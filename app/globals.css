@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color1: #E5E6F0;
+  --color2: #5366FF;
+  --color3: #5C916E;
+  --color4: #181823;
+  --color5: #AEC0EF;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Rubik', 'NewOrder', sans-serif;
+}
+
+@font-face {
+  font-family: 'NewOrder';
+  src: url("/fonts/NewOrder-Bold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Rubik";
+  src: url("/fonts/Rubik-Regular.ttf") format("truetype");
+}
