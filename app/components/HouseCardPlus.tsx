@@ -1,0 +1,104 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+
+interface HomeCardPlusProps {
+  name: string;
+  beds: number;
+  surface: number;
+  price: number;
+  city: string;
+  image: string;
+  link: string;
+  tokenPrice: number;
+  expectedIncome: number;
+  dateIncome: string;
+  tokenIncome: number;
+}
+
+const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price, city, image, link, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isCompact, setIsCompact] = useState(false);
+
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      if (entries.length > 0) {
+        const width = entries[0].contentRect.width;
+        setIsCompact(width < 500);
+      }
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div ref={containerRef} className="bg-color5 shadow-lg max-w-xl rounded-b-3xl">
+      <div className="relative">
+        <img src={image} alt={`Image of ${name}`} className="w-full" />
+      </div>
+      <div className="px-8 py-4">
+        <div className="flex items-center w-full">
+          <div className="border-t-2 border-color4 w-8 mr-2 ml-1"></div>
+          <h1 className="text-color4 text-2xl">{name}</h1>
+        </div>
+        <div className={`text-color4 text-lg flex items-center ${isCompact ? "flex-col space-y-2 items-start" : "space-x-4"} mt-2`}>
+          <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
+            <span className="mr-1">
+              <img src="/icons/bedIcon.png" alt="Bed Icon" className="w-10 h-10 object-contain" />
+            </span>
+            {beds} bed{beds > 1 && "s"}
+          </p>
+          <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
+            <span className="mr-1">
+              <img src="/icons/surfaceIcon.png" alt="Surface Icon" className="w-8 h-8 object-contain" />
+            </span>
+            {surface} m²
+          </p>
+          <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
+            <span className="mr-1">
+              <img src="/icons/locationIcon.png" alt="Location Icon" className="w-8 h-8 object-contain" />
+            </span>
+            {city}
+          </p>
+        </div>
+      </div>
+      <div className="px-8 pb-8">
+        <h1 className="text-color4 text-3xl my-4">Total Price</h1>
+        <h1 className="text-color2 text-3xl">Token Price</h1>
+        <div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-color4 text-xl">Expected Income</h3>
+              <p className="text-color2 text-sm">Not including capital appreciation</p>
+            </div>
+            <p className="text-color4 text-lg">{expectedIncome}%</p>
+          </div>
+          <div className="flex items-center justify-between text-color4 py-2">
+            <p>Income Start Date</p>
+            <p>{dateIncome}</p>
+          </div>
+          <div className="flex items-center justify-between text-color4">
+            <p>Income per Token</p>
+            <p>$ {tokenIncome} / year</p>
+          </div>
+        </div>
+        <div className="flex justify-center">
+          <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64">
+            <p className="text-color1">learn more</p>
+            <img src="/icons/shortArrowIcon.png" alt="Arrow Icon" className="h-6 w-6 object-contain" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HomeCardPlus;
