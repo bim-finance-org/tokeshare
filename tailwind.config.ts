@@ -1,20 +1,22 @@
+import { title } from "process";
 import type { Config } from "tailwindcss";
 
 export default {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./pages/**/*.{js,ts,jsx,tsx,mdx}", "./components/**/*.{js,ts,jsx,tsx,mdx}", "./app/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       fontFamily: {
-        title: ["NewOrder", "sans-serif"],
-        text: ["Rubik", "sans-serif"],
+        titleBold: ["NewOrderBold", "sans-serif"],
+        titleSemibold: ["NewOrderSemibold", "sans-serif"],
+        textRegular: ["RubikRegular", "sans-serif"],
+        textLight: ["RubikLight", "sans-serif"],
       },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        color1: "hsl(var(--color1))",
+        color2: "hsl(var(--color2))",
+        color3: "hsl(var(--color3))",
+        color4: "hsl(var(--color4))",
+        color5: "hsl(var(--color5))",
       },
     },
   },

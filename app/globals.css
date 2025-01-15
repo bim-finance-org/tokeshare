@@ -3,25 +3,41 @@
 @tailwind utilities;
 
 :root {
-  --color1: #E5E6F0;
-  --color2: #5366FF;
-  --color3: #5C916E;
-  --color4: #181823;
-  --color5: #AEC0EF;
+  --color1: 235, 27%, 92%;
+  --color2: 233, 100%, 66%;
+  --color3: 140, 22%, 46%;
+  --color4: 240, 19%, 12%;
+  --color5: 223, 67%, 81%;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: 'Rubik', 'NewOrder', sans-serif;
+  color: hsl(var(--color1));
+  background: hsl(var(--color1));
+  h1 {
+    font-family: "NewOrderSemiBold";
+  }
 }
 
 @font-face {
-  font-family: 'NewOrder';
-  src: url("/fonts/NewOrder-Bold.otf") format("opentype");
+  font-family: "NewOrderBold";
+  src: url("/fonts/New_Order_Bold.otf") format("opentype");
+  font-display: swap;
 }
 
 @font-face {
-  font-family: "Rubik";
+  font-family: "NewOrderSemiBold";
+  src: url("/fonts/New_Order_Semibold.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RubikRegular";
   src: url("/fonts/Rubik-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RubikLight";
+  src: url("/fonts/Rubik-Light.ttf") format("truetype");
+  font-display: swap;
 }

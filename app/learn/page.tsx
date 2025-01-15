@@ -1,0 +1,22 @@
+import React from "react";
+import faqData from "../data/faqData";
+import Question from "../components/Question";
+import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
+
+const Page = () => {
+  return (
+    <div className="bg-color4 pt-48">
+      <NavBar />
+      <h1 className="text-5xl font-bold mb-6 text-color1 flex justify-center">FAQ</h1>
+      <div className="space-y-4 ">
+        {faqData.map((faq, index) => (
+          <Question key={index} question={faq.question} answer={faq.answer} />
+        ))}
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
+export default Page;
