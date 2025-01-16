@@ -1,6 +1,6 @@
 import React from "react";
-import HomeCard from "./HomeCard";
-import database from "../data/housesData";
+import HomeCard from "./HouseCard";
+import housesData from "../data/housesData";
 
 interface PopularHomesProps {
   indexes: number[];
@@ -24,7 +24,7 @@ const PopularHomes: React.FC<PopularHomesProps> = ({ indexes }) => {
       </div>
       <div className="w-full mx-auto flex justify-center space-x-4">
         {indexes.map((index) => (
-          <HomeCard key={index} {...database.houses[index]} />
+          <HomeCard key={index} {...housesData[index]} />
         ))}
       </div>
     </div>

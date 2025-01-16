@@ -2,7 +2,7 @@ import React from "react";
 
 interface HomeCardProps {
   name: string;
-  beds: string;
+  beds: number;
   surface: number;
   price: number;
   city: string;
@@ -26,7 +26,7 @@ const HomeCard: React.FC<HomeCardProps> = ({ name, beds, surface, price, city, i
               <span className="mr-1">
                 <img src="/icons/bedIcon.png" alt="Bed Icon" className="w-4 h-4 object-contain" />
               </span>{" "}
-              {beds} bed
+              {beds} bed{beds > 1 && "s"}
             </p>
             <p className="flex items-center">
               <span className="mr-1">

@@ -42,7 +42,7 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
   return (
     <div ref={containerRef} className="bg-color5 shadow-lg max-w-xl rounded-b-3xl">
       <div className="relative">
-        <img src={image} alt={`Image of ${name}`} className="w-full" />
+        <img src={image} alt={`Image of ${name}`} className="w-full object-contain" />
       </div>
       <div className="px-8 py-4">
         <div className="flex items-center w-full">
