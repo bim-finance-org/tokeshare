@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const Footer = () => {
   return (
     <footer className="pt-12 bg-color4 text-white">
@@ -20,9 +22,15 @@ const Footer = () => {
           <h1 className="text-xl font-bold text-color2 mb-4">CONTACT US</h1>
           <p className="mb-8 text-lg">contact@tokenshare.co</p>
           <div className="flex space-x-4 text-2xl text-color2 mt-4">
-            <img src="/icons/instagramIcon.png" alt="Logo Instagram" className="w-14 h-14 object-contain" />
-            <img src="/icons/twitterIcon.png" alt="Logo Twitter" className="w-14 h-14 object-contain" />
-            <img src="/icons/linkedinIcon.png" alt="Logo Linkedin" className="w-14 h-14 object-contain" />
+            <Link href="https://www.linkedin.com/company/tokeshare/" target="_blank">
+              <img src="/icons/instagramIcon.png" alt="Logo Instagram" className="w-14 h-14 object-contain" />
+            </Link>
+            <Link href="https://x.com/Tokeshare" target="_blank">
+              <img src="/icons/twitterIcon.png" alt="Logo Twitter" className="w-14 h-14 object-contain" />
+            </Link>
+            <Link href="https://www.linkedin.com/company/tokeshare/" target="_blank">
+              <img src="/icons/linkedinIcon.png" alt="Logo Linkedin" className="w-14 h-14 object-contain" />
+            </Link>
           </div>
         </div>
       </div>
