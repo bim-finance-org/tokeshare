@@ -1,6 +1,6 @@
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
-import PopularHomes from "./components/PopularHomes";
+import PopularHouses from "./components/PopularHouses";
 
 export default function Home() {
   return (
@@ -9,10 +9,10 @@ export default function Home() {
         <NavBar />
         <img src="/images/bg-image-1.png" alt="Background" className="w-full h-full object-cover" />
         <div className="absolute inset-0 flex flex-col items-start justify-center px-6 md:px-36 space-y-4">
-          <h1 className="text-white text-4xl md:text-6xl">Let's redefine access to investment</h1>
+          <h1 className="text-white text-4xl md:text-6xl w-full md:w-2/3 lg:w-1/2">Let's redefine access to investment</h1>
           <p className="text-white font-textRegular text-sm md:text-lg max-w-lg leading-relaxed">Through Tokeshare, investors from around the world can now enter the Latin American market through fractionalized and tokenized ownership. With transparency and the efficiency of blockchain, we offer a compliant and modern solution to rethink real estate investment.</p>
           <p className="text-white font-text text-sm md:text-lg">The future of finance lies in tokenization.</p>
-          <button className="rounded-lg bg-black border-2 border-black px-6 py-2 text-sm md:text-lg text-white hover:bg-white hover:text-black transition">Sign up</button>
+          <button className="rounded-lg w-48 bg-color4 border-2 border-black px-6 py-2 text-sm md:text-lg ">Sign up</button>
         </div>
       </div>
 
@@ -23,7 +23,7 @@ export default function Home() {
         </div>
       </div>
 
-      <PopularHomes indexes={[0, 1, 2]} />
+      <PopularHouses indexes={[0, 1, 2]} />
 
       <div className="mt-16 bg-color4 p-8 ">
         <div className="h-72"></div>

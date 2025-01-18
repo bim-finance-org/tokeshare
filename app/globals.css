@@ -16,6 +16,9 @@ body {
   h1 {
     font-family: "NewOrderSemiBold";
   }
+  img {
+    object-fit: cover;
+  }
 }
 
 @font-face {

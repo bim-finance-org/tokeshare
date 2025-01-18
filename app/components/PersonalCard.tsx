@@ -1,4 +1,5 @@
 import React from "react";
+import LinkedinIcon from "./icons/LinkedinIcon";
 
 interface PersonalCardProps {
   firstName: string;
@@ -17,7 +18,7 @@ const PersonalCard: React.FC<PersonalCardProps> = ({ firstName, lastName, linked
           <p className="text-lg font-semibold text-gray-800">{firstName + " " + lastName}</p>
         </div>
         <a href={linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center">
-          <img src="/icons/linkedinIcon.png" alt="Linkedin Icon" className="w-10 h-10 object-contain" />
+          <img src="/icons/linkedinIcon.png" alt="linkedin icon" className="size-12 object-contain" />
         </a>
       </div>
     </div>

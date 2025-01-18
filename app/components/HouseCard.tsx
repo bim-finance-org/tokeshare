@@ -1,6 +1,6 @@
 import React from "react";
 
-interface HomeCardProps {
+interface HouseCardProps {
   name: string;
   beds: number;
   surface: number;
@@ -10,50 +10,47 @@ interface HomeCardProps {
   link: string;
 }
 
-const HomeCard: React.FC<HomeCardProps> = ({ name, beds, surface, price, city, image, link }) => {
+const HouseCard: React.FC<HouseCardProps> = ({ name, beds, surface, price, city, image, link }) => {
   return (
-    <div className="bg-color5 shadow-lg max-w-sm">
-      {/* Image */}
+    <div
+      className="bg-color5 text-color4 text-base sm:text-lg shadow-lg rounded-xl overflow-hidden flex flex-col min-w-0 
+                    max-w-[90%] sm:max-w-full mx-auto"
+    >
+      {" "}
       <div className="relative">
-        <img src={image} alt={`Image of ${name}`} className="w-full h-64 object-cover" />
+        <img src={image} alt={`Image of ${name}`} className="w-full h-52 sm:h-64 object-cover" />
       </div>
-
-      <div className="p-4 h-48 flex flex-col justify-between">
+      <div className="p-3 sm:p-4 flex flex-col flex-grow">
         <div>
-          <h3 className="font-semibold text-lg text-gray-700">{name}</h3>
-          <div className="flex items-center space-x-4 mt-2 text-gray-600">
+          <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
+          <div className="flex flex-wrap items-center space-x-3 mt-2 text-sm sm:text-base">
             <p className="flex items-center">
-              <span className="mr-1">
-                <img src="/icons/bedIcon.png" alt="Bed Icon" className="w-4 h-4 object-contain" />
-              </span>{" "}
+              <img src="/icons/bedIcon.png" alt="Bed Icon" className="size-6 sm:size-8 object-contain mr-1" />
               {beds} bed{beds > 1 && "s"}
             </p>
             <p className="flex items-center">
-              <span className="mr-1">
-                <img src="/icons/surfaceIcon.png" alt="Surface Icon" className="w-4 h-4 object-contain" />
-              </span>{" "}
+              <img src="/icons/surfaceIcon.png" alt="Surface Icon" className="size-5 sm:size-6 object-contain mr-1" />
               {surface} m²
             </p>
             <p className="flex items-center">
-              <span className="mr-1">
-                <img src="/icons/locationIcon.png" alt="Location Icon" className="w-4 h-4 object-contain" />
-              </span>
+              <img src="/icons/locationIcon.png" alt="Location Icon" className="size-5 sm:size-6 object-contain mr-1" />
               {city}
             </p>
           </div>
         </div>
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-blue-600 font-bold text-xl">{price.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p>
-          <div className="flex items-center bg-color4 rounded-lg px-2">
-            <a href={link} className="py-2 px-4 text-white">
-              Learn More
-            </a>
-            <img src="/icons/shortArrowIcon.png" alt="Short Arrow to Learn More" className="w-8 h-8 ml-2 object-contain pr-2 rounded-full" />
-          </div>
+
+        <div className="mt-4 flex flex-col sm:flex-row items-center sm:justify-between text-center sm:text-left">
+          <p className="text-blue-600 font-bold text-lg sm:text-xl">{price.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p>
+          <a href={link} className="mt-3 sm:mt-0 py-2 px-4 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center">
+            Learn More
+            <span>
+              <img src="/icons/shortArrowIcon.png" alt="Arrow" className="size-6 sm:size-8 ml-2 object-contain" />
+            </span>
+          </a>
         </div>
       </div>
     </div>
   );
 };
 
-export default HomeCard;
+export default HouseCard;
