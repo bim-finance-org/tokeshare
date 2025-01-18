@@ -8,7 +8,7 @@ const Page = () => {
   return (
     <div>
       <NavBar />
-      <div className="mt-20 bg-white">
+      <div className="bg-white">
         <div className="p-20">
           <h1 className="text-3xl text-color4 font-bold mb-6">Empowering Investments with Values</h1>
           <p className="mb-4 text-xl text-color3">At Tokeshare, we believe in democratizing investment access through the transformative power of tokenization. Our mission is to bridge the gap between global investors and the untapped opportunities of the Latin American market, fostering inclusivity and transparency in every transaction.</p>

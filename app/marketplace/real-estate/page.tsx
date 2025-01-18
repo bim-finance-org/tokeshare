@@ -6,7 +6,7 @@ import housesData from "@/app/data/housesData";
 
 const page = () => {
   return (
-    <div className="pt-20">
+    <div>
       <NavBar />
       <div className="px-32">
         <h1 className="text-color4 text-4xl py-12">Invest in real estate</h1>

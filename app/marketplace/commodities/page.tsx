@@ -6,7 +6,7 @@ import commoditiesData from "@/app/data/commoditiesData";
 
 const Page = () => {
   return (
-    <div className="pt-20">
+    <div>
       <NavBar />
       <div className="px-32 py-20 bg-white">
         <h1 className="text-color1 text-4xl my-10">Invest in Commodities</h1>
