@@ -17,6 +17,8 @@ export default {
         color3: "hsl(var(--color3))",
         color4: "hsl(var(--color4))",
         color5: "hsl(var(--color5))",
+        color6: "hsl(var(--color6))",
+        color7: "hsl(var(--color7))",
       },
     },
   },

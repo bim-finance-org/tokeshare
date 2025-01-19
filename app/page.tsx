@@ -12,12 +12,12 @@ export default function Home() {
           <h1 className="text-white text-4xl md:text-6xl w-full md:w-2/3 lg:w-1/2">Let's redefine access to investment</h1>
           <p className="text-white font-textRegular text-sm md:text-lg max-w-lg leading-relaxed">Through Tokeshare, investors from around the world can now enter the Latin American market through fractionalized and tokenized ownership. With transparency and the efficiency of blockchain, we offer a compliant and modern solution to rethink real estate investment.</p>
           <p className="text-white font-text text-sm md:text-lg">The future of finance lies in tokenization.</p>
-          <button className="rounded-lg w-48 bg-color4 border-2 border-black px-6 py-2 text-sm md:text-lg ">Sign up</button>
+          <button className="rounded-lg w-48 bg-color4 px-6 py-2 text-sm md:text-lg hover:bg-color2 hover:text-white transition-colors duration-300">Sign up</button>
         </div>
       </div>
 
       <div className="relative w-4/5 bg-color1 py-10 mx-auto rounded-3xl shadow-lg mt-[-10rem]">
-        <h2 className="text-2xl md:text-4xl font-bold text-black ml-20 mb-8">Rent payments are automatically sent to investors</h2>
+        <h2 className="text-2xl md:text-4xl font-bold text-black ml-20 mb-8 whitespace-nowrap ">Rent payments are automatically sent to investors</h2>
         <div className="flex justify-center items-center">
           <img src="/images/schema.png" alt="Rent payments schema" className="w-full max-w-5xl object-contain" />
         </div>
@@ -49,8 +49,9 @@ export default function Home() {
             </div>
           </div>
 
-          <button type="submit" className="flex items-center justify-center px-8 py-3 bg-color5 text-color4 rounded-full text-lg font-medium hover:bg-color2 transition">
-            Subscribe <span className="ml-2">→</span>
+          <button type="submit" className="flex items-center justify-center w-1/5 px-8  bg-color5 text-color4 rounded-full text-lg font-medium hover:bg-color2 transition">
+            <h1 className="pl-10 pr-4 text-3xl">Subscribe</h1>
+            <img src="/icons/mediumArrowIcon.png" alt="" className="size-16 object-contain" />
           </button>
         </form>
       </div>

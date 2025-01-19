@@ -1,6 +1,8 @@
-import React from "react";
+"use client";
 
-interface HouseCardProps {
+import React, { useEffect, useRef, useState } from "react";
+
+interface HomeCardPlusProps {
   name: string;
   beds: number;
   surface: number;
@@ -8,52 +10,101 @@ interface HouseCardProps {
   city: string;
   image: string;
   link: string;
+  tokenPrice: number;
+  expectedIncome: number;
+  dateIncome: string;
+  tokenIncome: number;
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ name, beds, surface, price, city, image, link }) => {
-  return (
-    <div className="bg-color5 shadow-lg rounded-lg overflow-hidden flex flex-col min-w-[300px] max-w-[400px]">
-      {/* Image */}
-      <div className="relative">
-        <img src={image} alt={`Image of ${name}`} className="w-full h-64 object-cover" />
-      </div>
+const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price, city, image, link, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isCompact, setIsCompact] = useState(false);
 
-      <div className="p-4 flex flex-col justify-between flex-grow">
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      if (entries.length > 0) {
+        const width = entries[0].contentRect.width;
+        setIsCompact(width < 500);
+      }
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-b-3xl ">
+      <div className="relative">
+        <img src={image} alt={`Image of ${name}`} className="w-full object-cover" />
+      </div>
+      <div className="px-8 py-4">
+        <div className="flex items-center w-full">
+          <div className="border-t-2 border-color4 w-8 mr-2 ml-1"></div>
+          <h1 className="text-color4 text-2xl">{name}</h1>
+        </div>
+        <div className={`text-color4 text-lg flex items-center ${isCompact ? "flex-col space-y-2 items-start" : "space-x-4"} mt-2`}>
+          <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
+            <span className="mr-1">
+              <img src="/icons/bedIcon.png" alt="Bed Icon" className="w-10 h-10 object-contain" />
+            </span>
+            {beds} bed{beds > 1 && "s"}
+          </p>
+          <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
+            <span className="mr-1">
+              <img src="/icons/surfaceIcon.png" alt="Surface Icon" className="w-8 h-8 object-contain" />
+            </span>
+            {surface} m²
+          </p>
+          <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
+            <span className="mr-1">
+              <img src="/icons/locationIcon.png" alt="Location Icon" className="w-8 h-8 object-contain" />
+            </span>
+            {city}
+          </p>
+        </div>
+      </div>
+      <div className="px-8 pb-8">
+        <div className="flex items-center justify-between my-2">
+          <h1 className="text-color4 text-xl">Total Price</h1>
+          <p className="text-color4 text-xl">${price.toLocaleString()}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <h1 className="text-color2 text-xl">Token Price</h1>
+          <p className="text-color2 text-xl">${tokenPrice.toLocaleString()}</p>
+        </div>
         <div>
-          <h3 className="font-semibold text-lg text-gray-700">{name}</h3>
-          <div className="flex items-center space-x-4 mt-2 text-gray-600">
-            <p className="flex items-center">
-              <span className="mr-1">
-                <img src="/icons/bedIcon.png" alt="Bed Icon" className="w-4 h-4 object-contain" />
-              </span>{" "}
-              {beds} bed{beds > 1 && "s"}
-            </p>
-            <p className="flex items-center">
-              <span className="mr-1">
-                <img src="/icons/surfaceIcon.png" alt="Surface Icon" className="w-4 h-4 object-contain" />
-              </span>{" "}
-              {surface} m²
-            </p>
-            <p className="flex items-center">
-              <span className="mr-1">
-                <img src="/icons/locationIcon.png" alt="Location Icon" className="w-4 h-4 object-contain" />
-              </span>
-              {city}
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-color4 text-xl">Expected Income</h3>
+              <p className="text-color2 text-sm">Not including capital appreciation</p>
+            </div>
+            <p className="text-color4 text-lg font-bold">{expectedIncome}%</p>
+          </div>
+          <div className="flex items-center justify-between text-color4 py-2">
+            <p>Income Start Date</p>
+            <p>{dateIncome}</p>
+          </div>
+          <div className="flex items-center justify-between text-color4">
+            <p>Income per Token</p>
+            <p>$ {tokenIncome} / year</p>
           </div>
         </div>
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-blue-600 font-bold text-xl">{price.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p>
-          <div className="flex items-center bg-color4 rounded-lg px-2">
-            <a href={link} className="py-2 px-4 text-white">
-              Learn More
-            </a>
-            <img src="/icons/shortArrowIcon.png" alt="Short Arrow to Learn More" className="w-8 h-8 ml-2 object-contain pr-2 rounded-full" />
-          </div>
+        <div className="flex justify-center">
+          <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
+            <p className="text-color1 hover:text-white">learn more</p>
+            <img src="/icons/shortArrowIcon.png" alt="Arrow Icon" className="h-6 w-6 object-contain" />
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default HouseCard;
+export default HomeCardPlus;

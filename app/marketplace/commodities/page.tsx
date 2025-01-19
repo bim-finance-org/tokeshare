@@ -8,8 +8,8 @@ const Page = () => {
   return (
     <div>
       <NavBar />
-      <div className="px-32 py-20 bg-white">
-        <h1 className="text-color1 text-4xl my-10">Invest in Commodities</h1>
+      <div className="px-32 py-20 bg-color7">
+        <h1 className="text-color6 text-4xl my-10">Invest in Commodities</h1>
         <p className="text-color3 text-2xl">With Tokeshare, discover a new way to access the commodities market. Through tokenization, we offer you the opportunity to invest in assets like gold, silver, cocoa, or sugarcane in a simple, secure, and management fee-free way.</p>
       </div>
 

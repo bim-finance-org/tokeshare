@@ -8,6 +8,8 @@
   --color3: 140, 22%, 46%;
   --color4: 240, 19%, 12%;
   --color5: 223, 67%, 81%;
+  --color6: 0, 0%, 57%;
+  --color7: 0, 0%, 100%;
 }
 
 body {
@@ -43,4 +45,10 @@ body {
   font-family: "RubikLight";
   src: url("/fonts/Rubik-Light.ttf") format("truetype");
   font-display: swap;
+}
+
+@media (max-width: 950px) {
+  .custom\:grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
 }
