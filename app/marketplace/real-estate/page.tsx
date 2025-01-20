@@ -14,7 +14,7 @@ const page = () => {
           <p>With Tokeshare, discover a new way to access the real estate market in Latin America.</p>
           <p>Thanks to tokenization, we offer you the opportunity to become a co-owner of real estate, in a simple, secure and compliant way.</p>
         </div>
-        <button className="bg-color4 w-full sm:w-64 text-xl sm:text-2xl p-4 rounded-2xl my-8 sm:my-12 hover:bg-black hover:text-white transition-colors duration-300">Properties</button>
+        <button className="bg-color4 w-full sm:w-64 text-xl sm:text-2xl p-4 rounded-2xl my-8 sm:my-12 hover:scale-105">Properties</button>
       </div>
 
       {/* 🏡 Responsive Grid */}

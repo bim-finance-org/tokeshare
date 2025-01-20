@@ -49,12 +49,21 @@ const NavBar: React.FC<NavBarProps> = ({ customClass }) => {
           ].map(({ name, path }, index) => (
             <li key={index} className="relative flex items-center">
               {name === "Market place" ? (
-                <button ref={marketPlaceRef} onClick={toggleSubMenu} className="flex items-center text-lg whitespace-nowrap font-titleSemibold hover:text-gray-300 transition-colors">
+                <button
+                  ref={marketPlaceRef}
+                  onClick={toggleSubMenu}
+                  className={`flex items-center whitespace-nowrap font-titleSemibold transition-transform transform hover:scale-105
+                    ${pathname === path ? "text-lg lg:text-2xl font-bold" : "text-xl font-light"}`}
+                >
                   {name}
-                  <img src="/icons/bottomArrowIcon.png" alt="" className={`size-5 ml-2 transition-transform  ${isSubMenuOpen ? "rotate-180" : ""}`} />
+                  <img src="/icons/bottomArrowIcon.png" alt="" className={`size-5 ml-2 transition-transform ${isSubMenuOpen ? "rotate-180" : ""}`} />
                 </button>
               ) : (
-                <Link href={path} className="text-lg whitespace-nowrap font-titleSemibold hover:text-gray-300 transition-colors">
+                <Link
+                  href={path}
+                  className={`whitespace-nowrap font-titleSemibold transition-transform transform hover:scale-105
+                  ${pathname === path ? "text-lg lg:text-2xl font-bold" : "text-xl font-light"}`}
+                >
                   {name}
                 </Link>
               )}
@@ -65,7 +74,11 @@ const NavBar: React.FC<NavBarProps> = ({ customClass }) => {
                     { name: "Commodities", path: "/marketplace/commodities" },
                   ].map(({ name, path }, idx) => (
                     <li key={idx} className="text-center py-1">
-                      <Link href={path} className="block px-4 py-2 text-lg rounded-lg hover:bg-color1 hover:text-white transition-colors font-titleSemibold">
+                      <Link
+                        href={path}
+                        className={`block px-4 py-2 rounded-lg hover:scale-105 font-titleSemibold
+                        ${pathname === path ? "text-lg lg:text-2xl font-bold" : "text-xl font-light"}`}
+                      >
                         {name}
                       </Link>
                     </li>

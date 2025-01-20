@@ -23,13 +23,13 @@ const Footer = () => {
           <p className="mb-8 text-lg">contact@tokenshare.co</p>
           <div className="flex space-x-4 text-2xl text-color2 mt-4">
             <Link href="https://www.linkedin.com/company/tokeshare/" target="_blank">
-              <img src="/icons/instagramIcon.png" alt="Logo Instagram" className="w-14 h-14 object-contain" />
+              <img src="/icons/instagramIcon.png" alt="Logo Instagram" className="size-14 object-contain hover:scale-105" />
             </Link>
             <Link href="https://x.com/Tokeshare" target="_blank">
-              <img src="/icons/twitterIcon.png" alt="Logo Twitter" className="w-14 h-14 object-contain" />
+              <img src="/icons/twitterIcon.png" alt="Logo Twitter" className="size-14 object-contain hover:scale-105" />
             </Link>
             <Link href="https://www.linkedin.com/company/tokeshare/" target="_blank">
-              <img src="/icons/linkedinIcon.png" alt="Logo Linkedin" className="w-14 h-14 object-contain" />
+              <img src="/icons/linkedinIcon.png" alt="Logo Linkedin" className="size-14 object-contain hover:scale-105" />
             </Link>
           </div>
         </div>
