@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import MobileMenu from "./MobileMenu";
+import ArrowDownIcon from "./icons/ArrowDownIcon";
+import CrossIcon from "./icons/CrossIcon"; // Import du composant CrossIcon
 
 interface NavBarProps {
   customClass?: string;
@@ -56,7 +58,7 @@ const NavBar: React.FC<NavBarProps> = ({ customClass }) => {
                     ${pathname === path ? "text-lg lg:text-2xl font-bold" : "text-xl font-light"}`}
                 >
                   {name}
-                  <img src="/icons/bottomArrowIcon.png" alt="" className={`size-5 ml-2 transition-transform ${isSubMenuOpen ? "rotate-180" : ""}`} />
+                  {isSubMenuOpen ? <CrossIcon size={30} className="ml-1 pointer-events-none" /> : <ArrowDownIcon size={36} className="ml-1 pointer-events-none" />}
                 </button>
               ) : (
                 <Link

@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import LocationIcon from "./icons/LocationIcon";
+import SurfaceIcon from "./icons/SurfaceIcon";
+import BedIcon from "./icons/BedIcon";
+import ArrowIcon from "./icons/ArrowIcon";
 
 interface HouseCardProps {
   name: string;
@@ -45,15 +49,15 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, beds, surface, price, city,
           <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
           <div className="flex flex-wrap items-center space-x-3 mt-2 text-sm sm:text-base">
             <p className="flex items-center">
-              <img src="/icons/bedIcon.png" alt="Bed Icon" className="size-6 sm:size-8 object-contain mr-1" />
+              <BedIcon size={36} />
               {beds} bed{beds > 1 && "s"}
             </p>
             <p className="flex items-center">
-              <img src="/icons/surfaceIcon.png" alt="Surface Icon" className="size-5 sm:size-6 object-contain mr-1" />
+              <SurfaceIcon />
               {surface} m²
             </p>
             <p className="flex items-center">
-              <img src="/icons/locationIcon.png" alt="Location Icon" className="size-5 sm:size-6 object-contain mr-1" />
+              <LocationIcon />
               {city}
             </p>
           </div>
@@ -64,8 +68,8 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, beds, surface, price, city,
 
           <a href={link} className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
             Learn More
-            <span>
-              <img src="/icons/shortArrowIcon.png" alt="Arrow" className="size-6 ml-2 object-contain" />
+            <span className="ml-2">
+              <ArrowIcon size={24} />
             </span>
           </a>
         </div>

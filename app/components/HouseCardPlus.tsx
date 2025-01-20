@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import BedIcon from "./icons/BedIcon";
+import SurfaceIcon from "./icons/SurfaceIcon";
+import LocationIcon from "./icons/LocationIcon";
+import ArrowIcon from "./icons/ArrowIcon";
 
 interface HomeCardPlusProps {
   name: string;
@@ -52,19 +56,19 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
         <div className={`text-color4 text-lg flex items-center ${isCompact ? "flex-col space-y-2 items-start" : "space-x-4"} mt-2`}>
           <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
             <span className="mr-1">
-              <img src="/icons/bedIcon.png" alt="Bed Icon" className="w-10 h-10 object-contain" />
+              <BedIcon size={36} />
             </span>
             {beds} bed{beds > 1 && "s"}
           </p>
           <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
             <span className="mr-1">
-              <img src="/icons/surfaceIcon.png" alt="Surface Icon" className="w-8 h-8 object-contain" />
+              <SurfaceIcon />
             </span>
             {surface} m²
           </p>
           <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
             <span className="mr-1">
-              <img src="/icons/locationIcon.png" alt="Location Icon" className="w-8 h-8 object-contain" />
+              <LocationIcon />
             </span>
             {city}
           </p>
@@ -99,7 +103,7 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
         <div className="flex justify-center">
           <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
             <p className="text-color1 hover:text-white">learn more</p>
-            <img src="/icons/shortArrowIcon.png" alt="Arrow Icon" className="h-6 w-6 object-contain" />
+            <ArrowIcon size={24} />
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import ArrowIcon from "./icons/ArrowIcon";
 
 interface CommoditiesCardProps {
   name: string;
@@ -33,7 +34,12 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ name, image, tokenPri
         </div>
 
         <a href={link} target="_blank" rel="noopener noreferrer">
-          <button className="mt-4 w-full bg-color2 text-white py-2 rounded-full text-sm font-bold hover:bg-color3 transition">Learn More →</button>
+          <button className="mt-4 w-full bg-color2 text-white py-2 rounded-full text-sm font-bold hover:bg-color3 transition">
+            <div className="flex justify-between items-center px-4">
+              <p>Learn More</p>
+              <ArrowIcon size={24} />
+            </div>
+          </button>
         </a>
       </div>
     </div>

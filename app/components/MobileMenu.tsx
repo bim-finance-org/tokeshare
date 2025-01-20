@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ArrowDownIcon from "./icons/ArrowDownIcon";
+import CrossIcon from "./icons/CrossIcon";
+import MenuIcon from "./icons/MenuIcon";
 
 const MobileMenu: React.FC = () => {
   const pathname = usePathname();
@@ -29,7 +32,7 @@ const MobileMenu: React.FC = () => {
   return (
     <div className="md:hidden" ref={menuRef}>
       <button onClick={toggleMenu} className="text-white text-2xl focus:outline-none hover:scale-110 transition-transform">
-        {isMenuOpen ? "✕" : "☰"}
+        {isMenuOpen ? <CrossIcon size={32} className="pointer-events-none" /> : <MenuIcon size={32} className="pointer-events-none" />}
       </button>
 
       {isMenuOpen && (
@@ -45,7 +48,7 @@ const MobileMenu: React.FC = () => {
                 {name === "Market place" ? (
                   <button onClick={toggleSubMenu} className="text-lg flex items-center w-full hover:text-gray-300 transition-colors">
                     {name}
-                    <img src="/icons/bottomArrowIcon.png" alt="" className={`ml-2 size-6 transition-transform ${isSubMenuOpen ? "rotate-180" : ""}`} />
+                    <ArrowDownIcon size={36} className="ml-1" />
                   </button>
                 ) : (
                   <Link href={path} onClick={toggleMenu} className="text-lg block w-full hover:text-gray-300 transition-colors">

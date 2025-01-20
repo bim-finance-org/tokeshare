@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import ArrowIcon from "./icons/ArrowIcon";
+import CrossIcon from "./icons/CrossIcon";
 
 interface QuestionProps {
   question: string;
@@ -15,7 +17,7 @@ const Question: React.FC<QuestionProps> = ({ question, answer, isOpen, onToggle 
       <div className="border border-color1 py-4 rounded-lg px-8">
         <div className="flex items-center justify-between cursor-pointer" onClick={onToggle}>
           <p className="text-color1">{question}</p>
-          <img src={isOpen ? "/icons/crossIcon.webp" : "/icons/shortArrowIcon.png"} alt={isOpen ? "Close Icon" : "Arrow Icon"} className="mr-8 h-8 w-8 object-contain transform" />
+          {isOpen ? <CrossIcon size={24} className="transform" /> : <ArrowIcon size={24} className="transform" />}
         </div>
         {isOpen && <p className="mt-2 text-gray-600">{answer}</p>}
       </div>

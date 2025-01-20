@@ -18,7 +18,7 @@ const PersonalCard: React.FC<PersonalCardProps> = ({ firstName, lastName, linked
           <p className="text-lg font-semibold text-gray-800">{firstName + " " + lastName}</p>
         </div>
         <a href={linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center hover:scale-110 transition-transform duration-300">
-          <img src="/icons/linkedinIcon.png" alt="linkedin icon" className="size-12 object-contain" />
+          <LinkedinIcon size={48} />
         </a>
       </div>
     </div>

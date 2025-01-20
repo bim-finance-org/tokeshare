@@ -1,6 +1,7 @@
 import React from "react";
 import HouseCard from "./HouseCard";
 import housesData from "../data/housesData";
+import ArrowLongLineIcon from "./icons/ArrowLongLineIcon";
 
 interface PopularHousesProps {
   indexes: number[];
@@ -18,14 +19,13 @@ const PopularHouses: React.FC<PopularHousesProps> = ({ indexes }) => {
         <div className="flex items-center space-x-2 mt-3 sm:mt-0">
           <a href="/explore-all" className="flex items-center hover:scale-105 transition-transform duration-300">
             <button className="text-lg sm:text-2xl text-color4">Explore All</button>
-            <div className="relative">
-              <img src="/icons/longArrowIcon.png" alt="Explore All" className="w-24 sm:w-28 pr-4 sm:pr-6" />
+            <div className="relative pr-4">
+              <ArrowLongLineIcon size={96} className="px-2" />
             </div>
           </a>
         </div>
       </div>
 
-      {/* Grille qui devient colonne sur mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         {indexes.map((index) => (
           <HouseCard key={index} {...housesData[index]} />

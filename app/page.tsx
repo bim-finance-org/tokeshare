@@ -1,6 +1,7 @@
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import PopularHouses from "./components/PopularHouses";
+import ArrowLineIcon from "./components/icons/ArrowLineIcon";
 
 export default function Home() {
   return (
@@ -27,7 +28,7 @@ export default function Home() {
 
       <div className="mt-16 bg-color4 p-8 ">
         <div className="h-72"></div>
-        <h4 className="font-bold text-5xl text-center mb-6">Interested in Updates?</h4>
+        <h4 className="font-bold text-5xl text-center mb-6">Interested in Updates ?</h4>
 
         <div className="relative w-full my-8">
           <div className="border-t-2 border-color1 w-full"></div>
@@ -49,9 +50,9 @@ export default function Home() {
             </div>
           </div>
 
-          <button type="submit" className="flex items-center justify-center w-1/5 px-8  bg-color5 text-color4 rounded-full text-lg font-medium hover:bg-color2 transition">
+          <button type="submit" className="flex items-center justify-center py-4 px-8  bg-color5 text-color4 rounded-full text-lg font-medium hover:bg-color2 transition">
             <h1 className="pl-10 pr-4 text-3xl">Subscribe</h1>
-            <img src="/icons/mediumArrowIcon.png" alt="" className="size-16 object-contain" />
+            <ArrowLineIcon size={72} />
           </button>
         </form>
       </div>
