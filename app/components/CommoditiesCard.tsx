@@ -12,13 +12,16 @@ interface CommoditiesCardProps {
 
 const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ name, image, tokenPrice, year1Perf, years5Perf, link }) => {
   return (
-    <div className="text-color4">
-      <div className="relative w-full h-96">
-        <img src={image} alt={name} className="w-full h-full object-cover" />
+    <div className="text-color4 min-w-[280px] max-w-[400px] w-full mx-auto">
+      <div className="relative w-full aspect-[4/3]">
+        <img src={image} alt={name} className="w-full h-full object-cover rounded-t-3xl" />
       </div>
       <div className="bg-color1 rounded-b-3xl p-4 shadow-lg">
         <div className="flex justify-between items-center">
-          <p className="font-semibold">{name}</p>
+          <div className="flex items-center">
+            <div className="border-t-2 border-color4 w-8 mr-2 ml-1"></div>
+            <p className="font-semibold">{name}</p>
+          </div>
           <p className="text-color2 font-bold text-lg">{tokenPrice} $</p>
         </div>
 
@@ -32,15 +35,16 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ name, image, tokenPri
             <p className="font-medium">{years5Perf} %</p>
           </div>
         </div>
-
-        <a href={link} target="_blank" rel="noopener noreferrer">
-          <button className="mt-4 w-full bg-color2 text-white py-2 rounded-full text-sm font-bold hover:bg-color3 transition">
-            <div className="flex justify-between items-center px-4">
-              <p>Learn More</p>
-              <ArrowIcon size={24} />
-            </div>
-          </button>
-        </a>
+        <div className="flex justify-center mt-4 w-full">
+          <a href={link} target="_blank" rel="noopener noreferrer">
+            <button className=" bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition ">
+              <div className="flex w-full justify-between items-center px-8">
+                <p className="whitespace-nowrap pr-10">Learn More</p>
+                <ArrowIcon size={24} />
+              </div>
+            </button>
+          </a>
+        </div>
       </div>
     </div>
   );
