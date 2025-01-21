@@ -1,7 +1,7 @@
 const commoditiesData = [
   {
     name: "Gold",
-    image: "/images/img-gold.png",
+    image: "/images/img-gold.webp",
     tokenPrice: 150,
     year1Perf: 2.03,
     years5Perf: 15.57,
@@ -9,7 +9,7 @@ const commoditiesData = [
   },
   {
     name: "Silver",
-    image: "/images/img-silver.png",
+    image: "/images/img-silver.webp",
     tokenPrice: 25,
     year1Perf: 1.5,
     years5Perf: 10.25,
@@ -17,7 +17,7 @@ const commoditiesData = [
   },
   {
     name: "Sugar",
-    image: "/images/img-sugar.png",
+    image: "/images/img-sugar.webp",
     tokenPrice: 0.3,
     year1Perf: 0.75,
     years5Perf: 5.0,
@@ -25,7 +25,7 @@ const commoditiesData = [
   },
   {
     name: "Cocoa",
-    image: "/images/img-cocoa.png",
+    image: "/images/img-cocoa.webp",
     tokenPrice: 2.5,
     year1Perf: 1.2,
     years5Perf: 7.8,

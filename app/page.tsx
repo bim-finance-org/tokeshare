@@ -8,7 +8,7 @@ export default function Home() {
     <main className="bg-color1">
       <div className="relative h-screen">
         <NavBar customClass="absolute top-0 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50" />
-        <img src="/images/bg-image-1.png" alt="Background" className="w-full h-full object-cover " />
+        <img src="/images/bg-image-1.webp" alt="Background" className="w-full h-full object-cover " />
         <div className="absolute inset-0 flex flex-col items-start justify-center px-6 md:px-36 space-y-4">
           <h1 className="text-white text-4xl md:text-6xl w-full md:w-2/3 lg:w-1/2">Let's redefine access to investment</h1>
           <p className="text-white font-textRegular text-sm md:text-lg max-w-lg leading-relaxed">Through Tokeshare, investors from around the world can now enter the Latin American market through fractionalized and tokenized ownership. With transparency and the efficiency of blockchain, we offer a compliant and modern solution to rethink real estate investment.</p>
