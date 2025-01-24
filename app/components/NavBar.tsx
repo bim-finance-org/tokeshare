@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import MobileMenu from "./MobileMenu";
 import ArrowDownIcon from "./icons/ArrowDownIcon";
-import CrossIcon from "./icons/CrossIcon"; // Import du composant CrossIcon
+import CrossIcon from "./icons/CrossIcon";
 
 interface NavBarProps {
   customClass?: string;
@@ -93,7 +93,9 @@ const NavBar: React.FC<NavBarProps> = ({ customClass }) => {
       </div>
 
       <div>
-        <button className="rounded-lg border-2 border-white px-2 sm:px-3 md:px-4 py-1 text-xs sm:text-sm md:text-base lg:text-lg text-white hover:bg-white hover:text-black transition-all duration-300">My Account</button>
+        <Link href="/buildingInProgress">
+          <button className="rounded-lg border-2 border-white px-2 sm:px-3 md:px-4 py-1 text-xs sm:text-sm md:text-base lg:text-lg text-white hover:bg-white hover:text-black transition-all duration-300">My Account</button>
+        </Link>
       </div>
     </nav>
   );

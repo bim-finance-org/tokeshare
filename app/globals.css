@@ -56,3 +56,9 @@ body {
 .transition-max-height {
   transition: max-height 0.3s ease-in-out;
 }
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}
