@@ -1,25 +1,38 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ArrowIcon from "./icons/ArrowIcon";
 import CrossIcon from "./icons/CrossIcon";
 
 interface QuestionProps {
   question: string;
-  answer: string;
   isOpen: boolean;
   onToggle: () => void;
+  children?: React.ReactNode;
 }
 
-const Question: React.FC<QuestionProps> = ({ question, answer, isOpen, onToggle }) => {
+const Question: React.FC<QuestionProps> = ({ question, isOpen, onToggle, children }) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<string | number>(0);
+
+  useEffect(() => {
+    if (isOpen) {
+      setHeight(contentRef.current?.scrollHeight || 0);
+    } else {
+      setHeight(0);
+    }
+  }, [isOpen]);
+
   return (
     <div className="px-4 md:px-8 py-4">
-      <div className="border border-color1 py-4 rounded-lg px-8">
+      <div className="border border-color1 py-4 rounded-lg px-2 md:px-8">
         <div className="flex items-center justify-between cursor-pointer" onClick={onToggle}>
           <p className="text-color1">{question}</p>
-          {isOpen ? <CrossIcon size={24} className="transform" /> : <ArrowIcon size={24} className="transform" />}
+          {isOpen ? <CrossIcon size={24} className="transform flex-shrink-0" /> : <ArrowIcon size={24} className="transform flex-shrink-0" />}
         </div>
-        {isOpen && <p className="mt-2 text-gray-600">{answer}</p>}
+        <div ref={contentRef} style={{ maxHeight: height }} className={`overflow-hidden transition-max-height duration-300 ease-in-out mt-2 text-gray-600 md:pl-6 md:text-justify`}>
+          {children}
+        </div>
       </div>
     </div>
   );

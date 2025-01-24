@@ -33,7 +33,7 @@ const NavBar: React.FC<NavBarProps> = ({ customClass }) => {
   }, []);
 
   return (
-    <nav className={`w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50 transition-all duration-300 hover:shadow-lg ${pathname === "/" ? "bg-transparent text-color1" : "bg-color3"} ${customClass}`}>
+    <nav className={`w-full backdrop-filter backdrop-blur-xs flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50 transition-all duration-300 hover:shadow-lg ${pathname === "/" ? "bg-transparent text-color1" : "bg-color3"} ${customClass}`}>
       <div className="w-24 md:w-32">
         <Link href="/">
           <img src="/logos/longs/tokeshare-07.png" alt="Logo Tokeshare" className="w-full h-auto hover:scale-105 transition-transform" />
@@ -41,7 +41,7 @@ const NavBar: React.FC<NavBarProps> = ({ customClass }) => {
       </div>
       <MobileMenu />
 
-      <div className="hidden md:flex justify-center w-2/3 max-w-screen-lg px-4 sm:px-6 md:px-8 lg:px-12">
+      <div className="hidden md:flex justify-center w-1/3 md:w-3/5 max-w-screen-lg px-4 sm:px-6 md:px-8 lg:px-12">
         <ul className="flex justify-between w-full space-x-4 md:space-x-8 lg:space-x-12">
           {[
             { name: "Home", path: "/" },

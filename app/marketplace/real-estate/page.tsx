@@ -10,7 +10,7 @@ const page = () => {
       <NavBar />
       <div className="px-6 md:px-32 bg-color7 pb-20">
         <h1 className="text-color6 text-3xl sm:text-4xl py-8 sm:py-12">Invest in real estate</h1>
-        <div className="text-color3 text-lg sm:text-2xl space-y-4">
+        <div className="text-color3 text-lg sm:text-2xl space-y-4 text-justify ">
           <p>With Tokeshare, discover a new way to access the real estate market in Latin America.</p>
           <p>Thanks to tokenization, we offer you the opportunity to become a co-owner of real estate, in a simple, secure and compliant way.</p>
         </div>

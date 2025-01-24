@@ -10,7 +10,7 @@ const Page = () => {
       <NavBar />
       <div className="bg-white">
         {/* Section Introduction */}
-        <div className="p-20">
+        <div className="p-20 text-justify">
           <h1 className="text-4xl text-color6 font-bold mb-6">Empowering Investments with Values</h1>
           <p className="mb-4 text-xl text-color3">At Tokeshare, we believe in democratizing investment access through the transformative power of tokenization. Our mission is to bridge the gap between global investors and the untapped opportunities of the Latin American market, fostering inclusivity and transparency in every transaction.</p>
           <p className="mb-4 text-xl text-color3">Driven by innovation, security, and sustainability, Tokeshare offers access to fractional ownership of real estate and commodities. By leveraging blockchain technology, we ensure every investment is efficient, compliant, and trustworthy.</p>

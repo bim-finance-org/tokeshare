@@ -20,6 +20,9 @@ export default {
         color6: "hsl(var(--color6))",
         color7: "hsl(var(--color7))",
       },
+      blur: {
+        xs: "2px",
+      },
     },
   },
   plugins: [],
