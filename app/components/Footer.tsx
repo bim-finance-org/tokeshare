@@ -13,11 +13,19 @@ const Footer = () => {
 
         <div className="mb-6 md:mb-0">
           <h1 className="text-xl font-bold text-color2 mb-4">INFORMATION</h1>
-          <ul className="space-y-4">
-            <li className="hover:underline cursor-pointer">FAQ</li>
-            <li className="hover:underline cursor-pointer">Blog</li>
-            <li className="hover:underline cursor-pointer">Terms of Service</li>
-            <li className="hover:underline cursor-pointer">Privacy Policy</li>
+          <ul className="space-y-2">
+            <li className="hover:underline cursor-pointer">
+              <Link href="/learn">FAQ</Link>
+            </li>
+            <li className="hover:underline cursor-pointer">
+              <Link href="/blog">Blog</Link>
+            </li>
+            <li className="hover:underline cursor-pointer">
+              <Link href="/terms-of-service">Terms of Service</Link>
+            </li>
+            <li className="hover:underline cursor-pointer">
+              <Link href="/privacy-policy">Privacy Policy</Link>
+            </li>
           </ul>
         </div>
 
