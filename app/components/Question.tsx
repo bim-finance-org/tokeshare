@@ -27,10 +27,10 @@ const Question: React.FC<QuestionProps> = ({ question, isOpen, onToggle, childre
     <div className="px-4 md:px-8 py-4">
       <div className="border border-color1 py-4 rounded-lg px-2 md:px-8">
         <div className="flex items-center justify-between cursor-pointer" onClick={onToggle}>
-          <p className="text-color1">{question}</p>
+          <p className="text-color1 font-bold">{question}</p>
           {isOpen ? <CrossIcon size={24} className="transform flex-shrink-0" /> : <ArrowIcon size={24} className="transform flex-shrink-0" />}
         </div>
-        <div ref={contentRef} style={{ maxHeight: height }} className={`overflow-hidden transition-max-height duration-300 ease-in-out mt-2 text-gray-600 md:pl-6 md:text-justify`}>
+        <div ref={contentRef} style={{ maxHeight: height }} className={`overflow-hidden transition-max-height duration-300 ease-in-out mt-2 text-color1 md:pl-6 md:text-justify`}>
           {children}
         </div>
       </div>

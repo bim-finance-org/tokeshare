@@ -30,45 +30,27 @@ const MobileMenu: React.FC = () => {
   }, []);
 
   return (
-    <div className="md:hidden" ref={menuRef}>
-      <button onClick={toggleMenu} className="text-white text-2xl focus:outline-none hover:scale-110 transition-transform">
+    <div className="md:hidden text-color7" ref={menuRef}>
+      <button onClick={toggleMenu} className="text-color7 text-2xl focus:outline-none hover:scale-110 ">
         {isMenuOpen ? <CrossIcon size={32} className="pointer-events-none" /> : <MenuIcon size={32} className="pointer-events-none" />}
       </button>
 
       {isMenuOpen && (
-        <div className={`absolute top-14 left-1/2 transform -translate-x-1/2 w-2/3 bg-color3 text-white shadow-lg md:hidden rounded-b-xl transition-all duration-300 ${pathname === "/" ? "bg-transparent text-color1" : "bg-color3"}`}>
+        <div className={`absolute top-14 left-1/2 transform -translate-x-1/2 w-full bg-color3 shadow-lg md:hidden rounded-b-xl transition-all duration-300 ${pathname === "/" ? "bg-transparent text-color7" : "bg-color3"}`}>
           <ul className="flex flex-col items-start space-y-4 p-6">
             {[
               { name: "Home", path: "/" },
-              { name: "Market place", path: "" },
+              { name: "Real Estate", path: "/marketplace/real-estate" },
+              { name: "Commodities", path: "/marketplace/commodities" },
               { name: "About Us", path: "/about" },
               { name: "Learn", path: "/learn" },
             ].map(({ name, path }, index) => (
               <li key={index} className="relative w-full">
-                {name === "Market place" ? (
-                  <button onClick={toggleSubMenu} className="text-lg flex items-center w-full hover:text-gray-300 transition-colors">
-                    {name}
-                    <ArrowDownIcon size={36} className="ml-1" />
-                  </button>
-                ) : (
-                  <Link href={path} onClick={toggleMenu} className="text-lg block w-full hover:text-gray-300 transition-colors">
+                {
+                  <Link href={path} onClick={toggleMenu} className={`text-lg  font-bold block w-full hover:text-gray-300 transition-colors ${pathname === "/" ? "text-color4" : "text-color1"}`}>
                     {name}
                   </Link>
-                )}
-                {name === "Market place" && isSubMenuOpen && (
-                  <ul className="pl-4 mt-2 space-y-2">
-                    <li>
-                      <Link href="/marketplace/real-estate" className="block text-sm font-titleSemibold hover:text-gray-300 transition-colors" onClick={toggleMenu}>
-                        Real Estate
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="/marketplace/commodities" className="block text-sm font-titleSemibold hover:text-gray-300 transition-colors" onClick={toggleMenu}>
-                        Commodities
-                      </Link>
-                    </li>
-                  </ul>
-                )}
+                }
               </li>
             ))}
           </ul>

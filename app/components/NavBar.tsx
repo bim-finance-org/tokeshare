@@ -33,7 +33,7 @@ const NavBar: React.FC<NavBarProps> = ({ customClass }) => {
   }, []);
 
   return (
-    <nav className={`w-full backdrop-filter backdrop-blur-xs flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50 transition-all duration-300 hover:shadow-lg ${pathname === "/" ? "bg-transparent text-color1" : "bg-color3"} ${customClass}`}>
+    <nav className={`w-full  flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50 transition-all duration-300 hover:shadow-lg ${pathname === "/" ? "bg-transparent text-color1 backdrop-filter backdrop-blur-xs" : "bg-color3"} ${customClass}`}>
       <div className="w-24 md:w-32">
         <Link href="/">
           <img src="/logos/longs/tokeshare-07.png" alt="Logo Tokeshare" className="w-full h-auto hover:scale-105 transition-transform" />
@@ -70,12 +70,12 @@ const NavBar: React.FC<NavBarProps> = ({ customClass }) => {
                 </Link>
               )}
               {name === "Market place" && isSubMenuOpen && (
-                <ul ref={subMenuRef} className={`absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-48 bg-color3 text-white shadow-lg rounded-lg overflow-hidden z-50 p-2 transition-all duration-300 ${pathname === "/" ? "bg-transparent text-color1" : "bg-color3"}`}>
+                <ul ref={subMenuRef} className={`absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-48  text-white rounded-lg overflow-hidden z-20 p-2   ${pathname === "/" ? "text-color1 backdrop-blur-xs backdrop-filter " : "bg-color3"}`}>
                   {[
                     { name: "Real Estate", path: "/marketplace/real-estate" },
                     { name: "Commodities", path: "/marketplace/commodities" },
                   ].map(({ name, path }, idx) => (
-                    <li key={idx} className="text-center py-1">
+                    <li key={idx} className="text-center py-1 ">
                       <Link
                         href={path}
                         className={`block px-4 py-2 rounded-lg hover:scale-105 font-titleSemibold

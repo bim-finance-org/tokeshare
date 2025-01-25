@@ -29,5 +29,11 @@ const teamData = [
     linkedin: "https://www.linkedin.com/in/cynthia-renaudin-841a6b188/",
     image: "/images/pic-cynthia.webp",
   },
+  {
+    firstName: "Adrien",
+    lastName: "GONCALVES",
+    linkedin: "https://www.linkedin.com/in/adrien-gonçalves/",
+    image: "/images/pic-adrien.png",
+  },
 ];
 module.exports = teamData;

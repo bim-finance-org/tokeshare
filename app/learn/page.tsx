@@ -18,7 +18,7 @@ const Page = () => {
       <NavBar />
       <h1 className="text-5xl font-bold mb-6 text-color1 flex justify-center pt-24">FAQ</h1>
       <div className="space-y-4">
-        <h1 className="px-4 md:px-8 text-lg md:text-xl">1. General information about Tokeshare</h1>
+        <h1 className="px-4 md:px-8 text-lg md:text-2xl">1. General information about Tokeshare</h1>
         <Question question="What is Tokeshare?" isOpen={openIndex === 0} onToggle={() => handleToggle(0)}>
           {
             <div>
@@ -62,26 +62,24 @@ const Page = () => {
               <ul>
                 <li>
                   <p>Tokeshare offers fractional investment in real estate located mainly in Latin America, notably in the Dominican Republic and Argentina. These properties can include:</p>
-                  <ul className="ml-4 mb-4">
-                    <li>- Luxury beachfront residences,</li>
-                    <li>- Rental apartments generating passive income,</li>
-                    <li>- Commercial properties with high potential for appreciation.</li>
-                  </ul>
+                  <div className="ml-4 mb-4">
+                    - Luxury beachfront residences, <br />
+                    - Rental apartments generating passive income, <br />
+                    - Commercial properties with high potential for appreciation. <br />
+                  </div>
                 </li>
                 <li>
                   <p>Tokeshare extends investment to strategic resources, allowing investors to diversify their portfolio with:</p>
-                  <ul className="ml-4 mb-4">
-                    <li>- Precious Metals (Gold, Silver): Invest in certified, stocked and audited metals, with no management fees and returns based on market valuation.</li>
-                    <li>- Agricultural products (Cocoa, Cane sugar): Access tangible assets linked to global economic cycles and consumer trends.</li>
-                  </ul>
+                  <div className="ml-4 mb-4">
+                    - Precious Metals (Gold, Silver): Invest in certified, stocked and audited metals, with no management fees and returns based on market valuation. <br />- Agricultural products (Cocoa, Cane sugar): Access tangible assets linked to global economic cycles and consumer trends.
+                  </div>
                   <li>
                     <p>Tokeshare also allows you to invest in physical businesses with high potential, such as:</p>
-                    <ul className="ml-4">
-                      <li>- Restaurants and bars,</li>
-                      <li>- Shops,</li>
-                      <li>- Tourism projects,</li>
-                      <li>- Vehicle fleets (e.g. quads, scooters, rental cars).</li>
-                    </ul>
+                    <div className="ml-4">
+                      - Restaurants and bars, <br />
+                      - Shops, <br />
+                      - Tourism projects, <br />- Vehicle fleets (e.g. quads, scooters, rental cars).
+                    </div>
                   </li>
                 </li>
               </ul>
@@ -96,7 +94,7 @@ const Page = () => {
           }
         </Question>
 
-        <h1 className="px-4 md:px-8 text-lg md:text-xl">2. Investment process</h1>
+        <h1 className="px-4 md:px-8 text-lg md:text-2xl">2. Investment process</h1>
         <Question question="How can I invest on Tokeshare?" isOpen={openIndex === 4} onToggle={() => handleToggle(4)}>
           {
             <div>
@@ -134,7 +132,7 @@ const Page = () => {
           }
         </Question>
 
-        <h1 className="px-4 md:px-8 text-lg md:text-xl">3. Safety and regulations</h1>
+        <h1 className="px-4 md:px-8 text-lg md:text-2xl">3. Safety and regulations</h1>
         <Question question="What are the risks associated with real estate tokenization?" isOpen={openIndex === 8} onToggle={() => handleToggle(8)}>
           {
             <div>
@@ -175,7 +173,7 @@ const Page = () => {
           }
         </Question>
 
-        <h1 className="px-4 md:px-8 text-lg md:text-xl">4. Costs and profitability</h1>
+        <h1 className="px-4 md:px-8 text-lg md:text-2xl">4. Costs and profitability</h1>
         <Question question="What are the fees applied on the platform?" isOpen={openIndex === 11} onToggle={() => handleToggle(11)}>
           {
             <div>
@@ -224,7 +222,7 @@ const Page = () => {
           }
         </Question>
 
-        <h1 className="px-4 md:px-8 text-lg md:text-xl">5. Support and contact</h1>
+        <h1 className="px-4 md:px-8 text-lg md:text-2xl">5. Support and contact</h1>
         <Question question="How can I contact Tokeshare?" isOpen={openIndex === 15} onToggle={() => handleToggle(15)}>
           {
             <div>
