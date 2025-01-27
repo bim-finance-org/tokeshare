@@ -2,13 +2,14 @@ import Link from "next/link";
 import LinkedinIcon from "./icons/LinkedinIcon";
 import XIcon from "./icons/XIcon";
 import InstagramIcon from "./icons/InstagramIcon";
+import Image from "next/image";
 
 const Footer = () => {
   return (
     <footer className="pt-12 bg-color4 text-white">
       <div className="flex flex-col md:flex-row justify-around items-start p-8 pb-12 w-4/5 mx-auto">
-        <div className="mb-6 md:mb-0">
-          <img src="/logos/shorts/logo_tokeshare-04.png" alt="Logo Tokenshare" className="h-48" />
+        <div className="mb-6 md:mb-0 relative w-[200px] h-[200px]">
+          <Image src="/logos/shorts/logo_tokeshare-04.webp" alt="Logo Tokeshare" fill className="object-contain" />
         </div>
 
         <div className="mb-6 md:mb-0">

@@ -5,6 +5,8 @@ import BedIcon from "./icons/BedIcon";
 import SurfaceIcon from "./icons/SurfaceIcon";
 import LocationIcon from "./icons/LocationIcon";
 import ArrowIcon from "./icons/ArrowIcon";
+import Link from "next/link";
+import Image from "next/image";
 
 interface HomeCardPlusProps {
   name: string;
@@ -40,22 +42,23 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
       }
     });
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const containerElement = containerRef.current;
+
+    if (containerElement) {
+      observer.observe(containerElement);
     }
 
     return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
+      if (containerElement) {
+        observer.unobserve(containerElement);
       }
     };
   }, []);
 
   return (
-    <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-b-3xl">
-      <div className="relative">
-        <img src={image} alt={`Image of ${name}`} className="w-full object-cover" />
-      </div>
+    <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-3xl">
+      <Image src={image} alt={`Image of ${name}`} width={500} height={400} className="w-full h-auto object-cover rounded-t-3xl" />
+
       <div className="px-8 py-4">
         <div className="flex items-center w-full">
           <div className="border-t-2 border-color4 w-8 mr-2 ml-1"></div>
@@ -109,10 +112,12 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
           </div>
         </div>
         <div className="flex justify-center">
-          <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
-            <h5 className="text-color1 hover:text-white">learn more</h5>
-            <ArrowIcon size={24} />
-          </button>
+          <Link href={link}>
+            <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
+              <h5 className="text-color1 hover:text-white">learn more</h5>
+              <ArrowIcon size={24} />
+            </button>
+          </Link>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ const page = () => {
         {/* --- Bloc sans <h2> --- */}
         <div>
           <h1 className="flex justify-center items-center h-48 text-4xl">Privacy Policy</h1>
-          <p className="mb-4">Legal name: Tokeshare Holding International Limited Address: Aegis Chambers, 1st Floor, Ellen Skelton Building, 3076 Sir Francis Drake's Highway, Road Town, Tortola, VG1110, British Virgin Islands</p>
+          <p className="mb-4">Legal name: Tokeshare Holding International Limited Address: Aegis Chambers, 1st Floor, Ellen Skelton Building, 3076 Sir Francis Drake&apos;s Highway, Road Town, Tortola, VG1110, British Virgin Islands</p>
 
           <h3 className="mb-4 font-bold">Effective date: 23/01/2025</h3>
           <p className="mb-4">This Privacy Policy explains how Tokeshare Holding International Limited (“Tokeshare”, “we”, “us” or “our company”), a company incorporated under the laws of the British Virgin Islands, collects, uses and protects information about you when you use our website https://www.tokeshare.co and our online services (collectively, the “Services”).</p>
@@ -19,7 +19,7 @@ const page = () => {
             choices available to you.
           </p>
           <p className="mb-4">Your continued use of our website and services following the update of this policy constitutes your acceptance of the revised terms. If you do not agree to this Privacy Policy, please do not use our website and services.</p>
-          <h3 className="mb-4 font-bold">Tokeshare's commitment to your privacy</h3>
+          <h3 className="mb-4 font-bold">Tokeshare&apos;s commitment to your privacy</h3>
 
           <p className="mb-4">At Tokeshare, we understand that your privacy is essential and we are firmly committed to protecting it. This includes the personal data you may provide when you access our content on our website https://www.tokeshare.co or any other page, application or feature associated with our services (hereinafter collectively referred to as the “Site”).</p>
 
@@ -91,7 +91,7 @@ const page = () => {
               <br />
               Financial information: Declared net worth, past, present and expected income, sources of income and supporting documents (tax returns, pay slips, account statements, etc.).
               <br />
-              Official identification documents: ID card, passport, social security or tax number, driver's license and any other official identification document in compliance with applicable legislation.
+              Official identification documents: ID card, passport, social security or tax number, driver&apos;s license and any other official identification document in compliance with applicable legislation.
               <br />
               Investment experience and preferences: Investment objectives, level of experience, liquidity needs and risk appetite.
               <br />
@@ -299,7 +299,7 @@ const page = () => {
               <ul className="pl-4">
                 <li>- Analyze usage trends to improve the user experience.</li>
                 <li>- Adapt our services to your preferences and usage patterns.</li>
-                <li>- Develop new functionalities to meet our users' expectations.</li>
+                <li>- Develop new functionalities to meet our users&apos; expectations.</li>
                 <li>- Improve the navigation and performance of our platform.</li>
               </ul>
             </div>
@@ -316,7 +316,7 @@ const page = () => {
             <div className="mb-4">
               This processing allows us to:
               <ul className="pl-4">
-                <li>- Adapt the site's interface and functionalities to your preferences.</li>
+                <li>- Adapt the site&apos;s interface and functionalities to your preferences.</li>
                 <li>- Provide a fluid and intuitive navigation based on your usage history.</li>
                 <li>- Remember your settings and preferences to improve your user experience.</li>
               </ul>
@@ -355,7 +355,7 @@ const page = () => {
         <div>
           <h2 className="mb-4 font-bold text-2xl">4. Cookies - Collection and use of automatically collected data</h2>
           <div className="pl-4">
-            <p className="mb-4">Cookies are small files that a website or its service provider transfers to your computer's hard drive via your web browser (with your permission). These files enable the site to recognize your browser, store certain information and improve your user experience. They are widely used to ensure the smooth running of websites, make them more efficient and provide data to site owners.</p>
+            <p className="mb-4">Cookies are small files that a website or its service provider transfers to your computer&apos;s hard drive via your web browser (with your permission). These files enable the site to recognize your browser, store certain information and improve your user experience. They are widely used to ensure the smooth running of websites, make them more efficient and provide data to site owners.</p>
             <p className="mb-4">Cookies are stored on your device, but do not necessarily transmit your personal data to Tokeshare.</p>
             <div className="mb-4">
               We use cookies to :
@@ -388,7 +388,7 @@ const page = () => {
               In order to continuously optimize our website, Tokeshare uses the Google Analytics web analysis service provided by Google Inc. This service helps us to track and analyze website traffic. The data collected is processed anonymously, thanks to the anonymization of IP addresses. Google will only share this information with third parties to the extent permitted by law.
             </p>
             <p className="mb-4">Google may use this information for the purpose of evaluating your use of the Tokeshare website, and to provide adverts tailored to your interests in the Tokeshare advertising network. You can refuse the use of Google Analytics by installing the deactivation extension available for your browser. This extension prevents the sharing of information about your visit with Google Analytics.</p>
-            <p className="mb-4">To find out more about Google's privacy practices, you can visit their dedicated page : Google Privacy Policy</p>
+            <p className="mb-4">To find out more about Google&apos;s privacy practices, you can visit their dedicated page : Google Privacy Policy</p>
             <p className="mb-4">Tokeshare is committed to transparency in the use of cookies and to respecting your privacy.</p>
           </div>
         </div>
@@ -582,7 +582,7 @@ const page = () => {
           <div className="pl-4">
             <p className="mb-4">Tokeshare complies with all applicable privacy laws and regulations.</p>
             <div className="mb-4">
-              In certain circumstances, Tokeshare may be legally compelled to disclose users' or customers' personal information to the appropriate authorities, without prior consent, if we receive:
+              In certain circumstances, Tokeshare may be legally compelled to disclose users&apos; or customers&apos; personal information to the appropriate authorities, without prior consent, if we receive:
               <ul className="pl-4">
                 <li>- A court order,</li>
                 <li>- A similar legal or administrative request,</li>
@@ -766,10 +766,10 @@ const page = () => {
 
         {/* --- Bloc 11 --- */}
         <div>
-          <h2 className="mb-4 font-bold text-2xl">11. Children's personal data</h2>
+          <h2 className="mb-4 font-bold text-2xl">11. Children&apos;s personal data</h2>
           <div className="pl-4">
             <p className="mb-4">We do not knowingly solicit or collect personal data from persons under the age of 18.</p>
-            <p className="mb-4">If we suspect that a user who has submitted personal information is under the age of 18, Tokeshare will require the user's account to be closed and will take all necessary steps to delete the user's data as soon as possible.</p>
+            <p className="mb-4">If we suspect that a user who has submitted personal information is under the age of 18, Tokeshare will require the user&apos;s account to be closed and will take all necessary steps to delete the user&apos;s data as soon as possible.</p>
           </div>
         </div>
 

@@ -14,10 +14,10 @@ const steps = [
 const Schema = () => {
   return (
     <div className="relative w-4/5 bg-color1 py-10 mx-auto rounded-3xl shadow-lg mt-[-10rem]">
-      <h2 className="text-lg sm:text-lg md:text-3xl lg:text-4xl font-bold text-black md:ml-20 mb-8 text-center">Rent payments are automatically sent to investors</h2>
+      <h2 className="text-lg sm:text-lg md:text-3xl lg:text-4xl font-bold text-black  mb-8 text-center">Rent payments are automatically sent to investors</h2>
 
       <div className="hidden sm:flex justify-center items-center mb-8">
-        <Image src="/images/schema/schema.png" alt="Rent payments schema" width={800} height={400} quality={90} loading="lazy" />
+        <Image src="/images/schema/schema.webp" alt="Rent payments schema" width={1000} height={500} quality={90} loading="lazy" />
       </div>
 
       <div className="flex flex-col sm:hidden justify-center items-center ">

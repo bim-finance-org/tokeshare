@@ -18,7 +18,7 @@ const page = () => {
           <ul className="pl-4">
             <li>(a) You have read, understood, and accepted these Terms,</li>
             <li>(b) You have the legal age required to enter into a binding contract, and</li>
-            <li>(c) You are authorized to use Tokeshare's services.</li>
+            <li>(c) You are authorized to use Tokeshare&apos;s services.</li>
           </ul>
         </div>
 
@@ -26,7 +26,7 @@ const page = () => {
         <p className="pb-4">Tokeshare provides a platform that offers investment opportunities through the tokenization of real estate assets and raw materials. Each investment is governed by specific conditions, and it is your responsibility to read and understand the associated offering documents before investing.</p>
 
         <h2>2. Legal Compliance</h2>
-        <p className="pb-4">Using our Sites in violation of applicable laws is strictly prohibited. You are solely responsible for ensuring that your use of Tokeshare's services complies with the regulations in your jurisdiction.</p>
+        <p className="pb-4">Using our Sites in violation of applicable laws is strictly prohibited. You are solely responsible for ensuring that your use of Tokeshare&apos;s services complies with the regulations in your jurisdiction.</p>
 
         <h2>3. No Financial Advice</h2>
         <p className="pb-4">Tokeshare does not provide legal, tax, or financial advice. The information presented on our Sites does not constitute a recommendation to buy or sell assets.</p>

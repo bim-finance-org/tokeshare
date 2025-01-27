@@ -3,18 +3,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ArrowDownIcon from "./icons/ArrowDownIcon";
 import CrossIcon from "./icons/CrossIcon";
 import MenuIcon from "./icons/MenuIcon";
 
 const MobileMenu: React.FC = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const toggleSubMenu = () => setIsSubMenuOpen(!isSubMenuOpen);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {

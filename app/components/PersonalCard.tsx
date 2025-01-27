@@ -1,5 +1,6 @@
 import React from "react";
 import LinkedinIcon from "./icons/LinkedinIcon";
+import Image from "next/image";
 
 interface PersonalCardProps {
   firstName: string;
@@ -11,7 +12,9 @@ interface PersonalCardProps {
 const PersonalCard: React.FC<PersonalCardProps> = ({ firstName, lastName, linkedin, image }) => {
   return (
     <div className="w-72 bg-color1 rounded-b-2xl shadow-lg flex flex-col items-center">
-      <img src={image} alt="Profile Picture" className="w-full h-full object-cover" />
+      <div className="relative w-full aspect-[1/1]">
+        <Image src={image} alt="Profile Picture" fill className="object-cover" />
+      </div>
       <div className="flex justify-between items-center w-full h-16 px-6 py-10">
         <div className="flex items-center">
           <div className="border-t-2 border-color4 w-6 mr-2"></div>

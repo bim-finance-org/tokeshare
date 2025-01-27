@@ -1,5 +1,7 @@
 import React from "react";
 import ArrowIcon from "./icons/ArrowIcon";
+import Image from "next/image";
+import Link from "next/link";
 
 interface CommoditiesCardProps {
   name: string;
@@ -13,8 +15,8 @@ interface CommoditiesCardProps {
 const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ name, image, tokenPrice, year1Perf, years5Perf, link }) => {
   return (
     <div className="text-color4 min-w-[280px] max-w-[400px] w-full mx-auto">
-      <div className="relative w-full aspect-[4/3]">
-        <img src={image} alt={name} className="w-full h-full object-cover rounded-t-3xl" />
+      <div className="relative w-">
+        <Image src={image} alt={name} width={500} height={400} className="object-contain " />
       </div>
       <div className="bg-color1 rounded-b-3xl p-4 shadow-lg">
         <div className="flex justify-between items-center">
@@ -36,14 +38,14 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ name, image, tokenPri
           </div>
         </div>
         <div className="flex justify-center mt-4 w-full">
-          <a href={link} target="_blank" rel="noopener noreferrer">
+          <Link href={link} target="_blank" rel="noopener noreferrer">
             <button className=" bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition ">
               <div className="flex w-full justify-between items-center px-8">
                 <h6 className="whitespace-nowrap pr-10">Learn More</h6>
                 <ArrowIcon size={24} />
               </div>
             </button>
-          </a>
+          </Link>
         </div>
       </div>
     </div>

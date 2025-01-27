@@ -33,7 +33,7 @@ const teamData = [
     firstName: "Adrien",
     lastName: "GONCALVES",
     linkedin: "https://www.linkedin.com/in/adrien-gonçalves/",
-    image: "/images/pic-adrien.png",
+    image: "/images/pic-adrien.webp",
   },
 ];
 module.exports = teamData;

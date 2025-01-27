@@ -5,6 +5,7 @@ import LocationIcon from "./icons/LocationIcon";
 import SurfaceIcon from "./icons/SurfaceIcon";
 import BedIcon from "./icons/BedIcon";
 import ArrowIcon from "./icons/ArrowIcon";
+import Image from "next/image";
 
 interface HouseCardProps {
   name: string;
@@ -41,9 +42,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, beds, surface, price, city,
       className="bg-color5 text-color4 text-base sm:text-lg shadow-lg rounded-xl overflow-hidden flex flex-col min-w-0 
                     max-w-[90%] sm:max-w-full mx-auto"
     >
-      <div className="relative">
-        <img src={image} alt={`Image of ${name}`} className="w-full h-52 sm:h-64 object-cover" />
-      </div>
+      <Image src={image} alt="House" width={800} height={800} className="object-cover" />
       <div className="p-3 sm:p-4 flex flex-col flex-grow">
         <div>
           <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
