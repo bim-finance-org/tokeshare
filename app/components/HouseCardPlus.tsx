@@ -77,11 +77,11 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
       <div className="px-8 pb-8">
         <div className="flex items-center justify-between my-2">
           <h1 className="text-color4 text-xl">Total Price</h1>
-          <p className="text-color4 text-xl">${price.toLocaleString()}</p>
+          <h5 className="text-color4 text-xl">${price.toLocaleString()}</h5>
         </div>
         <div className="flex items-center justify-between">
           <h1 className="text-color2 text-xl">Token Price</h1>
-          <p className="text-color2 text-xl">${tokenPrice.toLocaleString()}</p>
+          <h5 className="text-color2 text-xl">${tokenPrice.toLocaleString()}</h5>
         </div>
         <div>
           <div className="flex items-center justify-between">
@@ -89,7 +89,7 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
               <h3 className="text-color4 text-xl">Expected Income</h3>
               <p className="text-color2 text-sm">Not including capital appreciation</p>
             </div>
-            <p className="text-color4 text-lg font-bold">{expectedIncome}%</p>
+            <h5 className="text-color4 text-lg font-bold">{expectedIncome}%</h5>
           </div>
           <div className="flex items-center justify-between text-color4 py-2">
             <p>Income Start Date</p>
@@ -102,7 +102,7 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
         </div>
         <div className="flex justify-center">
           <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
-            <p className="text-color1 hover:text-white">learn more</p>
+            <h5 className="text-color1 hover:text-white">learn more</h5>
             <ArrowIcon size={24} />
           </button>
         </div>

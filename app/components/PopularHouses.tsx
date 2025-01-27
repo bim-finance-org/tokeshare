@@ -12,10 +12,10 @@ const PopularHouses: React.FC<PopularHousesProps> = ({ indexes }) => {
     <div className="px-4 sm:px-10 lg:px-24 mb-[-22rem] relative py-8 sm:py-10">
       <div className="flex items-center mb-4">
         <div className="w-10 sm:w-12 h-1 bg-color4 mr-2"></div>
-        <h3 className="font-titleSemiBold text-2xl sm:text-3xl text-color4">POPULAR</h3>
+        <h3 className=" text-2xl sm:text-3xl text-color4">POPULAR</h3>
       </div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h4 className="font-titleBold text-xl sm:text-2xl text-color4">Our Popular Homes</h4>
+        <h4 className=" text-xl sm:text-2xl text-color4">Our Popular Homes</h4>
         <div className="flex items-center space-x-2 mt-3 sm:mt-0">
           <a href="/explore-all" className="flex items-center hover:scale-105 transition-transform duration-300">
             <button className="text-lg sm:text-2xl text-color4">Explore All</button>

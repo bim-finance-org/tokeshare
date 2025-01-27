@@ -7,6 +7,7 @@ import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
 import { Input } from "../components/ui/input"; // Ensure this path is correct or update it to the correct path
+import Schema from "./components/Schema";
 
 export default function Home() {
   return (
@@ -28,20 +29,15 @@ export default function Home() {
         <Image src="/images/bg-image-1.webp" alt="Tokeshare Investment Platform" layout="fill" objectFit="cover" priority />
         <div className="absolute inset-0 flex flex-col items-start  justify-center px-6 md:px-36 space-y-4">
           <h1 className="text-white text-4xl md:text-6xl w-full md:w-2/3 lg:w-1/2 ">Let's redefine access to investment</h1>
-          <p className="text-white font-textRegular text-sm md:text-lg max-w-lg leading-relaxed text-justify">Through Tokeshare, investors from around the world can now enter the Latin American market through fractionalized and tokenized ownership. With transparency and the efficiency of blockchain, we offer a compliant and modern solution to rethink real estate investment.</p>
-          <p className="text-white font-text text-sm md:text-lg ">The future of finance lies in tokenization.</p>
+          <p className="text-white text-sm md:text-lg max-w-lg leading-relaxed text-justify">Through Tokeshare, investors from around the world can now enter the Latin American market through fractionalized and tokenized ownership. With transparency and the efficiency of blockchain, we offer a compliant and modern solution to rethink real estate investment.</p>
+          <p className="text-white text-sm md:text-lg ">The future of finance lies in tokenization.</p>
           <Link href="/buildingInProgress">
             <button className="rounded-lg w-48 bg-color4 px-6 py-2 text-sm md:text-lg hover:scale-105 transition-transform duration-300">Sign up</button>
           </Link>
         </div>
       </div>
 
-      <div className="relative w-4/5 bg-color1 py-10 mx-auto rounded-3xl shadow-lg mt-[-10rem]">
-        <h2 className="text-lg sm:text-lg md:text-3xl lg:text-4xl font-bold text-black ml-8 md:ml-20 mb-8 ">Rent payments are automatically sent to investors</h2>
-        <div className="flex justify-center items-center">
-          <Image src="/images/schema.png" alt="Rent payments schema" width={800} height={400} quality={90} loading="lazy" />
-        </div>
-      </div>
+      <Schema />
 
       <PopularHouses indexes={[0, 1, 2]} />
 
@@ -59,7 +55,6 @@ export default function Home() {
 
         <form className="flex flex-col items-center space-y-6">
           <label htmlFor="email" className="absolute top-0 left-4 text-white text-sm mt-2"></label>
-          {/* <input type="email" placeholder="Your email here " className="w-3/5 p-30 bg-transparent border border-color1" required /> */}
           <Input type="text" placeholder="Your email here" className="w-3/5 p-3 bg-transparent border border-color1" required />
           <div className="relative w-full my-8">
             <div className="border-t-2 border-color1 w-full"></div>

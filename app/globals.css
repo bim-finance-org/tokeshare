@@ -15,9 +15,26 @@
 body {
   color: hsl(var(--color1));
   background: hsl(var(--color1));
+
   h1 {
+    font-family: "NewOrderBold";
+  }
+
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  button {
     font-family: "NewOrderSemiBold";
   }
+
+  p,
+  span,
+  a {
+    font-family: "RubikRegular";
+  }
+
   img {
     object-fit: cover;
   }

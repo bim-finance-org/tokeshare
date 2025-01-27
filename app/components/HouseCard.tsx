@@ -64,10 +64,10 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, beds, surface, price, city,
         </div>
 
         <div className={`mt-4 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
-          <p className="text-blue-600 font-bold text-lg sm:text-xl">{price.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p>
+          <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{price.toLocaleString("en-US", { style: "currency", currency: "USD" })}</h5>
 
           <a href={link} className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
-            Learn More
+            <h5>Learn More</h5>
             <span className="ml-2">
               <ArrowIcon size={24} />
             </span>

@@ -47,7 +47,7 @@ const MobileMenu: React.FC = () => {
             ].map(({ name, path }, index) => (
               <li key={index} className="relative w-full">
                 {
-                  <Link href={path} onClick={toggleMenu} className={`text-lg  font-bold block w-full hover:text-gray-300 transition-colors ${pathname === "/" ? "text-color4" : "text-color1"}`}>
+                  <Link href={path} onClick={toggleMenu} className={`text-lg  font-bold block w-full hover:text-gray-300 transition-colors ${pathname === "/" ? "text-color1" : "text-color1"}`}>
                     {name}
                   </Link>
                 }
