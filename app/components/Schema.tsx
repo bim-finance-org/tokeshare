@@ -24,7 +24,7 @@ const Schema = () => {
         {steps.map((step, index) => (
           <div key={index} className="flex flex-col items-center text-center">
             {/* Image de l'étape */}
-            <Image src={step.src} alt={step.label} width={80} height={40} quality={90} loading="lazy" />
+            <Image src={step.src} alt={step.label} width={80} height={40} quality={90} loading="lazy" style={{ width: "auto", height: "auto" }} />
             <h2 className="text-color2 mt-2 whitespace-pre-line">{step.label}</h2>
 
             {index < steps.length - 1 && <ArrowLineIcon size={64} className="text-color3 rotate-90 my-4" />}

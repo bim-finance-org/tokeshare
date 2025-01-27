@@ -10,15 +10,17 @@ const page = () => {
         <h1 className=" text-3xl md:text-4xl pb-10 flex justify-center items-center">Terms of Service - Tokeshare</h1>
 
         <h2>Effective Date: 27/01/2025</h2>
-        <p className="pb-4">Please read these Terms of Use (“Terms”) carefully. They govern your access to and use of the Tokeshare website, platform, and mobile application (“Sites”). By accessing or using our services, you agree to these Terms in full. If you do not agree to these Terms, please do not use our services.</p>
-        <p className="pb-4">
-          By accessing the Sites, you confirm that: <br />
+        <div className="pb-4">Please read these Terms of Use (“Terms”) carefully. They govern your access to and use of the Tokeshare website, platform, and mobile application (“Sites”). By accessing or using our services, you agree to these Terms in full. If you do not agree to these Terms, please do not use our services.</div>
+        <div className="pb-4">
+          <p>
+            By accessing the Sites, you confirm that: <br />
+          </p>
           <ul className="pl-4">
             <li>(a) You have read, understood, and accepted these Terms,</li>
             <li>(b) You have the legal age required to enter into a binding contract, and</li>
             <li>(c) You are authorized to use Tokeshare's services.</li>
           </ul>
-        </p>
+        </div>
 
         <h2>1. Tokenization Services and Offerings</h2>
         <p className="pb-4">Tokeshare provides a platform that offers investment opportunities through the tokenization of real estate assets and raw materials. Each investment is governed by specific conditions, and it is your responsibility to read and understand the associated offering documents before investing.</p>

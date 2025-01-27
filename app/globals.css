@@ -54,7 +54,7 @@ body {
 
 @font-face {
   font-family: "RubikRegular";
-  src: url("/fonts/Rubik-Regular.ttf") format("truetype");
+  src: url("/fonts/Rubik-Regular.ttf") format("opentype");
   font-display: swap;
 }
 

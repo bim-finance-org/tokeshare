@@ -23,6 +23,14 @@ interface HomeCardPlusProps {
 const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price, city, image, link, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isCompact, setIsCompact] = useState(false);
+  const [formattedPrice, setFormattedPrice] = useState<string | null>(null);
+  const [formattedTokenPrice, setFormattedTokenPrice] = useState<string | null>(null);
+
+  useEffect(() => {
+    // S'assurer que la mise en forme des nombres se fait uniquement côté client
+    setFormattedPrice(price.toLocaleString("en-US"));
+    setFormattedTokenPrice(tokenPrice.toLocaleString("en-US"));
+  }, [price, tokenPrice]);
 
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
@@ -44,7 +52,7 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
   }, []);
 
   return (
-    <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-b-3xl ">
+    <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-b-3xl">
       <div className="relative">
         <img src={image} alt={`Image of ${name}`} className="w-full object-cover" />
       </div>
@@ -77,11 +85,11 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
       <div className="px-8 pb-8">
         <div className="flex items-center justify-between my-2">
           <h1 className="text-color4 text-xl">Total Price</h1>
-          <h5 className="text-color4 text-xl">${price.toLocaleString()}</h5>
+          <h5 className="text-color4 text-xl">{formattedPrice ? `$${formattedPrice}` : "Loading..."}</h5>
         </div>
         <div className="flex items-center justify-between">
           <h1 className="text-color2 text-xl">Token Price</h1>
-          <h5 className="text-color2 text-xl">${tokenPrice.toLocaleString()}</h5>
+          <h5 className="text-color2 text-xl">{formattedTokenPrice ? `$${formattedTokenPrice}` : "Loading..."}</h5>
         </div>
         <div>
           <div className="flex items-center justify-between">

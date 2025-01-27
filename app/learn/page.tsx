@@ -73,14 +73,14 @@ const Page = () => {
                   <div className="ml-4 mb-4">
                     - Precious Metals (Gold, Silver): Invest in certified, stocked and audited metals, with no management fees and returns based on market valuation. <br />- Agricultural products (Cocoa, Cane sugar): Access tangible assets linked to global economic cycles and consumer trends.
                   </div>
-                  <li>
+                  <div>
                     <p>Tokeshare also allows you to invest in physical businesses with high potential, such as:</p>
                     <div className="ml-4">
                       - Restaurants and bars, <br />
                       - Shops, <br />
                       - Tourism projects, <br />- Vehicle fleets (e.g. quads, scooters, rental cars).
                     </div>
-                  </li>
+                  </div>
                 </li>
               </ul>
             </div>

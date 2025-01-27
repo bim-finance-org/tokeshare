@@ -26,7 +26,8 @@ export default function Home() {
 
       <div className="relative h-screen bg-color1">
         <NavBar customClass="absolute top-0 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50" />
-        <Image src="/images/bg-image-1.webp" alt="Tokeshare Investment Platform" layout="fill" objectFit="cover" priority />
+        <Image src="/images/bg-image-1.webp" alt="Tokeshare Investment Platform" fill priority className="absolute inset-0 w-full h-full" style={{ objectFit: "cover" }} />
+
         <div className="absolute inset-0 flex flex-col items-start  justify-center px-6 md:px-36 space-y-4">
           <h1 className="text-white text-4xl md:text-6xl w-full md:w-2/3 lg:w-1/2 ">Let's redefine access to investment</h1>
           <p className="text-white text-sm md:text-lg max-w-lg leading-relaxed text-justify">Through Tokeshare, investors from around the world can now enter the Latin American market through fractionalized and tokenized ownership. With transparency and the efficiency of blockchain, we offer a compliant and modern solution to rethink real estate investment.</p>
@@ -58,7 +59,7 @@ export default function Home() {
           <Input type="text" placeholder="Your email here" className="w-3/5 p-3 bg-transparent border border-color1" required />
           <div className="relative w-full my-8">
             <div className="border-t-2 border-color1 w-full"></div>
-            <div className="absolute left-2/3 transform -translate-x-1/2 -top-3 bg-color4 px-4">
+            <div className="absolute left-2/3 transform -translate-x-1/2 -top-3 bg-color4 px-2">
               <span className="text-color3">* </span>
               <span>Required</span>
             </div>
