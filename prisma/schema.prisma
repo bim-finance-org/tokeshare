@@ -1,0 +1,16 @@
+generator client {
+  provider = "prisma-client-js"
+}
+ 
+datasource db {
+  provider = "postgresql"
+  // Uses connection pooling
+  url = env("DATABASE_URL")
+  // Uses direct connection, ⚠️ make sure to keep this to `DATABASE_URL_UNPOOLED`
+  // or you'll have dangling databases from migrations
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+ 
+model Emails {
+  email     String   @unique
+}
