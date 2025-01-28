@@ -80,6 +80,7 @@ const BuildingInProgress = () => {
 								className={`w-full mb-2 bg-color1 text-color4 ${
 									error ? "border-red-500" : "border-gray-600"
 								}`}
+								disabled={isSubmitting}
 							/>
 							{error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
 							<Button

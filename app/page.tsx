@@ -117,6 +117,7 @@ export default function Home() {
 								className={`w-3/5 p-3 bg-transparent border ${
 									error ? "border-red-500" : "border-color1"
 								}`}
+								disabled={isSubmitting}
 							/>
 							<div className='relative w-full my-8'>
 								<div className='border-t-2 border-color1 w-full'></div>
