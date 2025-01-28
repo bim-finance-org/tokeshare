@@ -11,7 +11,7 @@ const BuildingInProgress = () => {
 	const [email, setEmail] = useState("");
 	const [submitted, setSubmitted] = useState(false);
 	const [error, setError] = useState("");
-
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const handleSubscribe = async () => {
 		if (!email.trim()) {
 			setError("Please enter your email.");
@@ -23,6 +23,7 @@ const BuildingInProgress = () => {
 		}
 
 		try {
+			setIsSubmitting(true);
 			const body = { email };
 			const response = await fetch("/api/emails", {
 				method: "POST",
@@ -31,16 +32,14 @@ const BuildingInProgress = () => {
 			});
 
 			if (response.status < 200 || response.status >= 400) {
-				setError(
-					"An error occured when submitting the email address, Please try again."
-				);
-				return;
+				throw new Error();
 			}
-			// Simuler un enregistrement réussi
 			setSubmitted(true);
 			setEmail(""); // Réinitialisation du champ après soumission
 			setError(""); // Supprimer les erreurs après succès
+			setIsSubmitting(false);
 		} catch (error) {
+			setIsSubmitting(false);
 			console.error("Erreur d'inscription:", error);
 			setError("An error occurred. Please try again later.");
 		}
@@ -87,7 +86,9 @@ const BuildingInProgress = () => {
 								className='w-full bg-color2 hover:bg-blue-500 transition-all disabled:bg-gray-600'
 								onClick={handleSubscribe}
 								disabled={
-									!email.trim() || !z.string().email().safeParse(email).success
+									!email.trim() ||
+									!z.string().email().safeParse(email).success ||
+									isSubmitting
 								}
 							>
 								Notify Me

@@ -12,5 +12,5 @@ datasource db {
 }
  
 model Emails {
-  email     String   @unique
+  email     String   @id
 }
