@@ -38,14 +38,14 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ name, image, tokenPri
           </div>
         </div>
         <div className="flex justify-center mt-4 w-full">
-          <Link href={link} target="_blank" rel="noopener noreferrer">
-            <button className=" bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition ">
-              <div className="flex w-full justify-between items-center px-8">
-                <h6 className="whitespace-nowrap pr-10">Available Soon</h6>
-                <ArrowIcon size={24} />
-              </div>
-            </button>
-          </Link>
+          {/* <Link href={link} target="_blank" rel="noopener noreferrer"> */}
+          <button className=" bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition ">
+            <div className="flex w-full justify-between items-center px-8">
+              <h6 className="whitespace-nowrap pr-10">Available Soon</h6>
+              <ArrowIcon size={24} />
+            </div>
+          </button>
+          {/* </Link> */}
         </div>
       </div>
     </div>

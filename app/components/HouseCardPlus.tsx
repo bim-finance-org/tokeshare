@@ -112,12 +112,12 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, beds, surface, price,
           </div>
         </div>
         <div className="flex justify-center">
-          <Link href={link}>
-            <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
-              <h5 className="text-color1 hover:text-white">Available Soon</h5>
-              <ArrowIcon size={24} />
-            </button>
-          </Link>
+          {/* <Link href={link}> */}
+          <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
+            <h5 className="text-color1 hover:text-white">Available Soon</h5>
+            <ArrowIcon size={24} />
+          </button>
+          {/* </Link> */}
         </div>
       </div>
     </div>

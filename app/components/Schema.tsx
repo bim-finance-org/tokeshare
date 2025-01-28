@@ -13,7 +13,7 @@ const steps = [
 
 const Schema = () => {
   return (
-    <div className="relative w-4/5 bg-color1 py-10 mx-auto rounded-3xl shadow-lg mt-[-10rem]">
+    <div className="relative w-4/5 bg-color1 py-10 mx-auto rounded-3xl shadow-lg mt-[-8rem]">
       <h2 className="text-lg sm:text-lg md:text-3xl lg:text-4xl font-bold text-black  mb-8 text-center">Rent payments are automatically sent to investors</h2>
 
       <div className="hidden sm:flex justify-center items-center mb-8">

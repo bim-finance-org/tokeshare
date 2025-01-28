@@ -6,6 +6,7 @@ import SurfaceIcon from "./icons/SurfaceIcon";
 import BedIcon from "./icons/BedIcon";
 import ArrowIcon from "./icons/ArrowIcon";
 import Image from "next/image";
+import Link from "next/link";
 
 interface HouseCardProps {
   name: string;
@@ -65,12 +66,14 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, beds, surface, price, city,
         <div className={`mt-4 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
           <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{price.toLocaleString("en-US", { style: "currency", currency: "USD" })}</h5>
 
-          <a href={link} className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
+          {/* <Link href={link} > */}
+          <button className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
             <h5>Available Soon</h5>
             <span className="ml-2">
               <ArrowIcon size={24} />
             </span>
-          </a>
+          </button>
+          {/* </Link> */}
         </div>
       </div>
     </div>
