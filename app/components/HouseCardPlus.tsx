@@ -14,14 +14,13 @@ interface HomeCardPlusProps {
   price: string;
   city: string;
   image: string;
-  link: string;
   tokenPrice: string;
   expectedIncome: string;
   dateIncome: string;
   tokenIncome: string;
 }
 
-const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, number, surface, price, city, image, link, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
+const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, number, surface, price, city, image, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isCompact, setIsCompact] = useState(false);
 

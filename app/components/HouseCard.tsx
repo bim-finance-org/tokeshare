@@ -14,10 +14,9 @@ interface HouseCardProps {
   price: string;
   city: string;
   image: string;
-  link: string;
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, city, image, link }) => {
+const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, city, image }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 

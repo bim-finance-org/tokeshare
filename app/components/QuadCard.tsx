@@ -13,10 +13,9 @@ interface QuadCardProps {
   price: string;
   city: string;
   image: string;
-  link: string;
 }
 
-const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, image, link }) => {
+const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, image }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 
