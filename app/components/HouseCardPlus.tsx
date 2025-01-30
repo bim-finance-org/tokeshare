@@ -99,7 +99,7 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, number, surface, pric
           </div>
           <div className="flex items-center justify-between text-color4">
             <p>Income per Token</p>
-            <p>$ {tokenIncome} / year</p>
+            <p>{tokenIncome} / year</p>
           </div>
         </div>
         <div className="flex justify-center">

@@ -10,7 +10,7 @@ const housesData = [
     tokenPrice: "$ 1.000",
     expectedIncome: "9.07 %",
     dateIncome: "March 1 1995",
-    tokenIncome: "4.65 %",
+    tokenIncome: "$ 4.65",
   },
   {
     name: "House",
@@ -23,7 +23,7 @@ const housesData = [
     tokenPrice: "$ 1.000",
     expectedIncome: "9.07 %",
     dateIncome: "March 1 1995",
-    tokenIncome: "4.65 %",
+    tokenIncome: "$ 4.65",
   },
   {
     name: "House",
@@ -36,7 +36,7 @@ const housesData = [
     tokenPrice: "$ 1.000",
     expectedIncome: "9.07 %",
     dateIncome: "March 1 1995",
-    tokenIncome: "4.65%",
+    tokenIncome: "$ 4.65",
   },
   {
     name: "Apartment",
@@ -49,7 +49,7 @@ const housesData = [
     tokenPrice: "$ 77.5",
     expectedIncome: "6% - 11%",
     dateIncome: "No available date",
-    tokenIncome: "4.65$ - 8.52$",
+    tokenIncome: "$ 4.65 - $ 8.52",
   },
 ];
 

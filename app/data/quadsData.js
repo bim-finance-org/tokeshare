@@ -10,7 +10,7 @@ const quadsData = [
     tokenPrice: "77.5",
     expectedIncome: "6% - 11%",
     dateIncome: "No available date",
-    tokenIncome: "4.65$ - 8.52$",
+    tokenIncome: "$ 4.65 - $ 8.52",
   },
 ];
 
