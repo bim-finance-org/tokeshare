@@ -1,6 +1,6 @@
 import React, { ComponentPropsWithRef } from "react";
 
-const QuadIcon = ({ size = 24, className, fillColor = "currentColor", ...props }: ComponentPropsWithRef<"svg"> & { size?: number; fillColor?: string }) => {
+const QuadIcon = ({ size = 24, className, ...props }: ComponentPropsWithRef<"svg"> & { size?: number; fillColor?: string }) => {
   return (
     <svg fill="#000000" height={size} width={size} className={className} {...props} version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 470" xmlnsXlink="http://www.w3.org/1999/xlink" enableBackground="new 0 0 470 470">
       <g>

@@ -2,11 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import LocationIcon from "./icons/LocationIcon";
-import SurfaceIcon from "./icons/SurfaceIcon";
-import BedIcon from "./icons/BedIcon";
 import ArrowIcon from "./icons/ArrowIcon";
 import Image from "next/image";
-import Link from "next/link";
 import QuadIcon from "./icons/QuadIcon";
 
 interface QuadCardProps {

@@ -5,7 +5,6 @@ import BedIcon from "./icons/BedIcon";
 import SurfaceIcon from "./icons/SurfaceIcon";
 import LocationIcon from "./icons/LocationIcon";
 import ArrowIcon from "./icons/ArrowIcon";
-import Link from "next/link";
 import Image from "next/image";
 
 interface HomeCardPlusProps {

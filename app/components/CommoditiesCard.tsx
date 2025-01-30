@@ -1,7 +1,6 @@
 import React from "react";
 import ArrowIcon from "./icons/ArrowIcon";
 import Image from "next/image";
-import Link from "next/link";
 
 interface CommoditiesCardProps {
   name: string;

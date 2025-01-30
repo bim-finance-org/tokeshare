@@ -6,7 +6,6 @@ import SurfaceIcon from "./icons/SurfaceIcon";
 import BedIcon from "./icons/BedIcon";
 import ArrowIcon from "./icons/ArrowIcon";
 import Image from "next/image";
-import Link from "next/link";
 
 interface HouseCardProps {
   name: string;
