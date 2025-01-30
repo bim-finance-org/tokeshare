@@ -1,5 +1,18 @@
 const housesData = [
   {
+    name: "Apartment",
+    number: "2 Beds",
+    surface: "115.51",
+    price: "$ 310.000",
+    city: "Residencial Serenite",
+    image: "/images/img-house-4.webp",
+    link: "/house-1",
+    tokenPrice: "$ 77.5",
+    expectedIncome: "6% - 11%",
+    dateIncome: "No available date",
+    tokenIncome: "$ 4.65 - $ 8.52",
+  },
+  {
     name: "House",
     number: "5 beds",
     surface: "180",
@@ -10,7 +23,7 @@ const housesData = [
     tokenPrice: "$ 1.000",
     expectedIncome: "9.07 %",
     dateIncome: "March 1 1995",
-    tokenIncome: "4.65 %",
+    tokenIncome: "$ 4.65",
   },
   {
     name: "House",
@@ -23,7 +36,7 @@ const housesData = [
     tokenPrice: "$ 1.000",
     expectedIncome: "9.07 %",
     dateIncome: "March 1 1995",
-    tokenIncome: "4.65 %",
+    tokenIncome: "$ 4.65",
   },
   {
     name: "House",
@@ -36,20 +49,7 @@ const housesData = [
     tokenPrice: "$ 1.000",
     expectedIncome: "9.07 %",
     dateIncome: "March 1 1995",
-    tokenIncome: "4.65%",
-  },
-  {
-    name: "Apartment",
-    number: "2 Beds",
-    surface: "115.51",
-    price: "$ 310.000",
-    city: "Residencial Serenite",
-    image: "/images/img-house-4.webp",
-    link: "/house-1",
-    tokenPrice: "$ 77.5",
-    expectedIncome: "6% - 11%",
-    dateIncome: "No available date",
-    tokenIncome: "4.65$ - 8.52$",
+    tokenIncome: "$ 4.65",
   },
 ];
 
