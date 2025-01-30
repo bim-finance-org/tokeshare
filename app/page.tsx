@@ -67,7 +67,7 @@ export default function Home() {
 
       <Schema />
 
-      <PopularHouses indexes={[0, 1, 2]} />
+      <PopularHouses />
 
       <div className="mt-16 bg-color4 p-8">
         <div className="h-72"></div>

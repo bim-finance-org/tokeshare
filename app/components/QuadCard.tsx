@@ -7,18 +7,19 @@ import BedIcon from "./icons/BedIcon";
 import ArrowIcon from "./icons/ArrowIcon";
 import Image from "next/image";
 import Link from "next/link";
+import QuadIcon from "./icons/QuadIcon";
 
-interface HouseCardProps {
+interface QuadCardProps {
   name: string;
   number: string;
-  surface: string;
+  power: string;
   price: string;
   city: string;
   image: string;
   link: string;
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, city, image, link }) => {
+const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, image, link }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 
@@ -49,12 +50,12 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, cit
           <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
           <div className="flex flex-wrap items-center space-x-3 mt-2 text-sm sm:text-base">
             <div className="flex items-center">
-              <BedIcon size={36} />
+              <QuadIcon size={28} className="pr-1" />
               {number}
             </div>
             <p className="flex items-center">
-              <SurfaceIcon />
-              {surface} m²
+              {/* <PowerIcon/> */}
+              {power}
             </p>
             <p className="flex items-center">
               <LocationIcon />

@@ -1,0 +1,17 @@
+const quadsData = [
+  {
+    name: "Quad",
+    number: "10",
+    power: "250 CC",
+    price: "$ 20.000",
+    city: "Las Terrenas",
+    image: "/images/img-quad-1.webp",
+    link: "/house-1",
+    tokenPrice: "77.5",
+    expectedIncome: "6% - 11%",
+    dateIncome: "No available date",
+    tokenIncome: "4.65$ - 8.52$",
+  },
+];
+
+module.exports = quadsData;
