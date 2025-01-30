@@ -1,3 +1,4 @@
+// MobileMenu.tsx
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -27,13 +28,13 @@ const MobileMenu: React.FC = () => {
   }, []);
 
   return (
-    <div className="md:hidden text-color7" ref={menuRef}>
-      <button onClick={toggleMenu} className="text-color7 text-2xl focus:outline-none hover:scale-110 ">
+    <div className="custom-r:hidden text-color7" ref={menuRef}>
+      <button onClick={toggleMenu} className="text-color7 text-2xl focus:outline-none hover:scale-110" aria-label="Toggle Menu">
         {isMenuOpen ? <CrossIcon size={32} className="pointer-events-none" /> : <MenuIcon size={32} className="pointer-events-none" />}
       </button>
 
       {isMenuOpen && (
-        <div className={`absolute top-14 left-1/2 transform -translate-x-1/2 w-full bg-color3 shadow-lg md:hidden rounded-b-xl transition-all duration-300 ${pathname === "/" ? "bg-transparent text-color7" : "bg-color3"}`}>
+        <div className={`absolute top-14 left-1/2 transform -translate-x-1/2 w-full bg-color3 shadow-lg custom-r:hidden rounded-b-xl transition-all duration-300 ${pathname === "/" ? "bg-transparent text-color7" : "bg-color3"}`}>
           <ul className="flex flex-col items-start space-y-4 p-6">
             {[
               { name: "Home", path: "/" },
@@ -44,11 +45,9 @@ const MobileMenu: React.FC = () => {
               { name: "Learn", path: "/learn" },
             ].map(({ name, path }, index) => (
               <li key={index} className="relative w-full">
-                {
-                  <Link href={path} onClick={toggleMenu} className={`text-lg  font-bold block w-full hover:text-gray-300 transition-colors [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] ${pathname === "/" ? "text-color1" : "text-color1"}`}>
-                    <h3>{name}</h3>
-                  </Link>
-                }
+                <Link href={path} onClick={toggleMenu} className={`text-lg font-bold block w-full hover:text-gray-300 transition-colors [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] ${pathname === "/" ? "text-color1" : "text-color1"}`}>
+                  <h3>{name}</h3>
+                </Link>
               </li>
             ))}
           </ul>

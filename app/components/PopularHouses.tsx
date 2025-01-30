@@ -24,7 +24,7 @@ const PopularHouses: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-1 custom-r:grid-cols-3 gap-4 sm:gap-6">
         {<HouseCard key={1} {...housesData[0]} />}
         {<HouseCard key={2} {...housesData[3]} />}
         {<QuadCard key={3} {...quadsData[0]} />}
