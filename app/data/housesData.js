@@ -14,7 +14,7 @@ const housesData = [
   },
   {
     name: "House",
-    number: "5 beds",
+    number: "5 Beds",
     surface: "180",
     price: "$ 1.000.000",
     city: "Saint-Domingue",
@@ -22,7 +22,7 @@ const housesData = [
     link: "/house-1",
     tokenPrice: "$ 1.000",
     expectedIncome: "9.07 %",
-    dateIncome: "March 1 1995",
+    dateIncome: "No available date",
     tokenIncome: "$ 4.65",
   },
   {
@@ -35,7 +35,7 @@ const housesData = [
     link: "/house-1",
     tokenPrice: "$ 1.000",
     expectedIncome: "9.07 %",
-    dateIncome: "March 1 1995",
+    dateIncome: "No available date",
     tokenIncome: "$ 4.65",
   },
   {
@@ -48,7 +48,7 @@ const housesData = [
     link: "/house-1",
     tokenPrice: "$ 1.000",
     expectedIncome: "9.07 %",
-    dateIncome: "March 1 1995",
+    dateIncome: "No available date",
     tokenIncome: "$ 4.65",
   },
 ];
