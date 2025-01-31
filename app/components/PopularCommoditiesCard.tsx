@@ -41,9 +41,9 @@ const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ name, i
       <Image src={image} alt="House" width={800} height={800} className="object-cover w-hull h-64" />
       <div className="p-3 sm:p-4 flex flex-col flex-grow">
         <div>
-          <h3 className="font-semibold text-lg sm:text-xl pb-9">{name}</h3>
+          <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
         </div>
-
+        <div className="pt-2">1g {name}</div>
         <div className={`mt-4 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
           <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{tokenPrice}</h5>
 
