@@ -23,7 +23,7 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ name, image, tokenPri
             <div className="border-t-2 border-color4 w-8 mr-2 ml-1"></div>
             <h3>{name}</h3>
           </div>
-          <h6 className="text-color2 font-bold text-lg">{tokenPrice} $</h6>
+          <h6 className="text-color2 font-bold text-lg">{tokenPrice} </h6>
         </div>
 
         <div className="mt-2 space-y-1">
