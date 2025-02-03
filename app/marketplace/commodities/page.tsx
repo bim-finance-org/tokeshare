@@ -1,4 +1,4 @@
-import CommoditiesCard from "@/app/components/CommoditiesCard";
+import CommoditiesCard from "@/app/components/cards/CommoditiesCard";
 import Footer from "@/app/components/Footer";
 import NavBar from "@/app/components/NavBar";
 import React from "react";

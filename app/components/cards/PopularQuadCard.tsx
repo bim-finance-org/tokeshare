@@ -1,22 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import LocationIcon from "./icons/LocationIcon";
-import SurfaceIcon from "./icons/SurfaceIcon";
-import BedIcon from "./icons/BedIcon";
-import ArrowIcon from "./icons/ArrowIcon";
+import LocationIcon from "../icons/LocationIcon";
+import ArrowIcon from "../icons/ArrowIcon";
+import QuadIcon from "../icons/QuadIcon";
 import Image from "next/image";
 
-interface HouseCardProps {
+interface PopularQuadCardProps {
   name: string;
   number: string;
-  surface: string;
+  power: string;
   price: string;
   city: string;
   image: string;
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, city, image }) => {
+const PopularQuadCard: React.FC<PopularQuadCardProps> = ({ name, number, power, price, city, image }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 
@@ -47,12 +46,12 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, cit
           <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
           <div className="flex flex-wrap items-center space-x-3 mt-2 text-sm sm:text-base">
             <div className="flex items-center">
-              <BedIcon size={36} />
+              <QuadIcon size={28} className="pr-1" />
               {number}
             </div>
             <p className="flex items-center">
-              <SurfaceIcon />
-              {surface} m²
+              {/* <PowerIcon/> */}
+              {power}
             </p>
             <p className="flex items-center">
               <LocationIcon />
@@ -61,7 +60,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, cit
           </div>
         </div>
 
-        <div className={`mt-2 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
+        <div className={`mt-4 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
           <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{price}</h5>
 
           {/* <Link href={link} > */}
@@ -78,4 +77,4 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, cit
   );
 };
 
-export default HouseCard;
+export default PopularQuadCard;

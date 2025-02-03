@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Question from "../components/Question";
+import Question from "./components/Question";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 

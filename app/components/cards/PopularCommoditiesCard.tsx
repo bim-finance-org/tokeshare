@@ -1,21 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import LocationIcon from "./icons/LocationIcon";
-import ArrowIcon from "./icons/ArrowIcon";
+import React, { useEffect, useRef, useState } from "react";
+import ArrowIcon from "../icons/ArrowIcon";
 import Image from "next/image";
-import QuadIcon from "./icons/QuadIcon";
 
-interface QuadCardProps {
+interface PopularCommoditiesCardProps {
   name: string;
-  number: string;
-  power: string;
-  price: string;
-  city: string;
   image: string;
+  tokenPrice: string;
+  year1Perf: string;
+  years5Perf: string;
+  link: string;
 }
 
-const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, image }) => {
+const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ name, image, tokenPrice }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 
@@ -44,24 +42,10 @@ const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, 
       <div className="p-3 sm:p-4 flex flex-col flex-grow">
         <div>
           <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
-          <div className="flex flex-wrap items-center space-x-3 mt-2 text-sm sm:text-base">
-            <div className="flex items-center">
-              <QuadIcon size={28} className="pr-1" />
-              {number}
-            </div>
-            <p className="flex items-center">
-              {/* <PowerIcon/> */}
-              {power}
-            </p>
-            <p className="flex items-center">
-              <LocationIcon />
-              {city}
-            </p>
-          </div>
         </div>
-
+        <div className="pt-2">1g {name}</div>
         <div className={`mt-4 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
-          <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{price}</h5>
+          <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{tokenPrice}</h5>
 
           {/* <Link href={link} > */}
           <button className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
@@ -77,4 +61,4 @@ const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, 
   );
 };
 
-export default HouseCard;
+export default PopularCommoditiesCard;

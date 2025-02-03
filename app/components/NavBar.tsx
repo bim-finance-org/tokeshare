@@ -89,6 +89,7 @@ const NavBar: React.FC<NavBarProps> = ({ customClass }) => {
                     {[
                       { name: "Real Estate", path: "/marketplace/real-estate" },
                       { name: "Commodities", path: "/marketplace/commodities" },
+                      { name: "Stock & ETF", path: "/marketplace/stock" },
                       { name: "Other", path: "/marketplace/other" },
                     ].map(({ name, path }, idx) => (
                       <li key={idx} className="text-center py-1 ">

@@ -1,11 +1,11 @@
 import React from "react";
-import HouseCard from "./HouseCard";
+import PolularHouseCard from "./cards/PopularHouseCard";
 import housesData from "../data/housesData";
 import quadsData from "../data/quadsData";
 import ArrowLongLineIcon from "./icons/ArrowLongLineIcon";
-import QuadCard from "./QuadCard";
+import PopularQuadCard from "./cards/PopularQuadCard";
 import commoditiesData from "../data/commoditiesData";
-import PopularCommoditiesCard from "./PopularCommoditiesCard";
+import PopularCommoditiesCard from "./cards/PopularCommoditiesCard";
 
 const PopularHouses: React.FC = () => {
   return (
@@ -27,9 +27,9 @@ const PopularHouses: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-1 custom-r:grid-cols-3 gap-4 sm:gap-6">
-        <QuadCard key={3} {...quadsData[0]} />
+        <PopularQuadCard key={3} {...quadsData[0]} />
         <PopularCommoditiesCard key={2} {...commoditiesData[0]} />
-        <HouseCard key={1} {...housesData[0]} />
+        <PolularHouseCard key={1} {...housesData[0]} />
       </div>
     </div>
   );

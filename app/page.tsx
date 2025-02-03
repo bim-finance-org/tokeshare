@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
-import PopularHouses from "./components/PopularHouses";
+import PopularCards from "./components/PopularCards";
 import ArrowLineIcon from "./components/icons/ArrowLineIcon";
 import Link from "next/link";
 import Image from "next/image";
@@ -67,7 +67,7 @@ export default function Home() {
 
       <Schema />
 
-      <PopularHouses />
+      <PopularCards />
 
       <div className="mt-16 bg-color4 p-8">
         <div className="h-72"></div>

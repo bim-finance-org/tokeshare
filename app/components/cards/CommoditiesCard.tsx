@@ -1,5 +1,5 @@
 import React from "react";
-import ArrowIcon from "./icons/ArrowIcon";
+import ArrowIcon from "../icons/ArrowIcon";
 import Image from "next/image";
 
 interface CommoditiesCardProps {

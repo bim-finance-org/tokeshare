@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import BedIcon from "./icons/BedIcon";
-import SurfaceIcon from "./icons/SurfaceIcon";
-import LocationIcon from "./icons/LocationIcon";
-import ArrowIcon from "./icons/ArrowIcon";
+import BedIcon from "../icons/BedIcon";
+import SurfaceIcon from "../icons/SurfaceIcon";
+import LocationIcon from "../icons/LocationIcon";
+import ArrowIcon from "../icons/ArrowIcon";
 import Image from "next/image";
 
-interface HomeCardPlusProps {
+interface HomeCardProps {
   name: string;
   number: string;
   surface: string;
@@ -20,7 +20,7 @@ interface HomeCardPlusProps {
   tokenIncome: string;
 }
 
-const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, number, surface, price, city, image, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
+const HomeCard: React.FC<HomeCardProps> = ({ name, number, surface, price, city, image, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isCompact, setIsCompact] = useState(false);
 
@@ -115,4 +115,4 @@ const HomeCardPlus: React.FC<HomeCardPlusProps> = ({ name, number, surface, pric
   );
 };
 
-export default HomeCardPlus;
+export default HomeCard;

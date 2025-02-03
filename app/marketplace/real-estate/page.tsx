@@ -1,7 +1,7 @@
 import React from "react";
 import Footer from "../../components/Footer";
 import NavBar from "../../components/NavBar";
-import HouseCardPlus from "@/app/components/HouseCardPlus";
+import HouseCard from "@/app/components/cards/HouseCard";
 import housesData from "@/app/data/housesData";
 
 const page = () => {
@@ -21,7 +21,7 @@ const page = () => {
       <div className="flex flex-wrap justify-center gap-x-10 gap-y-10 max-w-7xl mx-auto px-4 mb-24 transform -translate-y-10 sm:-translate-y-20">
         {housesData.map((house, index) => (
           <div key={index} className="w-full  max-w-lg flex justify-center">
-            <HouseCardPlus {...house} />
+            <HouseCard {...house} />
           </div>
         ))}
       </div>
