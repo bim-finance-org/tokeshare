@@ -8,7 +8,6 @@ interface CommoditiesCardProps {
   tokenPrice: string;
   year1Perf: string;
   years5Perf: string;
-  link: string;
 }
 
 const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ name, image, tokenPrice, year1Perf, years5Perf }) => {
