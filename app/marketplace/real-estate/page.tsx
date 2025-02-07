@@ -2,7 +2,7 @@ import React from "react";
 import Footer from "../../components/Footer";
 import NavBar from "../../components/NavBar";
 import HouseCard from "@/app/components/cards/HouseCard";
-import housesData from "@/app/data/housesData";
+import housesData from "@/app/data/housesData.json";
 
 const page = () => {
   return (
