@@ -1,0 +1,54 @@
+[
+  {
+    "id": "1",
+    "name": "Apartment",
+    "number": "2 Beds",
+    "surface": "115.51",
+    "price": "$ 310.000",
+    "city": "Residencial Serenite",
+    "image": "/images/img-house-4.webp",
+    "tokenPrice": "$ 77.5",
+    "expectedIncome": "6% - 11%",
+    "dateIncome": "No available date",
+    "tokenIncome": "$ 4.65 - $ 8.52"
+  },
+  {
+    "id": "2",
+    "name": "House",
+    "number": "5 Beds",
+    "surface": "180",
+    "price": "$ 1.000.000",
+    "city": "Saint-Domingue",
+    "image": "/images/img-house-1.webp",
+    "tokenPrice": "$ 1.000",
+    "expectedIncome": "9.07 %",
+    "dateIncome": "No available date",
+    "tokenIncome": "$ 4.65"
+  },
+  {
+    "id": "3",
+    "name": "House",
+    "number": "1 Bed",
+    "surface": "80",
+    "price": "$ 1.000.000",
+    "city": "Saint-Domingue",
+    "image": "/images/img-house-2.webp",
+    "tokenPrice": "$ 1.000",
+    "expectedIncome": "9.07 %",
+    "dateIncome": "No available date",
+    "tokenIncome": "$ 4.65"
+  },
+  {
+    "id": "4",
+    "name": "House",
+    "number": "2 Beds",
+    "surface": "80",
+    "price": "$ 1.000.000",
+    "city": "Saint-Domingue",
+    "image": "/images/img-house-3.webp",
+    "tokenPrice": "$ 1.000",
+    "expectedIncome": "9.07 %",
+    "dateIncome": "No available date",
+    "tokenIncome": "$ 4.65"
+  }
+]

@@ -2,7 +2,7 @@ import React from "react";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import PersonalCard from "./components/PersonalCard";
-import teamData from "../data/teamData";
+import teamData from "../data/teamData.json";
 
 const Page = () => {
   return (

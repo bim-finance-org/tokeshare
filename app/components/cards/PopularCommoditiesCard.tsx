@@ -10,7 +10,6 @@ interface PopularCommoditiesCardProps {
   tokenPrice: string;
   year1Perf: string;
   years5Perf: string;
-  link: string;
 }
 
 const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ name, image, tokenPrice }) => {

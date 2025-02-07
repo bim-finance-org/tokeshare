@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+
 import BedIcon from "../icons/BedIcon";
 import SurfaceIcon from "../icons/SurfaceIcon";
 import LocationIcon from "../icons/LocationIcon";
 import ArrowIcon from "../icons/ArrowIcon";
-import Image from "next/image";
 
 interface HomeCardProps {
+  id: string;
   name: string;
   number: string;
   surface: string;
@@ -20,7 +23,7 @@ interface HomeCardProps {
   tokenIncome: string;
 }
 
-const HomeCard: React.FC<HomeCardProps> = ({ name, number, surface, price, city, image, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
+const HomeCard: React.FC<HomeCardProps> = ({ id, name, number, surface, price, city, image, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isCompact, setIsCompact] = useState(false);
 
@@ -103,12 +106,12 @@ const HomeCard: React.FC<HomeCardProps> = ({ name, number, surface, price, city,
           </div>
         </div>
         <div className="flex justify-center">
-          {/* <Link href={link}> */}
-          <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
-            <h5 className="text-color1 hover:text-white">Available Soon</h5>
-            <ArrowIcon size={24} />
-          </button>
-          {/* </Link> */}
+          <Link href={`/marketplace/real-estate/${id}`}>
+            <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
+              <h5 className="text-color1 hover:text-white">Available Soon</h5>
+              <ArrowIcon size={24} />
+            </button>
+          </Link>
         </div>
       </div>
     </div>
