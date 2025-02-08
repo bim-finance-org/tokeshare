@@ -5,17 +5,15 @@ import LocationIcon from "../icons/LocationIcon";
 import ArrowIcon from "../icons/ArrowIcon";
 import QuadIcon from "../icons/QuadIcon";
 import Image from "next/image";
+import { Quad } from "@/app/types";
 
 interface PopularQuadCardProps {
-  name: string;
-  number: string;
-  power: string;
-  price: string;
-  city: string;
-  image: string;
+  quad: Quad;
 }
 
-const PopularQuadCard: React.FC<PopularQuadCardProps> = ({ name, number, power, price, city, image }) => {
+const PopularQuadCard: React.FC<PopularQuadCardProps> = ({ quad }) => {
+  const { name, number, power, price, city, image } = quad;
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 

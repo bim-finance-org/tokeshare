@@ -18,7 +18,7 @@ const page = () => {
       <div className="flex flex-wrap justify-center gap-x-10 gap-y-10 max-w-7xl mx-auto px-4 mb-24 transform -translate-y-10 sm:-translate-y-20">
         {housesData.map((house, index) => (
           <div key={index} className="w-full  max-w-lg flex justify-center">
-            <HouseCard {...house} />
+            <HouseCard house={house} />
           </div>
         ))}
       </div>

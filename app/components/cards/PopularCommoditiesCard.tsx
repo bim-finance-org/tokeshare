@@ -3,16 +3,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import ArrowIcon from "../icons/ArrowIcon";
 import Image from "next/image";
+import { Commodity } from "@/app/types";
 
 interface PopularCommoditiesCardProps {
-  name: string;
-  image: string;
-  tokenPrice: string;
-  year1Perf: string;
-  years5Perf: string;
+  commodity: Commodity;
 }
 
-const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ name, image, tokenPrice }) => {
+const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ commodity }) => {
+  const { name, image, tokenPrice } = commodity;
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 

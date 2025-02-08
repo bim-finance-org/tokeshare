@@ -6,17 +6,15 @@ import SurfaceIcon from "../icons/SurfaceIcon";
 import BedIcon from "../icons/BedIcon";
 import ArrowIcon from "../icons/ArrowIcon";
 import Image from "next/image";
+import { House } from "@/app/types";
 
 interface PopularHouseCardProps {
-  name: string;
-  number: string;
-  surface: string;
-  price: string;
-  city: string;
-  image: string;
+  house: House;
 }
 
-const PopularHouseCard: React.FC<PopularHouseCardProps> = ({ name, number, surface, price, city, image }) => {
+const PopularHouseCard: React.FC<PopularHouseCardProps> = ({ house }) => {
+  const { name, number, surface, price, city, image } = house;
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 

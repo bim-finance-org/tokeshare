@@ -8,22 +8,15 @@ import BedIcon from "../icons/BedIcon";
 import SurfaceIcon from "../icons/SurfaceIcon";
 import LocationIcon from "../icons/LocationIcon";
 import ArrowIcon from "../icons/ArrowIcon";
+import { House } from "@/app/types";
 
 interface HomeCardProps {
-  id: string;
-  name: string;
-  number: string;
-  surface: string;
-  price: string;
-  city: string;
-  image: string;
-  tokenPrice: string;
-  expectedIncome: string;
-  dateIncome: string;
-  tokenIncome: string;
+  house: House;
 }
 
-const HomeCard: React.FC<HomeCardProps> = ({ id, name, number, surface, price, city, image, tokenPrice, expectedIncome, dateIncome, tokenIncome }) => {
+const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
+  const { id, name, number, surface, price, city, image, tokenPrice, expectedIncome, dateIncome, tokenIncome } = house;
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isCompact, setIsCompact] = useState(false);
 
@@ -108,7 +101,7 @@ const HomeCard: React.FC<HomeCardProps> = ({ id, name, number, surface, price, c
         <div className="flex justify-center">
           <Link href={`/marketplace/real-estate/${id}`}>
             <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
-              <h5 className="text-color1 hover:text-white">Available Soon</h5>
+              <h5 className="text-color1 hover:text-white">Learn More</h5>
               <ArrowIcon size={24} />
             </button>
           </Link>
