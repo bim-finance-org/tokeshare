@@ -1,54 +1,222 @@
 [
   {
     "id": "1",
-    "name": "Apartment",
-    "number": "2 Beds",
-    "surface": "115.51",
-    "price": "$ 310.000",
-    "city": "Residencial Serenite",
-    "image": "/images/img-house-4.webp",
-    "tokenPrice": "$ 77.5",
-    "expectedIncome": "6% - 11%",
-    "dateIncome": "No available date",
-    "tokenIncome": "$ 4.65 - $ 8.52"
+    "general": {
+      "name": "Apartment",
+      "number": "2 Beds",
+      "surface": "115.51",
+      "price": "$ 310.000",
+      "city": "Residencial Serenite",
+      "image": "/images/img-house-4.webp",
+      "tokenPrice": "$ 77.5",
+      "expectedIncome": "6% - 11%",
+      "dateIncome": "No available date",
+      "tokenIncome": "$ 4.65 - $ 8.52"
+    },
+    "highlights": {
+      "tokenType": "Standard Equity",
+      "totalTokens": "4.000",
+      "propertyType": "Single Family",
+      "fullAddress": "Calle 1, Residencial Serenite, Santo Domingo, Dominican Republic",
+      "source": "Tokeshare",
+      "neighborhood": "Conner",
+      "constructionYear": "1950",
+      "bathrooms": "2",
+      "rentalType": "Long Term",
+      "rented": "Fully Rented"
+    },
+    "financials": {
+      "grossIncomeYear": "$ 18.600",
+      "grossIncomeMonth": "$ 1.550",
+      "monthlyCost": "$ 1.000",
+      "netIncomeMonth": "$ 550",
+      "netIncomeYear": "$ 6.600",
+      "totalInvestment": "$ 310.000",
+      "expectedIncome": "9%"
+    },
+    "details": {
+      "lotSize": "1.000",
+      "foundation": "Concrete",
+      "exteriors": "Brick",
+      "roof": "Shingle",
+      "interiorSize": "1.000",
+      "heating": "Forced Air",
+      "buildingClass": "A",
+      "renovated": "2015",
+      "propertyManager": "New York Property Management"
+    },
+    "offering": {
+      "offeringDate": "2021-06-01",
+      "issuer": "...",
+      "minInvestmentAmount": "$ 1.000",
+      "maxInvestmentAmount": "$ 10.000",
+      "amountRaised": "$ 100.000",
+      "offeringPercentage": "100%"
+    }
   },
   {
     "id": "2",
-    "name": "House",
-    "number": "5 Beds",
-    "surface": "180",
-    "price": "$ 1.000.000",
-    "city": "Saint-Domingue",
-    "image": "/images/img-house-1.webp",
-    "tokenPrice": "$ 1.000",
-    "expectedIncome": "9.07 %",
-    "dateIncome": "No available date",
-    "tokenIncome": "$ 4.65"
+    "general": {
+      "name": "House",
+      "number": "5 Beds",
+      "surface": "180",
+      "price": "$ 1.000.000",
+      "city": "Saint-Domingue",
+      "image": "/images/img-house-1.webp",
+      "tokenPrice": "$ 1.000",
+      "expectedIncome": "9.07 %",
+      "dateIncome": "No available date",
+      "tokenIncome": "$ 4.65"
+    },
+    "highlights": {
+      "tokenType": "Standard Equity",
+      "totalTokens": "10.000",
+      "propertyType": "Single Family",
+      "fullAddress": "Calle 2, Saint-Domingue, Dominican Republic",
+      "source": "Tokeshare",
+      "neighborhood": "Downtown",
+      "constructionYear": "2000",
+      "bathrooms": "3",
+      "rentalType": "Long Term",
+      "rented": "Partially Rented"
+    },
+    "financials": {
+      "grossIncomeYear": "$ 54.420",
+      "grossIncomeMonth": "$ 4.535",
+      "monthlyCost": "$ 2.000",
+      "netIncomeMonth": "$ 2.535",
+      "netIncomeYear": "$ 30.420",
+      "totalInvestment": "$ 1.000.000",
+      "expectedIncome": "9.07%"
+    },
+    "details": {
+      "lotSize": "2.000",
+      "foundation": "Concrete",
+      "exteriors": "Brick",
+      "roof": "Tile",
+      "interiorSize": "1.800",
+      "heating": "Central",
+      "buildingClass": "B",
+      "renovated": "2018",
+      "propertyManager": "Dominican Property Management"
+    },
+    "offering": {
+      "offeringDate": "2022-01-01",
+      "issuer": "...",
+      "minInvestmentAmount": "$ 5.000",
+      "maxInvestmentAmount": "$ 50.000",
+      "amountRaised": "$ 500.000",
+      "offeringPercentage": "50%"
+    }
   },
   {
     "id": "3",
-    "name": "House",
-    "number": "1 Bed",
-    "surface": "80",
-    "price": "$ 1.000.000",
-    "city": "Saint-Domingue",
-    "image": "/images/img-house-2.webp",
-    "tokenPrice": "$ 1.000",
-    "expectedIncome": "9.07 %",
-    "dateIncome": "No available date",
-    "tokenIncome": "$ 4.65"
+    "general": {
+      "name": "House",
+      "number": "1 Bed",
+      "surface": "80",
+      "price": "$ 1.000.000",
+      "city": "Saint-Domingue",
+      "image": "/images/img-house-2.webp",
+      "tokenPrice": "$ 1.000",
+      "expectedIncome": "9.07 %",
+      "dateIncome": "No available date",
+      "tokenIncome": "$ 4.65"
+    },
+    "highlights": {
+      "tokenType": "Standard Equity",
+      "totalTokens": "10.000",
+      "propertyType": "Single Family",
+      "fullAddress": "Calle 3, Saint-Domingue, Dominican Republic",
+      "source": "Tokeshare",
+      "neighborhood": "Suburb",
+      "constructionYear": "2010",
+      "bathrooms": "1",
+      "rentalType": "Short Term",
+      "rented": "Fully Rented"
+    },
+    "financials": {
+      "grossIncomeYear": "$ 36.000",
+      "grossIncomeMonth": "$ 3.000",
+      "monthlyCost": "$ 1.500",
+      "netIncomeMonth": "$ 1.500",
+      "netIncomeYear": "$ 18.000",
+      "totalInvestment": "$ 1.000.000",
+      "expectedIncome": "9.07%"
+    },
+    "details": {
+      "lotSize": "500",
+      "foundation": "Concrete",
+      "exteriors": "Wood",
+      "roof": "Metal",
+      "interiorSize": "800",
+      "heating": "Electric",
+      "buildingClass": "C",
+      "renovated": "2020",
+      "propertyManager": "Saint-Domingue Property Management"
+    },
+    "offering": {
+      "offeringDate": "2023-03-01",
+      "issuer": "...",
+      "minInvestmentAmount": "$ 10.000",
+      "maxInvestmentAmount": "$ 100.000",
+      "amountRaised": "$ 1.000.000",
+      "offeringPercentage": "100%"
+    }
   },
   {
     "id": "4",
-    "name": "House",
-    "number": "2 Beds",
-    "surface": "80",
-    "price": "$ 1.000.000",
-    "city": "Saint-Domingue",
-    "image": "/images/img-house-3.webp",
-    "tokenPrice": "$ 1.000",
-    "expectedIncome": "9.07 %",
-    "dateIncome": "No available date",
-    "tokenIncome": "$ 4.65"
+    "general": {
+      "name": "House",
+      "number": "2 Beds",
+      "surface": "80",
+      "price": "$ 1.000.000",
+      "city": "Saint-Domingue",
+      "image": "/images/img-house-3.webp",
+      "tokenPrice": "$ 1.000",
+      "expectedIncome": "9.07 %",
+      "dateIncome": "No available date",
+      "tokenIncome": "$ 4.65"
+    },
+    "highlights": {
+      "tokenType": "Standard Equity",
+      "totalTokens": "10.000",
+      "propertyType": "Single Family",
+      "fullAddress": "Calle 4, Saint-Domingue, Dominican Republic",
+      "source": "Tokeshare",
+      "neighborhood": "Uptown",
+      "constructionYear": "2015",
+      "bathrooms": "2",
+      "rentalType": "Long Term",
+      "rented": "Fully Rented"
+    },
+    "financials": {
+      "grossIncomeYear": "$ 45.000",
+      "grossIncomeMonth": "$ 3.750",
+      "monthlyCost": "$ 2.000",
+      "netIncomeMonth": "$ 1.750",
+      "netIncomeYear": "$ 21.000",
+      "totalInvestment": "$ 1.000.000",
+      "expectedIncome": "9.07%"
+    },
+    "details": {
+      "lotSize": "1.000",
+      "foundation": "Concrete",
+      "exteriors": "Stucco",
+      "roof": "Shingle",
+      "interiorSize": "800",
+      "heating": "Gas",
+      "buildingClass": "B",
+      "renovated": "2021",
+      "propertyManager": "Uptown Property Management"
+    },
+    "offering": {
+      "offeringDate": "2024-05-01",
+      "issuer": "...",
+      "minInvestmentAmount": "$ 2.000",
+      "maxInvestmentAmount": "$ 20.000",
+      "amountRaised": "$ 200.000",
+      "offeringPercentage": "20%"
+    }
   }
 ]

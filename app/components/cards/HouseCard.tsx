@@ -15,7 +15,9 @@ interface HomeCardProps {
 }
 
 const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
-  const { id, name, number, surface, price, city, image, tokenPrice, expectedIncome, dateIncome, tokenIncome } = house;
+  const { id, general } = house;
+
+  const { name, image, number, surface, city, price, tokenPrice, expectedIncome, dateIncome, tokenIncome } = general;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isCompact, setIsCompact] = useState(false);

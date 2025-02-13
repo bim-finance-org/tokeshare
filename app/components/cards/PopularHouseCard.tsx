@@ -13,7 +13,8 @@ interface PopularHouseCardProps {
 }
 
 const PopularHouseCard: React.FC<PopularHouseCardProps> = ({ house }) => {
-  const { name, number, surface, price, city, image } = house;
+  const { general } = house;
+  const { name, number, surface, price, city, image } = general;
 
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
