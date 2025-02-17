@@ -1,8 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import NavBar from "./components/NavBar";
-import Footer from "./components/Footer";
-import PopularHouses from "./components/PopularHouses";
+import PopularCards from "./components/PopularCards";
 import ArrowLineIcon from "./components/icons/ArrowLineIcon";
 import Link from "next/link";
 import Image from "next/image";
@@ -51,7 +49,6 @@ export default function Home() {
   return (
     <>
       <div className="relative h-screen bg-color1">
-        <NavBar customClass="absolute top-0 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50" />
         <div className="relative h-screen">
           <Image src="/images/bg-image-1.webp" alt="House" fill className="object-cover" />
         </div>
@@ -67,7 +64,7 @@ export default function Home() {
 
       <Schema />
 
-      <PopularHouses />
+      <PopularCards />
 
       <div className="mt-16 bg-color4 p-8">
         <div className="h-72"></div>
@@ -112,8 +109,6 @@ export default function Home() {
           </>
         )}
       </div>
-
-      <Footer />
     </>
   );
 }

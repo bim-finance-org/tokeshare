@@ -1,11 +1,8 @@
 import React from "react";
-import Footer from "../components/Footer";
-import NavBar from "../components/NavBar";
 
 const page = () => {
   return (
     <div className="bg-color4">
-      <NavBar />
       <div className=" text-justify px-6 sm:px-20 py-20">
         <h1 className="text-3xl md:text-4xl flex justify-center items-center p-6 md:pb-12">General Disclaimer</h1>
         <p className="pb-4">The information presented on this website, as well as any additional analysis based on such presentations, is provided for the purpose of sharing limited information to parties interested in potentially investing in one or more offerings of Tokeshare, its subsidiaries, affiliates or associated entities, via the purchase of tokens in connection with such offerings.</p>
@@ -37,7 +34,6 @@ const page = () => {
 
         <p className="pb-4">We encourage potential investors to consult their financial and legal advisors before making any investment decision.</p>
       </div>
-      <Footer />
     </div>
   );
 };

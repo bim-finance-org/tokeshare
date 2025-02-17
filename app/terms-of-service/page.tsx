@@ -1,11 +1,8 @@
 import React from "react";
-import Footer from "../components/Footer";
-import Navbar from "../components/NavBar";
 
 const page = () => {
   return (
     <div className="bg-color4">
-      <Navbar />
       <div className="text-justify px-6 sm:px-20 py-20">
         <h1 className=" text-3xl md:text-4xl pb-10 flex justify-center items-center">Terms of Service - Tokeshare</h1>
 
@@ -57,7 +54,6 @@ const page = () => {
 
         <p className="pb-4">By using our services, you accept these Terms and acknowledge that you have reviewed our policies and obligations.</p>
       </div>
-      <Footer />
     </div>
   );
 };

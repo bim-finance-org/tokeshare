@@ -1,21 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import LocationIcon from "./icons/LocationIcon";
-import ArrowIcon from "./icons/ArrowIcon";
+import LocationIcon from "../icons/LocationIcon";
+import SurfaceIcon from "../icons/SurfaceIcon";
+import BedIcon from "../icons/BedIcon";
+import ArrowIcon from "../icons/ArrowIcon";
 import Image from "next/image";
-import QuadIcon from "./icons/QuadIcon";
+import { House } from "@/app/types";
 
-interface QuadCardProps {
-  name: string;
-  number: string;
-  power: string;
-  price: string;
-  city: string;
-  image: string;
+interface PopularHouseCardProps {
+  house: House;
 }
 
-const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, image }) => {
+const PopularHouseCard: React.FC<PopularHouseCardProps> = ({ house }) => {
+  const { general } = house;
+  const { name, number, surface, price, city, image } = general;
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 
@@ -46,12 +46,12 @@ const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, 
           <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
           <div className="flex flex-wrap items-center space-x-3 mt-2 text-sm sm:text-base">
             <div className="flex items-center">
-              <QuadIcon size={28} className="pr-1" />
+              <BedIcon size={36} />
               {number}
             </div>
             <p className="flex items-center">
-              {/* <PowerIcon/> */}
-              {power}
+              <SurfaceIcon />
+              {surface} m²
             </p>
             <p className="flex items-center">
               <LocationIcon />
@@ -60,7 +60,7 @@ const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, 
           </div>
         </div>
 
-        <div className={`mt-4 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
+        <div className={`mt-2 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
           <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{price}</h5>
 
           {/* <Link href={link} > */}
@@ -77,4 +77,4 @@ const HouseCard: React.FC<QuadCardProps> = ({ name, number, power, price, city, 
   );
 };
 
-export default HouseCard;
+export default PopularHouseCard;

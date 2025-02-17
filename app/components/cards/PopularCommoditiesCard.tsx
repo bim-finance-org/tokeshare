@@ -1,22 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import LocationIcon from "./icons/LocationIcon";
-import SurfaceIcon from "./icons/SurfaceIcon";
-import BedIcon from "./icons/BedIcon";
-import ArrowIcon from "./icons/ArrowIcon";
+import React, { useEffect, useRef, useState } from "react";
+import ArrowIcon from "../icons/ArrowIcon";
 import Image from "next/image";
+import { Commodity } from "@/app/types";
 
-interface HouseCardProps {
-  name: string;
-  number: string;
-  surface: string;
-  price: string;
-  city: string;
-  image: string;
+interface PopularCommoditiesCardProps {
+  commodity: Commodity;
 }
 
-const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, city, image }) => {
+const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ commodity }) => {
+  const { name, image, tokenPrice } = commodity;
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 
@@ -45,24 +40,10 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, cit
       <div className="p-3 sm:p-4 flex flex-col flex-grow">
         <div>
           <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
-          <div className="flex flex-wrap items-center space-x-3 mt-2 text-sm sm:text-base">
-            <div className="flex items-center">
-              <BedIcon size={36} />
-              {number}
-            </div>
-            <p className="flex items-center">
-              <SurfaceIcon />
-              {surface} m²
-            </p>
-            <p className="flex items-center">
-              <LocationIcon />
-              {city}
-            </p>
-          </div>
         </div>
-
-        <div className={`mt-2 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
-          <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{price}</h5>
+        <div className="pt-2">1g {name}</div>
+        <div className={`mt-4 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
+          <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{tokenPrice}</h5>
 
           {/* <Link href={link} > */}
           <button className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
@@ -78,4 +59,4 @@ const HouseCard: React.FC<HouseCardProps> = ({ name, number, surface, price, cit
   );
 };
 
-export default HouseCard;
+export default PopularCommoditiesCard;

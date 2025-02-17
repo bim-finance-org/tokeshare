@@ -1,17 +1,15 @@
 import React from "react";
-import ArrowIcon from "./icons/ArrowIcon";
+import ArrowIcon from "../icons/ArrowIcon";
 import Image from "next/image";
+import { Commodity } from "@/app/types";
 
 interface CommoditiesCardProps {
-  name: string;
-  image: string;
-  tokenPrice: string;
-  year1Perf: string;
-  years5Perf: string;
-  link: string;
+  commodity: Commodity;
 }
 
-const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ name, image, tokenPrice, year1Perf, years5Perf }) => {
+const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
+  const { name, image, tokenPrice, year1Perf, years5Perf } = commodity;
+
   return (
     <div className="text-color4 min-w-[280px] max-w-[400px] w-full mx-auto">
       <div className="relative w-">

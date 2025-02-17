@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Question from "../components/Question";
-import NavBar from "../components/NavBar";
-import Footer from "../components/Footer";
+import Question from "./components/Question";
 
 const Page = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -14,7 +12,6 @@ const Page = () => {
 
   return (
     <div className="bg-color4 ">
-      <NavBar />
       <h1 className="text-5xl font-bold mb-6 text-color1 flex justify-center pt-24">FAQ</h1>
       <div className="space-y-4">
         <h1 className="px-4 md:px-8 text-lg md:text-2xl">1. General information about Tokeshare</h1>
@@ -273,7 +270,6 @@ const Page = () => {
           }
         </Question>
       </div>
-      <Footer />
     </div>
   );
 };

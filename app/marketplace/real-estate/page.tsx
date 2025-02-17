@@ -1,13 +1,10 @@
 import React from "react";
-import Footer from "../../components/Footer";
-import NavBar from "../../components/NavBar";
-import HouseCardPlus from "@/app/components/HouseCardPlus";
-import housesData from "@/app/data/housesData";
+import HouseCard from "@/app/components/cards/HouseCard";
+import housesData from "@/app/data/housesData.json";
 
 const page = () => {
   return (
     <div>
-      <NavBar />
       <div className="px-6 md:px-32 bg-color7 pb-20">
         <h1 className="text-color6 text-3xl sm:text-4xl py-8 sm:py-12">Invest in real estate</h1>
         <div className="text-color3 text-lg sm:text-2xl space-y-4 text-justify ">
@@ -21,12 +18,10 @@ const page = () => {
       <div className="flex flex-wrap justify-center gap-x-10 gap-y-10 max-w-7xl mx-auto px-4 mb-24 transform -translate-y-10 sm:-translate-y-20">
         {housesData.map((house, index) => (
           <div key={index} className="w-full  max-w-lg flex justify-center">
-            <HouseCardPlus {...house} />
+            <HouseCard house={house} />
           </div>
         ))}
       </div>
-
-      <Footer />
     </div>
   );
 };

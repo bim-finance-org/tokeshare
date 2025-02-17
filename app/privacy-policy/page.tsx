@@ -1,11 +1,8 @@
 import React from "react";
-import Footer from "../components/Footer";
-import NavBar from "../components/NavBar";
 
 const page = () => {
   return (
     <>
-      <NavBar />
       <div className="bg-color4 text-jusitfy text-color1 px-12">
         {/* --- Bloc sans <h2> --- */}
         <div>
@@ -800,7 +797,6 @@ const page = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 };
