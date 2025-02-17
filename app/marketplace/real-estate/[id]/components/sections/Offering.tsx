@@ -15,35 +15,29 @@ const Offering: React.FC<OfferingProps> = ({ offering }) => {
         <h2 className="text-lg font-semibold">OFFERING DETAILS</h2>
       </div>
       <div className="bg-color1 p-6">
-        <div className="py-4 flex justify-between items-center border-b-2 border-color5">
+        <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
           <h3 className="text-lg font-semibold">Offering Date</h3>
-          <p className="text-lg ">{offeringDate}</p>
+          <p className="text-lg">{offeringDate}</p>
         </div>
-
-        {/* Exemple : Expected Income */}
-        {/* Si tu as un champ `expectedIncome`, par ex. */}
-        <div className="py-4 flex justify-between border-b-2 border-color5">
-          <h3 className="text-lg font-semibold  ">Issuer</h3>
-          <p className="text-lg  ">{issuer}</p>
+        <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
+          <h3 className="text-lg font-semibold">Issuer</h3>
+          <p className="text-lg">{issuer}</p>
         </div>
-
-        {/* Income Start Date, Income per Token, Token Price, etc. */}
-        <div className="py-4 flex justify-between items-center border-b-2 border-color5">
-          <h3 className="text-lg font-semibold ">Min. Investment Amount</h3>
-          <p className="text-base ">{minInvestmentAmount}</p>
+        <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
+          <h3 className="text-lg font-semibold">Min. Investment Amount</h3>
+          <p className="text-base">{minInvestmentAmount}</p>
         </div>
-
-        <div className="py-4 flex justify-between items-center border-b-2 border-color5 ">
-          <h3 className="text-lg font-semibold ">Max. Investment Amount</h3>
-          <p className="text-base ">{maxInvestmentAmount}</p>
+        <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
+          <h3 className="text-lg font-semibold">Max. Investment Amount</h3>
+          <p className="text-base">{maxInvestmentAmount}</p>
         </div>
-        <div className="py-4 flex justify-between items-center border-b-2 border-color5 ">
-          <h3 className="text-lg font-semibold ">Amount Raised</h3>
-          <p className="text-base ">{amountRaised}</p>
+        <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
+          <h3 className="text-lg font-semibold">Amount Raised</h3>
+          <p className="text-base">{amountRaised}</p>
         </div>
-        <div className="py-4 flex justify-between items-center  ">
-          <h3 className="text-lg font-semibold ">Offering Percent (of Total Tokens)</h3>
-          <p className="text-base ">{offeringPercentage}</p>
+        <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
+          <h3 className="text-lg font-semibold">Offering Percent (of Total Tokens)</h3>
+          <p className="text-base">{offeringPercentage}</p>
         </div>
       </div>
     </div>

@@ -31,18 +31,18 @@ const Financials: React.FC<FinancialsProps> = ({ financials }) => {
       {/* Contenu principal */}
       <div className=" p-6 space-y-6">
         {/* Revenus bruts Annuel et Mensuel */}
-        <div className="flex justify-between font-semibold text-xl border-b-2 border-color5 pb-2">
+        <div className="flex flex-col md:flex-row justify-between font-semibold text-xl border-b-2 border-color5 pb-2">
           <span className="">Gross Income / year</span>
           <span>{grossIncomeYear?.toLocaleString() || "12,840.00"}</span>
         </div>
-        <div className="flex justify-between font-semibold text-xl border-b-2 border-color5 pb-2">
+        <div className="flex flex-col md:flex-row justify-between font-semibold text-xl border-b-2 border-color5 pb-2">
           <span className="">Gross Income / month</span>
           <span>{grossIncomeMonth?.toLocaleString() || "1,070.00"}</span>
         </div>
 
         {/* Coûts Mensuels + Diagramme */}
         <div>
-          <div className="flex justify-between  mb-2 font-semibold text-xl">
+          <div className="flex flex-col md:flex-row justify-between  mb-2 font-semibold text-xl">
             <span className="">
               Monthly Costs <sup>©</sup>
             </span>
@@ -52,7 +52,7 @@ const Financials: React.FC<FinancialsProps> = ({ financials }) => {
           {/* Petit container pour le diagramme et la légende */}
           <div className="border-2 border-color5 rounded-md p-4 flex flex-col md:flex-row items-center md:items-start md:space-x-4 ">
             {/* Diagramme */}
-            <div className="mx-auto md:mx-0">
+            <div>
               <PieChart width={300} height={200}>
                 <Tooltip />
                 <Pie data={chartData} dataKey="value" cx="50%" cy="50%" outerRadius={80} labelLine={false}>
@@ -79,7 +79,7 @@ const Financials: React.FC<FinancialsProps> = ({ financials }) => {
         </div>
 
         {/* Revenu Net mensuel */}
-        <div className="flex justify-between font-semibold text-xl">
+        <div className="flex flex-col md:flex-row justify-between font-semibold text-xl">
           <span>Net Income / month</span>
           <span>{netIncomeMonth?.toLocaleString() || "568.00"}</span>
         </div>
@@ -89,12 +89,12 @@ const Financials: React.FC<FinancialsProps> = ({ financials }) => {
         {/* Section finale : Net Income / year, Total Investment, Expected Income */}
         <div className="flex flex-col space-y-6  ">
           {/* Net Income / year */}
-          <div className="text-center text-xl flex justify-between">
+          <div className="flex flex-col md:flex-row text-xl justify-between">
             <span className="text-color2 font-bold">Net Income / year</span>
             <p className="text-color2 font-semibold">{netIncomeYear?.toLocaleString() || "6,816.00"}</p>
           </div>
           {/* Total Investment */}
-          <div className="text-center text-xl flex justify-between">
+          <div className="flex flex-col md:flex-row text-xl justify-between">
             <span className="text-color2 font-bold">Total Investment</span>
             <p className="text-color2 font-semibold">{totalInvestment?.toLocaleString() || "75,705.00"}</p>
           </div>

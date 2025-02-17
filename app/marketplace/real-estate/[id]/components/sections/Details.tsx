@@ -17,65 +17,65 @@ const Details: React.FC<DetailsProps> = ({ details }) => {
 
       {/* Contenu en fond clair */}
       <div className="bg-color1 p-6">
-        {/* On sépare en deux colonnes, avec une bordure verticale au milieu */}
-        <div className="grid grid-cols-2 gap-6">
+        {/* Mise en page en deux colonnes sur md et plus */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Colonne de gauche */}
-          <div className="border-r-2 border-color4 pr-6">
-            {/* Exemple : Token Type */}
-            <div className="py-4 flex justify-between items-center border-b-2 border-color5">
+          <div className="md:border-r-2 md:border-color4 md:pr-6">
+            {/* Lot Size */}
+            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Lot Size (sqft)</h3>
-              <p className="text-lg ">{lotSize}</p>
+              <p className="text-lg">{lotSize}</p>
             </div>
 
-            {/* Exemple : Expected Income */}
-            {/* Si tu as un champ `expectedIncome`, par ex. */}
-            <div className="py-4 flex justify-between border-b-2 border-color5">
-              <h3 className="text-lg font-semibold  ">Foundation</h3>
-              <p className="text-lg  ">{foundation}</p>
+            {/* Foundation */}
+            <div className="py-4 flex flex-col md:flex-row md:justify-between border-b-2 border-color5">
+              <h3 className="text-lg font-semibold">Foundation</h3>
+              <p className="text-lg">{foundation}</p>
             </div>
 
-            {/* Income Start Date, Income per Token, Token Price, etc. */}
-            <div className="py-4 flex justify-between items-center border-b-2 border-color5">
-              <h3 className="text-lg font-semibold ">Exterior Walls</h3>
-              <p className="text-base ">{exteriors}</p>
+            {/* Exterior Walls */}
+            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
+              <h3 className="text-lg font-semibold">Exterior Walls</h3>
+              <p className="text-base">{exteriors}</p>
             </div>
 
-            <div className="py-4 flex justify-between items-center ">
-              <h3 className="text-lg font-semibold ">Roof Type</h3>
-              <p className="text-base ">{roof}</p>
+            {/* Roof Type */}
+            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
+              <h3 className="text-lg font-semibold">Roof Type</h3>
+              <p className="text-base">{roof}</p>
             </div>
           </div>
 
           {/* Colonne de droite */}
-          <div className="pl-6">
-            {/* Property Type */}
-            <div className="py-4 flex justify-between items-center  border-b-2 border-color5">
-              <h3 className="text-lg font-semibold ">Interior Size</h3>
-              <p className="text-lg ">{interiorSize}</p>
+          <div className="md:pl-6">
+            {/* Interior Size */}
+            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
+              <h3 className="text-lg font-semibold">Interior Size</h3>
+              <p className="text-lg">{interiorSize}</p>
             </div>
 
-            {/* Full Address */}
-            <div className="py-4 flex justify-between border-b-2 border-color5">
-              <h3 className="text-lg font-semibold ">Heating</h3>
-              <p className="text-base ">{heating}</p>
+            {/* Heating */}
+            <div className="py-4 flex flex-col md:flex-row md:justify-between border-b-2 border-color5">
+              <h3 className="text-lg font-semibold">Heating</h3>
+              <p className="text-base">{heating}</p>
             </div>
 
-            {/* Country (si tu as un champ country) */}
-            <div className="py-4 flex justify-between items-center border-b-2 border-color5">
-              <h3 className="text-lg font-semibold ">Building Class</h3>
+            {/* Building Class */}
+            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
+              <h3 className="text-lg font-semibold">Building Class</h3>
               <p className="text-base">{buildingClass}</p>
             </div>
 
-            {/* Source */}
-            <div className="py-4 flex justify-between items-center border-b-2 border-color5">
-              <h3 className="text-lg ont-semibold ">Renovated</h3>
-              <p className="text-base ">{renovated}</p>
+            {/* Renovated */}
+            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
+              <h3 className="text-lg font-semibold">Renovated</h3>
+              <p className="text-base">{renovated}</p>
             </div>
 
-            {/* Neighborhood */}
-            <div className="py-4 flex justify-between items-center">
-              <h3 className="text-lg font-semibold ">Property Manager</h3>
-              <p className="text-base ">{propertyManager}</p>
+            {/* Property Manager */}
+            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
+              <h3 className="text-lg font-semibold">Property Manager</h3>
+              <p className="text-base">{propertyManager}</p>
             </div>
           </div>
         </div>
