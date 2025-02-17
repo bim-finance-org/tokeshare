@@ -1,11 +1,6 @@
 import React from "react";
-import { House } from "@/app/types";
 
-interface HouseAboutProps {
-  house: House;
-}
-
-const HouseAbout: React.FC<HouseAboutProps> = ({ house }) => {
+const HouseAbout: React.FC = () => {
   return (
     <div className="px-4 sm:px-8 lg:px-16 py-6 w-4/5 mx-auto flex flex-col items-center sm:items-start text-color4">
       {/* Titre */}

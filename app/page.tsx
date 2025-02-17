@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import Footer from "./components/Footer";
 import PopularCards from "./components/PopularCards";
 import ArrowLineIcon from "./components/icons/ArrowLineIcon";
 import Link from "next/link";

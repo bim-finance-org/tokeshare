@@ -1,12 +1,7 @@
 import React from "react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
-import { House } from "@/app/types";
 
-interface HouseMapProps {
-  house: House;
-}
-
-const HouseMap: React.FC<HouseMapProps> = ({ house }) => {
+const HouseMap: React.FC = () => {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   const lat = 42.394;

@@ -22,8 +22,8 @@ const HouseDetailPage = () => {
     <div>
       <Head house={house} />
       <Info house={house} />
-      <About house={house} />
-      <Map house={house} />
+      <About />
+      <Map />
     </div>
   );
 };
