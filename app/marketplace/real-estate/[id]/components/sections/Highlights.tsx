@@ -12,7 +12,7 @@ const Highlights: React.FC<HighlightsProps> = ({ highlights, general }) => {
   const { expectedIncome, dateIncome } = general;
 
   return (
-    <div className="w-4/5 mx-auto rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
+    <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
       {/* Header sombre */}
       <div className="bg-color4 text-white p-4 pl-6">
         <h2 className="text-lg font-semibold">PROPERTY HIGHLIGHTS</h2>

@@ -11,22 +11,30 @@ interface HouseInfoProps {
 }
 
 const HouseInfo: React.FC<HouseInfoProps> = ({ house }) => {
-  const { highlights, financials, details, offering } = house;
+  const { highlights, financials, details, offering, general } = house;
 
+  // Liste des onglets
   const TABS = ["HIGHLIGHTS", "FINANCIALS", "DETAILS", "BLOCKCHAIN", "OFFERING"];
-
+  // Onglet actif
   const [activeTab, setActiveTab] = useState("HIGHLIGHTS");
 
   return (
-    <section className="bg-color1 px-4 sm:px-8 lg:px-16 py-6">
-      {/* Onglets */}
-      <div className="flex space-x-4 mb-4">
+    <section className="px-4 sm:px-8 lg:px-16 py-6 w-4/5 mx-auto flex flex-col items-center sm:items-start ">
+      {/* Barre d’onglets */}
+      <div className="flex space-x-4 mb-6 justify-center">
         {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-3 py-1 rounded-full 
-              ${activeTab === tab ? "bg-color2 text-white" : "bg-gray-200 text-black"}
+            className={`relative px-12 py-2 rounded-full text-xl font-medium transition-colors shadow-md
+              ${
+                activeTab === tab
+                  ? // Styles de l’onglet actif
+                    // Flèche : pseudo-élément after
+                    "bg-gray-900 text-white " + "after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 " + "after:border-l-8 after:border-l-transparent after:border-r-8 after:border-r-transparent " + "after:border-t-8 after:border-t-gray-900"
+                  : // Styles de l’onglet inactif
+                    "bg-gray-200 text-gray-800 hover:bg-gray-300"
+              }
             `}
           >
             {tab}
@@ -34,7 +42,8 @@ const HouseInfo: React.FC<HouseInfoProps> = ({ house }) => {
         ))}
       </div>
 
-      {activeTab === "HIGHLIGHTS" && <HouseHighlights highlights={highlights} />}
+      {/* Contenu conditionnel suivant l’onglet actif */}
+      {activeTab === "HIGHLIGHTS" && <HouseHighlights highlights={highlights} general={general} />}
       {activeTab === "FINANCIALS" && <HouseFinancials financials={financials} />}
       {activeTab === "DETAILS" && <HouseDetails details={details} />}
       {activeTab === "BLOCKCHAIN" && <HouseBlockchain />}
