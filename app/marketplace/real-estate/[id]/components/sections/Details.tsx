@@ -26,16 +26,15 @@ const Details: React.FC<DetailsProps> = ({ details }) => {
               <h3 className="text-lg font-semibold">Lot Size (sqft)</h3>
               <p className="text-lg">{lotSize}</p>
             </div>
-          </div>
-
-          {/* Colonne de droite */}
-          <div className="md:pl-6">
             {/* Interior Size */}
             <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Interior Size</h3>
               <p className="text-lg">{interiorSize}</p>
             </div>
+          </div>
 
+          {/* Colonne de droite */}
+          <div className="md:pl-6">
             {/* Heating */}
             <div className="py-4 flex flex-col md:flex-row md:justify-between border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Air conditioning</h3>

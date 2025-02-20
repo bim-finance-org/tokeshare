@@ -38,9 +38,9 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
       <div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center ">
         <h1 className="w-2/3 md:w-1/2 text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-color4 mb-4">{name}</h1>
         <div className="flex space-x-3">
-          <button className="text-xs sm:text-sm md:text-base lg:text-lg px-3 py-1 border rounded text-color4 border-color4 hover:bg-color4 hover:text-white transition">View Smart Contracts</button>
-          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-blue-500 text-white px-3 py-1 rounded">POL</button>
-          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-color4 text-white px-3 py-1 rounded">BASE</button>
+          <button className="text-xs sm:text-sm md:text-base lg:text-lg px-3 py-1 border rounded text-color4 border-color4 ">View Smart Contracts</button>
+          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-blue-500 text-white px-3 py-1 rounded transform hover:scale-105 transition">POL</button>
+          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-color4 text-white px-3 py-1 rounded transform hover:scale-105 transition">BASE</button>
         </div>
       </div>
 
