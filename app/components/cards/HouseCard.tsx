@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -20,28 +20,6 @@ const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
   const { name, images, number, surface, city, price, tokenPrice, expectedIncome, dateIncome, tokenIncome } = general;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [isCompact, setIsCompact] = useState(false);
-
-  useEffect(() => {
-    const observer = new ResizeObserver((entries) => {
-      if (entries.length > 0) {
-        const width = entries[0].contentRect.width;
-        setIsCompact(width < 500);
-      }
-    });
-
-    const containerElement = containerRef.current;
-
-    if (containerElement) {
-      observer.observe(containerElement);
-    }
-
-    return () => {
-      if (containerElement) {
-        observer.unobserve(containerElement);
-      }
-    };
-  }, []);
 
   return (
     <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-3xl">
