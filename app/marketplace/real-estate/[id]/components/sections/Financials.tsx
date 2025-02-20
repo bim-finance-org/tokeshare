@@ -11,8 +11,8 @@ const Financials: React.FC<FinancialsProps> = ({ financials }) => {
 
   // Exemple de données pour le diagramme (à adapter selon tes coûts réels)
   const chartData = [
-    { name: "Property Management (8.00%)", value: 90 },
-    { name: "RealT Platform (2.00%)", value: 21.4 },
+    { name: "Property Management (10.00%)", value: 90 },
+    { name: "Tokeshare Platform (2.00%)", value: 21.4 },
     { name: "Maintenance Expenses", value: 185 },
     { name: "Property Taxes", value: 120 },
     { name: "Insurance", value: 85.6 },

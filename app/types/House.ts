@@ -4,7 +4,7 @@ export interface HouseGeneralInfo {
   surface: string;
   price: string;
   city: string;
-  image: string;
+  images: string[];
   tokenPrice: string;
   expectedIncome: string;
   dateIncome: string;
@@ -16,8 +16,8 @@ export interface HouseHighlights {
   totalTokens: string;
   propertyType: string;
   fullAddress: string;
+  country: string;
   source: string;
-  neighborhood: string;
   constructionYear: string;
   bathrooms: string;
   rentalType: string;
@@ -36,12 +36,8 @@ export interface HouseFinancials {
 
 export interface HouseDetails {
   lotSize: string;
-  foundation: string;
-  exteriors: string;
-  roof: string;
   interiorSize: string;
-  heating: string;
-  buildingClass: string;
+  air: string;
   renovated: string;
   propertyManager: string;
 }

@@ -6,7 +6,7 @@ interface DetailsProps {
 }
 
 const Details: React.FC<DetailsProps> = ({ details }) => {
-  const { lotSize, foundation, exteriors, roof, interiorSize, heating, buildingClass, renovated, propertyManager } = details;
+  const { lotSize, interiorSize, air, renovated, propertyManager } = details;
 
   return (
     <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
@@ -26,24 +26,6 @@ const Details: React.FC<DetailsProps> = ({ details }) => {
               <h3 className="text-lg font-semibold">Lot Size (sqft)</h3>
               <p className="text-lg">{lotSize}</p>
             </div>
-
-            {/* Foundation */}
-            <div className="py-4 flex flex-col md:flex-row md:justify-between border-b-2 border-color5">
-              <h3 className="text-lg font-semibold">Foundation</h3>
-              <p className="text-lg">{foundation}</p>
-            </div>
-
-            {/* Exterior Walls */}
-            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
-              <h3 className="text-lg font-semibold">Exterior Walls</h3>
-              <p className="text-base">{exteriors}</p>
-            </div>
-
-            {/* Roof Type */}
-            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
-              <h3 className="text-lg font-semibold">Roof Type</h3>
-              <p className="text-base">{roof}</p>
-            </div>
           </div>
 
           {/* Colonne de droite */}
@@ -56,14 +38,8 @@ const Details: React.FC<DetailsProps> = ({ details }) => {
 
             {/* Heating */}
             <div className="py-4 flex flex-col md:flex-row md:justify-between border-b-2 border-color5">
-              <h3 className="text-lg font-semibold">Heating</h3>
-              <p className="text-base">{heating}</p>
-            </div>
-
-            {/* Building Class */}
-            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
-              <h3 className="text-lg font-semibold">Building Class</h3>
-              <p className="text-base">{buildingClass}</p>
+              <h3 className="text-lg font-semibold">Air conditioning</h3>
+              <p className="text-base">{air}</p>
             </div>
 
             {/* Renovated */}
