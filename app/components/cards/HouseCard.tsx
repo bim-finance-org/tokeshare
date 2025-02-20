@@ -79,12 +79,19 @@ const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
           </div>
         </div>
         <div className="flex justify-center">
-          <Link href={`/marketplace/real-estate/${id}`}>
-            <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
-              <h5 className="text-color1 hover:text-white">Learn More</h5>
+          {id === "1" ? (
+            <Link href={`/marketplace/real-estate/${id}`}>
+              <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
+                <h5 className="text-color1 hover:text-white">Learn More</h5>
+                <ArrowIcon size={24} />
+              </button>
+            </Link>
+          ) : (
+            <button className="flex items-center justify-between bg-gray-400 rounded-3xl px-4 py-1 mt-4 w-64 cursor-not-allowed">
+              <h5 className="text-gray-600">Learn More</h5>
               <ArrowIcon size={24} />
             </button>
-          </Link>
+          )}
         </div>
       </div>
     </div>
