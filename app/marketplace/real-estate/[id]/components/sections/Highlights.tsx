@@ -54,7 +54,7 @@ const Highlights: React.FC<HighlightsProps> = ({ highlights, general }) => {
               <h3 className="text-lg font-semibold">
                 Income per Token <sup>©</sup>
               </h3>
-              <p className="text-base"></p>
+              <p className="text-base">...</p>
             </div>
 
             {/* Token Price */}
@@ -79,7 +79,7 @@ const Highlights: React.FC<HighlightsProps> = ({ highlights, general }) => {
             </div>
 
             {/* Full Address */}
-            <div className="py-4 flex flex-col border-b-2 border-color5">
+            <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Full Address</h3>
               <p className="text-base">{fullAddress}</p>
             </div>
