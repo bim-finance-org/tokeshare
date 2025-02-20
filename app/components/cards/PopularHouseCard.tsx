@@ -14,7 +14,7 @@ interface PopularHouseCardProps {
 
 const PopularHouseCard: React.FC<PopularHouseCardProps> = ({ house }) => {
   const { general } = house;
-  const { name, number, surface, price, city, image } = general;
+  const { name, number, surface, price, city, images } = general;
 
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
@@ -40,7 +40,7 @@ const PopularHouseCard: React.FC<PopularHouseCardProps> = ({ house }) => {
       className="bg-color5 text-color4 text-base sm:text-lg shadow-lg rounded-xl overflow-hidden flex flex-col min-w-0 
                     max-w-[90%] sm:max-w-full mx-auto"
     >
-      <Image src={image} alt="House" width={800} height={800} className="object-cover w-hull h-64" />
+      <Image src={images[0]} alt="House" width={800} height={800} className="object-cover w-hull h-64" />
       <div className="p-3 sm:p-4 flex flex-col flex-grow">
         <div>
           <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>

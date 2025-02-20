@@ -17,7 +17,7 @@ interface HomeCardProps {
 const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
   const { id, general } = house;
 
-  const { name, image, number, surface, city, price, tokenPrice, expectedIncome, dateIncome, tokenIncome } = general;
+  const { name, images, number, surface, city, price, tokenPrice, expectedIncome, dateIncome, tokenIncome } = general;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isCompact, setIsCompact] = useState(false);
@@ -46,27 +46,27 @@ const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
   return (
     <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-3xl">
       <div className="image-container">
-        <Image src={image} alt={`Image of ${name}`} width={800} height={800} className="object-cover h-72 rounded-t-3xl" />
+        <Image src={images[0]} alt={`Image of ${name}`} width={800} height={800} className="object-cover h-72 rounded-t-3xl" />
       </div>
       <div className="px-8 py-4">
         <div className="flex items-center w-full">
           <div className="border-t-2 border-color4 w-8 mr-2 ml-1"></div>
-          <h1 className="text-color4 text-2xl">{name}</h1>
+          <h1 className="text-color4 text-xl">{name}</h1>
         </div>
-        <div className={`text-color4 text-lg flex items-center ${isCompact ? "flex-col space-y-2 items-start" : "space-x-4"} mt-2`}>
-          <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
+        <div className="text-color4 text-lg flex flex-wrap items-center space-x-4 mt-2">
+          <p className="flex items-center">
             <span className="mr-1">
               <BedIcon size={36} />
             </span>
             {number}
           </p>
-          <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
+          <p className="flex items-center">
             <span className="mr-1">
               <SurfaceIcon />
             </span>
             {surface} m²
           </p>
-          <p className={`flex items-center ${isCompact ? "w-full" : ""} `}>
+          <p className="flex items-center">
             <span className="mr-1">
               <LocationIcon />
             </span>

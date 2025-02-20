@@ -7,9 +7,9 @@ interface HighlightsProps {
 }
 
 const Highlights: React.FC<HighlightsProps> = ({ highlights, general }) => {
-  const { tokenType, totalTokens, propertyType, fullAddress, source, neighborhood, constructionYear, bathrooms, rentalType, rented } = highlights;
+  const { tokenType, totalTokens, propertyType, fullAddress, source, country, constructionYear, bathrooms, rentalType, rented } = highlights;
 
-  const { expectedIncome, dateIncome } = general;
+  const { tokenPrice, expectedIncome, dateIncome } = general;
 
   return (
     <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
@@ -60,7 +60,7 @@ const Highlights: React.FC<HighlightsProps> = ({ highlights, general }) => {
             {/* Token Price */}
             <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Token Price</h3>
-              <p className="text-base">$50.47</p>
+              <p className="text-base">{tokenPrice}</p>
             </div>
 
             {/* Total Tokens */}
@@ -87,7 +87,7 @@ const Highlights: React.FC<HighlightsProps> = ({ highlights, general }) => {
             {/* Country */}
             <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Country</h3>
-              <p className="text-base">USA</p>
+              <p className="text-base">{country}</p>
             </div>
 
             {/* Source */}
@@ -97,10 +97,10 @@ const Highlights: React.FC<HighlightsProps> = ({ highlights, general }) => {
             </div>
 
             {/* Neighborhood */}
-            <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
+            {/* <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Neighborhood</h3>
               <p className="text-base">{neighborhood}</p>
-            </div>
+            </div> */}
 
             {/* Construction Year */}
             <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
