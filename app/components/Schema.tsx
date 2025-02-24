@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import ArrowLineIcon from "./icons/ArrowLineIcon";
+import ArrowLineIcon from "./icons/arrows/ArrowLineIcon";
 
 const steps = [
   { src: "/images/schema/step-1.png", label: "TENANT" },

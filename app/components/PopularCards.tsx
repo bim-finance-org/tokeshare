@@ -2,7 +2,7 @@ import React from "react";
 import PolularHouseCard from "./cards/PopularHouseCard";
 import housesData from "../data/housesData.json";
 import quadsData from "../data/quadsData.json";
-import ArrowLongLineIcon from "./icons/ArrowLongLineIcon";
+import ArrowLongLineIcon from "./icons/arrows/ArrowLongLineIcon";
 import PopularQuadCard from "./cards/PopularQuadCard";
 import commoditiesData from "../data/commoditiesData.json";
 import PopularCommoditiesCard from "./cards/PopularCommoditiesCard";

@@ -7,7 +7,7 @@ import Link from "next/link";
 import BedIcon from "../icons/BedIcon";
 import SurfaceIcon from "../icons/SurfaceIcon";
 import LocationIcon from "../icons/LocationIcon";
-import ArrowIcon from "../icons/ArrowIcon";
+import ArrowIcon from "../icons/arrows/ArrowIcon";
 import { House } from "@/app/types";
 
 interface HomeCardProps {

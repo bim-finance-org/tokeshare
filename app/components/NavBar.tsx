@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import MobileMenu from "./MobileMenu";
-import ArrowDownIcon from "./icons/ArrowDownIcon";
+import ArrowDownIcon from "./icons/arrows/ArrowDownIcon";
 import CrossIcon from "./icons/CrossIcon";
 import Head from "next/head";
 

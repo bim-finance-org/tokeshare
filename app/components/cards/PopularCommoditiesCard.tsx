@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import ArrowIcon from "../icons/ArrowIcon";
+import ArrowIcon from "../icons/arrows/ArrowIcon";
 import Image from "next/image";
 import { Commodity } from "@/app/types";
 

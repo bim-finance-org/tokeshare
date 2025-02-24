@@ -8,7 +8,7 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import ArrowIcon from "@/app/components/icons/ArrowIcon";
+import ArrowIcon from "@/app/components/icons/arrows/ArrowIcon";
 
 interface HouseHeadProps {
   house: House;

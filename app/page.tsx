@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import PopularCards from "./components/PopularCards";
-import ArrowLineIcon from "./components/icons/ArrowLineIcon";
+import ArrowLineIcon from "./components/icons/arrows/ArrowLineIcon";
 import Link from "next/link";
 import Image from "next/image";
 import { Input } from "../components/ui/input";

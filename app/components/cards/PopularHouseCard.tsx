@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import LocationIcon from "../icons/LocationIcon";
 import SurfaceIcon from "../icons/SurfaceIcon";
 import BedIcon from "../icons/BedIcon";
-import ArrowIcon from "../icons/ArrowIcon";
+import ArrowIcon from "../icons/arrows/ArrowIcon";
 import Image from "next/image";
 import { House } from "@/app/types";
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import LocationIcon from "../icons/LocationIcon";
-import ArrowIcon from "../icons/ArrowIcon";
+import ArrowIcon from "../icons/arrows/ArrowIcon";
 import QuadIcon from "../icons/QuadIcon";
 import Image from "next/image";
 import { Quad } from "@/app/types";

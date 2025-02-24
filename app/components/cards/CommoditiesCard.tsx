@@ -1,7 +1,8 @@
 import React from "react";
-import ArrowIcon from "../icons/ArrowIcon";
+import ArrowIcon from "../icons/arrows/ArrowIcon";
 import Image from "next/image";
 import { Commodity } from "@/app/types";
+import Link from "next/link";
 
 interface CommoditiesCardProps {
   commodity: Commodity;
@@ -35,14 +36,14 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
           </div>
         </div>
         <div className="flex justify-center mt-4 w-full">
-          {/* <Link href={link} target="_blank" rel="noopener noreferrer"> */}
+          <Link href={`/marketplace/commodities/${name}`}  rel="noopener noreferrer">
           <button className=" bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition ">
             <div className="flex w-full justify-between items-center px-8">
               <h6 className="whitespace-nowrap pr-10">Available Soon</h6>
               <ArrowIcon size={24} />
             </div>
           </button>
-          {/* </Link> */}
+          </Link>
         </div>
       </div>
     </div>
