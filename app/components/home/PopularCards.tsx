@@ -1,11 +1,14 @@
 import React from "react";
-import PolularHouseCard from "./cards/PopularHouseCard";
-import housesData from "../data/housesData.json";
-import quadsData from "../data/quadsData.json";
-import ArrowLongLineIcon from "./icons/arrows/ArrowLongLineIcon";
-import PopularQuadCard from "./cards/PopularQuadCard";
-import commoditiesData from "../data/commoditiesData.json";
-import PopularCommoditiesCard from "./cards/PopularCommoditiesCard";
+
+import ArrowLongLineIcon from "../icons/arrows/ArrowLongLineIcon";
+
+import PolularHouseCard from "./PopularHouseCard";
+import PopularQuadCard from "./PopularQuadCard";
+import PopularCommoditiesCard from "./PopularCommoditiesCard";
+
+import housesData from "../../data/housesData.json";
+import quadsData from "../../data/quadsData.json";
+import commoditiesData from "../../data/commoditiesData.json";
 
 const PopularHouses: React.FC = () => {
   return (

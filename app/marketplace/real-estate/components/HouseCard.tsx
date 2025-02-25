@@ -4,10 +4,10 @@ import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import BedIcon from "../icons/card/BedIcon";
-import SurfaceIcon from "../icons/card/SurfaceIcon";
-import LocationIcon from "../icons/card/LocationIcon";
-import ArrowIcon from "../icons/arrows/ArrowIcon";
+import BedIcon from "@/app/components/icons/card/BedIcon";
+import SurfaceIcon from "@/app/components/icons/card/SurfaceIcon";
+import LocationIcon from "@/app/components/icons/card/LocationIcon";
+import ArrowIcon from "@/app/components/icons/arrows/ArrowIcon";
 import { House } from "@/app/types";
 
 interface HomeCardProps {

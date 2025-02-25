@@ -9,7 +9,7 @@ interface CADIconProps {
 const CADIcon = ({ size = 24, className = '' }: CADIconProps) => {
   return (
     <Image
-      src="/icons/currency/cad.png"
+      src="/images/currencies/cad.png"
       alt="CAD"
       width={size}
       height={size}

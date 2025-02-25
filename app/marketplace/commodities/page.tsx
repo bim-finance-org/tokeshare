@@ -1,5 +1,5 @@
 import React from "react";
-import CommoditiesCard from "@/app/components/cards/CommoditiesCard";
+import CommoditiesCard from "@/app/marketplace/commodities/components/CommoditiesCard";
 import commoditiesData from "@/app/data/commoditiesData.json";
 
 const Page = () => {
