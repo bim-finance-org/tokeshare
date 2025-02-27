@@ -84,7 +84,7 @@ const Buy = () => {
             />
             <button
               onClick={() => setShowCurrencyPicker(false)}
-              className="mt-4 px-3 py-2 bg-gray-200 rounded"
+              className="mt-4 px-3 py-2 bg-gray-200 rounded text-color4"
             >
               Fermer
             </button>

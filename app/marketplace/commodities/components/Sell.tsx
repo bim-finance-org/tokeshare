@@ -1,7 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import CurrencyInput from '../../../components/shared/CurrencyInput'
+import CurrencyPicker from '../../../components/shared/CurrencyPicker'
 
 const Sell = () => {
+  const [selectedCurrency, setSelectedCurrency] = useState('EUR')
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false)
+
   return (
     <div className="p-6 bg-white rounded-3xl shadow-sm w-full">
       <button className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-2">
@@ -23,7 +27,14 @@ const Sell = () => {
       <CurrencyInput
         label="YOU RECEIVE"
         value="9.2444"
-        currency="Euro"
+        currency="EUR"
+        onOpenCurrencyPicker={() => setShowCurrencyPicker(true)}
+      />
+
+<CurrencyPicker
+        isOpen={showCurrencyPicker}
+        onClose={() => setShowCurrencyPicker(false)}
+        onSelect={setSelectedCurrency}
       />
 
       <div className="mt-6">
