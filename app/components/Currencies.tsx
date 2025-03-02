@@ -24,10 +24,10 @@ const Currencies = ({ onSelect }: CurrenciesProps) => {
       <button 
         key={currency}
         onClick={() => onSelect(currency)}
-        className='flex items-center w-full px-4 py-2 hover:bg-gray-100 transition-colors'
+        className='flex items-center w-full p-2 hover:bg-gray-100 rounded-lg transition-colors border-b border-gray-200'
       >
         <div className='flex items-center gap-3'>
-          <Icon className='border-2 border-color2' />
+          <Icon />
           <span className='text-color4'>{currency}</span>
         </div>
       </button>
@@ -39,7 +39,7 @@ const Currencies = ({ onSelect }: CurrenciesProps) => {
   return (
     <div>
       <h1 className='text-2xl text-color2 font-bold border-b-2 border-color2 pb-2'>Select a Currency</h1>
-      <h2 className='text-lg text-color2 font-bold'>Available Currencies</h2>
+      <h2 className='text-lg text-color2 font-bold mt-4 mb-2'>Available Currencies</h2>
       <div className='flex flex-col gap-1 mt-4 min-w-[200px]'>
         {currencies.map(renderCurrencyButton)}
       </div>

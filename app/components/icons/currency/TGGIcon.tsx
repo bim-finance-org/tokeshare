@@ -1,10 +1,14 @@
 import React from 'react'
 import Image from 'next/image'
-const TGGIcon = () => {
+
+interface TGGIconProps {
+  size?: number
+  className?: string
+}
+
+const TGGIcon = ({ size = 20, className = '' }: TGGIconProps) => {
   return (
-    <div>
-        <Image src="/images/currencies/tgg.png" alt="TGG" width={20} height={20} />
-    </div>
+        <Image src="/images/currencies/tgg.png" alt="TGG" width={size} height={size} className={` ${className} rounded-full`} />
   )
 }
 

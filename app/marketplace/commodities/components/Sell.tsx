@@ -5,7 +5,7 @@ import Blockchains from '@/app/components/Blockchains'
 
 const Sell = () => {
   // Initialize with localStorage value or default
-  const [selectedCurrency, setSelectedCurrency] = useState(() => 
+  const [selectedCurrency, setSelectedCurrency] = useState(() =>
     localStorage.getItem('sellSelectedCurrency') || 'EUR'
   )
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false)
@@ -16,10 +16,10 @@ const Sell = () => {
   }, [selectedCurrency])
 
   return (
-    <div className="p-6 bg-white rounded-3xl shadow-sm w-full">
-      <button className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-2">
+    <div className="p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 w-full">
+      <button className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-3 shadow-md">
         <BankIcon />
-        Bank transfer
+        <span className="font-medium">Bank transfer</span>
       </button>
 
       <CurrencyInput
@@ -39,15 +39,19 @@ const Sell = () => {
         isSelectable={true}
       />
 
-      <Blockchains section="sell" />
+      <div className="mb-6 mt-4 space-y-2">
+        <Blockchains section="sell" />
+        <div className="space-y-1 ml-2">
+          <p className="text-color4 text-sm font-medium">Exchange rate: 1.13773446</p>
+          <p className="text-color4 text-sm font-medium">Delivery time: 0 - 2 Days</p>
+        </div>
+      </div>
 
       <div className="mt-6">
-        <button className="w-full bg-black text-white py-3 rounded-xl font-medium">
+        <button className="w-full bg-black text-white py-3 rounded-xl font-medium shadow-md hover:shadow-lg transform transition-all duration-200 hover:bg-opacity-80 hover:scale-[1.02] active:scale-[0.98]">
           Sell
         </button>
       </div>
-
-
     </div>
   )
 }

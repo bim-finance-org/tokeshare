@@ -3,6 +3,7 @@ import CurrencyInput from '@/app/components/shared/CurrencyInput'
 import BuyNext from './BuyNext'
 import BankIcon from '@/app/components/icons/BankIcon'
 import Blockchains from '@/app/components/Blockchains'
+
 const Buy = () => {
   // Initialize with localStorage value or default
   const [selectedCurrency, setSelectedCurrency] = useState(() => 
@@ -39,11 +40,11 @@ const Buy = () => {
   }
 
   return (
-    <div className="p-6 w-full relative">
+    <div className="p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 w-full relative">
       {/* Bouton Bank transfer (exemple) */}
-      <button className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-2 shadow-sm">
+      <button className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-3 shadow-md ">
         <BankIcon />  
-        Bank transfer
+        <span className="font-medium">Bank transfer</span>
       </button>
 
       {/* Champ de saisie pour le montant envoyé dans la devise sélectionnée */}
@@ -65,12 +66,18 @@ const Buy = () => {
         isSelectable={false}
       />
 
-      <Blockchains section="buy" />
+      <div className="mb-6 mt-4 space-y-2">
+        <Blockchains section="buy" />
+        <div className="space-y-1 ml-2">
+          <p className="text-color4 text-sm font-medium">Exchange rate: 1.13773446</p>
+          <p className="text-color4 text-sm font-medium">Delivery time: 0 - 2 Days</p>
+        </div>
+      </div>
 
       <div className="mt-6">
         <button 
           onClick={() => setShowBuyNext(true)}
-          className="w-full bg-black text-white py-3 rounded-xl font-medium shadow-sm"
+          className="w-full bg-black text-white py-3 rounded-xl font-medium shadow-md hover:shadow-lg transform transition-all duration-200 hover:bg-opacity-80 hover:scale-[1.02] active:scale-[0.98]"
         >
           Buy
         </button>

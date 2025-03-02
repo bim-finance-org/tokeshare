@@ -28,37 +28,45 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
 
   return (
     <div className="relative">
-      {/* Dropdown Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 bg-gray-100 p-3 rounded-xl shadow-sm hover:bg-gray-200 transition-colors"
+        className="flex items-center gap-3  px-3 py-2 bg-gray-100 rounded-xl shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-200"
       >
-        {selectedChain === 'Polygon' ? <PolygonIcon /> : <BaseIcon />}
+        <div className="w-6 h-6 flex items-center justify-center">
+          {selectedChain === 'Polygon' ? (
+            <PolygonIcon />
+          ) : (
+            <BaseIcon  />
+          )}
+        </div>
         <span className="text-color4 font-medium">{selectedChain}</span>
-        <ArrowDownIcon className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ArrowDownIcon className={`w-4 h-4 text-color4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-200 py-2">
+        <div className="absolute z-50 top-full left-0 mt-2  bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden transform transition-all duration-200">
           <button 
             onClick={() => handleSelect('Polygon')}
-            className={`flex items-center gap-2 w-full px-4 py-2 hover:bg-gray-100 transition-colors ${
+            className={`flex items-center gap-3 w-full px-3 pr-4 py-2 hover:bg-gray-50 transition-colors duration-200 ${
               selectedChain === 'Polygon' ? 'bg-gray-100' : ''
             }`}
           >
-            <PolygonIcon />
-            <span className="text-color4">Polygon</span>
+            <div className="w-6 h-6 flex items-center justify-center">
+              <PolygonIcon  />
+            </div>
+            <span className="text-color4 font-medium">Polygon</span>
           </button>
           
           <button 
             onClick={() => handleSelect('Base')}
-            className={`flex items-center gap-2 w-full px-4 py-2 hover:bg-gray-100 transition-colors ${
+            className={`flex items-center gap-3 w-full px-3 py-2 hover:bg-gray-50 transition-colors duration-200 ${
               selectedChain === 'Base' ? 'bg-gray-100' : ''
             }`}
           >
-            <BaseIcon />
-            <span className="text-color4">Base</span>
+            <div className="w-6 h-6 flex items-center justify-center">
+              <BaseIcon />
+            </div>
+            <span className="text-color4 font-medium">Base</span>
           </button>
         </div>
       )}

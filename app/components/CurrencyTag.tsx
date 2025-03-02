@@ -14,7 +14,7 @@ import CRVIcon from './icons/currency/CRVIcon'
 
 const CurrencyTag = ({ currency, isOpenable}: { currency: string, isOpenable: boolean}) => {
   return (
-    <div className="flex w-28 items-center gap-2 border border-color4 rounded-lg p-2">
+    <div className="flex items-center gap-2 border border-color4 rounded-lg p-2">
         {currency === 'EUR' && <EURIcon />}
         {currency === 'TGG' && <TGGIcon />}
         {currency === 'CHF' && <CHFIcon />}

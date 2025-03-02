@@ -7,7 +7,7 @@ interface GBPIconProps {
 
 const GBPIcon = ({ size = 24, className = '' }: GBPIconProps) => {
   return (
-                <svg height={size} width={size} className={`rounded-full mr-2 ${className}`} xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 512 512" style={{background: 'new 0 0 512 512'}} xmlSpace="preserve">
+                <svg height={size} width={size} className={`rounded-full ${className}`} xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 512 512" style={{background: 'new 0 0 512 512'}} xmlSpace="preserve">
           <circle style={{fill:'#F0F0F0'}} cx="256" cy="256" r="256"/>
           <g>
             <path style={{fill:'#0052B4'}} d="M52.92,100.142c-20.109,26.163-35.272,56.318-44.101,89.077h133.178L52.92,100.142z"/>

@@ -35,7 +35,7 @@ const Swap = () => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-3xl shadow-sm w-full relative">
+    <div className="p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 w-full relative">
       <div className="flex flex-col gap-6 relative">
         {/* First Input */}
         <CurrencyInput
@@ -50,8 +50,11 @@ const Swap = () => {
         />
 
         {/* Swap Button Between Inputs */}
-        <div className="z-10 pt-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 ">
-          <button onClick={handleSwapCurrencies}>
+        <div className="z-10 pt-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <button 
+            onClick={handleSwapCurrencies}
+            className="hover:scale-110 active:scale-95 transition-transform duration-200"
+          >
             <Image src="/images/switch.png" alt="Swap" width={60} height={60} />
           </button>
         </div>
@@ -68,13 +71,14 @@ const Swap = () => {
         />
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 mt-4 space-y-2">
         <Blockchains section="swap" onSelect={handleBlockchainSelect} />
+        <p className="text-color4 text-sm font-medium ml-2">Delivery time: instant</p>
       </div>
 
       {/* Swap Button */}
       <div className="mt-6">
-        <button className="w-full bg-color4 text-white py-3 rounded-xl font-medium">
+        <button className="w-full bg-color4 text-white py-3 rounded-xl font-medium transform transition-all duration-200 hover:bg-opacity-90 hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg">
           Swap
         </button>
       </div>

@@ -28,24 +28,27 @@ const CurrencyInput = ({
 
   return (
     <div className="relative">
-      <div className="bg-gray-100 p-4 rounded-xl shadow-lg">
-        <p className="text-color4 text-lg mb-2">{label}</p>
-        <div className="flex justify-between items-center">
+      <div className="bg-gray-100 p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
+        <p className="text-color4 text-lg mb-3 font-medium">{label}</p>
+        <div className="flex justify-between items-center gap-4">
           <input
             type="text"
             value={value}
             onChange={(e) => onChangeValue?.(e.target.value)}
-            className="bg-transparent text-2xl text-color4 font-medium outline-none w-1/2"
+            className="bg-transparent text-2xl text-color4 font-medium outline-none w-1/2 focus:ring-2 focus:ring-color4 rounded-lg px-2 py-1 transition-all duration-200"
           />
-          <div onClick={() => isSelectable && setShowCurrencyPicker(true)}>
+          <div 
+            onClick={() => isSelectable && setShowCurrencyPicker(true)}
+            className={isSelectable ? 'cursor-pointer transform hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200' : ''}
+          >
             <CurrencyTag currency={currency} isOpenable={isSelectable}/>
           </div>
         </div>
       </div>
 
       {showCurrencyPicker && (
-        <div className="fixed inset-0 bg-white/80 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-xl shadow-md">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full mx-4 transform transition-all duration-200">
             {type === 'currency' ? (
               <Currencies
                 onSelect={(selectedCurrency) => {
@@ -64,7 +67,7 @@ const CurrencyInput = ({
             )}
             <button
               onClick={() => setShowCurrencyPicker(false)}
-              className="mt-4 px-3 py-2 bg-gray-200 rounded text-color4"
+              className="mt-4 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-color4 font-medium transition-colors duration-200"
             >
               Close
             </button>
