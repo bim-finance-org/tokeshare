@@ -9,7 +9,7 @@ interface EURAIconProps {
 const EURAIcon = ({ size = 24, className = '' }: EURAIconProps) => {
   return (
     <Image
-      src="/icons/currency/euraLogo.png"
+      src="/images/currencies/euraLogo.png"
       alt="EURA"
       width={size}
       height={size}

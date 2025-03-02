@@ -10,28 +10,39 @@ interface CurrenciesProps {
 }
 
 const Currencies = ({ onSelect }: CurrenciesProps) => {
+  const renderCurrencyButton = (currency: string) => {
+    const icons = {
+      EUR: EURIcon,
+      USD: USDIcon,
+      CHF: CHFIcon,
+      GBP: GBPIcon,
+      CAD: CADIcon,
+    }
+    const Icon = icons[currency as keyof typeof icons]
+
+    return (
+      <button 
+        key={currency}
+        onClick={() => onSelect(currency)}
+        className='flex items-center w-full px-4 py-2 hover:bg-gray-100 transition-colors'
+      >
+        <div className='flex items-center gap-3'>
+          <Icon className='border-2 border-color2' />
+          <span className='text-color4'>{currency}</span>
+        </div>
+      </button>
+    )
+  }
+
+  const currencies = ['EUR', 'USD', 'CHF', 'GBP', 'CAD']
+
   return (
     <div>
-        <h1 className='text-2xl text-color2 font-bold border-b-2 border-color2 pb-2'>Select a Currency</h1>
-        <h2 className='text-lg text-color2 font-bold'>Search for a currency</h2>
-        <h2 className='text-lg text-color2 font-bold'>Available Currencies</h2>
-        <div className='flex flex-wrap gap-2'>
-            <button onClick={() => onSelect('EUR')} className='cursor-pointer'>
-                <EURIcon className='border-2 border-color2' />
-            </button>
-            <button onClick={() => onSelect('USD')} className='cursor-pointer'>
-                <USDIcon className='border-2 border-color2' />
-            </button>
-            <button onClick={() => onSelect('CHF')} className='cursor-pointer'>
-                <CHFIcon className='border-2 border-color2' />
-            </button>
-            <button onClick={() => onSelect('GBP')} className='cursor-pointer'>
-                <GBPIcon className='border-2 border-color2' />
-            </button>
-            <button onClick={() => onSelect('CAD')} className='cursor-pointer'>
-                <CADIcon className='border-2 border-color2' />
-            </button>
-        </div>
+      <h1 className='text-2xl text-color2 font-bold border-b-2 border-color2 pb-2'>Select a Currency</h1>
+      <h2 className='text-lg text-color2 font-bold'>Available Currencies</h2>
+      <div className='flex flex-col gap-1 mt-4 min-w-[200px]'>
+        {currencies.map(renderCurrencyButton)}
+      </div>
     </div>
   )
 }

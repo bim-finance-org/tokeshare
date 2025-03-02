@@ -9,7 +9,7 @@ interface DAIIconProps {
 const DAIIcon = ({ size = 24, className = '' }: DAIIconProps) => {
   return (
     <Image
-      src="/icons/currency/daiLogo.png"
+      src="/images/currencies/daiLogo.png"
       alt="DAI"
       width={size}
       height={size}

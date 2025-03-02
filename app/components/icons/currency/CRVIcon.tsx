@@ -9,7 +9,7 @@ interface CRVIconProps {
 const CRVIcon = ({ size = 24, className = '' }: CRVIconProps) => {
   return (
     <Image
-      src="/icons/currency/crvusd.png"
+      src="/images/currencies/crvusd.png"
       alt="CRV"
       width={size}
       height={size}

@@ -9,7 +9,7 @@ interface USDTIconProps {
 const USDTIcon = ({ size = 24, className = '' }: USDTIconProps) => {
   return (
     <Image
-      src="/icons/currency/usdtLogo.png"
+      src="/images/currencies/usdtLogo.png"
       alt="USDT"
       width={size}
       height={size}

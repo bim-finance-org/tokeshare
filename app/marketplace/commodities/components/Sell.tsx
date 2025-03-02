@@ -1,17 +1,24 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import CurrencyInput from '../../../components/shared/CurrencyInput'
-import CurrencyPicker from '../../../components/shared/CurrencyPicker'
+import BankIcon from '@/app/components/icons/BankIcon'
+import Blockchains from '@/app/components/Blockchains'
 
 const Sell = () => {
-  const [selectedCurrency, setSelectedCurrency] = useState('EUR')
+  // Initialize with localStorage value or default
+  const [selectedCurrency, setSelectedCurrency] = useState(() => 
+    localStorage.getItem('sellSelectedCurrency') || 'EUR'
+  )
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false)
+
+  // Save currency to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('sellSelectedCurrency', selectedCurrency)
+  }, [selectedCurrency])
 
   return (
     <div className="p-6 bg-white rounded-3xl shadow-sm w-full">
       <button className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-2">
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6h18M3 12h18M3 18h18" />
-        </svg>
+        <BankIcon />
         Bank transfer
       </button>
 
@@ -27,21 +34,20 @@ const Sell = () => {
       <CurrencyInput
         label="YOU RECEIVE"
         value="9.2444"
-        currency="EUR"
-        onOpenCurrencyPicker={() => setShowCurrencyPicker(true)}
+        currency={selectedCurrency}
+        onCurrencySelect={setSelectedCurrency}
+        isSelectable={true}
       />
 
-<CurrencyPicker
-        isOpen={showCurrencyPicker}
-        onClose={() => setShowCurrencyPicker(false)}
-        onSelect={setSelectedCurrency}
-      />
+      <Blockchains section="sell" />
 
       <div className="mt-6">
         <button className="w-full bg-black text-white py-3 rounded-xl font-medium">
-          Next
+          Sell
         </button>
       </div>
+
+
     </div>
   )
 }

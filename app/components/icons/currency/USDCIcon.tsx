@@ -9,7 +9,7 @@ interface USDCIconProps {
 const USDCIcon = ({ size = 24, className = '' }: USDCIconProps) => {
   return (
     <Image
-      src="/icons/currency/usdcLogo.png"
+      src="/images/currencies/usdcLogo.png"
       alt="USDC"
       width={size}
       height={size}

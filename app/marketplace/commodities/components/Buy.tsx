@@ -1,14 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import CurrencyInput from '@/app/components/shared/CurrencyInput'
-import Currencies from '@/app/components/Currencies'
-
+import BuyNext from './BuyNext'
+import BankIcon from '@/app/components/icons/BankIcon'
+import Blockchains from '@/app/components/Blockchains'
 const Buy = () => {
-  // État pour la devise choisie
-  const [selectedCurrency, setSelectedCurrency] = useState('EUR')
-  // État pour la somme que l’utilisateur envoie
+  // Initialize with localStorage value or default
+  const [selectedCurrency, setSelectedCurrency] = useState(() => 
+    localStorage.getItem('buySelectedCurrency') || 'EUR'
+  )
+  // État pour la somme que l'utilisateur envoie
   const [amountToSend, setAmountToSend] = useState('10')
-  // État pour afficher ou non le sélecteur de devises
-  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false)
+  const [showBuyNext, setShowBuyNext] = useState(false)
+
+  // Save currency to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('buySelectedCurrency', selectedCurrency)
+  }, [selectedCurrency])
 
   // Exemple de taux de change simplifié (pour la démo seulement)
   // Dans la vraie vie, vous récupérerez ça via une API
@@ -27,23 +34,15 @@ const Buy = () => {
     return (numericValue * rate).toFixed(4)
   }
 
+  if (showBuyNext) {
+    return <BuyNext />
+  }
+
   return (
     <div className="p-6 w-full relative">
       {/* Bouton Bank transfer (exemple) */}
       <button className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-2 shadow-sm">
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 6h18M3 12h18M3 18h18"
-          />
-        </svg>
+        <BankIcon />  
         Bank transfer
       </button>
 
@@ -52,8 +51,8 @@ const Buy = () => {
         label="YOU SEND"
         value={amountToSend}
         currency={selectedCurrency}
-        onChangeValue={val => setAmountToSend(val)}
-        onOpenCurrencyPicker={() => setShowCurrencyPicker(true)}
+        onChangeValue={setAmountToSend}
+        onCurrencySelect={setSelectedCurrency}
       />
 
       <div className="my-4" />
@@ -66,31 +65,16 @@ const Buy = () => {
         isSelectable={false}
       />
 
+      <Blockchains section="buy" />
+
       <div className="mt-6">
-        <button className="w-full bg-black text-white py-3 rounded-xl font-medium shadow-sm">
-          Next
+        <button 
+          onClick={() => setShowBuyNext(true)}
+          className="w-full bg-black text-white py-3 rounded-xl font-medium shadow-sm"
+        >
+          Buy
         </button>
       </div>
-
-      {/* Affichage conditionnel du sélecteur de devises (au clic sur la zone devise) */}
-      {showCurrencyPicker && (
-        <div className="absolute top-0 left-0 right-0 bottom-0 bg-white/80 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-xl shadow-md">
-            <Currencies
-              onSelect={(currency) => {
-                setSelectedCurrency(currency)
-                setShowCurrencyPicker(false)
-              }}
-            />
-            <button
-              onClick={() => setShowCurrencyPicker(false)}
-              className="mt-4 px-3 py-2 bg-gray-200 rounded text-color4"
-            >
-              Fermer
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
