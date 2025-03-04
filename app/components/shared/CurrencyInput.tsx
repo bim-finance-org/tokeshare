@@ -10,6 +10,7 @@ interface CurrencyInputProps {
   isSelectable?: boolean
   type?: 'currency' | 'stablecoin'
   blockchain?: string
+  disabled?: boolean
   onChangeValue?: (val: string) => void
   onCurrencySelect?: (currency: string) => void
 }
@@ -21,6 +22,7 @@ const CurrencyInput = ({
   isSelectable = true,
   type = 'currency',
   blockchain = 'Polygon',
+  disabled = false,
   onChangeValue,
   onCurrencySelect,
 }: CurrencyInputProps) => {
@@ -28,20 +30,21 @@ const CurrencyInput = ({
 
   return (
     <div className="relative">
-      <div className="bg-gray-100 p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
+      <div className={`bg-gray-100 p-4 rounded-xl shadow-md transition-all duration-200 ${!disabled && 'hover:shadow-lg'}`}>
         <p className="text-color4 text-lg mb-3 font-medium">{label}</p>
         <div className="flex justify-between items-center gap-4">
           <input
             type="text"
             value={value}
             onChange={(e) => onChangeValue?.(e.target.value)}
-            className="bg-transparent text-2xl text-color4 font-medium outline-none w-1/2 focus:ring-2 focus:ring-color4 rounded-lg px-2 py-1 transition-all duration-200"
+            disabled={disabled}
+            className={`bg-transparent text-2xl text-color4 font-medium outline-none w-1/2 px-2 py-1 transition-all duration-200 `}
           />
           <div 
-            onClick={() => isSelectable && setShowCurrencyPicker(true)}
-            className={isSelectable ? 'cursor-pointer transform hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200' : ''}
+            onClick={() => isSelectable && !disabled && setShowCurrencyPicker(true)}
+            className={isSelectable && !disabled ? 'cursor-pointer transform hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200' : ' opacity-80'}
           >
-            <CurrencyTag currency={currency} isOpenable={isSelectable}/>
+            <CurrencyTag currency={currency} isOpenable={isSelectable && !disabled}/>
           </div>
         </div>
       </div>

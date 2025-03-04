@@ -42,7 +42,7 @@ const UserForm = () => {
       </div>
 
       {/* Next Button */}
-      <button className="w-full bg-black text-white py-3 rounded-xl font-medium shadow-sm">
+      <button className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm">
         Buy
       </button>
     </div>
