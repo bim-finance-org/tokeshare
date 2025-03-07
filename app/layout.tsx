@@ -3,6 +3,9 @@ import "./globals.css";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 
+import { headers } from 'next/headers'
+import ContextProvider from './context'
+
 export const metadata: Metadata = {
   title: "Tokeshare",
   description: "Invest in fractionalized and tokenized real estate assets in Latin America. Tokeshare brings transparency and efficiency with blockchain technology.",
@@ -18,17 +21,23 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const headersObj = await headers();
+  const cookies = headersObj.get('cookie')
+  
   return (
-    <html lang="en">
+    <html lang="en">  
       <body>
-        <NavBar />
-        {children}
-        <Footer />
+        <ContextProvider cookies={cookies}>
+            <NavBar />
+            {children}
+            <Footer />
+        </ContextProvider>
       </body>
     </html>
   );

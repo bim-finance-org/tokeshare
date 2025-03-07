@@ -3,6 +3,7 @@ import CurrencyInput from '../../../components/shared/CurrencyInput'
 import BankIcon from '@/app/components/icons/BankIcon'
 import Blockchains from '@/app/components/Blockchains'
 import { fetchPAXGPrice, calculateTGGPrice } from '@/app/utils/priceUtils'
+import ConnectButton from '@/app/components/shared/ConnectButton'
 
 const Sell = () => {
   const [selectedCurrency, setSelectedCurrency] = useState(() =>
@@ -69,9 +70,10 @@ const Sell = () => {
       </div>
 
       <div className="mt-6">
-        <button className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-md hover:shadow-lg transform transition-all duration-200 hover:bg-opacity-80 hover:scale-[1.02] active:scale-[0.98]">
-          Sell
-        </button>
+        <ConnectButton
+          connectText="Connect Wallet"
+          connectedText="Sell"
+        />
       </div>
     </div>
   )

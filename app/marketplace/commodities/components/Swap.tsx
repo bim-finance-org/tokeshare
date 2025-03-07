@@ -3,6 +3,8 @@ import CurrencyInput from "@/app/components/shared/CurrencyInput";
 import Image from "next/image";
 import Blockchains from "@/app/components/Blockchains";
 import { fetchPAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
+import { useAccount } from 'wagmi';
+import ConnectButton from "@/app/components/shared/ConnectButton";
 
 const Swap = () => {
   const [isTggFirst, setIsTggFirst] = useState(true);
@@ -15,6 +17,7 @@ const Swap = () => {
   const [amountToSend, setAmountToSend] = useState("10");
   const [amountToReceive, setAmountToReceive] = useState("9.2444");
   const [tggPrice, setTggPrice] = useState<number>(0);
+  const { isConnected } = useAccount();
 
   useEffect(() => {
     localStorage.setItem("swapReceiveCurrency", receiveCurrency);
@@ -118,9 +121,10 @@ const Swap = () => {
       </div>
 
       <div className="mt-6">
-        <button className="w-full bg-color4 text-white py-3 rounded-xl font-medium transform transition-all duration-200 hover:bg-opacity-90 hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg">
-          Swap
-        </button>
+        <ConnectButton
+          connectText="Connect Wallet"
+          connectedText="Swap"
+        />
       </div>
     </div>
   );

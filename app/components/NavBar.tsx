@@ -8,6 +8,8 @@ import MobileMenu from "./MobileMenu";
 import ArrowDownIcon from "./icons/arrows/ArrowDownIcon";
 import CrossIcon from "./icons/CrossIcon";
 import Head from "next/head";
+import ConnectButton from "./shared/ConnectButton";
+import { useAccount } from "wagmi";
 
 interface NavBarProps {
   customClass?: string;
@@ -19,6 +21,7 @@ const NavBar: React.FC<NavBarProps> = () => {
 
   const subMenuRef = useRef<HTMLUListElement>(null);
   const marketPlaceRef = useRef<HTMLButtonElement>(null);
+  const { address } = useAccount();
 
   // Au changement de route, on referme le sous-menu
   useEffect(() => {
@@ -41,6 +44,11 @@ const NavBar: React.FC<NavBarProps> = () => {
   }, []);
 
   const classNav = pathname === "/" ? "bg-transparent text-color1 absolute top-0 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50" : "bg-color3 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50 transition-all duration-300 hover:shadow-lg";
+
+  const formatAddress = (addr: string) => {
+    if (!addr) return "";
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
 
   return (
     <>
@@ -137,9 +145,11 @@ const NavBar: React.FC<NavBarProps> = () => {
 
         {/* Bouton My Account */}
         <div>
-          <Link href="/buildingInProgress">
-            <button className="rounded-lg border-2 border-white px-2 sm:px-3 md:px-4 py-1 text-xs sm:text-sm md:text-base lg:text-lg text-white hover:bg-white hover:text-black transition-all duration-300">My Account</button>
-          </Link>
+          <ConnectButton 
+            connectText="My Account"
+            connectedText={formatAddress(address!)}
+            className="rounded-lg border-2 border-white px-2 sm:px-3 md:px-4 py-1 text-xs sm:text-sm md:text-base lg:text-lg text-white hover:bg-white hover:text-black transition-all duration-300"
+          />
         </div>
       </nav>
     </>
