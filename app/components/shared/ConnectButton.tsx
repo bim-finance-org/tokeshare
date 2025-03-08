@@ -6,13 +6,15 @@ interface ConnectButtonProps {
   connectedText?: string;
   className?: string;
   showAddress?: boolean;
+  onConnectedClick?: () => void;
 }
 
 const ConnectButton = ({ 
   connectText = 'Connect Wallet',
   connectedText,
   className = "w-full bg-color4 text-white py-3 rounded-xl font-medium transform transition-all duration-200 hover:bg-opacity-90 hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg",
-  showAddress = false
+  showAddress = false,
+  onConnectedClick
 }: ConnectButtonProps) => {
   const { address } = useAccount();
 
@@ -25,10 +27,11 @@ const ConnectButton = ({
     : connectText;
 
   return (
-    <div className={className}>
-      <appkit-connect-button
+    <div className={className} onClick={address ? onConnectedClick : undefined}>
+      <appkit-button
         label={buttonText}
         size="md"
+        balance={address ? "show" : "hide"}
       />
     </div>
   );

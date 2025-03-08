@@ -1,25 +1,29 @@
 import React, { useState, useEffect } from 'react'
-import CurrencyInput from '@/app/components/shared/CurrencyInput'
-import BuyNext from './BuyNext'
+import TradeWidget from '@/app/components/shared/TradeWidget'
 import BankIcon from '@/app/components/icons/BankIcon'
 import Blockchains from '@/app/components/Blockchains'
 import { fetchPAXGPrice, calculateTGGPrice } from '@/app/utils/priceUtils'
+import ConnectButton from '@/app/components/shared/ConnectButton'
+import { useAccount } from 'wagmi'
+import UserForm from './UserForm'
 
 const Buy = () => {
-  // Initialize with localStorage value or default
+  // États
   const [selectedCurrency, setSelectedCurrency] = useState(() => 
     localStorage.getItem('buySelectedCurrency') || 'EUR'
   )
-  // État pour la somme que l'utilisateur envoie
-  const [amountToSend, setAmountToSend] = useState('10')
-  const [showBuyNext, setShowBuyNext] = useState(false)
+  const [amountToSend, setAmountToSend] = useState("10")
+  const [tggAmount, setTggAmount] = useState("0")
   const [tggPrice, setTggPrice] = useState<number>(0)
+  const [showBuyNext, setShowBuyNext] = useState(false)
+  const { isConnected } = useAccount()
 
-  // Save currency to localStorage when it changes
+  // Sauvegarde de la devise sélectionnée
   useEffect(() => {
     localStorage.setItem('buySelectedCurrency', selectedCurrency)
   }, [selectedCurrency])
 
+  // Mise à jour du prix TGG
   useEffect(() => {
     const updatePrice = async () => {
       const paxgPrice = await fetchPAXGPrice();
@@ -27,47 +31,83 @@ const Buy = () => {
       setTggPrice(calculatedTggPrice);
     };
     updatePrice();
-    // Update price every 30 seconds
     const interval = setInterval(updatePrice, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // Conversion to TGG based on TGG price
-  const handleReceiveAmount = () => {
-    const numericValue = parseFloat(amountToSend) || 0;
-    return (numericValue / tggPrice).toFixed(4);
-  }
+  // Calcul initial du montant TGG
+  useEffect(() => {
+    if (tggPrice > 0) {
+      calculateTggFromFiat(amountToSend);
+    }
+  }, [tggPrice]);
+
+  // Calcule le montant TGG à partir du montant fiat
+  const calculateTggFromFiat = (fiatAmount: string) => {
+    if (tggPrice > 0) {
+      const numericAmount = parseFloat(fiatAmount) || 0;
+      const calculatedTggAmount = (numericAmount / tggPrice).toFixed(4);
+      setTggAmount(calculatedTggAmount);
+    }
+  };
+
+  // Calcule le montant fiat à partir du montant TGG
+  const calculateFiatFromTgg = (tggValue: string) => {
+    if (tggPrice > 0) {
+      const numericAmount = parseFloat(tggValue) || 0;
+      const calculatedFiatAmount = (numericAmount * tggPrice).toFixed(2);
+      setAmountToSend(calculatedFiatAmount);
+    }
+  };
+
+  // Gestion du changement de montant en devise fiat
+  const handleFiatAmountChange = (amount: string) => {
+    if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
+      setAmountToSend(amount);
+      calculateTggFromFiat(amount);
+    }
+  };
+
+  // Gestion du changement de montant en TGG
+  const handleTggAmountChange = (amount: string) => {
+    if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
+      setTggAmount(amount);
+      calculateFiatFromTgg(amount);
+    }
+  };
 
   if (showBuyNext) {
-    return <BuyNext />
+    return <UserForm type="buy" amount={amountToSend} currency={selectedCurrency} tggAmount={tggAmount} tggPrice={tggPrice} />
   }
 
   return (
     <div className="p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 w-full relative">
-      {/* Bouton Bank transfer (exemple) */}
+      {/* Bouton Bank transfer */}
       <div className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-3 shadow-md ">
         <BankIcon />  
         <span className="font-medium">Bank transfer</span>
       </div>
 
       {/* Champ de saisie pour le montant envoyé dans la devise sélectionnée */}
-      <CurrencyInput
+      <TradeWidget
+        type="fiat"
         label="YOU SEND"
-        value={amountToSend}
-        currency={selectedCurrency}
-        onChangeValue={setAmountToSend}
-        onCurrencySelect={setSelectedCurrency}
+        defaultToken={selectedCurrency}
+        value={amountToSend}  
+        onValueChange={handleFiatAmountChange}
+        onTokenChange={setSelectedCurrency}
       />
 
       <div className="my-4" />
 
-      {/* Affichage du montant en TGG (non sélectionnable car on reçoit toujours du TGG) */}
-      <CurrencyInput
+      {/* Affichage du montant en TGG */}
+      <TradeWidget
         label="YOU RECEIVE"
-        value={handleReceiveAmount()}
-        currency="TGG"
-        isSelectable={false}
-        disabled={true}
+        defaultToken="TGG"
+        value={tggAmount}
+        onValueChange={handleTggAmountChange}
+        onTokenChange={() => {}} // TGG ne peut pas être changé
+        type="crypto"
       />
 
       <div className="mb-6 mt-4 space-y-2">
@@ -79,12 +119,19 @@ const Buy = () => {
       </div>
 
       <div className="mt-6">
-        <button 
-          onClick={() => setShowBuyNext(true)}
-          className="w-full bg-color4 py-3 rounded-xl font-medium shadow-md hover:shadow-lg transform transition-all duration-200 hover:bg-opacity-80 hover:scale-[1.02] active:scale-[0.98]"
-        >
-          Buy
-        </button>
+        {isConnected ? (
+          <button
+            onClick={() => setShowBuyNext(true)}
+            className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition-all duration-200"
+          >
+            Buy
+          </button>
+        ) : (
+          <ConnectButton
+            connectText="Connect Wallet"
+            connectedText="Buy"
+          />
+        )}
       </div>
     </div>
   )

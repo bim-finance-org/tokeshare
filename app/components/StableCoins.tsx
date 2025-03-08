@@ -4,9 +4,10 @@ import USDCIcon from './icons/currency/USDCIcon'
 import DAIIcon from './icons/currency/DAIIcon'
 import EURSIcon from './icons/currency/EURSIcon'
 import CRVIcon from './icons/currency/CRVIcon'
-// import EURCIcon from './icons/currency/EURCIcon'
-// import BOLDIcon from './icons/currency/BOLDIcon'
-// import USDCEIcon from './icons/currency/USDCEIcon'
+import BOLDIcon from './icons/currency/BOLDIcon'
+import EURCIcon from './icons/currency/EURCIcon'
+import EURAIcon from './icons/currency/EURAIcon'
+
 interface StableCoinsProps {
   onSelect: (currency: string) => void
   blockchain: string
@@ -14,10 +15,8 @@ interface StableCoinsProps {
 
 // Define which stablecoins are available on each blockchain
 const BLOCKCHAIN_STABLECOINS = {
-//   Polygon: ['USDT', 'USDC', 'DAI', 'EURS', 'CRVUSD', 'EURA','USDCE'],
-//   Base: ['USDC', 'DAI','EURC', 'CRVUSD', 'BOLD']
-  Polygon: ['USDT', 'USDC', 'DAI', 'EURS', 'CRVUSD', 'EURA'],
-  Base: ['USDC', 'DAI', 'CRVUSD']
+  Polygon: ['USDT', 'USDC', 'DAI', 'EURS', 'CRVUSD', 'EURA','USDCE'],
+  Base: ['USDC', 'DAI','EURC', 'CRVUSD', 'BOLD']
 }
 
 const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
@@ -30,10 +29,10 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
       DAI: DAIIcon,
       EURS: EURSIcon,
       CRVUSD: CRVIcon,
-    //   EURC: EURCIcon,
-    //   BOLD: BOLDIcon,
-      EURA: EURSIcon,
-    //   USDCE: USDCEIcon,
+      EURC: EURCIcon,
+      BOLD: BOLDIcon,
+      EURA: EURAIcon,
+      USDCE: USDCIcon,
     }
     const Icon = icons[symbol as keyof typeof icons]
     
@@ -45,7 +44,7 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
       >
         <div className='flex items-center gap-3'>
           <Icon  />
-          <span className='text-color4 font-medium'>{symbol}</span>
+          <span className='text-color4 font-medium'>{symbol == 'USDCE' ? 'USDC.e' : symbol}</span>
         </div>
       </button>
     )

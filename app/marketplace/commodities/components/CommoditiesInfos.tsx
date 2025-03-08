@@ -63,6 +63,11 @@ const CommoditiesPage = () => {
                 <p className="text-base">$ 50.47</p>
               </div>
 
+              <div className="py-4 flex justify-between border-b-2 border-color5">
+                <h3 className="text-lg font-semibold">Proof of Reserve</h3>
+                <p className="text-base">100%</p>
+              </div>
+
               <div className="py-4 flex justify-between">
                 <h3 className="text-lg font-semibold">Tokeshare Gold Gram (TGG)</h3>
                 <div className="flex items-center gap-2 cursor-pointer" onClick={handleOnesheetClick}>
