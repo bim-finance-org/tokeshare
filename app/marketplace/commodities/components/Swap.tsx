@@ -5,19 +5,32 @@ import Blockchains from "@/app/components/Blockchains";
 import { fetchPAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
 import { useAccount } from 'wagmi';
 import ConnectButton from "@/app/components/shared/ConnectButton";
-import UserForm from "./UserForm";
+
 
 const Swap = () => {
-  const [selectedBlockchain, setSelectedBlockchain] = useState(() =>
-    localStorage.getItem("swapSelectedBlockchain") || "Polygon"
-  );
-  const [stablecoin, setStablecoin] = useState(() =>
-    localStorage.getItem("swapReceiveCurrency") || "USDT"
-  );
+
+
+  const [selectedBlockchain, setSelectedBlockchain] = useState("Polygon");
+  const [stablecoin, setStablecoin] = useState("USDT");
   const [stablecoinAmount, setStablecoinAmount] = useState("10");
   const [tggAmount, setTggAmount] = useState("0");
   const [tggPrice, setTggPrice] = useState<number>(0);
+  const [isTggFirst, setIsTggFirst] = useState(false);
   const { isConnected } = useAccount();
+
+  // Load saved preferences from localStorage on client-side only
+  useEffect(() => {
+    // Initialize from localStorage when component mounts (client-side only)
+    const savedBlockchain = localStorage.getItem("swapSelectedBlockchain");
+    if (savedBlockchain) {
+      setSelectedBlockchain(savedBlockchain);
+    }
+    
+    const savedStablecoin = localStorage.getItem("swapReceiveCurrency");
+    if (savedStablecoin) {
+      setStablecoin(savedStablecoin);
+    }
+  }, []);
 
   // Sauvegarde du stablecoin sélectionné
   useEffect(() => {
@@ -36,17 +49,25 @@ const Swap = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Nouveau useEffect pour calculer le montant TGG initial
+  // Calcul initial du montant TGG
   useEffect(() => {
     if (tggPrice > 0) {
-      const numericAmount = parseFloat(stablecoinAmount) || 0;
-      const calculatedTggAmount = (numericAmount / tggPrice).toFixed(4);
-      setTggAmount(calculatedTggAmount);
+      if (!isTggFirst) {
+        // If stablecoin is first, calculate TGG amount
+        const numericAmount = parseFloat(stablecoinAmount) || 0;
+        const calculatedTggAmount = (numericAmount / tggPrice).toFixed(4);
+        setTggAmount(calculatedTggAmount);
+      } else {
+        // If TGG is first, calculate stablecoin amount
+        const numericAmount = parseFloat(tggAmount) || 0;
+        const calculatedStablecoinAmount = (numericAmount * tggPrice).toFixed(2);
+        setStablecoinAmount(calculatedStablecoinAmount);
+      }
     }
-  }, [tggPrice]); // Se déclenche quand le prix TGG est chargé
+  }, [tggPrice, isTggFirst]);
 
+  // Handle stablecoin amount change
   const handleStablecoinAmountChange = (amount: string) => {
-    // Autoriser une chaîne vide ou des nombres
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setStablecoinAmount(amount);
       if (tggPrice > 0) {
@@ -57,37 +78,62 @@ const Swap = () => {
     }
   };
 
+  // Handle TGG amount change
+  const handleTggAmountChange = (amount: string) => {
+    if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
+      setTggAmount(amount);
+      if (tggPrice > 0) {
+        const numericAmount = parseFloat(amount) || 0;
+        const calculatedStablecoinAmount = (numericAmount * tggPrice).toFixed(2);
+        setStablecoinAmount(calculatedStablecoinAmount);
+      }
+    }
+  };
+
+  // Handle blockchain selection
   const handleBlockchainSelect = (blockchain: string) => {
     setSelectedBlockchain(blockchain);
     setStablecoin(blockchain === "Polygon" ? "USDT" : "USDC");
+  };
+
+  // Handle swap button click
+  const handleSwap = () => {
+    setIsTggFirst(!isTggFirst);
   };
 
   return (
     <div className="p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 w-full relative">
       <div className="flex flex-col gap-6 relative">
         <TradeWidget
-          type="stablecoin"
+          type={isTggFirst ? "crypto" : "stablecoin"}
           label="YOU SEND"
-          defaultToken={stablecoin}
-          value={stablecoinAmount}
-          onValueChange={handleStablecoinAmountChange}
-          onTokenChange={setStablecoin}
+          defaultToken={isTggFirst ? "TGG" : stablecoin}
+          value={isTggFirst ? tggAmount : stablecoinAmount}
+          onValueChange={isTggFirst ? handleTggAmountChange : handleStablecoinAmountChange}
+          onTokenChange={token => {
+            if (!isTggFirst) setStablecoin(token);
+          }}
           blockchain={selectedBlockchain}
         />
 
         <div className="z-10 pt-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <button className="hover:scale-110 active:scale-95 transition-transform duration-200">
+          <button 
+            onClick={handleSwap}
+            className="hover:scale-110 active:scale-95 transition-transform duration-200"
+          >
             <Image src="/images/switch.png" alt="Swap" width={60} height={60} />
           </button>
         </div>
 
         <TradeWidget
+          type={isTggFirst ? "stablecoin" : "crypto"}
           label="YOU RECEIVE"
-          defaultToken="TGG"
-          value={tggAmount}
-          onValueChange={() => {}}
-          onTokenChange={() => {}}
-          type="stablecoin"
+          defaultToken={isTggFirst ? stablecoin : "TGG"}
+          value={isTggFirst ? stablecoinAmount : tggAmount}
+          onValueChange={isTggFirst ? handleStablecoinAmountChange : handleTggAmountChange}
+          onTokenChange={token => {
+            if (isTggFirst) setStablecoin(token);
+          }}
           blockchain={selectedBlockchain}
         />
       </div>

@@ -1,8 +1,8 @@
 import React from "react";
 import ArrowIcon from "@/app/components/icons/arrows/ArrowIcon";
 import Image from "next/image";
-import { Commodity } from "@/app/types";
 import Link from "next/link";
+import { Commodity } from "@/app/types/Commodity";
 
 interface CommoditiesCardProps {
   commodity: Commodity;

@@ -10,19 +10,26 @@ interface BlockchainsProps {
 
 const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedChain, setSelectedChain] = useState(() => {
-    // Initialize from localStorage or default to Polygon
-    return localStorage.getItem(`${section}SelectedBlockchain`) || 'Polygon'
-  })
+  const [selectedChain, setSelectedChain] = useState('Polygon')
+
+  // Load from localStorage after component mounts (client-side only)
+  useEffect(() => {
+    const savedChain = localStorage.getItem(`${section}SelectedBlockchain`)
+    if (savedChain) {
+      setSelectedChain(savedChain)
+    }
+  }, [section])
 
   // Save to localStorage whenever selectedChain changes
   useEffect(() => {
     localStorage.setItem(`${section}SelectedBlockchain`, selectedChain)
-  }, [selectedChain, section])
+    if (onSelect) {
+      onSelect(selectedChain)
+    }
+  }, [selectedChain, section, onSelect])
 
   const handleSelect = (chain: string) => {
     setSelectedChain(chain)
-    onSelect?.(chain)
     setIsOpen(false)
   }
 

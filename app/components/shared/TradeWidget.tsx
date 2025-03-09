@@ -23,7 +23,7 @@ const TradeWidget = ({
   onValueChange,
   onTokenChange,
 }: TradeWidgetProps) => {
-  const [selectedToken, setSelectedToken] = useState(defaultToken || '');
+  const [selectedToken, setSelectedToken] = useState(defaultToken || 'USDC');
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const { address } = useAccount();
 
@@ -35,6 +35,10 @@ const TradeWidget = ({
     onTokenChange(token);
     setIsSelectorOpen(false);
   };
+
+  useEffect(() => {
+    setSelectedToken(defaultToken || 'USDC');
+  }, [defaultToken]);
 
   if(isSelectorOpen) {
     return (
