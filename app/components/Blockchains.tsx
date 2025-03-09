@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react'
+'use client'
+
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import PolygonIcon from './icons/blockchains/PolygonIcon'
 import BaseIcon from './icons/blockchains/BaseIcon'
 import ArrowDownIcon from './icons/arrows/ArrowDownIcon'
+import { TokenContexts } from '@/app/context/TokenContexts'
 
 interface BlockchainsProps {
   onSelect?: (blockchain: string) => void
@@ -9,25 +12,27 @@ interface BlockchainsProps {
 }
 
 const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
+  // Récupérer les valeurs du context selon la section
+  const tokenContext = useContext(TokenContexts)
+  
+  // Déterminer la blockchain et le setter en fonction de la section
+  let blockchain = 'Polygon'
+  let updateBlockchain = (chain: string) => {}
+  
+  if (section === 'swap') {
+    blockchain = tokenContext.swap.blockchain
+    updateBlockchain = tokenContext.updateSwapBlockchain
+  } else if (section === 'buy') {
+    blockchain = tokenContext.buy.blockchain
+    updateBlockchain = tokenContext.updateBuyBlockchain
+  } else if (section === 'sell') {
+    blockchain = tokenContext.sell.blockchain
+    updateBlockchain = tokenContext.updateSellBlockchain
+  }
+  
+  // État local uniquement pour l'UI du dropdown
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedChain, setSelectedChain] = useState('Polygon')
   const dropdownRef = useRef<HTMLDivElement>(null)
-
-  // Load from localStorage after component mounts (client-side only)
-  useEffect(() => {
-    const savedChain = localStorage.getItem(`${section}SelectedBlockchain`)
-    if (savedChain) {
-      setSelectedChain(savedChain)
-    }
-  }, [section])
-
-  // Save to localStorage whenever selectedChain changes
-  useEffect(() => {
-    localStorage.setItem(`${section}SelectedBlockchain`, selectedChain)
-    if (onSelect) {
-      onSelect(selectedChain)
-    }
-  }, [selectedChain, section, onSelect])
 
   // Handle click outside
   useEffect(() => {
@@ -37,17 +42,20 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
       }
     }
 
-    if (isOpen) {
-      document.addEventListener('click', handleClickOutside)
-    }
-
+    document.addEventListener('mousedown', handleClickOutside)
     return () => {
-      document.removeEventListener('click', handleClickOutside)
+      document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isOpen])
+  }, [])
 
+  // Mise à jour: le handler notifie aussi le parent via onSelect si nécessaire
   const handleSelect = (chain: string) => {
-    setSelectedChain(chain)
+    // Mettre à jour le context
+    updateBlockchain(chain)
+    
+    // Notifier le parent si onSelect est fourni (pour compatibilité)
+    if (onSelect) onSelect(chain)
+    
     setIsOpen(false)
   }
 
@@ -63,13 +71,13 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
         className="flex items-center gap-3  px-3 py-2 bg-color1 rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 transition-all duration-200"
       >
         <div className="w-6 h-6 flex items-center justify-center">
-          {selectedChain === 'Polygon' ? (
+          {blockchain === 'Polygon' ? (
             <PolygonIcon />
           ) : (
             <BaseIcon  />
           )}
         </div>
-        <span className="text-color4 font-medium">{selectedChain}</span>
+        <span className="text-color4 font-medium">{blockchain}</span>
         <ArrowDownIcon strokeColor="#4F5B76" className={`w-6 h-6 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -78,7 +86,7 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
           <button 
             onClick={() => handleSelect('Polygon')}
             className={`flex items-center gap-3 w-full px-3 pr-4 py-2 hover:bg-gray-50 transition-colors duration-200 ${
-              selectedChain === 'Polygon' ? 'bg-gray-100' : ''
+              blockchain === 'Polygon' ? 'bg-gray-100' : ''
             }`}
           >
             <div className="w-6 h-6 flex items-center justify-center">
@@ -90,7 +98,7 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
           <button 
             onClick={() => handleSelect('Base')}
             className={`flex items-center gap-3 w-full px-3 py-2 hover:bg-gray-50 transition-colors duration-200 ${
-              selectedChain === 'Base' ? 'bg-gray-100' : ''
+              blockchain === 'Base' ? 'bg-gray-100' : ''
             }`}
           >
             <div className="w-6 h-6 flex items-center justify-center">

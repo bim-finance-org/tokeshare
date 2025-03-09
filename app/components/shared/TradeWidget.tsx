@@ -34,7 +34,9 @@ const TradeWidget = ({
   const isTGG = selectedToken === 'TGG';
 
   const handleTokenSelect = (token: string) => {
+    console.log(token);
     setSelectedToken(token);
+    console.log(selectedToken);
     onTokenChange(token);
     setIsSelectorOpen(false);
   };
@@ -48,7 +50,7 @@ const TradeWidget = ({
         <TokenSelector
           type={type}
           blockchain={blockchain}
-          onSelect={handleTokenSelect}
+          onSelect={(token) => handleTokenSelect(token)}
           isOpen={isSelectorOpen}
           onClose={() => setIsSelectorOpen(false)}
         />

@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react'
+'use client'
+
+import React, { useState, useEffect, useContext } from 'react'
 import TradeWidget from '@/app/components/shared/TradeWidget'
 import BankIcon from '@/app/components/icons/BankIcon'
 import Blockchains from '@/app/components/Blockchains'
@@ -6,22 +8,22 @@ import { fetchPAXGPrice, calculateTGGPrice } from '@/app/utils/priceUtils'
 import ConnectButton from '@/app/components/shared/ConnectButton'
 import { useAccount } from 'wagmi'
 import UserForm from './UserForm'
+import { TokenContexts } from '@/app/context/TokenContexts'
 
 const Buy = () => {
-  // États
-  const [selectedCurrency, setSelectedCurrency] = useState(() => 
-    localStorage.getItem('buySelectedCurrency') || 'EUR'
-  )
+  // Get values from context
+  const { 
+    buy: { token: selectedCurrency, blockchain: selectedBlockchain },
+    updateBuyToken: setSelectedCurrency,
+    updateBuyBlockchain: setSelectedBlockchain
+  } = useContext(TokenContexts);
+
+  // Local state
   const [amountToSend, setAmountToSend] = useState("10")
   const [tggAmount, setTggAmount] = useState("0")
   const [tggPrice, setTggPrice] = useState<number>(0)
   const [showBuyNext, setShowBuyNext] = useState(false)
   const { isConnected } = useAccount()
-
-  // Sauvegarde de la devise sélectionnée
-  useEffect(() => {
-    localStorage.setItem('buySelectedCurrency', selectedCurrency)
-  }, [selectedCurrency])
 
   // Mise à jour du prix TGG
   useEffect(() => {

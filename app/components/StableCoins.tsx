@@ -7,6 +7,7 @@ import CRVIcon from './icons/currency/CRVIcon'
 import BOLDIcon from './icons/currency/BOLDIcon'
 import EURCIcon from './icons/currency/EURCIcon'
 import EURAIcon from './icons/currency/EURAIcon'
+import { log } from 'console'
 
 interface StableCoinsProps {
   onSelect: (currency: string) => void
@@ -39,14 +40,16 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
     return (
       <button 
         key={symbol}
-        onClick={() => onSelect(symbol)} 
+        onClick={() => {
+          onSelect(symbol)
+        }} 
         className='flex items-center w-full p-2 hover:bg-gray-200 rounded-lg transition-colors border-b border-gray-200'
       >
         <div className='flex items-center gap-3'>
           <Icon  />
           <span className='text-color4 font-medium'>{symbol == 'USDCE' ? 'USDC.e' : symbol}</span>
         </div>
-      </button>
+        </button>
     )
   }
 

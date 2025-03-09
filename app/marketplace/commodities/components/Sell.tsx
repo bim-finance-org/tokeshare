@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react'
+'use client'
+
+import React, { useState, useEffect, useContext } from 'react'
 import TradeWidget from '../../../components/shared/TradeWidget'
 import BankIcon from '@/app/components/icons/BankIcon'
 import Blockchains from '@/app/components/Blockchains'
@@ -6,27 +8,22 @@ import { fetchPAXGPrice, calculateTGGPrice } from '@/app/utils/priceUtils'
 import ConnectButton from '@/app/components/shared/ConnectButton'
 import { useAccount } from 'wagmi'
 import UserForm from './UserForm'
+import { TokenContexts } from '@/app/context/TokenContexts'
 
 const Sell = () => {
-  const [selectedCurrency, setSelectedCurrency] = useState(() =>
-    localStorage.getItem('sellSelectedCurrency') || 'USD'
-  )
-  const [selectedBlockchain, setSelectedBlockchain] = useState(() =>
-    localStorage.getItem('sellSelectedBlockchain') || 'Polygon'
-  )
+  // Get values from context
+  const { 
+    sell: { token: selectedCurrency, blockchain: selectedBlockchain },
+    updateSellToken: setSelectedCurrency,
+    updateSellBlockchain: setSelectedBlockchain
+  } = useContext(TokenContexts);
+
+  // Local state
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false)
   const [amountToSell, setAmountToSell] = useState('10')
   const [tggPrice, setTggPrice] = useState<number>(0)
   const [showUserForm, setShowUserForm] = useState(false)
   const { isConnected } = useAccount()
-
-  useEffect(() => {
-    localStorage.setItem('sellSelectedCurrency', selectedCurrency)
-  }, [selectedCurrency])
-
-  useEffect(() => {
-    localStorage.setItem('sellSelectedBlockchain', selectedBlockchain)
-  }, [selectedBlockchain])
 
   useEffect(() => {
     const updatePrice = async () => {
@@ -94,7 +91,7 @@ const Sell = () => {
       />
 
       <div className="mb-6 mt-4 space-y-2">
-        <Blockchains section="sell" onSelect={setSelectedBlockchain} />
+        <Blockchains section="sell" />
         <div className="space-y-1 ml-2">
           <p className="text-color4 text-sm font-medium">TGG Price: ${tggPrice.toFixed(2)}</p>
           <p className="text-color4 text-sm font-medium">Delivery time: 0 - 2 Days</p>

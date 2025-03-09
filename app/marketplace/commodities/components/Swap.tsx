@@ -1,41 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import TradeWidget from "@/app/components/shared/TradeWidget";
 import Image from "next/image";
 import Blockchains from "@/app/components/Blockchains";
 import { fetchPAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
 import { useAccount } from 'wagmi';
 import ConnectButton from "@/app/components/shared/ConnectButton";
-
+import { TokenContexts } from '@/app/context/TokenContexts';
 
 const Swap = () => {
-
-
-  const [selectedBlockchain, setSelectedBlockchain] = useState("Polygon");
-  const [stablecoin, setStablecoin] = useState("USDT");
+  // Utiliser le context au lieu de useState + localStorage
+  const { 
+    swap: { token: stablecoin, blockchain: selectedBlockchain },
+    updateSwapToken: setStablecoin,
+    updateSwapBlockchain: setSelectedBlockchain
+  } = useContext(TokenContexts);
+  
+  // État local qui reste inchangé
   const [stablecoinAmount, setStablecoinAmount] = useState("10");
   const [tggAmount, setTggAmount] = useState("0");
   const [tggPrice, setTggPrice] = useState<number>(0);
   const [isTggFirst, setIsTggFirst] = useState(false);
   const { isConnected } = useAccount();
-
-  // Load saved preferences from localStorage on client-side only
-  useEffect(() => {
-    // Initialize from localStorage when component mounts (client-side only)
-    const savedBlockchain = localStorage.getItem("swapSelectedBlockchain");
-    if (savedBlockchain) {
-      setSelectedBlockchain(savedBlockchain);
-    }
-    
-    const savedStablecoin = localStorage.getItem("swapReceiveCurrency");
-    if (savedStablecoin) {
-      setStablecoin(savedStablecoin);
-    }
-  }, []);
-
-  // Sauvegarde du stablecoin sélectionné
-  useEffect(() => {
-    localStorage.setItem("swapReceiveCurrency", stablecoin);
-  }, [stablecoin]);
 
   // Mise à jour du prix TGG
   useEffect(() => {
@@ -111,7 +96,7 @@ const Swap = () => {
           value={isTggFirst ? tggAmount : stablecoinAmount}
           onValueChange={isTggFirst ? handleTggAmountChange : handleStablecoinAmountChange}
           onTokenChange={token => {
-            if (!isTggFirst) setStablecoin(token);
+             setStablecoin(token);
           }}
           blockchain={selectedBlockchain}
           showBalance={true}
@@ -133,7 +118,7 @@ const Swap = () => {
           value={isTggFirst ? stablecoinAmount : tggAmount}
           onValueChange={isTggFirst ? handleStablecoinAmountChange : handleTggAmountChange}
           onTokenChange={token => {
-            if (isTggFirst) setStablecoin(token);
+            setStablecoin(token);
           }}
           blockchain={selectedBlockchain}
           showBalance={true}

@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 
 import { headers } from 'next/headers'
 import ContextProvider from './context'
+import { TokenProvider } from "./context/TokenContexts";
 
 export const metadata: Metadata = {
   title: "Tokeshare",
@@ -34,9 +35,11 @@ export default async function RootLayout({
     <html lang="en">  
       <body>
         <ContextProvider cookies={cookies}>
+          <TokenProvider>
             <NavBar />
             {children}
             <Footer />
+          </TokenProvider>
         </ContextProvider>
       </body>
     </html>
