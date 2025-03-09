@@ -102,7 +102,7 @@ const Swap = () => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 w-full relative">
+    <div className="p-6 w-full relative">
       <div className="flex flex-col gap-6 relative">
         <TradeWidget
           type={isTggFirst ? "crypto" : "stablecoin"}

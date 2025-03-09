@@ -45,21 +45,18 @@ const TradeWidget = ({
 
   if(isSelectorOpen) {
     return (
-      <div className="bg-gray-100 p-4 rounded-xl shadow-md">
         <TokenSelector
           type={type}
           blockchain={blockchain}
-          selectedToken={selectedToken}
           onSelect={handleTokenSelect}
           isOpen={isSelectorOpen}
           onClose={() => setIsSelectorOpen(false)}
         />
-      </div>
     )
   } 
 
   return (
-    <div className="bg-gray-100 p-4 rounded-xl shadow-md">
+    <div className="bg-color1 p-4 rounded-xl shadow-md">
       <div className="flex justify-between items-start gap-4">
         <TokenInput
           label={label}

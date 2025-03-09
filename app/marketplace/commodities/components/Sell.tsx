@@ -64,7 +64,7 @@ const Sell = () => {
   }
 
   return (
-    <div className="p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 w-full">
+    <div className="p-6 w-full">
       <div className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-3 shadow-md">
         <BankIcon />
         <span className="font-medium">Bank transfer</span>

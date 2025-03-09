@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import PolygonIcon from './icons/blockchains/PolygonIcon'
 import BaseIcon from './icons/blockchains/BaseIcon'
 import ArrowDownIcon from './icons/arrows/ArrowDownIcon'
@@ -11,6 +11,7 @@ interface BlockchainsProps {
 const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedChain, setSelectedChain] = useState('Polygon')
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Load from localStorage after component mounts (client-side only)
   useEffect(() => {
@@ -28,16 +29,38 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
     }
   }, [selectedChain, section, onSelect])
 
+  // Handle click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('click', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [isOpen])
+
   const handleSelect = (chain: string) => {
     setSelectedChain(chain)
     setIsOpen(false)
   }
 
+  const toggleDropdown = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsOpen(!isOpen)
+  }
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3  px-3 py-2 bg-gray-100 rounded-xl shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-200"
+        onClick={toggleDropdown}
+        className="flex items-center gap-3  px-3 py-2 bg-color1 rounded-xl shadow-md hover:shadow-lg hover:bg-gray-100 transition-all duration-200"
       >
         <div className="w-6 h-6 flex items-center justify-center">
           {selectedChain === 'Polygon' ? (
@@ -47,7 +70,7 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
           )}
         </div>
         <span className="text-color4 font-medium">{selectedChain}</span>
-        <ArrowDownIcon className={`w-4 h-4 text-color4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ArrowDownIcon strokeColor="#4F5B76" className={`w-6 h-6 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (

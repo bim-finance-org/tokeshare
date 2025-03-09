@@ -14,7 +14,7 @@ import CRVIcon from './icons/currency/CRVIcon'
 
 const TokenDisplay = ({ token, isOpenable, onTokenClick}: { token: string, isOpenable: boolean, onTokenClick: () => void}) => {
   return (
-    <div className="flex items-center gap-2 border border-color4 rounded-lg p-2" onClick={onTokenClick}>
+    <div className="flex items-center gap-2 border border-color4 rounded-lg p-2 cursor-pointer" onClick={onTokenClick}>
         {token === 'EUR' && <EURIcon />}
         {token === 'TGG' && <TGGIcon />}
         {token === 'CHF' && <CHFIcon />}
@@ -28,7 +28,7 @@ const TokenDisplay = ({ token, isOpenable, onTokenClick}: { token: string, isOpe
         {token === 'CRVUSD' && <CRVIcon />}
         <span className="font-medium text-color4">{token}</span>
         {isOpenable && (
-                <ArrowDownIcon />
+                <ArrowDownIcon strokeColor="#4F5B76" className="w-10 h-4"/>
         )}
     </div>
   )

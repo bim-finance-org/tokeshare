@@ -40,7 +40,7 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
       <button 
         key={symbol}
         onClick={() => onSelect(symbol)} 
-        className='flex items-center w-full p-2 hover:bg-gray-100 rounded-lg transition-colors border-b border-gray-200'
+        className='flex items-center w-full p-2 hover:bg-gray-200 rounded-lg transition-colors border-b border-gray-200'
       >
         <div className='flex items-center gap-3'>
           <Icon  />
