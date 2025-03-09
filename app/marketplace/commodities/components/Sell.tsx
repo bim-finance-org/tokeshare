@@ -78,6 +78,7 @@ const Sell = () => {
         type="crypto"
         value={amountToSell}
         blockchain={selectedBlockchain}
+        showBalance={true}
       />
 
       <div className="my-4" />

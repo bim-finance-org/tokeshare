@@ -3,6 +3,7 @@ import TokenInput from './TokenInput'
 import TokenSelector from './TokenSelector'
 import TokenDisplay from '@/app/components/TokenDisplay'
 import { useAccount } from 'wagmi'
+import CryptoBalance from './CryptoBalance'
 
 interface TradeWidgetProps {
   type: 'fiat' | 'crypto' | 'stablecoin';
@@ -12,6 +13,7 @@ interface TradeWidgetProps {
   value?: string;
   onValueChange: (value: string) => void;
   onTokenChange: (token: string) => void;
+  showBalance?: boolean;
 }
 
 const TradeWidget = ({
@@ -22,6 +24,7 @@ const TradeWidget = ({
   value,
   onValueChange,
   onTokenChange,
+  showBalance = false,
 }: TradeWidgetProps) => {
   const [selectedToken, setSelectedToken] = useState(defaultToken || 'USDC');
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
@@ -65,14 +68,20 @@ const TradeWidget = ({
           placeholder='10'
           disabled={isTGG && type === "stablecoin"}
         />
-        <TokenDisplay
-          token={selectedToken}
-          isOpenable={!isTGG}
-          onTokenClick={() => !isTGG && setIsSelectorOpen(true)}
-        />
+        <div className="flex flex-col items-end gap-2">
+          <TokenDisplay
+            token={selectedToken}
+            isOpenable={!isTGG}
+            onTokenClick={() => !isTGG && setIsSelectorOpen(true)}
+          />
+          {showBalance && (
+            <CryptoBalance 
+              currency={selectedToken} 
+              blockchain={blockchain}
+            />
+          )}
+        </div>
       </div>
-    
-      
     </div>
   )
 }
