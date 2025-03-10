@@ -11,7 +11,10 @@ import USDCIcon from './icons/currency/USDCIcon'
 import DAIIcon from './icons/currency/DAIIcon'
 import EURSIcon from './icons/currency/EURSIcon'
 import CRVIcon from './icons/currency/CRVIcon'
-
+import BOLDIcon from './icons/currency/BOLDIcon'
+import EURCIcon from './icons/currency/EURCIcon'
+import EURAIcon from './icons/currency/EURAIcon'
+import USDCEIcon from './icons/currency/USDCIcon'
 const TokenDisplay = ({ token, isOpenable, onTokenClick}: { token: string, isOpenable: boolean, onTokenClick: () => void}) => {
   return (
     <div className="flex items-center gap-2 border border-color4 rounded-lg p-2 cursor-pointer" onClick={onTokenClick}>
@@ -26,6 +29,10 @@ const TokenDisplay = ({ token, isOpenable, onTokenClick}: { token: string, isOpe
         {token === 'DAI' && <DAIIcon />}
         {token === 'EURS' && <EURSIcon />}
         {token === 'CRVUSD' && <CRVIcon />}
+        {token === 'BOLD' && <BOLDIcon />}
+        {token === 'EURC' && <EURCIcon />}
+        {token === 'EURA' && <EURAIcon />}
+        {token === 'USDCE' && <USDCEIcon />}
         <span className="font-medium text-color4">{token}</span>
         {isOpenable && (
                 <ArrowDownIcon strokeColor="#4F5B76" className="w-10 h-4"/>

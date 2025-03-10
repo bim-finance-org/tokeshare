@@ -1,20 +1,59 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import ArrowIcon from "@/app/components/icons/arrows/ArrowIcon";
 import Image from "next/image";
 import Link from "next/link";
 import { Commodity } from "@/app/types/Commodity";
+import { fetchPAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
 
 interface CommoditiesCardProps {
   commodity: Commodity;
 }
 
 const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
-  const { name, image, tokenPrice, year1Perf, years5Perf } = commodity;
+  const { name, image, tokenPrice: staticTokenPrice } = commodity;
+  const [dynamicTokenPrice, setDynamicTokenPrice] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch real-time token price
+  useEffect(() => {
+    const getPrice = async () => {
+      try {
+        setIsLoading(true);
+        const paxgPrice = await fetchPAXGPrice();
+        const calculatedTggPrice = calculateTGGPrice(paxgPrice);
+        setDynamicTokenPrice(calculatedTggPrice);
+      } catch (error) {
+        console.error("Error fetching token price:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getPrice();
+    
+    // Refresh price every 30 seconds
+    const intervalId = setInterval(getPrice, 30000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Format price for display
+  const formatPrice = (price: number) => {
+    return `$${price.toFixed(2)}`;
+  };
+
+  // Display price based on availability
+  const displayPrice = isLoading 
+    ? "Loading..." 
+    : dynamicTokenPrice 
+      ? formatPrice(dynamicTokenPrice)
+      : staticTokenPrice;
 
   return (
     <div className="text-color4 min-w-[280px] max-w-[400px] w-full mx-auto">
       <div className="relative w-">
-        <Image src={image} alt={name} width={500} height={400} className="object-contain " />
+        <Image src={image} alt={name} width={500} height={400} className="object-contain" />
       </div>
       <div className="bg-color1 rounded-b-3xl p-4 shadow-lg">
         <div className="flex justify-between items-center">
@@ -22,28 +61,39 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
             <div className="border-t-2 border-color4 w-8 mr-2 ml-1"></div>
             <h3>{name}</h3>
           </div>
-          <h6 className="text-color2 font-bold text-lg">{tokenPrice} </h6>
+          <h6 className={`font-bold text-lg ${isLoading ? 'text-gray-400' : 'text-color2'}`}>
+            {displayPrice}
+          </h6>
         </div>
 
         <div className="mt-2 space-y-1">
           <div className="flex justify-between">
-            <p className="text-sm">Performance over 1 year</p>
-            <h6 className="font-medium">{year1Perf}</h6>
+            <p className="text-sm">Performance over 1 day</p>
+            <h6 className="font-medium">...</h6>
           </div>
           <div className="flex justify-between">
-            <p className="text-sm">Performance over 5 years</p>
-            <h6 className="font-medium">{years5Perf}</h6>
+            <p className="text-sm">Performance over 1 year</p>
+            <h6 className="font-medium">...</h6>
           </div>
         </div>
         <div className="flex justify-center mt-4 w-full">
-          <Link href={`/marketplace/commodities/${name}`}  rel="noopener noreferrer">
-          <button className=" bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition ">
-            <div className="flex w-full justify-between items-center px-8">
-              <h6 className="whitespace-nowrap pr-10">Available Soon</h6>
-              <ArrowIcon size={24} />
-            </div>
-          </button>
-          </Link>
+          {name === 'Gold' ? (
+            <Link href={`/marketplace/commodities/${name}`} rel="noopener noreferrer">
+              <button className="bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition">
+                <div className="flex w-full justify-between items-center px-8">
+                  <h6 className="whitespace-nowrap pr-10">Buy Gold (TGG)</h6>
+                  <ArrowIcon size={24} />
+                </div>
+              </button>
+            </Link>
+          ) : (
+            <button className="bg-gray-400 text-white rounded-full text-sm font-bold cursor-not-allowed opacity-80">
+              <div className="flex w-full justify-between items-center px-8">
+                <h6 className="whitespace-nowrap pr-10">Available Soon</h6>
+                <ArrowIcon size={24} />
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </div>

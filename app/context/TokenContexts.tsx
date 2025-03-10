@@ -5,7 +5,7 @@ import React, { createContext, useState, ReactNode } from 'react';
 export const TokenContexts = createContext({
   // États
   swap: { token: 'USDT', blockchain: 'Polygon' },
-  buy: { token: 'EUR', blockchain: 'Polygon' },
+  buy: { token: 'USD', blockchain: 'Polygon' },
   sell: { token: 'USD', blockchain: 'Polygon' },
   
   // Actions

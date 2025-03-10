@@ -2,15 +2,13 @@ import React from 'react'
 
 interface BuyInfoProps {
   amount: string;
-  tggAmount: string;
-  tggPrice: string;
   beneficiary: string;
   iban: string;
   alias: string;
   bank: string;
 }
 
-const BuyInfo = ({ amount, tggAmount, tggPrice, beneficiary, iban, alias, bank }: BuyInfoProps) => {
+const BuyInfo = ({ amount, beneficiary, iban, alias, bank }: BuyInfoProps) => {
   return (
     <div className="bg-gray-200 p-6 rounded-xl space-y-4">
       <div>
@@ -22,14 +20,6 @@ const BuyInfo = ({ amount, tggAmount, tggPrice, beneficiary, iban, alias, bank }
         <div className="flex justify-between items-center">
           <span className="text-gray-600">Amount:</span>
           <span className="font-medium">{amount}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600">TGG Amount:</span>
-          <span className="font-medium">{tggAmount}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600">TGG Price:</span>
-          <span className="font-medium">{tggPrice}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-600">Beneficiary:</span>

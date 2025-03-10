@@ -7,7 +7,8 @@ import CRVIcon from './icons/currency/CRVIcon'
 import BOLDIcon from './icons/currency/BOLDIcon'
 import EURCIcon from './icons/currency/EURCIcon'
 import EURAIcon from './icons/currency/EURAIcon'
-import { log } from 'console'
+import { useAccount } from 'wagmi'
+import { useTokenBalance } from '@/app/utils/blockchainUtils'
 
 interface StableCoinsProps {
   onSelect: (currency: string) => void
@@ -22,6 +23,7 @@ const BLOCKCHAIN_STABLECOINS = {
 
 const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
   const availableStablecoins = BLOCKCHAIN_STABLECOINS[blockchain as keyof typeof BLOCKCHAIN_STABLECOINS] || []
+  const { isConnected } = useAccount()
 
   const renderStablecoinButton = (symbol: string) => {
     const icons = {
@@ -36,6 +38,7 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
       USDCE: USDCIcon,
     }
     const Icon = icons[symbol as keyof typeof icons]
+    const balance = useTokenBalance(symbol, blockchain)
     
     return (
       <button 
@@ -43,13 +46,19 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
         onClick={() => {
           onSelect(symbol)
         }} 
-        className='flex items-center w-full p-2 hover:bg-gray-200 rounded-lg transition-colors border-b border-gray-200'
+        className='flex items-center justify-between w-full p-2 hover:bg-gray-200 rounded-lg transition-colors border-b border-gray-200'
       >
         <div className='flex items-center gap-3'>
-          <Icon  />
-          <span className='text-color4 font-medium'>{symbol == 'USDCE' ? 'USDC.e' : symbol}</span>
+          <Icon />
+          <span className='text-color4 font-medium'>{symbol === 'USDCE' ? 'USDC.e' : symbol}</span>
         </div>
-        </button>
+        
+        {isConnected && (
+          <span className='text-sm text-color4 font-medium'>
+            Balance: {balance}
+          </span>
+        )}
+      </button>
     )
   }
 

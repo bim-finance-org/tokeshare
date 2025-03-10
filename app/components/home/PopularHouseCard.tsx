@@ -6,7 +6,7 @@ import SurfaceIcon from "../icons/card/SurfaceIcon";
 import BedIcon from "../icons/card/BedIcon";
 import ArrowIcon from "../icons/arrows/ArrowIcon";
 import Image from "next/image";
-import { House } from "@/app/types";
+import { House } from "@/app/types/House";
 
 interface PopularHouseCardProps {
   house: House;

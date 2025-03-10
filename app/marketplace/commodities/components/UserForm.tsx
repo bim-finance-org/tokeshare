@@ -12,8 +12,8 @@ interface UserFormProps {
 }
 
 const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps) => {
-  const { isConnected } = useAccount();
-  const [showBuyInfo, setShowBuyInfo] = useState(false);
+  const { isConnected, address } = useAccount();
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -21,21 +21,19 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     iban: type === 'sell' ? '' : undefined,
   });
 
-  // Example data - replace with your actual data
+  // Informations de transfert pour le type 'buy'
   const transferInfo = {
     amount: `${amount} ${currency}`,
-    tggAmount: `${tggAmount} TGG`,
-    tggPrice: `$${tggPrice.toFixed(2)}`,
     beneficiary: "Tokeshare",
-    iban: formData.iban || "FR7630006000011234567890189",
+    iban: "FR76 1695 8000 0103 0490 4861 482",
     alias: "Tokeshare",
-    bank: "BNP Paribas"
+    bank: "Qonto"
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (type === 'buy' ? isConnected : true) {
-      setShowBuyInfo(true);
+      setShowConfirmation(true);
     }
   };
 
@@ -48,8 +46,8 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
   };
 
   return (
-    <div className="p-6 w-full text-color4 max-w-md mx-auto bg-gray-100 rounded-2xl shadow-md space-y-4">
-      {!showBuyInfo ? (
+    <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4">
+      {!showConfirmation ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name Section */}
           <div className="bg-gray-200 p-4 rounded-xl">
@@ -116,9 +114,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
               <label className="block text-sm mb-2">Reception address</label>
               <ConnectButton
                 connectText="Connect"
-                className={`w-full py-2 rounded-xl font-medium shadow ${
-                  isConnected ? "bg-gray-400" : "bg-blue-600 text-white"
-                }`}
+                className="w-full py-2 rounded-xl font-medium shadow"
                 showAddress={true}
               />
             </div>
@@ -134,23 +130,21 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           </button>
         </form>
       ) : (
-        <div className="space-y-4">
-          <BuyInfo 
-            amount={transferInfo.amount}
-            tggAmount={transferInfo.tggAmount}
-            tggPrice={transferInfo.tggPrice}
-            beneficiary={transferInfo.beneficiary}
-            iban={transferInfo.iban}
-            alias={transferInfo.alias}
-            bank={transferInfo.bank}
-          />
-          <button
-            onClick={() => setShowBuyInfo(false)}
-            className="w-full bg-gray-200 text-color4 py-3 rounded-xl font-medium shadow-sm hover:bg-gray-300 transition-colors"
-          >
-            Back to Form
-          </button>
-        </div>
+        // Affichage conditionnel selon le type après soumission
+        <>
+          {type === 'buy' && (
+            // Informations de transfert pour Buy
+            <div className="space-y-4">
+              <BuyInfo 
+                amount={transferInfo.amount}
+                beneficiary={transferInfo.beneficiary}
+                iban={transferInfo.iban}
+                alias={transferInfo.alias}
+                bank={transferInfo.bank}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

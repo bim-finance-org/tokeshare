@@ -28,10 +28,10 @@ const ConnectButton = ({
 
   return (
     <div className={className} onClick={address ? onConnectedClick : undefined}>
-      <appkit-button
+      <w3m-connect-button
         label={buttonText}
         size="md"
-        balance={address ? "show" : "hide"}
+        custom-class="w-full py-2 font-medium text-white"
       />
     </div>
   );

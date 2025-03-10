@@ -65,7 +65,7 @@ const CommoditiesPage = () => {
 
               <div className="py-4 flex justify-between border-b-2 border-color5">
                 <h3 className="text-lg font-semibold">Proof of Reserve</h3>
-                <p className="text-base">100%</p>
+                <p className="text-base">0x0c...f80</p>
               </div>
 
               <div className="py-4 flex justify-between">
