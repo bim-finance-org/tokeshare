@@ -10,6 +10,7 @@ import CrossIcon from "./icons/CrossIcon";
 import Head from "next/head";
 import ConnectButton from "./shared/ConnectButton";
 import { useAccount } from "wagmi";
+import { ActionButtonList } from "./shared/ActionButtonList";
 
 interface NavBarProps {
   customClass?: string;
@@ -145,11 +146,7 @@ const NavBar: React.FC<NavBarProps> = () => {
 
         {/* Bouton My Account */}
         <div>
-          <ConnectButton 
-            connectText="My Account"
-            connectedText={formatAddress(address!)}
-            className="rounded-lg border-2 border-white px-2 sm:px-3 md:px-4 py-1 text-xs sm:text-sm md:text-base lg:text-lg text-white hover:bg-white hover:text-black transition-all duration-300"
-          />
+          <ConnectButton/>
         </div>
       </nav>
     </>

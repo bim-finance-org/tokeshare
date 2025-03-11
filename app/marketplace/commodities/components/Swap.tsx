@@ -141,8 +141,6 @@ const Swap = () => {
           </button>
         ) : (
           <ConnectButton
-            connectText="Connect Wallet"
-            connectedText="Swap"
           />
         )}
       </div>

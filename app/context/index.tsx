@@ -31,7 +31,7 @@ const modal = createAppKit({
   metadata: metadata,
   features: {
     analytics: true // Optional - defaults to your Cloud configuration
-  }
+  },
 })
 
 function ContextProvider({ children, cookies }: { children: ReactNode; cookies: string | null }) {
