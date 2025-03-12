@@ -107,10 +107,7 @@ const Sell = () => {
             Sell
           </button>
         ) : (
-          <ConnectButton
-            connectText="Connect Wallet"
-            connectedText="Sell"
-          />
+          <ConnectButton/>
         )}
       </div>
     </div>

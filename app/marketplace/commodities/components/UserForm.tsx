@@ -112,11 +112,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           {type === 'buy' && (
             <div className="bg-gray-200 p-4 rounded-xl">
               <label className="block text-sm mb-2">Reception address</label>
-              <ConnectButton
-                connectText="Connect"
-                className="w-full py-2 rounded-xl font-medium shadow"
-                showAddress={true}
-              />
+              <ConnectButton/>
             </div>
           )}
 

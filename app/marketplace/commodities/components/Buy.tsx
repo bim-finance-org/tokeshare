@@ -129,10 +129,12 @@ const Buy = () => {
             Buy
           </button>
         ) : (
-          <ConnectButton
-            connectText="Connect Wallet"
-            connectedText="Buy"
-          />
+          <button
+            onClick={() => setShowBuyNext(true)}
+            className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition-all duration-200"
+          >
+            Buy
+          </button>
         )}
       </div>
     </div>

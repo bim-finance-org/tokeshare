@@ -10,7 +10,6 @@ import CrossIcon from "./icons/CrossIcon";
 import Head from "next/head";
 import ConnectButton from "./shared/ConnectButton";
 import { useAccount } from "wagmi";
-import { ActionButtonList } from "./shared/ActionButtonList";
 
 interface NavBarProps {
   customClass?: string;
@@ -146,7 +145,7 @@ const NavBar: React.FC<NavBarProps> = () => {
 
         {/* Bouton My Account */}
         <div>
-          <ConnectButton/>
+          <ConnectButton isTransparent={true} navbarButton={true} />
         </div>
       </nav>
     </>
