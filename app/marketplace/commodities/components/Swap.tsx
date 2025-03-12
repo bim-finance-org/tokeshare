@@ -87,8 +87,8 @@ const Swap = () => {
   };
 
   return (
-    <div className="p-6 w-full relative">
-      <div className="flex flex-col gap-6 relative">
+    <div className="p-3 sm:p-6 w-full relative">
+      <div className="flex flex-col gap-4 sm:gap-6 relative">
         <TradeWidget
           type={isTggFirst ? "crypto" : "stablecoin"}
           label="YOU SEND"
@@ -125,23 +125,22 @@ const Swap = () => {
         />
       </div>
 
-      <div className="mb-6 mt-4 space-y-2">
+      <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-1 sm:space-y-2">
         <Blockchains section="swap" onSelect={handleBlockchainSelect} />
-        <p className="text-color4 text-sm font-medium ml-2">Delivery time: instant</p>
-        <p className="text-color4 text-sm font-medium ml-2">TGG Price: ${tggPrice.toFixed(2)}</p>
-        <p className="text-color4 text-sm font-medium ml-2">
+        <p className="text-color4 text-xs sm:text-sm font-medium ml-2">Delivery time: instant</p>
+        <p className="text-color4 text-xs sm:text-sm font-medium ml-2">TGG Price: ${tggPrice.toFixed(2)}</p>
+        <p className="text-color4 text-xs sm:text-sm font-medium ml-2">
           Exchange rate: 1 TGG = ${tggPrice.toFixed(2)}
         </p>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4 sm:mt-6">
         {isConnected ? (
-          <button className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition-all duration-200">
+          <button className="w-full bg-color4 text-white py-2 sm:py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition-all duration-200 text-sm sm:text-base">
             Swap
           </button>
         ) : (
-          <ConnectButton
-          />
+          <ConnectButton />
         )}
       </div>
     </div>
