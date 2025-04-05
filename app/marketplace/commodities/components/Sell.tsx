@@ -4,7 +4,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import TradeWidget from '../../../components/shared/TradeWidget'
 import BankIcon from '@/app/components/icons/BankIcon'
 import Blockchains from '@/app/components/Blockchains'
-import { fetchPAXGPrice, calculateTGGPrice } from '@/app/utils/priceUtils'
+import { usePAXGPrice, calculateTGGPrice } from '@/app/utils/priceUtils'
 import ConnectButton from '@/app/components/shared/ConnectButton'
 import { useAccount } from 'wagmi'
 import UserForm from './UserForm'
@@ -24,10 +24,10 @@ const Sell = () => {
   const [tggPrice, setTggPrice] = useState<number>(0)
   const [showUserForm, setShowUserForm] = useState(false)
   const { isConnected } = useAccount()
-
+  const { paxgPrice, isLoading } = usePAXGPrice();
+    
   useEffect(() => {
     const updatePrice = async () => {
-      const paxgPrice = await fetchPAXGPrice();
       const calculatedTggPrice = calculateTGGPrice(paxgPrice);
       setTggPrice(calculatedTggPrice);
     };

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ArrowIcon from "../icons/arrows/ArrowIcon";
 import Image from "next/image";
 import { Commodity } from "@/app/types/Commodity";
-import { fetchPAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
+import { usePAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
 import Link from "next/link";
 
 interface PopularCommoditiesCardProps {
@@ -13,33 +13,10 @@ interface PopularCommoditiesCardProps {
 
 const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ commodity }) => {
   const { name, image, tokenPrice: staticTokenPrice } = commodity;
+  const { paxgPrice, isLoading } = usePAXGPrice();
 
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
-  const [dynamicTokenPrice, setDynamicTokenPrice] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Fetch the real-time price
-  useEffect(() => {
-    const getPrice = async () => {
-      try {
-        setIsLoading(true);
-        const paxgPrice = await fetchPAXGPrice();
-        const calculatedTggPrice = calculateTGGPrice(paxgPrice);
-        setDynamicTokenPrice(calculatedTggPrice);
-      } catch (error) {
-        console.error("Error fetching token price:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    getPrice();
-    
-    // Refresh price every 30 seconds
-    const intervalId = setInterval(getPrice, 30000);
-    return () => clearInterval(intervalId);
-  }, []);
 
   // Handle responsive layout
   useEffect(() => {
@@ -58,15 +35,15 @@ const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ commodi
   }, []);
 
   // Format price display
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number): string => {
     return `$${price.toFixed(2)}`;
   };
 
   // Display price based on availability
   const displayPrice = isLoading 
     ? "Loading..." 
-    : dynamicTokenPrice 
-      ? formatPrice(dynamicTokenPrice)
+    : paxgPrice 
+      ? formatPrice(calculateTGGPrice(paxgPrice))
       : staticTokenPrice;
 
   return (

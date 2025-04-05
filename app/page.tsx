@@ -7,12 +7,17 @@ import Image from "next/image";
 import { Input } from "../components/ui/input";
 import Schema from "./components/home/Schema";
 import { z } from "zod";
+import { usePaxgPrice } from "./hooks/usePaxgPrice";
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Précharger le prix du PAXG
+  usePaxgPrice();
+
   const handleSubscribe = async () => {
     if (!email.trim()) {
       setError("Please enter your email.");
@@ -71,7 +76,7 @@ export default function Home() {
         <h4 className="font-bold text-5xl text-center mb-6">Interested in Updates?</h4>
 
         {submitted ? (
-          <p className="text-green-400 font-semibold text-center">✅ Thank you! We’ll keep you updated. Stay tuned! 🎉</p>
+          <p className="text-green-400 font-semibold text-center">✅ Thank you! We&apos;ll keep you updated. Stay tuned! 🎉</p>
         ) : (
           <>
             <div className="relative w-full my-8">
@@ -100,10 +105,14 @@ export default function Home() {
                   <span>Required</span>
                 </div>
               </div>
-              {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-              <button className="flex items-center justify-center py-4 px-8 bg-color5 text-color4 rounded-full text-lg font-medium hover:bg-color2 transition disabled:bg-gray-600" onClick={handleSubscribe} disabled={!email.trim() || !z.string().email().safeParse(email).success || isSubmitting}>
-                <h2 className="pl-10 pr-4 text-3xl">Subscribe</h2>
-                <ArrowLineIcon size={72} />
+              {error && <p className="text-red-500">{error}</p>}
+              <button
+                type="button"
+                onClick={handleSubscribe}
+                disabled={isSubmitting}
+                className="bg-color1 text-white px-6 py-2 rounded-lg hover:scale-105 transition-transform duration-300 disabled:opacity-50"
+              >
+                {isSubmitting ? "Subscribing..." : "Subscribe"}
               </button>
             </form>
           </>

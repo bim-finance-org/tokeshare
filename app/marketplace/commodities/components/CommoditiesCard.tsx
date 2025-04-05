@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import ArrowIcon from "@/app/components/icons/arrows/ArrowIcon";
 import Image from "next/image";
 import Link from "next/link";
 import { Commodity } from "@/app/types/Commodity";
-import { fetchPAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
+import { usePAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
 
 interface CommoditiesCardProps {
   commodity: Commodity;
@@ -13,30 +13,7 @@ interface CommoditiesCardProps {
 
 const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
   const { name, image, tokenPrice: staticTokenPrice } = commodity;
-  const [dynamicTokenPrice, setDynamicTokenPrice] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Fetch real-time token price
-  useEffect(() => {
-    const getPrice = async () => {
-      try {
-        setIsLoading(true);
-        const paxgPrice = await fetchPAXGPrice();
-        const calculatedTggPrice = calculateTGGPrice(paxgPrice);
-        setDynamicTokenPrice(calculatedTggPrice);
-      } catch (error) {
-        console.error("Error fetching token price:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    getPrice();
-    
-    // Refresh price every 30 seconds
-    const intervalId = setInterval(getPrice, 30000);
-    return () => clearInterval(intervalId);
-  }, []);
+  const { paxgPrice, isLoading } = usePAXGPrice();
 
   // Format price for display
   const formatPrice = (price: number) => {
@@ -46,8 +23,8 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
   // Display price based on availability
   const displayPrice = isLoading 
     ? "Loading..." 
-    : dynamicTokenPrice 
-      ? formatPrice(dynamicTokenPrice)
+    : paxgPrice 
+      ? formatPrice(calculateTGGPrice(paxgPrice))
       : staticTokenPrice;
 
   return (

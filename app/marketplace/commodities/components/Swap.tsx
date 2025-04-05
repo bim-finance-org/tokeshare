@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import TradeWidget from "@/app/components/shared/TradeWidget";
 import Image from "next/image";
 import Blockchains from "@/app/components/Blockchains";
-import { fetchPAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
+import { usePAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
 import { useAccount } from 'wagmi';
 import ConnectButton from "@/app/components/shared/ConnectButton";
 import { TokenContexts } from '@/app/context/TokenContexts';
@@ -21,11 +21,11 @@ const Swap = () => {
   const [tggPrice, setTggPrice] = useState<number>(0);
   const [isTggFirst, setIsTggFirst] = useState(false);
   const { isConnected } = useAccount();
+  const { paxgPrice, isLoading } = usePAXGPrice();
 
   // Mise à jour du prix TGG
   useEffect(() => {
     const updatePrice = async () => {
-      const paxgPrice = await fetchPAXGPrice();
       const calculatedTggPrice = calculateTGGPrice(paxgPrice);
       setTggPrice(calculatedTggPrice);
     };

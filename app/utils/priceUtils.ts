@@ -1,13 +1,4 @@
-export const fetchPAXGPrice = async (): Promise<number> => {
-  try {
-    const response = await fetch('/api/paxg-price');
-    const data = await response.json();
-    return data.price;
-  } catch (error) {
-    console.error('Error fetching PAXG price:', error);
-    return 2898.86; 
-  }
-};
+import { usePaxgPrice } from '../hooks/usePaxgPrice';
 
 // Calculate TGG price based on PAXG price
 export const calculateTGGPrice = (paxgPrice: number): number => {
@@ -26,4 +17,14 @@ const EXCHANGE_RATES: { [key: string]: number } = {
 export const convertToUSD = (amount: number, fromCurrency: string): number => {
   const rate = EXCHANGE_RATES[fromCurrency] || 1;
   return amount * rate;
+};
+
+// Hook pour utiliser le prix du PAXG
+export const usePAXGPrice = () => {
+  const { data: paxgPrice, isLoading, error } = usePaxgPrice();
+  return {
+    paxgPrice: paxgPrice,
+    isLoading,
+    error
+  };
 }; 
