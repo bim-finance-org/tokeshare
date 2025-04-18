@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useAccount } from 'wagmi';
 import ConnectButton from "@/app/components/shared/ConnectButton";
 import BuyInfo from "./BuyInfo";
+import { TokenContexts } from "@/app/context/TokenContexts";
 
 interface UserFormProps {
   type: 'buy' | 'sell';
@@ -12,8 +13,16 @@ interface UserFormProps {
 }
 
 const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps) => {
+  // Récupérer les valeurs du contexte pour la blockchain
+  const { 
+    buy: { blockchain: buyBlockchain },
+    sell: { blockchain: sellBlockchain }
+  } = useContext(TokenContexts);
+  
   const { isConnected, address } = useAccount();
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -30,10 +39,74 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     bank: "Qonto"
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (type === 'buy' ? isConnected : true) {
+    setError(null);
+    
+    // Vérifier que l'utilisateur est connecté pour les achats
+    if (type === 'buy' && !isConnected) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Préparer les données pour l'API
+      let apiData;
+      
+      if (type === 'buy') {
+        // Données pour une transaction d'achat
+        apiData = {
+          walletAddress: address || '',
+          blockchain: buyBlockchain,
+          crypto: 'TGG',
+          amount: parseFloat(tggAmount),
+          email: formData.email,
+          cvu: '', // Champ optionnel
+          status: 'pending'
+        };
+      } else {
+        // Données pour une transaction de vente
+        apiData = {
+          iban: formData.iban || '',
+          blockchain: sellBlockchain,
+          fiat: currency,
+          amount: parseFloat(amount),
+          email: formData.email,
+          fullName: `${formData.firstName} ${formData.lastName}`,
+          status: 'pending'
+        };
+      }
+      
+      // Faire l'appel API en fonction du type (achat ou vente)
+      const endpoint = type === 'buy' ? '/api/transactions/buy' : '/api/transactions/sell';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Une erreur est survenue lors de la transaction');
+      }
+      
+      // Si tout va bien, afficher la confirmation
       setShowConfirmation(true);
+    } catch (err) {
+      console.error('Erreur lors de la soumission:', err);
+      
+      // Gérer l'erreur de parsing JSON si elle se produit
+      if (err instanceof SyntaxError && err.message.includes('JSON')) {
+        setError("Erreur de connexion au serveur. Veuillez réessayer plus tard.");
+      } else {
+        setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -116,13 +189,20 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
             </div>
           )}
 
+          {/* Error message */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+              {error}
+            </div>
+          )}
+
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={type === 'buy' && !isConnected}
+            disabled={(type === 'buy' && !isConnected) || isLoading}
             className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {type === 'buy' ? 'Buy' : 'Sell'}
+            {isLoading ? 'Traitement en cours...' : type === 'buy' ? 'Buy' : 'Sell'}
           </button>
         </form>
       ) : (
@@ -138,6 +218,15 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
                 alias={transferInfo.alias}
                 bank={transferInfo.bank}
               />
+            </div>
+          )}
+          
+          {type === 'sell' && (
+            <div className="bg-gray-200 p-6 rounded-xl text-center">
+              <h2 className="text-xl font-bold mb-4">Demande de vente envoyée</h2>
+              <p className="mb-2">Merci pour votre demande de vente de {tggAmount} TGG.</p>
+              <p className="mb-4">Vous recevrez {amount} {currency} sur votre compte bancaire.</p>
+              <p>Nous vous contacterons à {formData.email} pour confirmer la transaction.</p>
             </div>
           )}
         </>
