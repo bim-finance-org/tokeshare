@@ -1,25 +1,45 @@
 'use client'
 
 import { useState } from 'react'
+import { signIn, signOut, useSession } from 'next-auth/react'
 import DashBoard from './components/DashBoard'
 
-const page = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+const DashboardPage = () => {
+  const { data: session, status } = useSession()
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Remplacez 'votre_mot_de_passe' par le mot de passe souhaité
-    if (password === 'admin') {
-      setIsAuthenticated(true)
-      setError('')
-    } else {
+    setIsLoading(true)
+    setError('')
+    
+    const result = await signIn('credentials', {
+      password,
+      redirect: false
+    })
+    
+    setIsLoading(false)
+    
+    if (result?.error) {
       setError('Mot de passe incorrect')
     }
   }
 
-  if (!isAuthenticated) {
+  // Afficher un chargement pendant la vérification de session
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Si l'utilisateur n'est pas authentifié, afficher le formulaire de connexion
+  if (status !== 'authenticated') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
@@ -56,9 +76,10 @@ const page = () => {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={isLoading}
+                className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                Se connecter
+                {isLoading ? 'Connexion...' : 'Se connecter'}
               </button>
             </div>
           </form>
@@ -67,7 +88,20 @@ const page = () => {
     )
   }
 
-  return <DashBoard />
+  // Si l'utilisateur est authentifié, afficher le dashboard
+  return (
+    <div>
+      <DashBoard />
+      <div className="fixed bottom-4 right-4">
+        <button
+          onClick={() => signOut({ callbackUrl: '/' })}
+          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+        >
+          Déconnexion
+        </button>
+      </div>
+    </div>
+  )
 }
 
-export default page
+export default DashboardPage

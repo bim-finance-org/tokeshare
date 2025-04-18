@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import ContextProvider from './context'
 import { TokenProvider } from "./context/TokenContexts";
 import LayoutWrapper from "./components/LayoutWrapper";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Tokeshare",
@@ -31,13 +32,15 @@ export default async function RootLayout({
   return (
     <html lang="en">  
       <body>
-        <ContextProvider cookies={cookies}>
-          <TokenProvider>
-            <LayoutWrapper>
-              {children}
-            </LayoutWrapper>
-          </TokenProvider>
-        </ContextProvider>
+        <Providers>
+          <ContextProvider cookies={cookies}>
+            <TokenProvider>
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </TokenProvider>
+          </ContextProvider>
+        </Providers>
       </body>
     </html>
   );
