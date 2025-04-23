@@ -221,33 +221,44 @@ const BuyModal = () => {
     setNewAmount('');
   };
 
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        // Optionally show a success message
+        console.log('Wallet address copied to clipboard');
+      })
+      .catch((err) => {
+        console.error('Failed to copy text: ', err);
+      });
+  };
+
   return (
     <div className='w-full h-full p-4'>
       <div className="mb-4 flex gap-4">
         <div className="w-48">
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Filter by status</label>
+          <label htmlFor="status" className="block text-sm font-medium text-black mb-1">Filter by status</label>
           <select
             id="status"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="all">All statuses</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-            <option value="receipt">Receipt</option>
+            <option value="all" className='text-black'>All statuses</option>
+            <option value="completed" className='text-black'>Completed</option>
+            <option value="pending" className='text-black'>Pending</option>
+            <option value="failed" className='text-black'>Failed</option>
+            <option value="receipt" className='text-black'>Receipt</option>
           </select>
         </div>
         <div className="flex-1">
-          <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Search by reference</label>
+          <label htmlFor="search" className="block text-sm font-medium text-black mb-1">Search by reference</label>
           <input
             type="text"
             id="search"
             value={searchRef}
             onChange={(e) => setSearchRef(e.target.value)}
             placeholder="Enter a reference..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>
@@ -296,11 +307,19 @@ const BuyModal = () => {
                       {transaction.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.walletAddress}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span 
+                      className="cursor-pointer hover:text-blue-500 hover:underline" 
+                      onClick={() => handleCopyToClipboard(transaction.walletAddress)}
+                      title="Click to copy wallet address"
+                    >
+                      {transaction.walletAddress}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.crypto}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {parseFloat(transaction.amount.toString()).toFixed(8)} {transaction.crypto}
+                    {parseFloat(transaction.amount.toString()).toFixed(8)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {parseFloat(transaction.fees.toString()).toFixed(2)} {transaction.fiatCurrency}

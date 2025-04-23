@@ -221,6 +221,17 @@ const SellModal = () => {
     setNewAmount('');
   };
 
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        // Optionally show a success message
+        console.log('IBAN copied to clipboard');
+      })
+      .catch((err) => {
+        console.error('Failed to copy text: ', err);
+      });
+  };
+
   return (
     <div className='w-full h-full p-4'>
       <div className="mb-4 flex gap-4">
@@ -296,7 +307,15 @@ const SellModal = () => {
                       {transaction.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.iban}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span 
+                      className="cursor-pointer hover:text-blue-500 hover:underline" 
+                      onClick={() => handleCopyToClipboard(transaction.iban)}
+                      title="Click to copy IBAN"
+                    >
+                      {transaction.iban}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.fiat}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.amount.toString()}</td>
