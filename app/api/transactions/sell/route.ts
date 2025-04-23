@@ -61,6 +61,12 @@ export async function POST(request: NextRequest) {
     // Génération d'une référence unique
     const ref = `${generatePayReference()}`;
     
+    // Récupérer les fees ou calculer par défaut (2.5% du montant)
+    const amount = parseFloat(data.amount);
+    const fees = data.fees !== undefined 
+      ? parseFloat(data.fees) 
+      : parseFloat((amount * 0.025).toFixed(2));
+    
     // Création de la transaction
     const newTransaction = await prisma.sellTransaction.create({
       data: {
@@ -68,11 +74,13 @@ export async function POST(request: NextRequest) {
         iban: data.iban,
         blockchain: data.blockchain,
         fiat: data.fiat,
-        amount: parseFloat(data.amount),
+        amount: amount,
+        fees: fees,
         ref: ref,
         date: new Date(),
         email: data.email,
-        fullName: data.fullName
+        fullName: data.fullName,
+        cryptoCurrency: data.cryptoCurrency
       }
     });
     

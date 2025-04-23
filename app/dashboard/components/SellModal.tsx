@@ -11,10 +11,12 @@ interface SellTransaction {
   blockchain: string
   fiat: string
   amount: number
+  fees: number
   ref: string
   date: Date
   email: string
   fullName: string
+  cryptoCurrency: string
 }
 
 const SellModal = () => {
@@ -175,7 +177,7 @@ const SellModal = () => {
         throw new Error('Error updating status');
       }
 
-      // Then update the amount
+      // Then update the amount (fees will be calculated in the API)
       const amountResponse = await fetch(`/api/transactions/sell/${transactionId}/amount`, {
         method: 'PUT',
         headers: {
@@ -195,11 +197,11 @@ const SellModal = () => {
 
       const updatedTransaction = await amountResponse.json();
 
-      // Update local state
+      // Update local state with response from API
       setTransactions(prevTransactions =>
         prevTransactions.map(transaction =>
           transaction.id === transactionId
-            ? { ...transaction, status: 'completed', amount: amount }
+            ? updatedTransaction
             : transaction
         )
       );
@@ -272,6 +274,7 @@ const SellModal = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blockchain</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">FIAT</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fees</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">REF</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
@@ -297,6 +300,9 @@ const SellModal = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.fiat}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.amount.toString()}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {parseFloat(transaction.fees.toString()).toFixed(8)} {transaction.cryptoCurrency}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.ref}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(transaction.date).toLocaleDateString()}

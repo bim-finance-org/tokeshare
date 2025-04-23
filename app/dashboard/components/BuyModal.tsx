@@ -15,6 +15,8 @@ interface BuyTransaction {
   date: Date
   email: string
   cvu: string
+  fees: number
+  fiatCurrency: string
 }
 
 const BuyModal = () => {
@@ -272,6 +274,7 @@ const BuyModal = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blockchain</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Crypto</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fees</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ref</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
@@ -296,7 +299,12 @@ const BuyModal = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.walletAddress}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.crypto}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.amount.toString()}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {parseFloat(transaction.amount.toString()).toFixed(8)} {transaction.crypto}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {parseFloat(transaction.fees.toString()).toFixed(2)} {transaction.fiatCurrency}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.ref}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(transaction.date).toLocaleDateString()}

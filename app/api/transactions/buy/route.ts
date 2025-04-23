@@ -18,7 +18,7 @@ function generatePayReference(): string {
 }
 
 // GET pour récupérer toutes les transactions d'achat
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Vérifier si l'utilisateur est authentifié
     const session = await getServerSession(authOptions);
@@ -54,12 +54,18 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     
     // Validation des données
-    if (!data.walletAddress || !data.blockchain || !data.crypto || !data.amount || !data.email) {
+    if (!data.walletAddress || !data.blockchain || !data.crypto || !data.amount || !data.email || !data.fiatCurrency) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
     }
     
     // Génération d'une référence unique
     const ref = `${generatePayReference()}`;
+    
+    // Récupérer les fees ou calculer par défaut (2.5% du montant)
+    const amount = parseFloat(data.amount);
+    const fees = data.fees !== undefined 
+      ? parseFloat(data.fees) 
+      : parseFloat((amount * 0.025).toFixed(8));
     
     // Création de la transaction
     const newTransaction = await prisma.buyTransaction.create({
@@ -68,7 +74,9 @@ export async function POST(request: NextRequest) {
         walletAddress: data.walletAddress,
         blockchain: data.blockchain,
         crypto: data.crypto,
-        amount: parseFloat(data.amount),
+        fiatCurrency: data.fiatCurrency,
+        amount: amount,
+        fees: fees,
         ref: ref,
         date: new Date(),
         email: data.email,

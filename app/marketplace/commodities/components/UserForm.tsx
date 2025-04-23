@@ -55,23 +55,35 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
       let apiData;
       
       if (type === 'buy') {
+        // Calculer le montant et les frais pour l'achat
+        const amountValue = parseFloat(tggAmount);
+        const feesValue = parseFloat((parseFloat(amount) * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
+        
         // Données pour une transaction d'achat
         apiData = {
           walletAddress: address || '',
           blockchain: buyBlockchain,
           crypto: 'TGG',
-          amount: parseFloat(tggAmount),
+          fiatCurrency: currency,
+          amount: amountValue,
+          fees: feesValue,
           email: formData.email,
-          cvu: '', // Champ optionnel
+          cvu: '',
           status: 'pending'
         };
       } else {
+        // Calculer le montant et les frais pour la vente
+        const amountValue = parseFloat(amount);
+        const feesValue = parseFloat((amountValue * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
+        
         // Données pour une transaction de vente
         apiData = {
           iban: formData.iban || '',
           blockchain: sellBlockchain,
           fiat: currency,
-          amount: parseFloat(amount),
+          cryptoCurrency: 'TGG',
+          amount: amountValue,
+          fees: feesValue,
           email: formData.email,
           fullName: `${formData.firstName} ${formData.lastName}`,
           status: 'pending'

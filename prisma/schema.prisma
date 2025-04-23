@@ -1,31 +1,30 @@
 generator client {
   provider = "prisma-client-js"
 }
- 
+
 datasource db {
-  provider = "postgresql"
-  // Uses connection pooling
-  url = env("DATABASE_URL")
-  // Uses direct connection, ⚠️ make sure to keep this to `DATABASE_URL_UNPOOLED`
-  // or you'll have dangling databases from migrations
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
- 
+
 model Emails {
-  email     String   @id
+  email String @id
 }
 
 model SellTransaction {
-  id        Int      @id @default(autoincrement())
-  status    String   @db.VarChar(20)
-  iban      String   @db.VarChar(34)
-  blockchain String   @db.VarChar(50)
-  fiat      String   @db.VarChar(10)
-  amount    Decimal  @db.Decimal(18, 2)
-  ref       String   @unique @db.VarChar(20)
-  date      DateTime @db.Date
-  email     String   @db.VarChar(255)
-  fullName  String   @db.VarChar(255)
+  id            Int      @id @default(autoincrement())
+  status        String   @db.VarChar(20)
+  iban          String   @db.VarChar(34)
+  blockchain    String   @db.VarChar(50)
+  fiat          String   @db.VarChar(10)
+  cryptoCurrency String  @db.VarChar(10)
+  amount        Decimal  @db.Decimal(18, 2)
+  fees          Decimal  @db.Decimal(18, 2)
+  ref           String   @unique @db.VarChar(20)
+  date          DateTime @db.Date
+  email         String   @db.VarChar(255)
+  fullName      String   @db.VarChar(255)
 
   @@map("sell_transactions")
 }
@@ -36,7 +35,9 @@ model BuyTransaction {
   walletAddress String   @db.VarChar(255)
   blockchain    String   @db.VarChar(50)
   crypto        String   @db.VarChar(10)
+  fiatCurrency  String   @db.VarChar(10)
   amount        Decimal  @db.Decimal(18, 8)
+  fees          Decimal  @db.Decimal(18, 8)
   ref           String   @unique @db.VarChar(20)
   date          DateTime @db.Date
   email         String   @db.VarChar(255)

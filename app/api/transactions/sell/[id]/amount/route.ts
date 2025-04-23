@@ -30,13 +30,16 @@ export async function PUT(
 
     const data = await request.json();
     
-    // Data validation
+    // Data validation for amount
     if (data.amount === undefined || isNaN(parseFloat(data.amount)) || parseFloat(data.amount) <= 0) {
       return NextResponse.json(
         { error: 'Invalid amount. Must be a positive number.' },
         { status: 400 }
       );
     }
+
+    // Parse amount and fees
+    const amount = parseFloat(data.amount);
     
     // Check if transaction exists
     const transaction = await prisma.sellTransaction.findUnique({
@@ -50,11 +53,11 @@ export async function PUT(
       );
     }
     
-    // Update transaction amount
+    // Update transaction amount and fees
     const updatedTransaction = await prisma.sellTransaction.update({
       where: { id },
       data: { 
-        amount: parseFloat(data.amount)
+        amount: amount,
       }
     });
     
