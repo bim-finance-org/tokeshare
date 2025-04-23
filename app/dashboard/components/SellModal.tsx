@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import { CheckCircle } from 'lucide-react';
 
 interface SellTransaction {
   id: number
@@ -28,6 +29,7 @@ const SellModal = () => {
   const [expandedTransactionId, setExpandedTransactionId] = useState<number | null>(null)
   const [validationStep, setValidationStep] = useState<number | null>(null)
   const [newAmount, setNewAmount] = useState<string>('')
+  const [showCopiedNotification, setShowCopiedNotification] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -224,8 +226,12 @@ const SellModal = () => {
   const handleCopyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
       .then(() => {
-        // Optionally show a success message
-        console.log('IBAN copied to clipboard');
+        // Show notification
+        setShowCopiedNotification(true);
+        // Hide after 1 second
+        setTimeout(() => {
+          setShowCopiedNotification(false);
+        }, 1000);
       })
       .catch((err) => {
         console.error('Failed to copy text: ', err);
@@ -233,32 +239,40 @@ const SellModal = () => {
   };
 
   return (
-    <div className='w-full h-full p-4'>
+    <div className='w-full h-full p-4 relative'>
+      {/* Notification de copie */}
+      {showCopiedNotification && (
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md flex items-center shadow-lg">
+          <CheckCircle className="mr-2 h-5 w-5" />
+          <span className="font-medium">Copied!</span>
+        </div>
+      )}
+      
       <div className="mb-4 flex gap-4">
         <div className="w-48">
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Filter by status</label>
+          <label htmlFor="status" className="block text-sm font-medium text-black mb-1">Filter by status</label>
           <select
             id="status"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="all">All statuses</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-            <option value="receipt">Receipt</option>
+            <option value="all" className='text-black'>All statuses</option>
+            <option value="completed" className='text-black'>Completed</option>
+            <option value="pending" className='text-black'>Pending</option>
+            <option value="failed" className='text-black'>Failed</option>
+            <option value="receipt" className='text-black'>Receipt</option>
           </select>
         </div>
         <div className="flex-1">
-          <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Search by reference</label>
+          <label htmlFor="search" className="block text-sm font-medium text-black mb-1">Search by reference</label>
           <input
             type="text"
             id="search"
             value={searchRef}
             onChange={(e) => setSearchRef(e.target.value)}
             placeholder="Enter a reference..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>
