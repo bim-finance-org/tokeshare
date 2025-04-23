@@ -1,3 +1,4 @@
+import { log } from 'console';
 import { usePaxgPrice } from '../hooks/usePaxgPrice';
 
 // Calculate TGG price based on PAXG price

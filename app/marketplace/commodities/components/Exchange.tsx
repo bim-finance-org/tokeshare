@@ -60,7 +60,7 @@ const Exchange = () => {
 
       <div className="p-2 sm:p-4 w-full">
         {isLoading ? (
-          <div className="text-center py-4">Chargement des taux de change...</div>
+          <div className="text-center py-4 text-color4">Loading...</div>
         ) : (
           <>
             {activeTab === 'swap' && <Swap />}

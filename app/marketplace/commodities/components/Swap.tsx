@@ -23,43 +23,46 @@ const Swap = () => {
   const { isConnected } = useAccount();
   const { paxgPrice, isLoading } = usePAXGPrice();
 
-  // Mise à jour du prix TGG
+  // Mise à jour du prix TGG quand paxgPrice change
   useEffect(() => {
     const updatePrice = async () => {
-      const calculatedTggPrice = calculateTGGPrice(paxgPrice);
-      setTggPrice(calculatedTggPrice);
+      // S'assurer que paxgPrice n'est pas undefined avant de calculer
+      if (paxgPrice !== undefined) {
+        const calculatedTggPrice = calculateTGGPrice(paxgPrice);
+        setTggPrice(calculatedTggPrice);
+        console.log("TGG price updated:", calculatedTggPrice, "from PAXG:", paxgPrice);
+      } else {
+        console.log("PAXG price is still loading, using default TGG price");
+      }
     };
+    
     updatePrice();
     const interval = setInterval(updatePrice, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [paxgPrice]); // Dépendance sur paxgPrice pour réagir aux changements
 
   // Calcul initial du montant TGG
   useEffect(() => {
-    if (tggPrice > 0) {
-      if (!isTggFirst) {
-        // If stablecoin is first, calculate TGG amount
-        const numericAmount = parseFloat(stablecoinAmount) || 0;
-        const calculatedTggAmount = (numericAmount / tggPrice).toFixed(4);
-        setTggAmount(calculatedTggAmount);
-      } else {
-        // If TGG is first, calculate stablecoin amount
-        const numericAmount = parseFloat(tggAmount) || 0;
-        const calculatedStablecoinAmount = (numericAmount * tggPrice).toFixed(2);
-        setStablecoinAmount(calculatedStablecoinAmount);
-      }
+    if (!isTggFirst) {
+      // If stablecoin is first, calculate TGG amount
+      const numericAmount = parseFloat(stablecoinAmount) || 0;
+      const calculatedTggAmount = (numericAmount / tggPrice).toFixed(4);
+      setTggAmount(calculatedTggAmount);
+    } else {
+      // If TGG is first, calculate stablecoin amount
+      const numericAmount = parseFloat(tggAmount) || 0;
+      const calculatedStablecoinAmount = (numericAmount * tggPrice).toFixed(2);
+      setStablecoinAmount(calculatedStablecoinAmount);
     }
-  }, [tggPrice, isTggFirst]);
+  }, [tggPrice, isTggFirst, stablecoinAmount, tggAmount]);
 
   // Handle stablecoin amount change
   const handleStablecoinAmountChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setStablecoinAmount(amount);
-      if (tggPrice > 0) {
-        const numericAmount = parseFloat(amount) || 0;
-        const calculatedTggAmount = (numericAmount / tggPrice).toFixed(4);
-        setTggAmount(calculatedTggAmount);
-      }
+      const numericAmount = parseFloat(amount) || 0;
+      const calculatedTggAmount = (numericAmount / tggPrice).toFixed(4);
+      setTggAmount(calculatedTggAmount);
     }
   };
 
@@ -67,11 +70,9 @@ const Swap = () => {
   const handleTggAmountChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setTggAmount(amount);
-      if (tggPrice > 0) {
-        const numericAmount = parseFloat(amount) || 0;
-        const calculatedStablecoinAmount = (numericAmount * tggPrice).toFixed(2);
-        setStablecoinAmount(calculatedStablecoinAmount);
-      }
+      const numericAmount = parseFloat(amount) || 0;
+      const calculatedStablecoinAmount = (numericAmount * tggPrice).toFixed(2);
+      setStablecoinAmount(calculatedStablecoinAmount);
     }
   };
 
@@ -128,9 +129,11 @@ const Swap = () => {
       <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-1 sm:space-y-2">
         <Blockchains section="swap" onSelect={handleBlockchainSelect} />
         <p className="text-color4 text-xs sm:text-sm font-medium ml-2">Delivery time: instant</p>
-        <p className="text-color4 text-xs sm:text-sm font-medium ml-2">TGG Price: ${tggPrice.toFixed(2)}</p>
         <p className="text-color4 text-xs sm:text-sm font-medium ml-2">
-          Exchange rate: 1 TGG = ${tggPrice.toFixed(2)}
+          TGG Price: {isLoading ? "Loading..." : `$${tggPrice.toFixed(2)}`}
+        </p>
+        <p className="text-color4 text-xs sm:text-sm font-medium ml-2">
+          Exchange rate: {isLoading ? "Loading..." : `1 TGG = $${tggPrice.toFixed(2)}`}
         </p>
       </div>
 
