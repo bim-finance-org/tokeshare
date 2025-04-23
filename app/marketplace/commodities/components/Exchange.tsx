@@ -1,12 +1,27 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Buy from '@/app/marketplace/commodities/components/Buy'
 import Sell from '@/app/marketplace/commodities/components/Sell'
 import Swap from '@/app/marketplace/commodities/components/Swap'
+import { useAllStablePrices } from '@/app/hooks/useStablePrice'
 
 const Exchange = () => {
   const [activeTab, setActiveTab] = useState('swap')
+  
+  // Précharger les prix des stablecoins en utilisant notre hook avec Redis
+  const { data: stablePrices, isLoading, error } = useAllStablePrices();
+  
+  // Log des prix pour vérification (à supprimer en production)
+  useEffect(() => {
+    if (stablePrices) {
+      console.log('Stablecoin prices loaded:', stablePrices);
+    }
+    
+    if (error) {
+      console.error('Error loading stablecoin prices:', error);
+    }
+  }, [stablePrices, error]);
 
   return (
     <div className="flex flex-col items-center bg-gray-100 rounded-xl overflow-hidden w-full mx-auto max-w-md sm:max-w-lg">
@@ -44,9 +59,15 @@ const Exchange = () => {
       </div>
 
       <div className="p-2 sm:p-4 w-full">
-        {activeTab === 'swap' && <Swap />}
-        {activeTab === 'buy' && <Buy />}
-        {activeTab === 'sell' && <Sell />}
+        {isLoading ? (
+          <div className="text-center py-4">Chargement des taux de change...</div>
+        ) : (
+          <>
+            {activeTab === 'swap' && <Swap />}
+            {activeTab === 'buy' && <Buy />}
+            {activeTab === 'sell' && <Sell />}
+          </>
+        )}
       </div>
     </div>
   )

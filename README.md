@@ -20,6 +20,20 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Redis Setup
+
+This project uses Redis for caching stablecoin prices. To set up Redis:
+
+1. Install Redis on your local machine or use a cloud service
+   - For local installation: [Redis Installation Guide](https://redis.io/docs/getting-started/installation/)
+   - For production: Consider using [Upstash](https://upstash.com/), [Redis Cloud](https://redis.com/redis-enterprise-cloud/overview/), or similar services
+
+2. Configure your environment variables:
+   - Copy `.env.example` to `.env.local`
+   - Set your `REDIS_URL` (format: `redis://username:password@host:port`)
+
+3. Restart your development server
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

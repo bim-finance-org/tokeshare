@@ -14,40 +14,64 @@ const ACTIVE_STABLECOINS: StablecoinSymbol[] = [
 // Clé de requête constante pour le cache React Query
 const STABLE_PRICES_QUERY_KEY = ['stablePrices'];
 
+// Durée d'expiration des données en millisecondes (20 minutes)
+const CACHE_EXPIRATION = 20 * 60 * 1000;
+
 /**
- * Hook principal qui récupère tous les stablecoins en une seule requête.
- * Ce hook est conçu pour être appelé au lancement de l'application.
+ * Hook principal qui récupère tous les stablecoins.
+ * Ce hook vérifie automatiquement si les données Redis doivent être rafraîchies.
  */
-export const useAllStablePrices = (refetchInterval = 5 * 60 * 1000) => {
+export const useAllStablePrices = (refetchInterval = CACHE_EXPIRATION) => {
   return useQuery({
     queryKey: STABLE_PRICES_QUERY_KEY,
     queryFn: async () => {
       const symbols = ACTIVE_STABLECOINS.join(',');
+      
+      // Appel à l'API avec vérification de fraîcheur des données
       const response = await fetch(`/api/cmc?symbols=${symbols}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch stablecoin prices');
       }
       
+      // Extraire les données de la réponse
       const data = await response.json();
       
       // Extraire les prix de la réponse
       const prices: StablecoinPrices = {};
       
       // Traiter les données de l'API
-      ACTIVE_STABLECOINS.forEach(symbol => {
-        if (data.data && data.data[symbol]) {
-          prices[symbol] = data.data[symbol].quote.USD.price;
-        } else {
-          // Valeur par défaut pour les stablecoins (proche de 1 USD)
+      // Si les données viennent de Redis (structure avec data.data)
+      if (data.data && data.data.data) {
+        ACTIVE_STABLECOINS.forEach(symbol => {
+          if (data.data.data && data.data.data[symbol]) {
+            prices[symbol] = data.data.data[symbol].quote.USD.price;
+          } else {
+            prices[symbol] = 1.0;
+          }
+        });
+      } 
+      // Si les données viennent directement de CMC
+      else if (data.data) {
+        ACTIVE_STABLECOINS.forEach(symbol => {
+          if (data.data && data.data[symbol]) {
+            prices[symbol] = data.data[symbol].quote.USD.price;
+          } else {
+            prices[symbol] = 1.0;
+          }
+        });
+      }
+      // Fallback
+      else {
+        ACTIVE_STABLECOINS.forEach(symbol => {
           prices[symbol] = 1.0;
-        }
-      });
+        });
+      }
       
       return prices;
     },
-    staleTime: refetchInterval, // Données considérées comme fraîches pendant X minutes
-    refetchInterval: refetchInterval, // Rafraîchissement automatique toutes les X minutes
+    staleTime: refetchInterval, // Données considérées comme fraîches pendant 20 minutes
+    refetchInterval: refetchInterval, // Rafraîchissement automatique toutes les 20 minutes
     retry: 3, // 3 tentatives en cas d'échec
     retryDelay: 1000, // 1 seconde entre chaque tentative
     refetchOnWindowFocus: false, // Ne pas rafraîchir quand la fenêtre reprend le focus
@@ -86,7 +110,7 @@ export const useStablePrices = (symbols: StablecoinSymbol[] = ACTIVE_STABLECOINS
     // Cette requête dépend de la requête principale
     enabled: Boolean(queryClient.getQueryData(STABLE_PRICES_QUERY_KEY)),
     // Utilise le même staleTime que la requête principale
-    staleTime: 5 * 60 * 1000,
+    staleTime: CACHE_EXPIRATION,
   });
 };
 
@@ -95,7 +119,6 @@ export const useStablecoinPrice = ({stablecoin}: {stablecoin: StablecoinSymbol})
   const { data, isLoading, error } = useStablePrices([stablecoin]);
   return { data: data?.[stablecoin], isLoading, error };
 };
-
 
 /**
  * Hook à appeler au chargement de l'application pour précharger tous les prix
@@ -120,17 +143,32 @@ export const usePrefetchStablePrices = () => {
         // Extraire les prix de la réponse
         const prices: StablecoinPrices = {};
         
-        ACTIVE_STABLECOINS.forEach(symbol => {
-          if (data.data && data.data[symbol]) {
-            prices[symbol] = data.data[symbol].quote.USD.price;
-          } else {
+        // Traiter les données comme dans useAllStablePrices
+        if (data.data && data.data.data) {
+          ACTIVE_STABLECOINS.forEach(symbol => {
+            if (data.data.data && data.data.data[symbol]) {
+              prices[symbol] = data.data.data[symbol].quote.USD.price;
+            } else {
+              prices[symbol] = 1.0;
+            }
+          });
+        } else if (data.data) {
+          ACTIVE_STABLECOINS.forEach(symbol => {
+            if (data.data && data.data[symbol]) {
+              prices[symbol] = data.data[symbol].quote.USD.price;
+            } else {
+              prices[symbol] = 1.0;
+            }
+          });
+        } else {
+          ACTIVE_STABLECOINS.forEach(symbol => {
             prices[symbol] = 1.0;
-          }
-        });
+          });
+        }
         
         return prices;
       },
-      staleTime: 5 * 60 * 1000,
+      staleTime: CACHE_EXPIRATION,
     });
   }, [queryClient]);
   
