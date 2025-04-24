@@ -14,21 +14,25 @@ export async function GET(request: NextRequest) {
   try {
     console.log('CMC API route called');
     
-    // Get symbol(s) from query params
+    // Extract query parameters
     const { searchParams } = new URL(request.url);
-    const symbolParam = searchParams.get('symbol') || searchParams.get('symbols');
     
-    if (!symbolParam) {
-      console.log('Missing symbol parameter');
-      return NextResponse.json({ error: 'Symbol or symbols parameter is required' }, { status: 400 });
+    // Only use ID parameter now
+    const idParam = searchParams.get('id') || searchParams.get('ids');
+    
+    if (!idParam) {
+      console.log('Missing ID parameter');
+      return NextResponse.json({ 
+        error: 'ID parameter (id or ids) is required' 
+      }, { status: 400 });
     }
     
-    // Handle both single symbol and multiple symbols
-    const symbols = symbolParam.includes(',') ? symbolParam : symbolParam;
-    console.log(`Requested symbols: ${symbols}`);
+    // Format the IDs parameter
+    const cryptoIds = idParam.includes(',') ? idParam : idParam;
+    console.log(`Requested crypto IDs: ${cryptoIds}`);
     
-    // Create a cache key based on the symbols
-    const cacheKey = `cmc:prices:${symbols}`;
+    // Create a cache key based on the IDs
+    const cacheKey = `cmc:prices:id:${cryptoIds}`;
     console.log(`Cache key: ${cacheKey}`);
     
     // Try to get data from Redis cache first
@@ -39,7 +43,6 @@ export async function GET(request: NextRequest) {
       console.log('Cache hit! Checking freshness of data');
       
       // Vérifier si les données sont encore fraîches (moins de 20 minutes)
-      // Les métadonnées de Redis ne sont pas utilisées ici, nous vérifions le timestamp stocké dans les données
       const cachedTimestamp = cachedData.timestamp;
       const currentTime = Date.now();
       const dataAge = currentTime - cachedTimestamp;
@@ -59,12 +62,14 @@ export async function GET(request: NextRequest) {
       console.log('Cache miss. Fetching from CoinMarketCap API');
     }
     
-    // Si on arrive ici, soit il n'y a pas de données en cache, soit elles sont périmées
-    // Donc on récupère de nouvelles données depuis l'API
+    // Fetch fresh data from CoinMarketCap API
     const cmcApiUrl = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
     
-    console.log(`Fetching from CMC API: ${cmcApiUrl}?symbol=${symbols}`);
-    const response = await fetch(`${cmcApiUrl}?symbol=${symbols}`, {
+    // Construct the API URL with the ID parameter and default to USD conversion
+    const apiUrl = `${cmcApiUrl}?id=${cryptoIds}&convert=USD`;
+    console.log(`Fetching from CMC API: ${apiUrl}`);
+    
+    const response = await fetch(apiUrl, {
       headers: {
         'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY || '',
         'Accept': 'application/json'
@@ -86,9 +91,7 @@ export async function GET(request: NextRequest) {
       timestamp: Date.now()
     };
     
-    // Store the response in Redis cache (with longer expiration to allow for age checking)
-    // Nous stockons avec une expiration plus longue pour que Redis n'efface pas les données automatiquement
-    // Notre logique utilise le timestamp pour déterminer la fraîcheur
+    // Store the response in Redis cache
     console.log('Storing data in Redis cache');
     await setCache(cacheKey, dataToCache, CACHE_EXPIRATION * 2); // Double expiration pour Redis
     
