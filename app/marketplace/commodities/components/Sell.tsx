@@ -4,12 +4,12 @@ import React, { useState, useEffect, useContext } from 'react'
 import TradeWidget from '../../../components/shared/TradeWidget'
 import BankIcon from '@/app/components/icons/BankIcon'
 import Blockchains from '@/app/components/Blockchains'
-import { usePAXGPrice, calculateTGGPrice } from '@/app/utils/priceUtils'
+import { calculateTGGPrice } from '@/app/utils/priceUtils'
 import ConnectButton from '@/app/components/shared/ConnectButton'
 import { useAccount } from 'wagmi'
 import UserForm from './UserForm'
 import { TokenContexts } from '@/app/context/TokenContexts'
-
+import { usePaxgPrice } from '@/app/hooks/usePaxgPrice'
 const Sell = () => {
   // Get values from context
   const { 
@@ -24,7 +24,7 @@ const Sell = () => {
   const [tggPrice, setTggPrice] = useState<number>(0)
   const [showUserForm, setShowUserForm] = useState(false)
   const { isConnected } = useAccount()
-  const { paxgPrice, isLoading } = usePAXGPrice();
+  const { data: paxgPrice, isLoading } = usePaxgPrice();
     
   useEffect(() => {
     const updatePrice = async () => {

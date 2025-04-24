@@ -5,15 +5,15 @@ import ArrowIcon from "@/app/components/icons/arrows/ArrowIcon";
 import Image from "next/image";
 import Link from "next/link";
 import { Commodity } from "@/app/types/Commodity";
-import { usePAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
-
+import {  calculateTGGPrice } from "@/app/utils/priceUtils";
+import { usePaxgPrice } from "@/app/hooks/usePaxgPrice";
 interface CommoditiesCardProps {
   commodity: Commodity;
 }
 
 const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
   const { name, image, tokenPrice: staticTokenPrice } = commodity;
-  const { paxgPrice, isLoading } = usePAXGPrice();
+  const { data: paxgPrice, isLoading } = usePaxgPrice();
 
   // Format price for display
   const formatPrice = (price: number) => {

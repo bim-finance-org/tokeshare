@@ -2,10 +2,11 @@ import React, { useState, useEffect, useContext } from "react";
 import TradeWidget from "@/app/components/shared/TradeWidget";
 import Image from "next/image";
 import Blockchains from "@/app/components/Blockchains";
-import { usePAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
+import { calculateTGGPrice } from "@/app/utils/priceUtils";
 import { useAccount } from 'wagmi';
 import ConnectButton from "@/app/components/shared/ConnectButton";
 import { TokenContexts } from '@/app/context/TokenContexts';
+import { usePaxgPrice } from '@/app/hooks/usePaxgPrice';
 
 const Swap = () => {
   // Utiliser le context au lieu de useState + localStorage
@@ -21,7 +22,7 @@ const Swap = () => {
   const [tggPrice, setTggPrice] = useState<number>(0);
   const [isTggFirst, setIsTggFirst] = useState(false);
   const { isConnected } = useAccount();
-  const { paxgPrice, isLoading } = usePAXGPrice();
+  const { data: paxgPrice, isLoading } = usePaxgPrice();
 
   // Mise à jour du prix TGG quand paxgPrice change
   useEffect(() => {

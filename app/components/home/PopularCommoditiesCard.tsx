@@ -4,7 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import ArrowIcon from "../icons/arrows/ArrowIcon";
 import Image from "next/image";
 import { Commodity } from "@/app/types/Commodity";
-import { usePAXGPrice, calculateTGGPrice } from "@/app/utils/priceUtils";
+import { calculateTGGPrice } from "@/app/utils/priceUtils";
+import { usePaxgPrice } from "@/app/hooks/usePaxgPrice";
 import Link from "next/link";
 
 interface PopularCommoditiesCardProps {
@@ -13,7 +14,7 @@ interface PopularCommoditiesCardProps {
 
 const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ commodity }) => {
   const { name, image, tokenPrice: staticTokenPrice } = commodity;
-  const { paxgPrice, isLoading } = usePAXGPrice();
+  const { data: paxgPrice, isLoading } = usePaxgPrice();
 
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
