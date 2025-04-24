@@ -4,12 +4,14 @@ import React, { useState, useEffect, useContext } from 'react'
 import TradeWidget from '../../../components/shared/TradeWidget'
 import BankIcon from '@/app/components/icons/BankIcon'
 import Blockchains from '@/app/components/Blockchains'
-import { calculateTGGPrice } from '@/app/utils/priceUtils'
+import { calculateTGGPrice, convertTGGToFiat } from '@/app/utils/priceUtils'
 import ConnectButton from '@/app/components/shared/ConnectButton'
 import { useAccount } from 'wagmi'
 import UserForm from './UserForm'
 import { TokenContexts } from '@/app/context/TokenContexts'
 import { usePaxgPrice } from '@/app/hooks/usePaxgPrice'
+import { useExchangeRates } from '@/app/hooks/useExchangeRates'
+
 const Sell = () => {
   // Get values from context
   const { 
@@ -21,10 +23,12 @@ const Sell = () => {
   // Local state
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false)
   const [amountToSell, setAmountToSell] = useState('10')
+  const [receiveAmount, setReceiveAmount] = useState('0')
   const [tggPrice, setTggPrice] = useState<number>(0)
   const [showUserForm, setShowUserForm] = useState(false)
   const { isConnected } = useAccount()
-  const { data: paxgPrice, isLoading } = usePaxgPrice();
+  const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
+  const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
     
   useEffect(() => {
     const updatePrice = async () => {
@@ -35,12 +39,40 @@ const Sell = () => {
     // Update price every 5 seconds
     const interval = setInterval(updatePrice, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [paxgPrice]);
+  
+  // Calculer le montant à recevoir quand le prix TGG, le taux de change ou la devise change
+  useEffect(() => {
+    if (tggPrice > 0 && !isRatesLoading) {
+      calculateReceiveAmount();
+    }
+  }, [tggPrice, exchangeRates, selectedCurrency, amountToSell]);
 
-  const handleReceiveAmount = () => {
+  // Calcule le montant à recevoir en devise fiat
+  const calculateReceiveAmount = () => {
     const tggAmount = parseFloat(amountToSell) || 0;
-    return (tggAmount * tggPrice).toFixed(4);
-  }
+    const fiatValue = convertTGGToFiat(tggAmount, selectedCurrency, exchangeRates, tggPrice);
+    
+    if (fiatValue !== undefined) {
+      setReceiveAmount(fiatValue.toFixed(2));
+    } else {
+      setReceiveAmount('0');
+    }
+  };
+  
+  // Gérer le changement de devise
+  const handleCurrencyChange = (currency: string) => {
+    setSelectedCurrency(currency);
+    calculateReceiveAmount();
+  };
+  
+  // Gérer le changement du montant TGG à vendre
+  const handleTggAmountChange = (amount: string) => {
+    if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
+      setAmountToSell(amount);
+      // Le calcul du montant à recevoir sera déclenché par l'effet
+    }
+  };
 
   if (showUserForm) {
     return (
@@ -51,7 +83,7 @@ const Sell = () => {
         </div>
         <UserForm 
           type="sell"
-          amount={handleReceiveAmount()}
+          amount={receiveAmount}
           currency={selectedCurrency}
           tggAmount={amountToSell}
           tggPrice={tggPrice}
@@ -70,8 +102,8 @@ const Sell = () => {
       <TradeWidget
         label="YOU SEND"
         defaultToken="TGG"
-        onValueChange={(value) => setAmountToSell(value)}
-        onTokenChange={(token) => setSelectedCurrency(token)}
+        onValueChange={handleTggAmountChange}
+        onTokenChange={() => {}} // Le token "TGG" ne peut pas être changé
         type="crypto"
         value={amountToSell}
         blockchain={selectedBlockchain}
@@ -83,10 +115,10 @@ const Sell = () => {
       <TradeWidget
         label="YOU RECEIVE"
         defaultToken={selectedCurrency}
-        onValueChange={(value) => setAmountToSell(value)}
-        onTokenChange={(token) => setSelectedCurrency(token)}
+        onValueChange={() => {}} // Le montant à recevoir est calculé automatiquement
+        onTokenChange={handleCurrencyChange}
         type="fiat"
-        value={handleReceiveAmount()}
+        value={receiveAmount}
         blockchain={selectedBlockchain}
       />
 

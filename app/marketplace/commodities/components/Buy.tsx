@@ -4,12 +4,13 @@ import React, { useState, useEffect, useContext } from 'react'
 import TradeWidget from '@/app/components/shared/TradeWidget'
 import BankIcon from '@/app/components/icons/BankIcon'
 import Blockchains from '@/app/components/Blockchains'
-import { calculateTGGPrice } from '@/app/utils/priceUtils'
+import { calculateTGGPrice, convertFiatToTGG, convertTGGToFiat } from '@/app/utils/priceUtils'
 import { usePaxgPrice } from '@/app/hooks/usePaxgPrice'
 import ConnectButton from '@/app/components/shared/ConnectButton'
 import { useAccount } from 'wagmi'
 import UserForm from './UserForm'
 import { TokenContexts } from '@/app/context/TokenContexts'
+import { useExchangeRates } from '@/app/hooks/useExchangeRates'
 
 const Buy = () => {
   // Get values from context
@@ -25,7 +26,9 @@ const Buy = () => {
   const [tggPrice, setTggPrice] = useState<number>(0)
   const [showBuyNext, setShowBuyNext] = useState(false)
   const { isConnected } = useAccount()
-  const { data: paxgPrice, isLoading } = usePaxgPrice();
+  const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
+  const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
+  
   // Mise à jour du prix TGG
   useEffect(() => {
     const updatePrice = async () => {
@@ -35,21 +38,25 @@ const Buy = () => {
     updatePrice();
     const interval = setInterval(updatePrice, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [paxgPrice]);
 
   // Calcul initial du montant TGG
   useEffect(() => {
-    if (tggPrice > 0) {
+    if (tggPrice > 0 && !isRatesLoading) {
       calculateTggFromFiat(amountToSend);
     }
-  }, [tggPrice]);
+  }, [tggPrice, exchangeRates, selectedCurrency]);
 
   // Calcule le montant TGG à partir du montant fiat
   const calculateTggFromFiat = (fiatAmount: string) => {
     if (tggPrice > 0) {
       const numericAmount = parseFloat(fiatAmount) || 0;
-      const calculatedTggAmount = (numericAmount / tggPrice).toFixed(4);
-      setTggAmount(calculatedTggAmount);
+      const tggValue = convertFiatToTGG(numericAmount, selectedCurrency, exchangeRates, tggPrice);
+      if (tggValue !== undefined) {
+        setTggAmount(tggValue.toFixed(4));
+      } else {
+        setTggAmount("0");
+      }
     }
   };
 
@@ -57,8 +64,12 @@ const Buy = () => {
   const calculateFiatFromTgg = (tggValue: string) => {
     if (tggPrice > 0) {
       const numericAmount = parseFloat(tggValue) || 0;
-      const calculatedFiatAmount = (numericAmount * tggPrice).toFixed(2);
-      setAmountToSend(calculatedFiatAmount);
+      const fiatValue = convertTGGToFiat(numericAmount, selectedCurrency, exchangeRates, tggPrice);
+      if (fiatValue !== undefined) {
+        setAmountToSend(fiatValue.toFixed(2));
+      } else {
+        setAmountToSend("0");
+      }
     }
   };
 
@@ -75,6 +86,15 @@ const Buy = () => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setTggAmount(amount);
       calculateFiatFromTgg(amount);
+    }
+  };
+
+  // Gestion du changement de devise
+  const handleCurrencyChange = (currency: string) => {
+    setSelectedCurrency(currency);
+    // Recalculer le montant TGG avec la nouvelle devise
+    if (amountToSend) {
+      calculateTggFromFiat(amountToSend);
     }
   };
 
@@ -97,7 +117,7 @@ const Buy = () => {
         defaultToken={selectedCurrency}
         value={amountToSend}  
         onValueChange={handleFiatAmountChange}
-        onTokenChange={setSelectedCurrency}
+        onTokenChange={handleCurrencyChange}
       />
 
       <div className="my-4" />
