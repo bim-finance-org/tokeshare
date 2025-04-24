@@ -1,0 +1,1 @@
+export type ListFiat = "EUR" | "USD" | "CHF" | "GBP" | "CAD";
