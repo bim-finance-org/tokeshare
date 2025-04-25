@@ -3,20 +3,6 @@ import { prisma } from '@/app/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-// Fonction pour générer une chaîne aléatoire
-function randomString(length: number, chars: string): string {
-  let result = '';
-  for (let i = length; i > 0; --i) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-}
-
-// Fonction pour générer une référence de paiement
-function generatePayReference(): string {
-  return randomString(9, '0123456789abcdefghijklmnopqrstuvwxyz');
-}
-
 // GET pour récupérer toutes les transactions d'achat
 export async function GET(_request: NextRequest) {
   try {
@@ -54,12 +40,10 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     
     // Validation des données
-    if (!data.walletAddress || !data.blockchain || !data.crypto || !data.amount || !data.email || !data.fiatCurrency) {
+    if (!data.walletAddress || !data.blockchain || !data.crypto || !data.amount || !data.email || !data.fiatCurrency || !data.ref) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
     }
     
-    // Génération d'une référence unique
-    const ref = `${generatePayReference()}`;
     
     // Récupérer les fees ou calculer par défaut (2.5% du montant)
     const amount = parseFloat(data.amount);
@@ -77,7 +61,7 @@ export async function POST(request: NextRequest) {
         fiatCurrency: data.fiatCurrency,
         amount: amount,
         fees: fees,
-        ref: ref,
+        ref: data.ref,
         date: new Date(),
         email: data.email,
         cvu: data.cvu || ''

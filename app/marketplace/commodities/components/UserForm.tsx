@@ -3,7 +3,7 @@ import { useAccount } from 'wagmi';
 import ConnectButton from "@/app/components/shared/ConnectButton";
 import BuyInfo from "./BuyInfo";
 import { TokenContexts } from "@/app/context/TokenContexts";
-
+import { generatePayReference } from "@/app/utils/RandomRefs";
 interface UserFormProps {
   type: 'buy' | 'sell';
   amount: string;
@@ -53,6 +53,8 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
       
       // Préparer les données pour l'API
       let apiData;
+
+      const ref = generatePayReference();
       
       if (type === 'buy') {
         // Calculer le montant et les frais pour l'achat
@@ -67,6 +69,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           fiatCurrency: currency,
           amount: amountValue,
           fees: feesValue,
+          ref: ref, 
           email: formData.email,
           cvu: '',
           status: 'pending'
@@ -86,6 +89,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           fees: feesValue,
           email: formData.email,
           fullName: `${formData.firstName} ${formData.lastName}`,
+          ref: ref,
           status: 'pending'
         };
       }
