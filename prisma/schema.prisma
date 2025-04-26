@@ -42,6 +42,7 @@ model BuyTransaction {
   date          DateTime @db.Date
   email         String   @db.VarChar(255)
   cvu           String   @db.VarChar(50)
+  fullName      String   @db.VarChar(255)
 
   @@map("buy_transactions")
 }
