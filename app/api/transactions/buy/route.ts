@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { sendTransactionEmail } from '@/app/utils/email/sendEmail';
 
 // GET pour récupérer toutes les transactions d'achat
 export async function GET(_request: NextRequest) {
@@ -64,9 +65,31 @@ export async function POST(request: NextRequest) {
         ref: data.ref,
         date: new Date(),
         email: data.email,
-        cvu: data.cvu || ''
+        cvu: data.cvu || '',  
+        fullName: data.fullName || ''
       }
     });
+    
+    // Envoi d'email de confirmation
+    try {
+      await sendTransactionEmail({
+        email: data.email,
+        fullName: data.fullName,
+        transactionRef: newTransaction.ref,
+        transactionType: 'buy',
+        date: newTransaction.date.toLocaleDateString(),
+        blockchain: data.blockchain,
+        fiatSymbol: data.fiatCurrency,
+        fiatAmount: ,
+        tokenSymbol: data.crypto,
+        tokenAmount: data.amount,
+        walletAddress: data.walletAddress
+      });
+      console.log('Email de confirmation envoyé pour l\'achat');
+    } catch (emailError) {
+      console.error('Erreur lors de l\'envoi de l\'email de confirmation:', emailError);
+      // On continue malgré l'erreur d'envoi d'email
+    }
     
     return NextResponse.json(newTransaction, { status: 201 });
   } catch (error) {
@@ -77,3 +100,4 @@ export async function POST(request: NextRequest) {
     );
   }
 } 
+

@@ -4,6 +4,7 @@ import ConnectButton from "@/app/components/shared/ConnectButton";
 import BuyInfo from "./BuyInfo";
 import { TokenContexts } from "@/app/context/TokenContexts";
 import { generatePayReference } from "@/app/utils/RandomRefs";
+
 interface UserFormProps {
   type: 'buy' | 'sell';
   amount: string;
@@ -29,6 +30,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     email: '',
     iban: type === 'sell' ? '' : undefined,
   });
+  const [ref, setRef] = useState<string>('');
 
   // Informations de transfert pour le type 'buy'
   const transferInfo = {
@@ -38,6 +40,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     alias: "Tokeshare",
     bank: "Qonto"
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +57,8 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
       // Préparer les données pour l'API
       let apiData;
 
-      const ref = generatePayReference();
+      const transactionRef = generatePayReference();
+      setRef(transactionRef);
       
       if (type === 'buy') {
         // Calculer le montant et les frais pour l'achat
@@ -69,8 +73,9 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           fiatCurrency: currency,
           amount: amountValue,
           fees: feesValue,
-          ref: ref, 
+          ref: transactionRef, 
           email: formData.email,
+          fullName: `${formData.firstName} ${formData.lastName}`,
           cvu: '',
           status: 'pending'
         };
@@ -89,9 +94,10 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           fees: feesValue,
           email: formData.email,
           fullName: `${formData.firstName} ${formData.lastName}`,
-          ref: ref,
+          ref: transactionRef,
           status: 'pending'
         };
+        console.log(apiData);
       }
       
       // Faire l'appel API en fonction du type (achat ou vente)
@@ -238,11 +244,15 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           )}
           
           {type === 'sell' && (
-            <div className="bg-gray-200 p-6 rounded-xl text-center">
-              <h2 className="text-xl font-bold mb-4">Demande de vente envoyée</h2>
-              <p className="mb-2">Merci pour votre demande de vente de {tggAmount} TGG.</p>
-              <p className="mb-4">Vous recevrez {amount} {currency} sur votre compte bancaire.</p>
-              <p>Nous vous contacterons à {formData.email} pour confirmer la transaction.</p>
+            <div className="bg-gray-200 p-6 rounded-xl">
+              <h2 className="text-xl font-bold mb-4 text-center">Demande de vente confirmée</h2>
+              <p>Votre opération de vente n°<span className="font-bold">{ref}</span> a été traitée avec succès.</p>
+              <p className="my-3">Vous devriez recevoir le virement de <span className="font-semibold">{amount} {currency}</span> sur votre compte dans un délai de 2 à 7 jours, en fonction du temps de traitement habituel de votre banque.</p>
+              <p className="my-3">Si vous rencontrez des difficultés, n'hésitez pas à nous contacter. Nous vous remercions de votre confiance.</p>
+              <p className="my-3">À bientôt sur TokShare.</p>
+              <div className="mt-6 text-center text-sm text-gray-600">
+                <p>Un email de confirmation a été envoyé à {formData.email}</p>
+              </div>
             </div>
           )}
         </>
