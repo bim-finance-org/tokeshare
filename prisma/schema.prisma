@@ -14,35 +14,37 @@ model Emails {
 
 model SellTransaction {
   id            Int      @id @default(autoincrement())
-  status        String   @db.VarChar(20)
-  iban          String   @db.VarChar(34)
-  blockchain    String   @db.VarChar(50)
-  fiat          String   @db.VarChar(10)
-  cryptoCurrency String  @db.VarChar(10)
-  amount        Decimal  @db.Decimal(18, 2)
-  fees          Decimal  @db.Decimal(18, 2)
   ref           String   @unique @db.VarChar(20)
   date          DateTime @db.Date
   email         String   @db.VarChar(255)
   fullName      String   @db.VarChar(255)
+  iban          String   @db.VarChar(34)
+  status        String   @db.VarChar(20)
+  blockchain    String   @db.VarChar(50)
+  fiat          String   @db.VarChar(10)
+  fiatAmount    Decimal  @db.Decimal(18, 4)
+  crypto        String   @db.VarChar(10)
+  cryptoAmount  Decimal  @db.Decimal(18, 4)
+  fees          Decimal  @db.Decimal(18, 4)
 
   @@map("sell_transactions")
 }
 
 model BuyTransaction {
   id            Int      @id @default(autoincrement())
-  status        String   @db.VarChar(20)
-  walletAddress String   @db.VarChar(255)
-  blockchain    String   @db.VarChar(50)
-  crypto        String   @db.VarChar(10)
-  fiatCurrency  String   @db.VarChar(10)
-  amount        Decimal  @db.Decimal(18, 8)
-  fees          Decimal  @db.Decimal(18, 8)
   ref           String   @unique @db.VarChar(20)
   date          DateTime @db.Date
   email         String   @db.VarChar(255)
-  cvu           String   @db.VarChar(50)
   fullName      String   @db.VarChar(255)
+  cvu           String   @db.VarChar(50)
+  walletAddress String   @db.VarChar(255)
+  status        String   @db.VarChar(20)
+  blockchain    String   @db.VarChar(50) 
+  fiat          String   @db.VarChar(10)
+  fiatAmount    Decimal  @db.Decimal(18, 4)
+  crypto        String   @db.VarChar(10)
+  cryptoAmount  Decimal  @db.Decimal(18, 4)
+  fees          Decimal  @db.Decimal(18, 4)
 
   @@map("buy_transactions")
 }
