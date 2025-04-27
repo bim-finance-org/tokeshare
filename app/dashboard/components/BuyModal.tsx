@@ -335,9 +335,23 @@ const BuyModal = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.crypto + ' ' + transaction.cryptoAmount}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {transaction.fiat} {parseFloat(transaction.fiatAmount.toString()).toFixed(2)}
+                    {transaction.crypto} <span 
+                      className="cursor-pointer hover:text-blue-500 hover:underline" 
+                      onClick={() => handleCopyToClipboard(transaction.cryptoAmount.toString())}
+                      title="Click to copy crypto amount"
+                    >
+                      {transaction.cryptoAmount}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {transaction.fiat} <span 
+                      className="cursor-pointer hover:text-blue-500 hover:underline" 
+                      onClick={() => handleCopyToClipboard(parseFloat(transaction.fiatAmount.toString()).toFixed(2))}
+                      title="Click to copy fiat amount"
+                    >
+                      {parseFloat(transaction.fiatAmount.toString()).toFixed(2)}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {transaction.fiat} {parseFloat(transaction.fees.toString()).toFixed(2)}
