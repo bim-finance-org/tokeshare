@@ -16,7 +16,7 @@ const SellTransactionEmail = ({
   transactionRef,
   companyName = 'TokeShare'
 }) => {
-  const previewText = `Confirmation de votre opération de vente - ${companyName}`;
+  const previewText = `Confirmation of your sale operation - ${companyName}`;
 
   return (
     <Html>
@@ -26,28 +26,28 @@ const SellTransactionEmail = ({
         <Body className="bg-white my-auto mx-auto font-sans">
           <Container className="my-10 mx-auto p-5 w-[465px]">
             <Heading className="text-2xl font-normal text-center p-0 my-8 mx-0">
-              <strong>{companyName}</strong> - Confirmation de vente
+              <strong>{companyName}</strong> - Confirmation of sale
             </Heading>
             <Text className="text-sm">
-              Bonjour {fullName},
+              Hello {fullName},
             </Text>
             <Text className="text-sm">
-              Votre opération de vente n°{transactionRef} a été traitée avec succès. 
-              Vous devriez recevoir le virement sur votre compte dans un délai de 2 à 7 jours, 
-              en fonction du temps de traitement habituel de votre banque.
+              Your sale operation number {transactionRef} has been successfully processed. 
+              You should receive the transfer on your account in a delay of 2 to 7 days, 
+              depending on the usual processing time of your bank.
             </Text>
             <Text className="text-sm">
-              Si vous rencontrez des difficultés, n'hésitez pas à nous contacter en utilisant 
-              ce <Link href="https://tokeshare.co/contact" className="text-blue-600">lien</Link>. 
-              Nous vous remercions de votre confiance.
+              If you encounter difficulties, please do not hesitate to contact us using 
+              this <Link href="https://tokeshare.co" className="text-blue-600">link</Link>. 
+              We thank you for your trust.
             </Text>
             <Text className="text-sm">
-              À bientôt sur {companyName}.
+              See you soon on {companyName}.
             </Text>
             <Text className="text-sm mt-8">
-              Cordialement,
+              Best regards,
               <br/>
-              L'équipe de {companyName}
+              The {companyName} team
             </Text>
           </Container>
         </Body>

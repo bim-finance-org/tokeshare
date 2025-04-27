@@ -249,13 +249,13 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           
           {type === 'sell' && (
             <div className="bg-gray-200 p-6 rounded-xl">
-              <h2 className="text-xl font-bold mb-4 text-center">Demande de vente confirmée</h2>
-              <p>Votre opération de vente n°<span className="font-bold">{ref}</span> a été traitée avec succès.</p>
-              <p className="my-3">Vous devriez recevoir le virement de <span className="font-semibold">{amount} {currency}</span> sur votre compte dans un délai de 2 à 7 jours, en fonction du temps de traitement habituel de votre banque.</p>
-              <p className="my-3">Si vous rencontrez des difficultés, n'hésitez pas à nous contacter. Nous vous remercions de votre confiance.</p>
-              <p className="my-3">À bientôt sur TokShare.</p>
+              <h2 className="text-xl font-bold mb-4 text-center">Demand of sale confirmed</h2>
+              <p>Your sale operation number <span className="font-bold">{ref}</span> has been successfully processed.</p>
+              <p className="my-3">You should receive the transfer of <span className="font-semibold">{amount} {currency}</span> on your account in a delay of 2 to 7 days, depending on the usual processing time of your bank.</p>
+              <p className="my-3">If you encounter difficulties, please do not hesitate to contact us. We thank you for your trust.</p>
+              <p className="my-3">See you soon on TokShare.</p>
               <div className="mt-6 text-center text-sm text-gray-600">
-                <p>Un email de confirmation a été envoyé à {formData.email}</p>
+                <p>A confirmation email has been sent to {formData.email}</p>
               </div>
             </div>
           )}
