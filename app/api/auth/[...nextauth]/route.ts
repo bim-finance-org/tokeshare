@@ -2,22 +2,24 @@ import NextAuth from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-// Le mot de passe est maintenant récupéré depuis les variables d'environnement
 const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || "default-password";
 
+/**
+ * NextAuth options
+ * @returns The NextAuth options
+ */
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Dashboard Access",
       credentials: {
-        password: { label: "Mot de passe", type: "password" }
+        password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
         if (!credentials?.password) {
           return null;
         }
 
-        // Vérification du mot de passe avec la variable d'environnement
         if (credentials.password === DASHBOARD_PASSWORD) {
           return {
             id: "1",

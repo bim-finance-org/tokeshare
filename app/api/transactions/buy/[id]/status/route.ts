@@ -3,16 +3,21 @@ import { prisma } from '@/app/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-// PUT to update the status of a buy transaction
+/**
+ * PUT to update the status of a buy transaction
+ * @param request - The request object
+ * @param params - The parameters object
+ * @returns The updated transaction
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check if user is authenticated
+    // check if user is authenticated
     const session = await getServerSession(authOptions);
     
-    // If no session, return 401 Unauthorized
+    // if no session, return 401 Unauthorized
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized. Please log in.' },
@@ -20,7 +25,6 @@ export async function PUT(
       );
     }
 
-    // Extract id from params object
     const id = parseInt(params.id);
 
     if (isNaN(id)) {
@@ -32,7 +36,6 @@ export async function PUT(
 
     const data = await request.json();
     
-    // Data validation
     if (!data.status || !['pending', 'completed', 'failed', 'received'].includes(data.status)) {
       return NextResponse.json(
         { error: 'Invalid status. Allowed values are: pending, completed, failed, received' },
@@ -40,7 +43,6 @@ export async function PUT(
       );
     }
     
-    // Check if transaction exists
     const transaction = await prisma.buyTransaction.findUnique({
       where: { id }
     });
@@ -52,7 +54,6 @@ export async function PUT(
       );
     }
     
-    // Update transaction status
     const updatedTransaction = await prisma.buyTransaction.update({
       where: { id },
       data: { 
@@ -62,7 +63,6 @@ export async function PUT(
     
     return NextResponse.json(updatedTransaction);
   } catch (error) {
-    console.error('Error updating transaction status:', error);
     return NextResponse.json(
       { error: 'Error updating transaction status' },
       { status: 500 }

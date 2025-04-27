@@ -4,21 +4,24 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { sendTransactionEmail } from '@/app/utils/email/sendEmail';
 
-// GET pour récupérer toutes les transactions d'achat
+/**
+ * GET to retrieve all buy transactions
+ * @param _request - The request object
+ * @returns The buy transactions
+ */
 export async function GET(_request: NextRequest) {
   try {
-    // Vérifier si l'utilisateur est authentifié
+    // check if user is authenticated
     const session = await getServerSession(authOptions);
     
-    // Si pas de session, renvoyer une erreur 401 Unauthorized
+    // if no session, return 401 Unauthorized
     if (!session) {
       return NextResponse.json(
-        { error: 'Non autorisé. Veuillez vous connecter.' },
+        { error: 'Unauthorized. Please log in.' },
         { status: 401 }
       );
     }
-    
-    // L'utilisateur est authentifié, récupérer les données
+      
     const buyTransactions = await prisma.buyTransaction.findMany({
       orderBy: {
         date: 'desc'
@@ -27,32 +30,32 @@ export async function GET(_request: NextRequest) {
     
     return NextResponse.json(buyTransactions);
   } catch (error) {
-    console.error('Erreur lors de la récupération des transactions d\'achat:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de la récupération des transactions' },
+      { error: 'Error retrieving transactions' },
       { status: 500 }
     );
   }
 }
 
-// POST pour créer une nouvelle transaction d'achat
+/**
+ * POST to create a new buy transaction
+ * @param request - The request object
+ * @returns The new buy transaction
+ */
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
     
-    // Validation des données
+    // check if data is missing
     if (!data.walletAddress || !data.blockchain || !data.crypto || !data.cryptoAmount || !data.email || !data.fiat || !data.fiatAmount || !data.ref) {
-      return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing data' }, { status: 400 });
     }
     
-    
-    // Récupérer les fees ou calculer par défaut (2.5% du montant)
     const amount = parseFloat(data.amount);
     const fees = data.fees !== undefined 
       ? parseFloat(data.fees) 
       : parseFloat((amount * 0.025).toFixed(4));
     
-    // Création de la transaction
     const newTransaction = await prisma.buyTransaction.create({
       data: {
         ref: data.ref,
@@ -71,7 +74,6 @@ export async function POST(request: NextRequest) {
       }
     });
     
-    // Envoi d'email de confirmation
     try {
       await sendTransactionEmail({
         email: data.email,  
@@ -86,17 +88,17 @@ export async function POST(request: NextRequest) {
         tokenAmount: data.cryptoAmount,
         walletAddress: data.walletAddress
       });
-      console.log('Email de confirmation envoyé pour l\'achat');
     } catch (emailError) {
-      console.error('Erreur lors de l\'envoi de l\'email de confirmation:', emailError);
-      // On continue malgré l'erreur d'envoi d'email
+      return NextResponse.json(
+        { error: 'Error sending confirmation email' },
+        { status: 500 }
+      );
     }
     
     return NextResponse.json(newTransaction, { status: 201 });
   } catch (error) {
-    console.error('Erreur lors de la création de la transaction d\'achat:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de la création de la transaction' },
+      { error: 'Error creating buy transaction' },
       { status: 500 }
     );
   }
