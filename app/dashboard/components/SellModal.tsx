@@ -329,7 +329,7 @@ const SellModal = () => {
                       onClick={() => handleCopyToClipboard(transaction.iban)}
                       title="Click to copy IBAN"
                     >
-                      {transaction.iban}
+                      {transaction.iban?.replace(/\s+/g, '')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>

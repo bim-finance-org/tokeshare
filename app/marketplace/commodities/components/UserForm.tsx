@@ -253,7 +253,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
               <p>Your sale operation number <span className="font-bold">{ref}</span> has been successfully processed.</p>
               <p className="my-3">You should receive the transfer of <span className="font-semibold">{amount} {currency}</span> on your account in a delay of 2 to 7 days, depending on the usual processing time of your bank.</p>
               <p className="my-3">If you encounter difficulties, please do not hesitate to contact us. We thank you for your trust.</p>
-              <p className="my-3">See you soon on TokShare.</p>
+              <p className="my-3">See you soon on TokeShare.</p>
               <div className="mt-6 text-center text-sm text-gray-600">
                 <p>A confirmation email has been sent to {formData.email}</p>
               </div>
