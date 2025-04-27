@@ -33,9 +33,9 @@ export async function PUT(
     const data = await request.json();
     
     // Data validation
-    if (!data.status || !['pending', 'completed', 'failed', 'receipt'].includes(data.status)) {
+    if (!data.status || !['pending', 'completed', 'failed', 'received'].includes(data.status)) {
       return NextResponse.json(
-        { error: 'Invalid status. Allowed values are: pending, completed, failed, receipt' },
+        { error: 'Invalid status. Allowed values are: pending, completed, failed, received' },
         { status: 400 }
       );
     }

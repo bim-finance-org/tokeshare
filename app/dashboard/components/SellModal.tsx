@@ -7,7 +7,7 @@ import { CheckCircle } from 'lucide-react';
 
 interface SellTransaction {
   id: number
-  status: 'completed' | 'pending' | 'failed' | 'receipt'
+  status: 'completed' | 'pending' | 'failed' | 'received'
   iban: string
   blockchain: string
   fiat: string
@@ -70,7 +70,7 @@ const SellModal = () => {
     return statusMatch && refMatch
   })
 
-  const handleChangeStatus = async (transactionId: number, newStatus: 'pending' | 'completed' | 'failed' | 'receipt') => {
+  const handleChangeStatus = async (transactionId: number, newStatus: 'pending' | 'completed' | 'failed' | 'received') => {
     try {
       setError(null);
       const response = await fetch(`/api/transactions/sell/${transactionId}/status`, {
@@ -108,16 +108,16 @@ const SellModal = () => {
     }
   };
 
-  const handleReceipt = async (transactionId: number) => {
+  const handleReceived = async (transactionId: number) => {
     try {
       setError(null);
-      // Call API to change status to receipt
+      // Call API to change status to received
       const response = await fetch(`/api/transactions/sell/${transactionId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: 'receipt' }),
+        body: JSON.stringify({ status: 'received' }),
       });
 
       if (response.status === 401) {
@@ -134,7 +134,7 @@ const SellModal = () => {
       setTransactions(prevTransactions =>
         prevTransactions.map(transaction =>
           transaction.id === transactionId
-            ? { ...transaction, status: 'receipt' }
+            ? { ...transaction, status: 'received' }
             : transaction
         )
       );
@@ -263,7 +263,7 @@ const SellModal = () => {
             <option value="completed" className='text-black'>Completed</option>
             <option value="pending" className='text-black'>Pending</option>
             <option value="failed" className='text-black'>Failed</option>
-            <option value="receipt" className='text-black'>Receipt</option>
+            <option value="received" className='text-black'>Received</option>
           </select>
         </div>
         <div className="flex-1">
@@ -316,7 +316,7 @@ const SellModal = () => {
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       transaction.status === 'completed' ? 'bg-green-100 text-green-800' :
                       transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      transaction.status === 'receipt' ? 'bg-blue-100 text-blue-800' :
+                      transaction.status === 'received' ? 'bg-blue-100 text-blue-800' :
                       transaction.status === 'failed' ? 'bg-red-100 text-red-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
@@ -346,7 +346,13 @@ const SellModal = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.fullName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {transaction.status === 'completed' || transaction.status === 'failed' ? (
-                      <span className="text-gray-500 italic">No action available</span>
+                        <div className="flex flex-col gap-2">
+                          <button 
+                            onClick={() => handleChangeStatus(transaction.id, 'pending')}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-md">
+                            Reset
+                          </button>
+                        </div>
                     ) : validationStep === transaction.id ? (
                       <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
@@ -376,7 +382,7 @@ const SellModal = () => {
                         <button 
                           onClick={() => handleChangeStatus(transaction.id, 'pending')}
                           className="bg-yellow-500 text-white px-4 py-2 rounded-md">
-                          In Progress
+                          Pending
                         </button>
                         <button 
                           onClick={() => handleStartValidation(transaction.id, transaction.amount)}
@@ -392,9 +398,9 @@ const SellModal = () => {
                     ) : transaction.status === 'pending' ? (
                       <div className="flex flex-col gap-2">
                         <button 
-                          onClick={() => handleReceipt(transaction.id)}
+                          onClick={() => handleReceived(transaction.id)}
                           className="bg-blue-500 text-white px-4 py-2 rounded-md">
-                          Receipt
+                          Received
                         </button>
                         <button 
                           onClick={() => handleChangeStatus(transaction.id, 'failed')}
