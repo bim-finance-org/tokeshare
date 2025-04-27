@@ -11,13 +11,15 @@ interface SellTransaction {
   iban: string
   blockchain: string
   fiat: string
+  fiatAmount: number
   amount: number
   fees: number
   ref: string
   date: Date
   email: string
   fullName: string
-  cryptoCurrency: string
+  crypto: string
+  cryptoAmount: number
 }
 
 const SellModal = () => {
@@ -28,7 +30,7 @@ const SellModal = () => {
   const [error, setError] = useState<string | null>(null)
   const [expandedTransactionId, setExpandedTransactionId] = useState<number | null>(null)
   const [validationStep, setValidationStep] = useState<number | null>(null)
-  const [newAmount, setNewAmount] = useState<string>('')
+  const [newCryptoAmount, setNewCryptoAmount] = useState<number>(0)
   const [showCopiedNotification, setShowCopiedNotification] = useState(false)
   const router = useRouter()
 
@@ -147,7 +149,7 @@ const SellModal = () => {
 
   const handleStartValidation = (transactionId: number, currentAmount: number) => {
     setValidationStep(transactionId);
-    setNewAmount(currentAmount.toString());
+    setNewCryptoAmount(currentAmount);
   };
 
   const handleConfirmValidation = async (transactionId: number) => {
@@ -155,8 +157,8 @@ const SellModal = () => {
       setError(null);
       
       // Validate input
-      const amount = parseFloat(newAmount);
-      if (isNaN(amount) || amount <= 0) {
+      const cryptoAmount = newCryptoAmount;
+      if (isNaN(cryptoAmount) || cryptoAmount <= 0) {
         setError('Please enter a valid amount');
         return;
       }
@@ -180,12 +182,12 @@ const SellModal = () => {
       }
 
       // Then update the amount (fees will be calculated in the API)
-      const amountResponse = await fetch(`/api/transactions/sell/${transactionId}/amount`, {
+      const amountResponse = await fetch(`/api/transactions/sell/${transactionId}/cryptoAmount`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify({ cryptoAmount }),
       });
 
       if (amountResponse.status === 401) {
@@ -210,7 +212,7 @@ const SellModal = () => {
 
       // Reset validation step and amount
       setValidationStep(null);
-      setNewAmount('');
+      setNewCryptoAmount(0);
       setExpandedTransactionId(null);
     } catch (error) {
       console.error('Error updating transaction:', error);
@@ -220,7 +222,7 @@ const SellModal = () => {
 
   const handleCancelValidation = () => {
     setValidationStep(null);
-    setNewAmount('');
+    setNewCryptoAmount(0);
   };
 
   const handleCopyToClipboard = (text: string) => {
@@ -331,10 +333,10 @@ const SellModal = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.fiat}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.amount.toString()}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.fiat + ' ' + transaction.fiatAmount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.crypto + ' ' + transaction.cryptoAmount}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {parseFloat(transaction.fees.toString()).toFixed(8)} {transaction.cryptoCurrency}
+                  {transaction.fiat} {parseFloat(transaction.fees.toString()).toFixed(2)} 
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.ref}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -350,8 +352,8 @@ const SellModal = () => {
                         <div className="flex items-center gap-2">
                           <input
                             type="number"
-                            value={newAmount}
-                            onChange={(e) => setNewAmount(e.target.value)}
+                            value={newCryptoAmount}
+                            onChange={(e) => setNewCryptoAmount(parseFloat(e.target.value))}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Enter amount"
                           />

@@ -11,13 +11,14 @@ interface BuyTransaction {
   walletAddress: string
   blockchain: string
   crypto: string
-  amount: number
+  cryptoAmount: number
+  fiatAmount: number
+  fiat: string
   ref: string
   date: Date
   email: string
   cvu: string
   fees: number
-  fiatCurrency: string
 }
 
 const BuyModal = () => {
@@ -28,7 +29,7 @@ const BuyModal = () => {
   const [error, setError] = useState<string | null>(null)
   const [expandedTransactionId, setExpandedTransactionId] = useState<number | null>(null)
   const [validationStep, setValidationStep] = useState<number | null>(null)
-  const [newAmount, setNewAmount] = useState<string>('')
+  const [newCryptoAmount, setNewCryptoAmount] = useState<number>(0)
   const [copiedId, setCopiedId] = useState<number | null>(null)
   const [showCopiedNotification, setShowCopiedNotification] = useState(false)
   const router = useRouter()
@@ -148,7 +149,7 @@ const BuyModal = () => {
 
   const handleStartValidation = (transactionId: number, currentAmount: number) => {
     setValidationStep(transactionId);
-    setNewAmount(currentAmount.toString());
+    setNewCryptoAmount(currentAmount);
   };
 
   const handleConfirmValidation = async (transactionId: number) => {
@@ -156,8 +157,8 @@ const BuyModal = () => {
       setError(null);
       
       // Validate input
-      const amount = parseFloat(newAmount);
-      if (isNaN(amount) || amount <= 0) {
+      const cryptoAmount = newCryptoAmount;
+      if (isNaN(cryptoAmount) || cryptoAmount <= 0) {
         setError('Please enter a valid amount');
         return;
       }
@@ -181,12 +182,12 @@ const BuyModal = () => {
       }
 
       // Then update the amount
-      const amountResponse = await fetch(`/api/transactions/buy/${transactionId}/amount`, {
+      const amountResponse = await fetch(`/api/transactions/buy/${transactionId}/cryptoAmount`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify({ cryptoAmount: cryptoAmount }),
       });
 
       if (amountResponse.status === 401) {
@@ -204,14 +205,14 @@ const BuyModal = () => {
       setTransactions(prevTransactions =>
         prevTransactions.map(transaction =>
           transaction.id === transactionId
-            ? { ...transaction, status: 'completed', amount: amount }
+            ? { ...transaction, status: 'completed', cryptoAmount: cryptoAmount }
             : transaction
         )
       );
 
       // Reset validation step and amount
       setValidationStep(null);
-      setNewAmount('');
+      setNewCryptoAmount(0);
       setExpandedTransactionId(null);
     } catch (error) {
       console.error('Error updating transaction:', error);
@@ -221,7 +222,7 @@ const BuyModal = () => {
 
   const handleCancelValidation = () => {
     setValidationStep(null);
-    setNewAmount('');
+    setNewCryptoAmount(0);
   };
 
   const handleCopyToClipboard = (text: string) => {
@@ -334,12 +335,12 @@ const BuyModal = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.crypto}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.crypto + ' ' + transaction.cryptoAmount}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {parseFloat(transaction.amount.toString()).toFixed(8)}
+                    {transaction.fiat} {parseFloat(transaction.fiatAmount.toString()).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {parseFloat(transaction.fees.toString()).toFixed(2)} {transaction.fiatCurrency}
+                    {transaction.fiat} {parseFloat(transaction.fees.toString()).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.ref}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -355,8 +356,8 @@ const BuyModal = () => {
                         <div className="flex items-center gap-2">
                           <input
                             type="number"
-                            value={newAmount}
-                            onChange={(e) => setNewAmount(e.target.value)}
+                            value={newCryptoAmount}
+                            onChange={(e) => setNewCryptoAmount(parseFloat(e.target.value))}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Enter amount"
                           />
@@ -382,7 +383,7 @@ const BuyModal = () => {
                           In Progress
                         </button>
                         <button 
-                          onClick={() => handleStartValidation(transaction.id, transaction.amount)}
+                          onClick={() => handleStartValidation(transaction.id, transaction.cryptoAmount)}
                           className="bg-green-500 text-white px-4 py-2 rounded-md">
                           Validate
                         </button>

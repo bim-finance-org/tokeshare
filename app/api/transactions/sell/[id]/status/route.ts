@@ -20,7 +20,10 @@ export async function PUT(
       );
     }
 
+
+    // Extract id from params object
     const id = parseInt(params.id);
+
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid transaction ID' },

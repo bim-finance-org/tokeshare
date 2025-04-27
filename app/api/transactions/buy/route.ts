@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     
     // Validation des données
-    if (!data.walletAddress || !data.blockchain || !data.crypto || !data.amount || !data.email || !data.fiatCurrency || !data.ref) {
+    if (!data.walletAddress || !data.blockchain || !data.crypto || !data.cryptoAmount || !data.email || !data.fiat || !data.fiatAmount || !data.ref) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
     }
     
@@ -50,39 +50,40 @@ export async function POST(request: NextRequest) {
     const amount = parseFloat(data.amount);
     const fees = data.fees !== undefined 
       ? parseFloat(data.fees) 
-      : parseFloat((amount * 0.025).toFixed(8));
+      : parseFloat((amount * 0.025).toFixed(4));
     
     // Création de la transaction
     const newTransaction = await prisma.buyTransaction.create({
       data: {
-        status: data.status || 'pending',
-        walletAddress: data.walletAddress,
-        blockchain: data.blockchain,
-        crypto: data.crypto,
-        fiatCurrency: data.fiatCurrency,
-        amount: amount,
-        fees: fees,
         ref: data.ref,
         date: new Date(),
         email: data.email,
+        fullName: data.fullName || '',
         cvu: data.cvu || '',  
-        fullName: data.fullName || ''
+        walletAddress: data.walletAddress,
+        status: data.status || 'pending',
+        blockchain: data.blockchain,
+        fiat: data.fiat,
+        fiatAmount: data.fiatAmount,
+        crypto: data.crypto,
+        cryptoAmount: data.cryptoAmount,
+        fees: fees
       }
     });
     
     // Envoi d'email de confirmation
     try {
       await sendTransactionEmail({
-        email: data.email,
+        email: data.email,  
         fullName: data.fullName,
         transactionRef: newTransaction.ref,
         transactionType: 'buy',
         date: newTransaction.date.toLocaleDateString(),
         blockchain: data.blockchain,
-        fiatSymbol: data.fiatCurrency,
-        fiatAmount: ,
+        fiatSymbol: data.fiat,
+        fiatAmount: data.fiatAmount,
         tokenSymbol: data.crypto,
-        tokenAmount: data.amount,
+        tokenAmount: data.cryptoAmount,
         walletAddress: data.walletAddress
       });
       console.log('Email de confirmation envoyé pour l\'achat');

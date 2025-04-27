@@ -62,40 +62,44 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
       
       if (type === 'buy') {
         // Calculer le montant et les frais pour l'achat
-        const amountValue = parseFloat(tggAmount);
-        const feesValue = parseFloat((parseFloat(amount) * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
+        const cryptoAmount = parseFloat(tggAmount);
+        const fiatAmount = parseFloat(amount);
+        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
         
         // Données pour une transaction d'achat
         apiData = {
-          walletAddress: address || '',
-          blockchain: buyBlockchain,
-          crypto: 'TGG',
-          fiatCurrency: currency,
-          amount: amountValue,
-          fees: feesValue,
           ref: transactionRef, 
           email: formData.email,
           fullName: `${formData.firstName} ${formData.lastName}`,
           cvu: '',
-          status: 'pending'
+          walletAddress: address || '',
+          status: 'pending',
+          blockchain: buyBlockchain,
+          fiat: currency,
+          fiatAmount: fiatAmount,
+          crypto: 'TGG',
+          cryptoAmount: cryptoAmount,
+          fees: feesValue,
         };
       } else {
         // Calculer le montant et les frais pour la vente
-        const amountValue = parseFloat(amount);
-        const feesValue = parseFloat((amountValue * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
+        const cryptoAmount = parseFloat(tggAmount);
+        const fiatAmount = parseFloat(amount);
+        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
         
         // Données pour une transaction de vente
         apiData = {
-          iban: formData.iban || '',
-          blockchain: sellBlockchain,
-          fiat: currency,
-          cryptoCurrency: 'TGG',
-          amount: amountValue,
-          fees: feesValue,
+          ref: transactionRef,
           email: formData.email,
           fullName: `${formData.firstName} ${formData.lastName}`,
-          ref: transactionRef,
-          status: 'pending'
+          iban: formData.iban || '',
+          status: 'pending',
+          blockchain: sellBlockchain,
+          fiat: currency,
+          fiatAmount: fiatAmount,
+          crypto: 'TGG',
+          cryptoAmount: cryptoAmount,
+          fees: feesValue,
         };
         console.log(apiData);
       }

@@ -41,6 +41,7 @@ interface SellEmailData extends BaseEmailData {
 export async function sendTransactionEmail(data: BaseEmailData & { transactionType: 'buy' | 'sell' } & Partial<BuyEmailData>) {
   if (data.transactionType === 'buy') {
     // Validation des données spécifiques à l'achat
+    console.log(data);
     if (!data.blockchain || !data.fiatAmount || 
         !data.tokenSymbol || !data.tokenAmount || !data.walletAddress) {
             

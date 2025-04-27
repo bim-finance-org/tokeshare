@@ -3,7 +3,7 @@ import { prisma } from '@/app/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-// PUT to update the amount of a buy transaction
+// PUT to update the amount of a sell transaction
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -21,6 +21,8 @@ export async function PUT(
     }
 
     const id = parseInt(params.id);
+    
+
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid transaction ID' },
@@ -30,16 +32,19 @@ export async function PUT(
 
     const data = await request.json();
     
-    // Data validation
-    if (data.amount === undefined || isNaN(parseFloat(data.amount)) || parseFloat(data.amount) <= 0) {
+    // Data validation for amount
+    if (data.cryptoAmount === undefined || isNaN(parseFloat(data.cryptoAmount)) || parseFloat(data.cryptoAmount) <= 0) {
       return NextResponse.json(
         { error: 'Invalid amount. Must be a positive number.' },
         { status: 400 }
       );
     }
+
+    // Parse amount and fees
+    const cryptoAmount = parseFloat(data.cryptoAmount);
     
     // Check if transaction exists
-    const transaction = await prisma.buyTransaction.findUnique({
+    const transaction = await prisma.sellTransaction.findUnique({
       where: { id }
     });
     
@@ -50,11 +55,11 @@ export async function PUT(
       );
     }
     
-    // Update transaction amount
-    const updatedTransaction = await prisma.buyTransaction.update({
+    // Update transaction amount and fees
+    const updatedTransaction = await prisma.sellTransaction.update({
       where: { id },
       data: { 
-        amount: parseFloat(data.amount)
+        cryptoAmount: cryptoAmount,
       }
     });
     

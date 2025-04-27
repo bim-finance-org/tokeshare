@@ -41,31 +41,32 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     
     // Validation des données
-    if (!data.iban || !data.blockchain || !data.fiat || !data.amount || !data.email || !data.fullName || !data.ref) {
+    if (!data.iban || !data.blockchain || !data.crypto || !data.cryptoAmount || !data.fiat || !data.fiatAmount || !data.email || !data.fullName || !data.ref) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
     }
 
     
     // Récupérer les fees ou calculer par défaut (2.5% du montant)
-    const amount = parseFloat(data.amount);
+    const fiatAmount = parseFloat(data.fiatAmount);
     const fees = data.fees !== undefined 
       ? parseFloat(data.fees) 
-      : parseFloat((amount * 0.025).toFixed(2));
+      : parseFloat((fiatAmount * 0.025).toFixed(2));
     
     // Création de la transaction
     const newTransaction = await prisma.sellTransaction.create({
       data: {
-        status: data.status || 'pending',
-        iban: data.iban,
-        blockchain: data.blockchain,
-        fiat: data.fiat,
-        amount: amount,
-        fees: fees,
         ref: data.ref,
         date: new Date(),
         email: data.email,
         fullName: data.fullName,
-        cryptoCurrency: data.cryptoCurrency
+        iban: data.iban,
+        status: data.status || 'pending',
+        blockchain: data.blockchain,
+        fiat: data.fiat,
+        fiatAmount: data.fiatAmount,
+        crypto: data.crypto,
+        cryptoAmount: data.cryptoAmount,
+        fees: fees
       }
     });
     
