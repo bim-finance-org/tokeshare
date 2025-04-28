@@ -11,7 +11,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // check if user is authenticated
@@ -25,7 +25,7 @@ export async function PUT(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
 
     if (isNaN(id)) {
       return NextResponse.json(
