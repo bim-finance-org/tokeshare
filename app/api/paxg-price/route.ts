@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getFromCache, setCache } from '@/app/lib/redis';
+import { getFromCache, setCache } from '@/lib/redis';
 
 const CACHE_EXPIRATION = 60;
 
