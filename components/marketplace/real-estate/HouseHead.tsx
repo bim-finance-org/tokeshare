@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { House } from "@/app/types";
+import { House } from "@/types/House";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import ArrowIcon from "@/app/components/icons/arrows/ArrowIcon";
+import ArrowIcon from "@/components/icons/arrows/ArrowIcon";
 
 interface HouseHeadProps {
   house: House;

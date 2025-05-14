@@ -1,9 +1,9 @@
 import React, { useState, useContext } from "react";
 import { useAccount } from 'wagmi';
-import ConnectButton from "@/app/components/shared/ConnectButton";
+import ConnectButton from "@/components/shared/ConnectButton";
 import BuyInfo from "./BuyInfo";
-import { TokenContexts } from "@/app/context/TokenContexts";
-import { generatePayReference } from "@/app/utils/RandomRefs";
+import { TokenContexts } from "@/context/TokenContexts";
+import { generatePayReference } from "@/utils/RandomRefs";
 
 interface UserFormProps {
   type: 'buy' | 'sell';

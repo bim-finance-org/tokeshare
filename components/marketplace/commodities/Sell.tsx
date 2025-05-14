@@ -2,15 +2,15 @@
 
 import React, { useState, useEffect, useContext } from 'react'
 import TradeWidget from '../../../components/shared/TradeWidget'
-import BankIcon from '@/app/components/icons/BankIcon'
-import Blockchains from '@/app/components/Blockchains'
-import { calculateTGGPrice, convertTGGToFiat } from '@/app/utils/priceUtils'
-import ConnectButton from '@/app/components/shared/ConnectButton'
+import BankIcon from '@/components/icons/BankIcon'
+import Blockchains from '@/components/Blockchains'
+import { calculateTGGPrice, convertTGGToFiat } from '@/utils/priceUtils'
+import ConnectButton from '@/components/shared/ConnectButton'
 import { useAccount } from 'wagmi'
 import UserForm from './UserForm'
-import { TokenContexts } from '@/app/context/TokenContexts'
-import { usePaxgPrice } from '@/app/hooks/usePaxgPrice'
-import { useExchangeRates } from '@/app/hooks/useExchangeRates'
+import { TokenContexts } from '@/context/TokenContexts'
+import { usePaxgPrice } from '@/hooks/usePaxgPrice'
+import { useExchangeRates } from '@/hooks/useExchangeRates'
 
 const Sell = () => {
   // Get values from context

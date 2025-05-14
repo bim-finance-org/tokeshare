@@ -3,9 +3,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import ArrowIcon from "../icons/arrows/ArrowIcon";
 import Image from "next/image";
-import { Commodity } from "@/app/types/Commodity";
-import { calculateTGGPrice } from "@/app/utils/priceUtils";
-import { usePaxgPrice } from "@/app/hooks/usePaxgPrice";
+import { Commodity } from "@/types/Commodity";
+import { calculateTGGPrice } from "@/utils/priceUtils";
+import { usePaxgPrice } from "@/hooks/usePaxgPrice";
 import Link from "next/link";
 
 interface PopularCommoditiesCardProps {

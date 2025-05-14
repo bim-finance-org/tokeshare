@@ -1,5 +1,5 @@
 import React from "react";
-import { HouseOffering } from "@/app/types";
+import { HouseOffering } from "@/types/House";
 
 interface OfferingProps {
   offering: HouseOffering;

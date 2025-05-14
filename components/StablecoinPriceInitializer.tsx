@@ -1,6 +1,6 @@
 'use client';
 
-import { usePrefetchStablePrices } from '@/app/hooks/useStablePrice';
+import { usePrefetchStablePrices } from '@/hooks/useStablePrice';
 
 /**
  * Composant à inclure dans le layout principal de l'application

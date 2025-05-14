@@ -1,16 +1,16 @@
 'use client'
 
 import React, { useState, useEffect, useContext } from 'react'
-import TradeWidget from '@/app/components/shared/TradeWidget'
-import BankIcon from '@/app/components/icons/BankIcon'
-import Blockchains from '@/app/components/Blockchains'
-import { calculateTGGPrice, convertFiatToTGG, convertTGGToFiat } from '@/app/utils/priceUtils'
-import { usePaxgPrice } from '@/app/hooks/usePaxgPrice'
-import ConnectButton from '@/app/components/shared/ConnectButton'
+import TradeWidget from '@/components/shared/TradeWidget'
+import BankIcon from '@/components/icons/BankIcon'
+import Blockchains from '@/components/Blockchains'
+import { calculateTGGPrice, convertFiatToTGG, convertTGGToFiat } from '@/utils/priceUtils'
+import { usePaxgPrice } from '@/hooks/usePaxgPrice'
+import ConnectButton from '@/components/shared/ConnectButton'
 import { useAccount } from 'wagmi'
 import UserForm from './UserForm'
-import { TokenContexts } from '@/app/context/TokenContexts'
-import { useExchangeRates } from '@/app/hooks/useExchangeRates'
+import { TokenContexts } from '@/context/TokenContexts'
+import { useExchangeRates } from '@/hooks/useExchangeRates'
 
 const Buy = () => {
   // Get values from context

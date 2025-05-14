@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react'
 import PolygonIcon from './icons/blockchains/PolygonIcon'
 import BaseIcon from './icons/blockchains/BaseIcon'
 import ArrowDownIcon from './icons/arrows/ArrowDownIcon'
-import { TokenContexts } from '@/app/context/TokenContexts'
+import { TokenContexts } from '@/context/TokenContexts'
 
 interface BlockchainsProps {
   onSelect?: (blockchain: string) => void

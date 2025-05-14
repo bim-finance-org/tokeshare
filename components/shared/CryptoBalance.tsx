@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAccount} from 'wagmi';
-import { useTokenBalance } from '@/app/utils/blockchainUtils';
+import { useTokenBalance } from '@/utils/blockchainUtils';
 const CryptoBalance = ({
   currency,
   blockchain,

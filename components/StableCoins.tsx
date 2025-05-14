@@ -8,7 +8,7 @@ import BOLDIcon from './icons/currency/BOLDIcon'
 import EURCIcon from './icons/currency/EURCIcon'
 import EURAIcon from './icons/currency/EURAIcon'
 import { useAccount } from 'wagmi'
-import { useTokenBalance } from '@/app/utils/blockchainUtils'
+import { useTokenBalance } from '@/utils/blockchainUtils'
 
 interface StableCoinsProps {
   onSelect: (currency: string) => void

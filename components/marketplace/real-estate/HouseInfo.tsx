@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { House } from "@/app/types";
+import { House } from "@/types/House";
 import HouseHighlights from "./sections/Highlights";
 import HouseFinancials from "./sections/Financials";
 import HouseDetails from "./sections/Details";

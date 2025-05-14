@@ -1,5 +1,5 @@
 import React from "react";
-import { HouseGeneralInfo, HouseHighlights } from "@/app/types";
+import { HouseGeneralInfo, HouseHighlights } from "@/types/House";
 
 interface HighlightsProps {
   highlights: HouseHighlights;

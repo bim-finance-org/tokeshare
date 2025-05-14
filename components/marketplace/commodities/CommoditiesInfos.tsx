@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Blockchain from '../../real-estate/[id]/components/sections/Blockchain';
-import NewTabIcon from '@/app/components/icons/NewTabIcon';
+import Blockchain from '@/components/marketplace/real-estate/sections/Blockchain';
+import NewTabIcon from '@/components/icons/NewTabIcon';
 
 const CommoditiesPage = () => {
   const [activeTab, setActiveTab] = useState('DETAILS');

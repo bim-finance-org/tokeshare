@@ -1,5 +1,5 @@
 import React from "react";
-import { HouseFinancials } from "@/app/types";
+import { HouseFinancials } from "@/types/House";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
 interface FinancialsProps {

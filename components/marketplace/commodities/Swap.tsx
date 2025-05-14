@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
-import TradeWidget from "@/app/components/shared/TradeWidget";
+import TradeWidget from "@/components/shared/TradeWidget";
 import Image from "next/image";
-import Blockchains from "@/app/components/Blockchains";
-import { calculateTGGPrice, convertStablecoinToTGG, convertTGGToStablecoin } from "@/app/utils/priceUtils";
+import Blockchains from "@/components/Blockchains";
+import { calculateTGGPrice, convertStablecoinToTGG, convertTGGToStablecoin } from "@/utils/priceUtils";
 import { useAccount } from 'wagmi';
-import ConnectButton from "@/app/components/shared/ConnectButton";
-import { TokenContexts } from '@/app/context/TokenContexts';
-import { usePaxgPrice } from '@/app/hooks/usePaxgPrice';
-import { useStablecoinPrice } from '@/app/hooks/useStablePrice';
-import { StablecoinSymbol } from '@/app/utils/ListStableCoinsUsed';
+import ConnectButton from "@/components/shared/ConnectButton";
+import { TokenContexts } from '@/context/TokenContexts';
+import { usePaxgPrice } from '@/hooks/usePaxgPrice';
+import { useStablecoinPrice } from '@/hooks/useStablePrice';
+import { StablecoinSymbol } from '@/utils/ListStableCoinsUsed';
 
 // Définir le type pour les propriétés acceptées par TradeWidget
 type TradeWidgetType = "stablecoin" | "crypto" | "fiat";
