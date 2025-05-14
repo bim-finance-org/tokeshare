@@ -1,13 +1,13 @@
 "use client";
 import React, { useState } from "react";
-import PopularCards from "./components/home/PopularCards";
-import ArrowLineIcon from "./components/icons/arrows/ArrowLineIcon";
+import PopularCards from "../components/home/PopularCards";
+import ArrowLineIcon from "../components/icons/arrows/ArrowLineIcon";
 import Link from "next/link";
 import Image from "next/image";
 import { Input } from "../components/ui/input";
-import Schema from "./components/home/Schema";
+import Schema from "../components/home/Schema";
 import { z } from "zod";
-import { usePaxgPrice } from "./hooks/usePaxgPrice";
+import { usePaxgPrice } from "../hooks/usePaxgPrice";
 
 export default function Home() {
   const [email, setEmail] = useState("");

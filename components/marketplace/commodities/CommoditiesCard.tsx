@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import ArrowIcon from "@/app/components/icons/arrows/ArrowIcon";
+import ArrowIcon from "@/components/icons/arrows/ArrowIcon";
 import Image from "next/image";
 import Link from "next/link";
-import { Commodity } from "@/app/types/Commodity";
-import {  calculateTGGPrice } from "@/app/utils/priceUtils";
-import { usePaxgPrice } from "@/app/hooks/usePaxgPrice";
+import { Commodity } from "@/types/Commodity";
+import {  calculateTGGPrice } from "@/utils/priceUtils";
+import { usePaxgPrice } from "@/hooks/usePaxgPrice";
 interface CommoditiesCardProps {
   commodity: Commodity;
 }

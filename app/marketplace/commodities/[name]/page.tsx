@@ -1,11 +1,12 @@
 'use client'
 
 import React from "react";
-import Exchange from '@/app/marketplace/commodities/components/Exchange'
-import commoditiesData from '@/app/data/commoditiesData.json'
-import Contracts from '@/app/components/Contracts'
+import { useParams } from 'next/navigation'
+import Exchange from '@/components/marketplace/commodities/Exchange'
+import commoditiesData from '@/data/commoditiesData.json'
+import Contracts from '@/components/Contracts'
 import Image from 'next/image'
-import CommoditiesInfos from "../components/CommoditiesInfos";
+import CommoditiesInfos from "@/components/marketplace/commodities/CommoditiesInfos";
 import { use } from "react";
 
 interface PageProps {

@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Buy from '@/app/marketplace/commodities/components/Buy'
-import Sell from '@/app/marketplace/commodities/components/Sell'
-import Swap from '@/app/marketplace/commodities/components/Swap'
-import { useAllStablePrices } from '@/app/hooks/useStablePrice'
+import Buy from '@/components/marketplace/commodities/Buy'
+import Sell from '@/components/marketplace/commodities/Sell'
+import Swap from '@/components/marketplace/commodities/Swap'
+import { useAllStablePrices } from '@/hooks/useStablePrice'
 
 const Exchange = () => {
   const [activeTab, setActiveTab] = useState('swap')

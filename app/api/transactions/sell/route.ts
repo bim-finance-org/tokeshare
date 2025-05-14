@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { sendTransactionEmail } from '@/app/utils/email/sendEmail';
+import { sendTransactionEmail } from '@/utils/email/sendEmail';
 
 /**
  * GET to retrieve all sell transactions

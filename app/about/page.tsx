@@ -1,6 +1,6 @@
 import React from "react";
-import PersonalCard from "./components/PersonalCard";
-import teamData from "../data/teamData.json";
+import PersonalCard from "@/components/about/PersonalCard";
+import teamData from "@/data/teamData.json";
 
 const Page = () => {
   return (
@@ -10,7 +10,7 @@ const Page = () => {
         <h1 className="text-3xl sm:text-4xl text-color6 font-bold mb-6">Empowering Investments with Values</h1>
         <p className="mb-4 text-xl text-color3">At Tokeshare, we believe in democratizing investment access through the transformative power of tokenization. Our mission is to bridge the gap between global investors and the untapped opportunities of the Latin American market, fostering inclusivity and transparency in every transaction.</p>
         <p className="mb-4 text-xl text-color3">Driven by innovation, security, and sustainability, Tokeshare offers access to fractional ownership of real estate and commodities. By leveraging blockchain technology, we ensure every investment is efficient, compliant, and trustworthy.</p>
-        <p className="mb-4 text-xl text-color3">We prioritize simplicity, empowering investors with user-friendly solutions to navigate complex markets. Whether you’re investing in properties or commodities like gold, silver, cocoa, or sugarcane, we strive to make every step seamless and rewarding.</p>
+        <p className="mb-4 text-xl text-color3">We prioritize simplicity, empowering investors with user-friendly solutions to navigate complex markets. Whether you're investing in properties or commodities like gold, silver, cocoa, or sugarcane, we strive to make every step seamless and rewarding.</p>
         <p className="mb-8 text-xl text-color3">Join us in reshaping the future of finance—one token at a time.</p>
       </div>
 

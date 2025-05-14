@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { headers } from 'next/headers'
-import ContextProvider from './context'
-import { TokenProvider } from "./context/TokenContexts";
-import LayoutWrapper from "./components/LayoutWrapper";
+import ContextProvider from '../context'
+import { TokenProvider } from "../context/TokenContexts";
+import LayoutWrapper from "../components/LayoutWrapper";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {

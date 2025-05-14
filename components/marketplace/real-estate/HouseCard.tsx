@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useRef } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
-import BedIcon from "@/app/components/icons/card/BedIcon";
-import SurfaceIcon from "@/app/components/icons/card/SurfaceIcon";
-import LocationIcon from "@/app/components/icons/card/LocationIcon";
-import ArrowIcon from "@/app/components/icons/arrows/ArrowIcon";
-import { House } from "@/app/types";
+import { House } from "@/types/House";
+import BedIcon from "@/components/icons/card/BedIcon";
+import SurfaceIcon from "@/components/icons/card/SurfaceIcon";
+import LocationIcon from "@/components/icons/card/LocationIcon";
+import ArrowIcon from "@/components/icons/arrows/ArrowIcon";
 
 interface HomeCardProps {
   house: House;
