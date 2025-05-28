@@ -8,7 +8,7 @@ import BOLDIcon from './icons/currency/BOLDIcon'
 import EURCIcon from './icons/currency/EURCIcon'
 import EURAIcon from './icons/currency/EURAIcon'
 import { useAccount } from 'wagmi'
-import { useTokenBalance } from '@/utils/blockchainUtils'
+import { useAllTokenBalances} from '@/utils/blockchainUtils'
 
 interface StableCoinsProps {
   onSelect: (currency: string) => void
@@ -24,6 +24,9 @@ const BLOCKCHAIN_STABLECOINS = {
 const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
   const availableStablecoins = BLOCKCHAIN_STABLECOINS[blockchain as keyof typeof BLOCKCHAIN_STABLECOINS] || []
   const { isConnected } = useAccount()
+  
+  // Récupérer toutes les balances en une seule fois avec multicall
+  const { balances, isLoading, error } = useAllTokenBalances(blockchain)
 
   const renderStablecoinButton = (symbol: string) => {
     const icons = {
@@ -38,7 +41,9 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
       USDCE: USDCIcon,
     }
     const Icon = icons[symbol as keyof typeof icons]
-    const balance = useTokenBalance(symbol, blockchain)
+    
+    // Récupérer la balance depuis le multicall
+    const balance = balances[symbol]?.formatted || '0'
     
     return (
       <button 
@@ -55,7 +60,7 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
         
         {isConnected && (
           <span className='text-sm text-color4 font-medium'>
-            Balance: {balance}
+            Balance: {isLoading ? 'Loading...' : balance}
           </span>
         )}
       </button>
@@ -66,6 +71,11 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
     <div>
       <h1 className='text-2xl text-color2 font-bold border-b-2 border-color2 pb-2'>Select a Stablecoin</h1>
       <h2 className='text-lg text-color2 font-bold mt-4 mb-2'>Available on {blockchain}</h2>
+      {error && (
+        <div className="text-red-500 text-sm mb-2">
+          Erreur: {error.toString()}
+        </div>
+      )}
       <div className='flex flex-col gap-1 min-w-[200px]'>
         {availableStablecoins.map(renderStablecoinButton)}
       </div>
