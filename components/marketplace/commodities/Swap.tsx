@@ -9,6 +9,7 @@ import { TokenContexts } from '@/context/TokenContexts';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { useStablecoinPrice } from '@/hooks/useStablePrice';
 import { StablecoinSymbol } from '@/utils/ListStableCoinsUsed';
+import { useSwap } from "@/hooks/useSwap";
 
 // Définir le type pour les propriétés acceptées par TradeWidget
 type TradeWidgetType = "stablecoin" | "crypto" | "fiat";
@@ -26,7 +27,10 @@ const Swap = () => {
   const [tggAmount, setTggAmount] = useState("0");
   const [tggPrice, setTggPrice] = useState<number>(0);
   const [isTggFirst, setIsTggFirst] = useState(false);
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  
+  // Hooks pour le swap - DEPLACER AU NIVEAU DU COMPOSANT
+  const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
   
   // Récupérer les prix via les hooks
   const { data: paxgPrice, isLoading } = usePaxgPrice();
@@ -134,6 +138,67 @@ const Swap = () => {
     return `1 TGG = ${tggPrice.toFixed(2)} ${stablecoin}`;
   };
 
+  const swaping = async () => {
+    try {
+      console.log("Début du swap...");
+      
+      // Vérifier que le wallet est connecté
+      if (!address) {
+        console.error("Wallet non connecté");
+        alert("Veuillez connecter votre wallet");
+        return;
+      }
+      
+      // CORRECT : Faire un swap USDC vers PAXG (ce que le contrat attend)
+      const usdcAddress = "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"; // USDC sur Polygon
+      const paxgAddress = "0x553d3d295e0f695b9228246232edf400ed3560b5"; // PAXG sur Polygon (bridgé)
+      
+      // Adresse du routeur KyberSwap pour Polygon
+      const kyberRouter = "0x6131B5fae19EA4f9D964eAc0408E4408b66337b5";
+      
+      // Pour le test : utiliser un montant fixe en USDC
+      const testAmountUsdc = "1"; // 1 USDC (sera converti avec parseUnits)
+      
+      console.log("Paramètres du swap:", {
+        inputToken: usdcAddress,
+        inputAmount: testAmountUsdc,
+        outputToken: paxgAddress, // ✅ PAXG (ce que le contrat attend)
+        routerAddress: kyberRouter,
+        walletAddress: address
+      });
+      
+      console.log("🚨 IMPORTANT: Assurez-vous d'avoir au moins 1 USDC dans votre wallet sur Polygon");
+      console.log("🎯 Le swap se fera vers PAXG (comme attendu par le contrat TGG)");
+      console.log("💰 Montant exact: 1 USDC");
+      
+      // Appeler la nouvelle fonction swapMint avec les bons paramètres
+      const result = await swapMint({
+        inputToken: usdcAddress,
+        inputAmount: testAmountUsdc,
+        outputToken: paxgAddress, // ✅ PAXG (ce que le contrat attend)
+        routerAddress: kyberRouter,
+        walletAddress: address
+      });
+      
+      console.log("✅ Swap réussi:", result);
+      alert("Swap exécuté avec succès ! Vérifiez votre transaction. Vous devriez avoir reçu des tokens TGG !");
+      
+    } catch (error: any) {
+      console.error("❌ Erreur lors du swap:", error);
+      
+      // Messages d'erreur plus informatifs
+      if (error.message?.includes('Solde insuffisant')) {
+        alert("❌ Solde insuffisant. Vous devez avoir au moins 1 USDC dans votre wallet sur Polygon.");
+      } else if (error.message?.includes('User rejected')) {
+        alert("❌ Transaction annulée par l'utilisateur.");
+      } else if (error.message?.includes('TRANSFER_FROM_FAILED')) {
+        alert("❌ Échec du transfert. Vérifiez que vous avez assez d'USDC et que votre wallet est sur le réseau Polygon.");
+      } else {
+        alert(`❌ Erreur lors du swap: ${error.message || 'Erreur inconnue'}`);
+      }
+    }
+  };
+
   // Debugging
   useEffect(() => {
     console.log("Stablecoin changed to:", stablecoin, "Rate:", stablecoinPrice);
@@ -215,6 +280,7 @@ const Swap = () => {
       <div className="mt-4 sm:mt-6">
         {isConnected ? (
           <button 
+            onClick={swaping}
             className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base ${
               arePricesAvailable 
                 ? "bg-color4 text-white hover:bg-opacity-90" 

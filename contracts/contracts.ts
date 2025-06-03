@@ -1,0 +1,12 @@
+// Adresses des contrats sur Polygon Mainnet
+export const CONTRACTS = {
+    TGG: "0xf779B8CBd6fc9022181b399931b63ec64a552fB9",
+    ZAP: "0xF1342CcdC94aE6840B32b4C13cCd5bc9f6D2B07c",
+    PAXG: "0x553d3D295e0f695B9228246232eDF400ed3560B5",
+    WETH: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"
+  };
+  
+  export const TRUSTED_AGGREGATORS = [
+    "0x6131B5fae19EA4f9D964eAc0408E4408b66337b5", // KyberSwap
+    "0x3a23F943181408EAC424116Af7b7790c94Cb97a5"  // Bungee
+  ];
