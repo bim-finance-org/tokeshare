@@ -25,7 +25,7 @@ const TokenInput = ({
   };
 
   return (
-    <div>
+    <div className="w-32 sm:w-40">
       <p className='text-color4 text-lg font-medium'>{label}</p>
       <input 
         type="text"

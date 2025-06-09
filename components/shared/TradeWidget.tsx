@@ -4,6 +4,7 @@ import TokenSelector from './TokenSelector'
 import TokenDisplay from '@/components/TokenDisplay'
 import { useAccount } from 'wagmi'
 import CryptoBalance from './CryptoBalance'
+import MaxButton from './MaxButton'
 
 interface TradeWidgetProps {
   type: 'fiat' | 'crypto' | 'stablecoin';
@@ -14,6 +15,7 @@ interface TradeWidgetProps {
   onValueChange: (value: string) => void;
   onTokenChange: (token: string) => void;
   showBalance?: boolean;
+  readOnly?: boolean;
 }
 
 const TradeWidget = ({
@@ -25,6 +27,7 @@ const TradeWidget = ({
   onValueChange,
   onTokenChange,
   showBalance = false,
+  readOnly = false,
 }: TradeWidgetProps) => {
   const [selectedToken, setSelectedToken] = useState(defaultToken || 'USDC');
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
@@ -39,6 +42,14 @@ const TradeWidget = ({
     console.log(selectedToken);
     onTokenChange(token);
     setIsSelectorOpen(false);
+  };
+
+  const handleMaxClick = (maxValue: string) => {
+    // Formater la valeur max pour enlever les zéros inutiles
+    const numValue = parseFloat(maxValue);
+    if (!isNaN(numValue)) {
+      onValueChange(numValue.toString());
+    }
   };
 
   useEffect(() => {
@@ -59,14 +70,28 @@ const TradeWidget = ({
 
   return (
     <div className="bg-color1 p-4 rounded-xl shadow-md">
-      <div className="flex justify-between items-start gap-4">
-        <TokenInput
-          label={label}
-          value={value || ''}
-          onChange={onValueChange}
-          placeholder='10'
-          disabled={isTGG && type === "stablecoin"}
-        />
+      <div className="flex justify-between items-center gap-4">
+        <div>
+          <TokenInput
+            label={label}
+            value={value || ''}
+            onChange={onValueChange}
+            placeholder='10'
+            disabled={isTGG && type === "stablecoin"}
+          />
+        </div>
+        
+        {/* Bouton MAX - placé entre l'input et l'icône */}
+        {!readOnly && showBalance && !(isTGG && type === "stablecoin") && (
+          <div className="flex items-end pb-3">
+            <MaxButton
+              currency={selectedToken}
+              blockchain={blockchain}
+              onMaxClick={handleMaxClick}
+            />
+          </div>
+        )}
+        
         <div className="flex flex-col items-end gap-2">
           <TokenDisplay
             token={selectedToken}
