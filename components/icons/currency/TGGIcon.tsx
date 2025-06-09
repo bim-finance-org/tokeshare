@@ -6,9 +6,9 @@ interface TGGIconProps {
   className?: string
 }
 
-const TGGIcon = ({ size = 20, className = '' }: TGGIconProps) => {
+const TGGIcon = ({ className = '' }: TGGIconProps) => {
   return (
-        <Image src="/images/currencies/tgg.png" alt="TGG" width={size} height={size} className={` ${className} rounded-full`} />
+        <Image src="/images/currencies/tgg.png" alt="TGG" width={17} height={17} className={` ${className} rounded-full`} />
   )
 }
 
