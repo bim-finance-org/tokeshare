@@ -10,6 +10,10 @@ import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { useStablecoinPrice } from '@/hooks/useStablePrice';
 import { StablecoinSymbol } from '@/utils/ListStableCoinsUsed';
 import { useSwap } from "@/hooks/useSwap";
+import { POLYGON_ADDRESSES } from '@/utils/addresses/polygonAddresses';
+import { BASE_ADDRESSES } from '@/utils/addresses/baseAddresses';
+import { CONTRACTS, TRUSTED_AGGREGATORS } from "@/contracts/contracts";
+import { Address } from "viem";
 
 // Définir le type pour les propriétés acceptées par TradeWidget
 type TradeWidgetType = "stablecoin" | "crypto" | "fiat";
@@ -56,7 +60,8 @@ const Swap = () => {
     
     if (!isTggFirst) {
       // Si stablecoin est l'entrée, calcule le montant TGG
-      const numericAmount = parseFloat(stablecoinAmount) || 0;
+      const numericAmount = parseFloat(stablecoinAmount) || undefined;
+      if (numericAmount === undefined) return;
       const calculatedTggAmount = convertStablecoinToTGG(
         numericAmount, 
         stablecoinRate,
@@ -65,7 +70,8 @@ const Swap = () => {
       setTggAmount(calculatedTggAmount.toFixed(4));
     } else {
       // Si TGG est l'entrée, calcule le montant stablecoin
-      const numericAmount = parseFloat(tggAmount) || 0;
+      const numericAmount = parseFloat(tggAmount) || undefined;
+      if (numericAmount === undefined) return;
       const calculatedStablecoinAmount = convertTGGToStablecoin(
         numericAmount,
         tggPrice,
@@ -140,48 +146,49 @@ const Swap = () => {
 
   const swaping = async () => {
     try {
-      console.log("Début du swap...");
+      // Récupérer les adresses selon la blockchain
+      const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
       
-      // Vérifier que le wallet est connecté
-      if (!address) {
-        console.error("Wallet non connecté");
-        alert("Veuillez connecter votre wallet");
-        return;
+      // Adresse PAXG (token de backing pour TGG)
+      const paxgAddress = CONTRACTS.PAXG as Address; // PAXG sur Polygon
+      
+      const routerAddress = TRUSTED_AGGREGATORS.kyberSwap as Address;
+
+      if (!isTggFirst) {
+        // Direction: Stablecoin → TGG (swapMint)
+        const inputTokenAddress = (tokenAddresses as Record<string, string>)[stablecoin];
+        
+        if (!inputTokenAddress) {
+          alert(`Adresse du token ${stablecoin} non trouvée pour ${selectedBlockchain}`);
+          return;
+        }
+
+        console.log("stablecoinAmount", stablecoinAmount);
+
+        await swapMint({
+          inputToken: inputTokenAddress as Address,
+          inputAmount: stablecoinAmount,
+          outputToken: paxgAddress,
+          routerAddress: routerAddress,
+          walletAddress: address as Address,
+        });
+
+      } else {
+        // Direction: TGG → Stablecoin (swapWithdraw)
+        const outputTokenAddress = (tokenAddresses as Record<string, string>)[stablecoin];
+        
+        if (!outputTokenAddress) {
+          alert(`Adresse du token ${stablecoin} non trouvée pour ${selectedBlockchain}`);
+          return;
+        }
+
+        await swapWithdraw({
+          tggAmount,
+          outputToken: outputTokenAddress as Address,
+          routerAddress: routerAddress as Address,
+          walletAddress: address as Address,
+        });
       }
-      
-      // CORRECT : Faire un swap USDC vers PAXG (ce que le contrat attend)
-      const usdcAddress = "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"; // USDC sur Polygon
-      const paxgAddress = "0x553d3d295e0f695b9228246232edf400ed3560b5"; // PAXG sur Polygon (bridgé)
-      
-      // Adresse du routeur KyberSwap pour Polygon
-      const kyberRouter = "0x6131B5fae19EA4f9D964eAc0408E4408b66337b5";
-      
-      // Pour le test : utiliser un montant fixe en USDC
-      const testAmountUsdc = "1"; // 1 USDC (sera converti avec parseUnits)
-      
-      console.log("Paramètres du swap:", {
-        inputToken: usdcAddress,
-        inputAmount: testAmountUsdc,
-        outputToken: paxgAddress, // ✅ PAXG (ce que le contrat attend)
-        routerAddress: kyberRouter,
-        walletAddress: address
-      });
-      
-      console.log("🚨 IMPORTANT: Assurez-vous d'avoir au moins 1 USDC dans votre wallet sur Polygon");
-      console.log("🎯 Le swap se fera vers PAXG (comme attendu par le contrat TGG)");
-      console.log("💰 Montant exact: 1 USDC");
-      
-      // Appeler la nouvelle fonction swapMint avec les bons paramètres
-      const result = await swapMint({
-        inputToken: usdcAddress,
-        inputAmount: testAmountUsdc,
-        outputToken: paxgAddress, // ✅ PAXG (ce que le contrat attend)
-        routerAddress: kyberRouter,
-        walletAddress: address
-      });
-      
-      console.log("✅ Swap réussi:", result);
-      alert("Swap exécuté avec succès ! Vérifiez votre transaction. Vous devriez avoir reçu des tokens TGG !");
       
     } catch (error: any) {
       console.error("❌ Erreur lors du swap:", error);

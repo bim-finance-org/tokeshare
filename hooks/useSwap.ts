@@ -1,12 +1,43 @@
 import { CONTRACTS } from '@/contracts/contracts'
 import { useZAPContract } from './useContracts'
 import { Address } from 'viem'
-import { usePublicClient, useWalletClient } from 'wagmi'
+import { usePublicClient, useWalletClient, useReadContract } from 'wagmi'
 import { RouteParams } from '@/interfaces/RouteParams'
 import { RouteSummary } from '@/interfaces/RouteSummary'
 import { BuildRouteParams } from '@/interfaces/BuildRouteParams'
 import { BuildRouteResponse } from '@/interfaces/BuildRouteResponse'
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi'
+import { ZAP_ABI } from '@/contracts/abis/zap_abi'
+import { getTokenDecimals } from '@/utils/tokenUtils'
+
+// Hook React pour lire les fees du contrat ZAP de manière réactive
+export const useZapFees = () => {
+  const { data: zapMintFeeRaw, isLoading: isLoadingMintFee, error: mintFeeError } = useReadContract({
+    address: CONTRACTS.ZAP as Address,
+    abi: ZAP_ABI,
+    functionName: 'zapMintFee'
+  })
+
+  const { data: zapWithdrawFeeRaw, isLoading: isLoadingWithdrawFee, error: withdrawFeeError } = useReadContract({
+    address: CONTRACTS.ZAP as Address,
+    abi: ZAP_ABI,
+    functionName: 'zapWithdrawFee'
+  })
+
+  const zapMintFee = zapMintFeeRaw ? Number(zapMintFeeRaw) / 100 : 0 // Convertir en pourcentage
+  const zapWithdrawFee = zapWithdrawFeeRaw ? Number(zapWithdrawFeeRaw) / 100 : 0 // Convertir en pourcentage
+
+  return {
+    zapMintFee,
+    zapWithdrawFee,
+    isLoading: isLoadingMintFee || isLoadingWithdrawFee,
+    error: mintFeeError || withdrawFeeError,
+    raw: {
+      zapMintFeeRaw,
+      zapWithdrawFeeRaw
+    }
+  }
+}
 
 export const useSwap = () => {
   const { zapMint, zapWithdraw, isPending, error, hash } = useZAPContract()
@@ -71,6 +102,62 @@ export const useSwap = () => {
       if (publicClient) {
         await publicClient.waitForTransactionReceipt({ hash })
       }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Fonction pour lire les fees du contrat ZAP (pour usage dans les fonctions async)
+  const getZapFees = async (): Promise<{ zapMintFee: number; zapWithdrawFee: number }> => {
+    if (!publicClient) throw new Error('Public client non disponible')
+    
+    try {
+      const [zapMintFeeRaw, zapWithdrawFeeRaw] = await Promise.all([
+        publicClient.readContract({
+          address: CONTRACTS.ZAP as Address,
+          abi: ZAP_ABI,
+          functionName: 'zapMintFee'
+        }) as Promise<bigint>,
+        publicClient.readContract({
+          address: CONTRACTS.ZAP as Address,
+          abi: ZAP_ABI,
+          functionName: 'zapWithdrawFee'
+        }) as Promise<bigint>
+      ])
+
+      // Convertir les valeurs BigInt en pourcentage 
+      // Supposons que les fees sont exprimées en basis points (1% = 100, 0.5% = 50)
+      const zapMintFee = Number(zapMintFeeRaw) / 10000 // Convertir en pourcentage
+      const zapWithdrawFee = Number(zapWithdrawFeeRaw) / 10000 // Convertir en pourcentage
+
+      return { zapMintFee, zapWithdrawFee }
+    } catch (error) {
+      console.error("❌ Erreur lors de la lecture des fees:", error)
+      throw error
+    }
+  }
+
+  const getConversion = async (params: {
+    tggAmount: string
+  }) => {
+    try {
+      // Lire les fees réelles du contrat ZAP
+      const { zapWithdrawFee } = await getZapFees()
+
+      console.log("zapWithdrawFee", zapWithdrawFee);
+
+      console.log("tggAmount", params.tggAmount);
+      
+      // Calcul de conversion avec la vraie fee
+      let conversion = (parseFloat(params.tggAmount) * 10**9 / 31_103_476_800)
+
+      console.log("conversion", conversion);
+
+      conversion = conversion - conversion * zapWithdrawFee  // zapWithdrawFee est déjà en pourcentage
+      
+      console.log('conversion after fee', conversion);
+
+      return conversion
     } catch (error) {
       throw error
     }
@@ -157,6 +244,7 @@ export const useSwap = () => {
         throw new Error(`Erreur build API: ${data.message || 'Données de swap manquantes'}`)
       }
 
+      console.log("data.data.data", data.data.data);
       return data.data.data
     } catch (error) {
       throw error
@@ -172,14 +260,20 @@ export const useSwap = () => {
     walletAddress: Address
   }) => {
     try {
-      // FIXÉ : Convertir le montant en unités de base pour l'API KyberSwap
-      const decimals = params.inputToken.toLowerCase() === "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359" ? 6 : 18 // USDC = 6 décimales
-      const amountInBaseUnits = (parseFloat(params.inputAmount) * Math.pow(10, decimals)).toString()
+      // Utiliser getTokenDecimals pour obtenir les bonnes décimales
+      const decimals = getTokenDecimals(params.inputToken);
+      if (decimals === undefined) {
+        throw new Error(`Impossible de déterminer les décimales pour le token ${params.inputToken}`);
+      }
       
-      const amountBigInt = BigInt(amountInBaseUnits)
+      const amountInBaseUnits = (parseFloat(params.inputAmount) * Math.pow(10, decimals)).toString();
+      if (isNaN(parseFloat(amountInBaseUnits))) {
+        throw new Error(`Montant invalide: ${params.inputAmount}`);
+      }
       
-      const balance = await checkTokenBalance(params.inputToken, params.walletAddress)
-      
+      const amountBigInt = BigInt(amountInBaseUnits);
+      console.log("amountBigInt", amountBigInt);
+      const balance = await checkTokenBalance(params.inputToken, params.walletAddress);
       if (balance < amountBigInt) {
         throw new Error(`Solde insuffisant. Requis: ${amountInBaseUnits}, Disponible: ${balance.toString()}`)
       }
@@ -187,13 +281,13 @@ export const useSwap = () => {
       const currentAllowance = await checkAllowance(
         params.inputToken,
         params.walletAddress,
-        params.routerAddress
+        CONTRACTS.ZAP as Address
       )
       
       // 3. Approuver si nécessaire
       if (currentAllowance < amountBigInt) {
-        const approvalAmount = amountBigInt * BigInt(2) // 2x le montant nécessaire
-        await approveToken(params.inputToken, params.routerAddress, approvalAmount)
+        const approvalAmount = amountBigInt
+        await approveToken(params.inputToken, CONTRACTS.ZAP as Address, approvalAmount)
       }
 
       const routeSummary = await getSwapRoute({
@@ -208,7 +302,7 @@ export const useSwap = () => {
         routeSummary,
         sender: CONTRACTS.ZAP as Address,
         recipient: CONTRACTS.ZAP as Address,
-        slippageTolerance: 200,
+        slippageTolerance: 50,
         source: 'tokeshare-dapp'
       })
 
@@ -227,9 +321,86 @@ export const useSwap = () => {
     }
   }
 
+  const performSwapWithdraw = async (params: {
+    tggAmount: string
+    outputToken: Address
+    routerAddress: Address
+    walletAddress: Address
+  }) => {
+    try {
+
+      console.log("params.tggAmount", params.tggAmount);
+      console.log("params.outputToken", params.outputToken);
+      console.log("params.routerAddress", params.routerAddress);
+      console.log("params.walletAddress", params.walletAddress);
+
+      // 1. Vérifier les soldes TGG
+      const tggBalance = await checkTokenBalance(CONTRACTS.TGG as Address, params.walletAddress)
+      const tggAmountBigInt = BigInt((parseFloat(params.tggAmount) * Math.pow(10, 18)).toString()) // TGG a 18 décimales
+      console.log("tggAmountBigInt", tggAmountBigInt);
+
+      if (tggBalance < tggAmountBigInt) {
+        throw new Error(`Solde TGG insuffisant. Requis: ${params.tggAmount}, Disponible: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`)
+      }
+
+      // 2. Vérifier l'allowance TGG pour le contrat ZAP
+      const currentAllowance = await checkAllowance(
+        CONTRACTS.TGG as Address,
+        params.walletAddress,
+        CONTRACTS.ZAP as Address
+      )
+
+      if (currentAllowance < tggAmountBigInt) {
+        await approveToken(CONTRACTS.TGG as Address, CONTRACTS.ZAP as Address, tggAmountBigInt)
+      }
+
+      // 3. Obtenir la route de swap PAXG → outputToken
+
+      const conversion = await getConversion({ tggAmount: params.tggAmount })
+      
+      // Convertir en entier avant BigInt (Math.floor pour éviter les décimales)
+      const conversionInteger = Math.floor(conversion * Math.pow(10, 18))
+      const conversionBigInt = BigInt(conversionInteger)
+      const paxgAmountInBaseUnits = conversionBigInt.toString()
+
+      console.log("paxgAmountInBaseUnits", paxgAmountInBaseUnits);
+
+      const routeSummary = await getSwapRoute({
+        tokenIn: CONTRACTS.PAXG as Address,
+        tokenOut: params.outputToken,
+        amountIn: paxgAmountInBaseUnits,
+        gasInclude: true,
+        slippageTolerance: 50
+      })
+
+      // 4. Construire les données de swap automatiquement
+      const swapData = await buildSwapData({
+        routeSummary,
+        sender: CONTRACTS.ZAP as Address,
+        recipient: CONTRACTS.ZAP as Address,
+        slippageTolerance: 50,
+        source: 'tokeshare-dapp'
+      })
+
+      // 5. Exécuter le zapWithdraw avec le swapData construit
+      const result = await zapWithdraw(
+        params.tggAmount,
+        params.outputToken,
+        swapData,
+        params.routerAddress,
+        params.walletAddress
+      )
+
+
+      return result
+    } catch (error) {
+      throw error
+    }
+  }
+
   return {
     swapMint: performSwapMint,
-    swapWithdraw: zapWithdraw,
+    swapWithdraw: performSwapWithdraw,
     isPending,
     error,
     hash,
@@ -237,6 +408,9 @@ export const useSwap = () => {
     buildSwapData,
     checkTokenBalance,
     checkAllowance,
-    approveToken
+    approveToken,
+    useZapFees,
+    getZapFees,
+    getConversion
   }
 }

@@ -8,11 +8,6 @@ export const ZAP_ABI = [
       },
       {
         "internalType": "address",
-        "name": "_weth",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
         "name": "_feeRecipient",
         "type": "address"
       }
@@ -360,19 +355,6 @@ export const ZAP_ABI = [
   },
   {
     "inputs": [],
-    "name": "WETH",
-    "outputs": [
-      {
-        "internalType": "contract IWETH",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "feeRecipient",
     "outputs": [
       {
@@ -607,9 +589,5 @@ export const ZAP_ABI = [
     ],
     "stateMutability": "view",
     "type": "function"
-  },
-  {
-    "stateMutability": "payable",
-    "type": "receive"
   }
 ]
