@@ -5,6 +5,7 @@ import ContextProvider from '../context'
 import { TokenProvider } from "../context/TokenContexts";
 import LayoutWrapper from "../components/LayoutWrapper";
 import { Providers } from "./providers";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Tokeshare",
@@ -41,6 +42,7 @@ export default async function RootLayout({
             </TokenProvider>
           </ContextProvider>
         </Providers>
+        <Toaster />
       </body>
     </html>
   );

@@ -14,6 +14,11 @@ import { POLYGON_ADDRESSES } from '@/utils/addresses/polygonAddresses';
 import { BASE_ADDRESSES } from '@/utils/addresses/baseAddresses';
 import { CONTRACTS, TRUSTED_AGGREGATORS } from "@/contracts/contracts";
 import { Address } from "viem";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, AlertCircle, ExternalLink } from "lucide-react";
 
 // Définir le type pour les propriétés acceptées par TradeWidget
 type TradeWidgetType = "stablecoin" | "crypto" | "fiat";
@@ -31,10 +36,14 @@ const Swap = () => {
   const [tggAmount, setTggAmount] = useState("0");
   const [tggPrice, setTggPrice] = useState<number>(0);
   const [isTggFirst, setIsTggFirst] = useState(false);
+  const [isPreparingSwap, setIsPreparingSwap] = useState(false);
   const { isConnected, address } = useAccount();
   
   // Hooks pour le swap - DEPLACER AU NIVEAU DU COMPOSANT
   const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
+  
+  // Hook pour les toasts
+  const { toast } = useToast();
   
   // Récupérer les prix via les hooks
   const { data: paxgPrice, isLoading } = usePaxgPrice();
@@ -131,7 +140,14 @@ const Swap = () => {
 
   // Préparation des informations d'échange
   const exchangeRateInfo = () => {
-    if (isLoading || isLoadingStablecoin) return "Loading...";
+    if (isLoading || isLoadingStablecoin) {
+      return (
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span>Loading rate...</span>
+        </div>
+      );
+    }
     
     const stablecoinRate = stablecoinPrice ?? 1.0;
     
@@ -145,6 +161,8 @@ const Swap = () => {
   };
 
   const swaping = async () => {
+    setIsPreparingSwap(true);
+    
     try {
       // Récupérer les adresses selon la blockchain
       const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
@@ -159,11 +177,22 @@ const Swap = () => {
         const inputTokenAddress = (tokenAddresses as Record<string, string>)[stablecoin];
         
         if (!inputTokenAddress) {
-          alert(`Adresse du token ${stablecoin} non trouvée pour ${selectedBlockchain}`);
+          toast({
+            variant: "destructive",
+            title: "Configuration Error",
+            description: `Token address for ${stablecoin} not found on ${selectedBlockchain}`,
+          });
+          setIsPreparingSwap(false);
           return;
         }
 
         console.log("stablecoinAmount", stablecoinAmount);
+
+        // Notification pour informer l'utilisateur que la préparation commence
+        toast({
+          title: "Preparing swap...",
+          description: "Checking balances and preparing transaction. Please wait for approval prompts.",
+        });
 
         await swapMint({
           inputToken: inputTokenAddress as Address,
@@ -178,9 +207,20 @@ const Swap = () => {
         const outputTokenAddress = (tokenAddresses as Record<string, string>)[stablecoin];
         
         if (!outputTokenAddress) {
-          alert(`Adresse du token ${stablecoin} non trouvée pour ${selectedBlockchain}`);
+          toast({
+            variant: "destructive",
+            title: "Configuration Error",
+            description: `Token address for ${stablecoin} not found on ${selectedBlockchain}`,
+          });
+          setIsPreparingSwap(false);
           return;
         }
+
+        // Notification pour informer l'utilisateur que la préparation commence
+        toast({
+          title: "Preparing swap...",
+          description: "Checking TGG balance and preparing transaction. Please wait for approval prompts.",
+        });
 
         await swapWithdraw({
           tggAmount,
@@ -190,21 +230,87 @@ const Swap = () => {
         });
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("❌ Erreur lors du swap:", error);
       
-      // Messages d'erreur plus informatifs
-      if (error.message?.includes('Solde insuffisant')) {
-        alert("❌ Solde insuffisant. Vous devez avoir au moins 1 USDC dans votre wallet sur Polygon.");
-      } else if (error.message?.includes('User rejected')) {
-        alert("❌ Transaction annulée par l'utilisateur.");
-      } else if (error.message?.includes('TRANSFER_FROM_FAILED')) {
-        alert("❌ Échec du transfert. Vérifiez que vous avez assez d'USDC et que votre wallet est sur le réseau Polygon.");
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Messages d'erreur plus informatifs avec toast
+      if (errorMessage.includes('Solde insuffisant') || errorMessage.includes('Insufficient balance')) {
+        toast({
+          variant: "destructive",
+          title: "Insufficient Balance",
+          description: "You need to have at least 1 USDC in your wallet on Polygon.",
+        });
+      } else if (errorMessage.includes('User rejected')) {
+        toast({
+          variant: "destructive",
+          title: "Transaction Cancelled",
+          description: "The transaction was cancelled by the user.",
+        });
+      } else if (errorMessage.includes('TRANSFER_FROM_FAILED')) {
+        toast({
+          variant: "destructive",
+          title: "Transfer Failed",
+          description: "Please verify you have enough USDC and your wallet is on the Polygon network.",
+        });
       } else {
-        alert(`❌ Erreur lors du swap: ${error.message || 'Erreur inconnue'}`);
+        toast({
+          variant: "destructive",
+          title: "Swap Error",
+          description: errorMessage || 'Unknown error',
+        });
       }
+    } finally {
+      // Toujours remettre à false, même en cas d'erreur
+      setIsPreparingSwap(false);
     }
   };
+
+  // Effect pour gérer la transition des états et les notifications
+  useEffect(() => {
+    if (isPending) {
+      // Quand la transaction devient pending, on arrête la préparation
+      setIsPreparingSwap(false);
+    }
+  }, [isPending]);
+
+  // Effect pour gérer les notifications de succès de transaction
+  useEffect(() => {
+    if (hash) {
+      toast({
+        title: "Transaction Sent!",
+        description: (
+          <div className="flex flex-col gap-2">
+            <p>Your transaction is being processed.</p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                {hash.slice(0, 6)}...{hash.slice(-4)}
+              </span>
+              <button
+                onClick={() => window.open(`https://polygonscan.com/tx/${hash}`, '_blank')}
+                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+              >
+                <ExternalLink className="h-3 w-3" />
+                View
+              </button>
+            </div>
+          </div>
+        ),
+      });
+    }
+  }, [hash, toast]);
+
+  // Effect pour gérer les erreurs globales du swap
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Transaction Error",
+        description: error.message || String(error),
+      });
+    }
+  }, [error, toast]);
 
   // Debugging
   useEffect(() => {
@@ -238,8 +344,6 @@ const Swap = () => {
 
   // Vérifier si les prix sont disponibles pour permettre l'affichage
   const arePricesAvailable = tggPrice > 0 && stablecoinPrice !== undefined;
-  const errorMessage = !arePricesAvailable ? 
-    (isLoading || isLoadingStablecoin ? "Chargement des prix..." : "Prix non disponibles pour cette conversion") : "";
 
   return (
     <div className="p-3 sm:p-6 w-full relative">
@@ -260,42 +364,132 @@ const Swap = () => {
         <TradeWidget
           {...bottomWidgetProps}
         />
-        
-        {errorMessage && (
-          <div className="text-red-500 text-center text-sm font-medium mt-1">
-            {errorMessage}
-          </div>
-        )}
       </div>
 
-      <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-1 sm:space-y-2">
+      <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-3 sm:space-y-4">
         <Blockchains section="swap" onSelect={handleBlockchainSelect} />
-        <p className="text-color4 text-xs sm:text-sm font-medium ml-2">Delivery time: instant</p>
-        <p className="text-color4 text-xs sm:text-sm font-medium ml-2">
-          TGG Price: {isLoading ? "Loading..." : `$${tggPrice.toFixed(2)}`}
-        </p>
-        <p className="text-color4 text-xs sm:text-sm font-medium ml-2">
-          Exchange rate: {exchangeRateInfo()}
-        </p>
-        {stablecoinPrice && (
-          <p className="text-color4 text-xs sm:text-sm font-medium ml-2">
-            {stablecoin} rate: ${stablecoinPrice.toFixed(4)}
-          </p>
+        
+        {/* État de la transaction */}
+        {isPreparingSwap && (
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <AlertTitle>Preparing Swap</AlertTitle>
+            <AlertDescription>
+              Checking balances and allowances. Please approve any pending transactions in your wallet.
+            </AlertDescription>
+          </Alert>
         )}
+        
+        {isPending && (
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <AlertTitle>Transaction Processing</AlertTitle>
+            <AlertDescription>
+              Your transaction is being processed. Please wait...
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Informations sur les prix */}
+        <div className="bg-white/50 rounded-lg p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
+            <Badge variant="secondary">Instant</Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-color4 text-xs sm:text-sm font-medium">TGG Price:</span>
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ) : (
+              <Badge>${tggPrice.toFixed(2)}</Badge>
+            )}
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-color4 text-xs sm:text-sm font-medium">Exchange rate:</span>
+            {isLoading || isLoadingStablecoin ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ) : (
+              <span className="text-xs sm:text-sm font-medium">{exchangeRateInfo()}</span>
+            )}
+          </div>
+          
+          {stablecoinPrice && (
+            <div className="flex items-center justify-between">
+              <span className="text-color4 text-xs sm:text-sm font-medium">{stablecoin} rate:</span>
+              {isLoadingStablecoin ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              ) : (
+                <Badge variant="outline">${stablecoinPrice.toFixed(4)}</Badge>
+              )}
+            </div>
+          )}
+          
+          {/* Hash de transaction */}
+          {hash && (
+            <div className="flex items-center justify-between pt-2 border-t">
+              <span className="text-color4 text-xs sm:text-sm font-medium">Transaction:</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                  {hash.slice(0, 6)}...{hash.slice(-4)}
+                </span>
+                <button
+                  onClick={() => window.open(`https://polygonscan.com/tx/${hash}`, '_blank')}
+                  className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="mt-4 sm:mt-6">
+      <div className="mt-4 sm:mt-6 space-y-3">
+        {/* Affichage d'erreur globale */}
+        {!arePricesAvailable && !isLoading && !isLoadingStablecoin && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Prices Unavailable</AlertTitle>
+            <AlertDescription>
+              Unable to fetch prices for this conversion. Please try again later.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {isConnected ? (
           <button 
             onClick={swaping}
-            className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base ${
-              arePricesAvailable 
+            className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
+              arePricesAvailable && !isPending && !isPreparingSwap
                 ? "bg-color4 text-white hover:bg-opacity-90" 
                 : "bg-gray-400 text-gray-200 cursor-not-allowed"
             }`}
-            disabled={!arePricesAvailable}
+            disabled={!arePricesAvailable || isPending || isPreparingSwap}
           >
-            Swap
+            {isPreparingSwap ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Preparing swap...</span>
+              </>
+            ) : isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Processing transaction...</span>
+              </>
+            ) : (
+              "Swap"
+            )}
           </button>
         ) : (
           <ConnectButton />
