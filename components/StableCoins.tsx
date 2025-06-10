@@ -17,7 +17,7 @@ interface StableCoinsProps {
 
 // Define which stablecoins are available on each blockchain
 const BLOCKCHAIN_STABLECOINS = {
-  Polygon: ['USDT', 'USDC', 'DAI', 'EURS', 'CRVUSD', 'EURA','USDCE'],
+  Polygon: ['USDT', 'USDC', 'DAI', 'EURS','USDCE'],
   Base: ['USDC', 'DAI','EURC', 'CRVUSD', 'BOLD']
 }
 

@@ -3,8 +3,8 @@ import { useERC20 } from '@/hooks/useERC20';
 
 // Decimals connues pour les tokens les plus utilisés
 const KNOWN_DECIMALS: Record<string, number> = {
-    '0x493Af8D9aC56f46652F5b0C1Fb617Fe59da535C7': 18,
-    '0x1e4a5963abfd975d8c9021ce480b42188849d41d': 6,
+    '0x493af8d9ac56f46652f5b0c1fb617fe59da535c7': 18,
+    '0xc2132d05d31c914a87c6611c10748aeb04b58e8f': 6,
     '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359': 6,
     '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063': 18,
     '0xe111178a87a3bff0c8d18decba5798827539ae99': 2,

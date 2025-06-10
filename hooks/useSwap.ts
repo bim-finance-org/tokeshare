@@ -176,8 +176,23 @@ export const useSwap = () => {
       ...(params.chargeFeeBy && { chargeFeeBy: params.chargeFeeBy }),
       ...(params.feeAmount && { feeAmount: params.feeAmount }),
       ...(params.feeReceiver && { feeReceiver: params.feeReceiver }),
-      ...(params.isInBps && { isInBps: params.isInBps.toString() })
+      ...(params.isInBps && { isInBps: params.isInBps.toString() }),
+      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order'
     })
+
+    console.log({
+      tokenIn: params.tokenIn,
+      tokenOut: params.tokenOut,
+      amountIn: params.amountIn,
+      ...(params.saveGas && { saveGas: params.saveGas.toString() }),
+      ...(params.gasInclude && { gasInclude: params.gasInclude.toString() }),
+      ...(params.gasPrice && { gasPrice: params.gasPrice }),
+      ...(params.slippageTolerance && { slippageTolerance: params.slippageTolerance.toString() }),
+      ...(params.chargeFeeBy && { chargeFeeBy: params.chargeFeeBy }),
+      ...(params.feeAmount && { feeAmount: params.feeAmount }),
+      ...(params.feeReceiver && { feeReceiver: params.feeReceiver }),
+      ...(params.isInBps && { isInBps: params.isInBps.toString() })
+    });
 
     // FIXÉ : Utilisation du bon endpoint pour Polygon
     const url = `https://aggregator-api.kyberswap.com/polygon/api/v1/routes?${queryParams}`
@@ -233,6 +248,20 @@ export const useSwap = () => {
         })
       })
 
+      console.log("params", {
+        routeSummary: params.routeSummary,
+        sender: params.sender,
+        recipient: params.recipient,
+        slippageTolerance: params.slippageTolerance,
+        deadline: params.deadline || Math.floor(Date.now() / 1000) + 1200, // 20 minutes par défaut
+        source: params.source || 'tokeshare-dapp',
+        enableGasEstimation: false,
+        ...(params.permit && { permit: params.permit }),
+        ...(params.ignoreCappedSlippage && { ignoreCappedSlippage: params.ignoreCappedSlippage })
+      });
+
+      
+
       if (!response.ok) {
         const errorText = await response.text()
         throw new Error(`Erreur HTTP ${response.status}: ${errorText}`)
@@ -278,6 +307,12 @@ export const useSwap = () => {
         throw new Error(`Solde insuffisant. Requis: ${amountInBaseUnits}, Disponible: ${balance.toString()}`)
       }
 
+      console.log("inputToken", params.inputToken);
+      console.log("walletAddress", params.walletAddress);
+      console.log("inputAmount", params.inputAmount);
+      console.log("outputToken", params.outputToken);
+      console.log("routerAddress", params.routerAddress);
+
       const currentAllowance = await checkAllowance(
         params.inputToken,
         params.walletAddress,
@@ -295,16 +330,20 @@ export const useSwap = () => {
         tokenOut: params.outputToken,
         amountIn: amountInBaseUnits, // ✅ Utiliser les unités de base pour l'API
         gasInclude: true,
-        slippageTolerance: 50
+        slippageTolerance: 200
       })
+
+      console.log("routeSummary", routeSummary);
 
       const swapData = await buildSwapData({
         routeSummary,
         sender: CONTRACTS.ZAP as Address,
         recipient: CONTRACTS.ZAP as Address,
-        slippageTolerance: 50,
+        slippageTolerance: 200,
         source: 'tokeshare-dapp'
       })
+
+    
 
       const result = await zapMint(
         params.inputToken,
@@ -370,7 +409,7 @@ export const useSwap = () => {
         tokenOut: params.outputToken,
         amountIn: paxgAmountInBaseUnits,
         gasInclude: true,
-        slippageTolerance: 50
+        slippageTolerance: 200
       })
 
       // 4. Construire les données de swap automatiquement
@@ -378,7 +417,7 @@ export const useSwap = () => {
         routeSummary,
         sender: CONTRACTS.ZAP as Address,
         recipient: CONTRACTS.ZAP as Address,
-        slippageTolerance: 50,
+        slippageTolerance: 200,
         source: 'tokeshare-dapp'
       })
 
