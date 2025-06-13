@@ -2,12 +2,14 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-import housesData from "@/app/data/housesData.json";
+import housesData from "@/data/housesData.json";
+import Image from "next/image";
+import { notFound } from "next/navigation";
 
-import Map from "./components/HouseMap";
-import Head from "./components/HouseHead";
-import Info from "./components/HouseInfo";
-import About from "./components/HouseAbout";
+import Map from "@/components/marketplace/real-estate/HouseMap";
+import Head from "@/components/marketplace/real-estate/HouseHead";
+import Info from "@/components/marketplace/real-estate/HouseInfo";
+import About from "@/components/marketplace/real-estate/HouseAbout";
 
 const HouseDetailPage = () => {
   const { id } = useParams();

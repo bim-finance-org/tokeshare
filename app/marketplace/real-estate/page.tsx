@@ -1,6 +1,6 @@
 import React from "react";
-import HouseCard from "@/app/components/cards/HouseCard";
-import housesData from "@/app/data/housesData.json";
+import HouseCard from "@/components/marketplace/real-estate/HouseCard";
+import housesData from "@/data/housesData.json";
 
 const page = () => {
   return (

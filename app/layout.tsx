@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import NavBar from "./components/NavBar";
-import Footer from "./components/Footer";
+import { headers } from 'next/headers'
+import ContextProvider from '../context'
+import { TokenProvider } from "../context/TokenContexts";
+import LayoutWrapper from "../components/LayoutWrapper";
+import { Providers } from "./providers";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Tokeshare",
@@ -18,17 +22,27 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersObj = await headers();
+  const cookies = headersObj.get('cookie');
+  
   return (
-    <html lang="en">
+    <html lang="en">  
       <body>
-        <NavBar />
-        {children}
-        <Footer />
+        <Providers>
+          <ContextProvider cookies={cookies}>
+            <TokenProvider>
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </TokenProvider>
+          </ContextProvider>
+        </Providers>
+        <Toaster />
       </body>
     </html>
   );

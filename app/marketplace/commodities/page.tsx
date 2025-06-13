@@ -1,6 +1,6 @@
 import React from "react";
-import CommoditiesCard from "@/app/components/cards/CommoditiesCard";
-import commoditiesData from "@/app/data/commoditiesData.json";
+import CommoditiesCard from "@/components/marketplace/commodities/CommoditiesCard";
+import commoditiesData from "@/data/commoditiesData.json";
 
 const Page = () => {
   return (

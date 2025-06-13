@@ -8,6 +8,11 @@ const emailSchema = z.object({
 	email: z.string().email(),
 });
 
+/**
+ * POST to create a new email
+ * @param request - The request object
+ * @returns The success of the operation
+ */
 export async function POST(request: Request) {
 	const rawEmail = await request.json();
 	const email = emailSchema.safeParse(rawEmail);
