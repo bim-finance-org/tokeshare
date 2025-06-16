@@ -2,14 +2,13 @@ import React, { useState, useEffect, useContext } from "react";
 import TradeWidget from "@/components/shared/TradeWidget";
 import Image from "next/image";
 import Blockchains from "@/components/Blockchains";
-import { calculateTGGPrice, convertStablecoinToTGG, convertTGGToStablecoin } from "@/utils/priceUtils";
+import { calculateTGGPrice } from "@/utils/priceUtils";
 import { useAccount } from 'wagmi';
 import ConnectButton from "@/components/shared/ConnectButton";
 import { TokenContexts } from '@/context/TokenContexts';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
-import { useStablecoinPrice } from '@/hooks/useStablePrice';
-import { StablecoinSymbol } from '@/utils/ListStableCoinsUsed';
 import { useSwap } from "@/hooks/useSwap";
+import { useSwapQuote } from "@/hooks/useSwapQuote";
 import { POLYGON_ADDRESSES } from '@/utils/addresses/polygonAddresses';
 import { BASE_ADDRESSES } from '@/utils/addresses/baseAddresses';
 import { CONTRACTS, TRUSTED_AGGREGATORS } from "@/contracts/contracts";
@@ -39,7 +38,7 @@ const Swap = () => {
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
   const { isConnected, address } = useAccount();
   
-  // Hooks pour le swap - DEPLACER AU NIVEAU DU COMPOSANT
+  // Hooks pour le swap
   const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
   
   // Hook pour les toasts
@@ -47,9 +46,28 @@ const Swap = () => {
   
   // Récupérer les prix via les hooks
   const { data: paxgPrice, isLoading } = usePaxgPrice();
-  const { data: stablecoinPrice, isLoading: isLoadingStablecoin } = useStablecoinPrice({
-    stablecoin: stablecoin as StablecoinSymbol
-  });
+  
+  // Préparer les paramètres pour le hook useSwapQuote
+  const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
+  const inputToken = isTggFirst ? CONTRACTS.TGG as Address : (tokenAddresses as Record<string, string>)[stablecoin] as Address;
+  const outputToken = isTggFirst ? (tokenAddresses as Record<string, string>)[stablecoin] as Address : CONTRACTS.TGG as Address;
+  const inputAmount = isTggFirst ? tggAmount : stablecoinAmount;
+  const direction = isTggFirst ? 'tgg-to-stablecoin' : 'stablecoin-to-tgg';
+  
+  // Hook pour obtenir les vrais montants de swap via KyberSwap
+  const swapQuoteParams = inputToken && outputToken && inputAmount && parseFloat(inputAmount) > 0 ? {
+    inputToken,
+    outputToken,
+    inputAmount,
+    direction: direction as 'stablecoin-to-tgg' | 'tgg-to-stablecoin'
+  } : null;
+  
+  const { 
+    outputAmount: calculatedOutputAmount, 
+    isLoading: isLoadingQuote, 
+    error: quoteError,
+    exchangeRate 
+  } = useSwapQuote(swapQuoteParams);
 
   // Mise à jour du prix TGG quand paxgPrice change
   useEffect(() => {
@@ -60,53 +78,18 @@ const Swap = () => {
     }
   }, [paxgPrice]);
 
-  // Fonction pour recalculer les montants en fonction de l'input actif
-  const recalculateAmounts = () => {
-    // Vérifier que les prix nécessaires sont disponibles
-    if (tggPrice <= 0 || stablecoinPrice === undefined) return;
-    
-    const stablecoinRate = stablecoinPrice ?? 1.0;
-    
-    if (!isTggFirst) {
-      // Si stablecoin est l'entrée, calcule le montant TGG
-      const numericAmount = parseFloat(stablecoinAmount) || undefined;
-      if (numericAmount === undefined) return;
-      const calculatedTggAmount = convertStablecoinToTGG(
-        numericAmount, 
-        stablecoinRate,
-        tggPrice
-      );
-      setTggAmount(calculatedTggAmount.toFixed(4));
-    } else {
-      // Si TGG est l'entrée, calcule le montant stablecoin
-      const numericAmount = parseFloat(tggAmount) || undefined;
-      if (numericAmount === undefined) return;
-      const calculatedStablecoinAmount = convertTGGToStablecoin(
-        numericAmount,
-        tggPrice,
-        stablecoinRate
-      );
-      setStablecoinAmount(calculatedStablecoinAmount.toFixed(2));
-    }
-  };
-
-  // Effet pour recalculer quand les prix ou le stablecoin changent
+  // Mettre à jour automatiquement le montant de sortie basé sur les calculs KyberSwap
   useEffect(() => {
-    recalculateAmounts();
-  }, [tggPrice, stablecoinPrice, stablecoin, isTggFirst]);
-
-  // Effet pour recalculer quand les montants changent
-  useEffect(() => {
-    if (!isTggFirst) {
-      recalculateAmounts();
+    if (calculatedOutputAmount && !isLoadingQuote) {
+      if (isTggFirst) {
+        // TGG → Stablecoin
+        setStablecoinAmount(calculatedOutputAmount);
+      } else {
+        // Stablecoin → TGG
+        setTggAmount(calculatedOutputAmount);
+      }
     }
-  }, [stablecoinAmount]);
-
-  useEffect(() => {
-    if (isTggFirst) {
-      recalculateAmounts();
-    }
-  }, [tggAmount]);
+  }, [calculatedOutputAmount, isTggFirst, isLoadingQuote]);
 
   // Handle stablecoin amount change
   const handleStablecoinAmountChange = (amount: string) => {
@@ -140,7 +123,7 @@ const Swap = () => {
 
   // Préparation des informations d'échange
   const exchangeRateInfo = () => {
-    if (isLoading || isLoadingStablecoin) {
+    if (isLoading || isLoadingQuote) {
       return (
         <div className="flex items-center gap-2">
           <Loader2 className="h-3 w-3 animate-spin" />
@@ -149,14 +132,12 @@ const Swap = () => {
       );
     }
     
-    const stablecoinRate = stablecoinPrice ?? 1.0;
-    
-    // Afficher le taux de change avec le stablecoin approprié
-    if (stablecoinRate !== 1.0) {
-      const adjustedPrice = tggPrice / stablecoinRate;
-      return `1 TGG = ${adjustedPrice.toFixed(2)} ${stablecoin}`;
+    // Utiliser le taux de change calculé par KyberSwap si disponible
+    if (exchangeRate) {
+      return exchangeRate;
     }
     
+    // Fallback au calcul basique si pas de données KyberSwap
     return `1 TGG = ${tggPrice.toFixed(2)} ${stablecoin}`;
   };
 
@@ -314,8 +295,8 @@ const Swap = () => {
 
   // Debugging
   useEffect(() => {
-    console.log("Stablecoin changed to:", stablecoin, "Rate:", stablecoinPrice);
-  }, [stablecoin, stablecoinPrice]);
+    console.log("Stablecoin changed to:", stablecoin, "Exchange rate:", exchangeRate);
+  }, [stablecoin, exchangeRate]);
 
   // Déterminer quel widget est en entrée (modifiable) et lequel est en sortie (lecture seule)
   const topWidgetProps = {
@@ -343,7 +324,7 @@ const Swap = () => {
   };
 
   // Vérifier si les prix sont disponibles pour permettre l'affichage
-  const arePricesAvailable = tggPrice > 0 && stablecoinPrice !== undefined;
+  const arePricesAvailable = tggPrice > 0 && !isLoadingQuote;
 
   return (
     <div className="p-3 sm:p-6 w-full relative">
@@ -411,7 +392,7 @@ const Swap = () => {
           
           <div className="flex items-center justify-between">
             <span className="text-color4 text-xs sm:text-sm font-medium">Exchange rate:</span>
-            {isLoading || isLoadingStablecoin ? (
+            {isLoading || isLoadingQuote ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <Skeleton className="h-4 w-20" />
@@ -421,17 +402,11 @@ const Swap = () => {
             )}
           </div>
           
-          {stablecoinPrice && (
+          {/* Afficher les erreurs de quote si il y en a */}
+          {quoteError && (
             <div className="flex items-center justify-between">
-              <span className="text-color4 text-xs sm:text-sm font-medium">{stablecoin} rate:</span>
-              {isLoadingStablecoin ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
-              ) : (
-                <Badge variant="outline">${stablecoinPrice.toFixed(4)}</Badge>
-              )}
+              <span className="text-color4 text-xs sm:text-sm font-medium">Quote status:</span>
+              <Badge variant="destructive">Error loading quote</Badge>
             </div>
           )}
           
@@ -457,12 +432,23 @@ const Swap = () => {
 
       <div className="mt-4 sm:mt-6 space-y-3">
         {/* Affichage d'erreur globale */}
-        {!arePricesAvailable && !isLoading && !isLoadingStablecoin && (
+        {!arePricesAvailable && !isLoading && !isLoadingQuote && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Prices Unavailable</AlertTitle>
             <AlertDescription>
               Unable to fetch prices for this conversion. Please try again later.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Affichage d'erreur de quote */}
+        {quoteError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Quote Error</AlertTitle>
+            <AlertDescription>
+              {quoteError}
             </AlertDescription>
           </Alert>
         )}
