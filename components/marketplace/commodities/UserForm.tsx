@@ -1,9 +1,11 @@
-import React, { useState, useContext } from "react";
-import { useAccount } from 'wagmi';
+import React, { useState, useContext, useEffect } from "react";
+import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 import ConnectButton from "@/components/shared/ConnectButton";
 import BuyInfo from "./BuyInfo";
 import { TokenContexts } from "@/context/TokenContexts";
 import { generatePayReference } from "@/utils/RandomRefs";
+import { useTGGBalance } from "@/hooks/useTGGBalance";
+import { useTGGTransfer } from "@/hooks/useTGGTransfer";
 
 interface UserFormProps {
   type: 'buy' | 'sell';
@@ -14,7 +16,6 @@ interface UserFormProps {
 }
 
 const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps) => {
-  // Récupérer les valeurs du contexte pour la blockchain
   const { 
     buy: { blockchain: buyBlockchain },
     sell: { blockchain: sellBlockchain }
@@ -32,7 +33,13 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
   });
   const [ref, setRef] = useState<string>('');
 
-  // Informations de transfert pour le type 'buy'
+  const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address);
+  const { transferTGGToTokeShare, isPending: transferPending, error: transferError, hash } = useTGGTransfer();
+
+  const { data: receipt, isLoading: receiptLoading, isSuccess: receiptSuccess, isError: receiptError } = useWaitForTransactionReceipt({
+    hash,
+  });
+
   const transferInfo = {
     amount: `${amount} ${currency}`,
     beneficiary: "Tokeshare",
@@ -41,32 +48,38 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     bank: "Qonto"
   };
 
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    
-    // Vérifier que l'utilisateur est connecté pour les achats
-    if (type === 'buy' && !isConnected) {
-      return;
+  useEffect(() => {
+    if (receiptSuccess && hash) {
+      handleApiSubmission();
+    } else if (receiptError) {
+      setError("La transaction TGG a échoué. Veuillez contacter le support pour assistance.");
     }
-    
-    try {
-      setIsLoading(true);
-      
-      // Préparer les données pour l'API
-      let apiData;
+  }, [receiptSuccess, receiptError, hash]);
 
+  useEffect(() => {
+    if (transferError) {
+      if (transferError.message?.includes('User rejected') || transferError.message?.includes('rejected')) {
+        setError("Transaction annulée par l'utilisateur.");
+      } else if (transferError.message?.includes('insufficient funds')) {
+        setError("Solde insuffisant pour effectuer la transaction.");
+      } else {
+        setError("Erreur lors du transfert. Veuillez réessayer.");
+      }
+    }
+  }, [transferError]);
+
+  const handleApiSubmission = async () => {
+    try {
       const transactionRef = generatePayReference();
       setRef(transactionRef);
       
+      let apiData;
+      
       if (type === 'buy') {
-        // Calculer le montant et les frais pour l'achat
         const cryptoAmount = parseFloat(tggAmount);
         const fiatAmount = parseFloat(amount);
-        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
+        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2));
         
-        // Données pour une transaction d'achat
         apiData = {
           ref: transactionRef, 
           email: formData.email,
@@ -82,12 +95,11 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           fees: feesValue,
         };
       } else {
-        // Calculer le montant et les frais pour la vente
+        // Calculer le mont ant et les frais pour la vente
         const cryptoAmount = parseFloat(tggAmount);
         const fiatAmount = parseFloat(amount);
-        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
+        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2));
         
-        // Données pour une transaction de vente
         apiData = {
           ref: transactionRef,
           email: formData.email,
@@ -104,7 +116,6 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
         console.log(apiData);
       }
       
-      // Faire l'appel API en fonction du type (achat ou vente)
       const endpoint = type === 'buy' ? '/api/transactions/buy' : '/api/transactions/sell';
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -117,21 +128,48 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
       const data = await response.json();
       
       if (!response.ok) {
+        console.log(data);
         throw new Error(data.error || 'Une erreur est survenue lors de la transaction');
       }
       
-      // Si tout va bien, afficher la confirmation
       setShowConfirmation(true);
     } catch (err) {
       console.error('Erreur lors de la soumission:', err);
       
-      // Gérer l'erreur de parsing JSON si elle se produit
       if (err instanceof SyntaxError && err.message.includes('JSON')) {
         setError("Erreur de connexion au serveur. Veuillez réessayer plus tard.");
       } else {
         setError(err instanceof Error ? err.message : 'Une erreur est survenue');
       }
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    
+    if (!isConnected) {
+      return;
+    }
+    
+    try {
+      if (type === 'buy') {
+        setIsLoading(true);
+        await handleApiSubmission();
+      } else {
+        const balanceCheck = checkSufficientBalance(tggAmount);
+        
+        if (!balanceCheck.hasSufficient) {
+          throw new Error(`Solde TGG insuffisant. Vous avez ${balanceCheck.formattedBalance} TGG mais ${tggAmount} TGG sont requis.`);
+        }
+        
+        transferTGGToTokeShare(tggAmount);
+      }
+    } catch (err) {
+      console.error('Erreur lors de la soumission:', err);
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
       setIsLoading(false);
     }
   };
@@ -143,6 +181,8 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
       [name]: value
     }));
   };
+
+  const balanceCheck = type === 'sell' && address ? checkSufficientBalance(tggAmount) : null;
 
   return (
     <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4">
@@ -207,11 +247,33 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
             </div>
           )}
 
-          {/* Wallet Connection - Only for Buy */}
-          {type === 'buy' && (
-            <div className="bg-gray-200 p-4 rounded-xl">
-              <label className="block text-sm mb-2">Reception address</label>
-              <ConnectButton/>
+          {/* Wallet Connection - For both Buy and Sell */}
+          <div className="bg-gray-200 p-4 rounded-xl">
+            <label className="block text-sm mb-2">
+              {type === 'buy' ? 'Reception address' : 'Your wallet address'}
+            </label>
+            <ConnectButton/>
+          </div>
+
+          {/* TGG Balance Info - Only for Sell */}
+          {type === 'sell' && isConnected && (
+            <div className="bg-blue-50 p-4 rounded-xl">
+              <div className="text-sm text-blue-800">
+                {balanceCheck && !balanceCheck.hasSufficient && (
+                  <p className="text-red-600 mt-1">
+                    Insufficient balance. You need {tggAmount} TGG but only have {balanceCheck.formattedBalance} TGG.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Transaction Status - For Sell */}
+          {type === 'sell' && (transferPending || receiptLoading) && (
+            <div className="bg-yellow-50 p-4 rounded-xl">
+              <p className="text-yellow-800">
+                {transferPending ? 'Please confirm the TGG transfer in your wallet...' : 'Waiting for transaction confirmation...'}
+              </p>
             </div>
           )}
 
@@ -225,17 +287,25 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={(type === 'buy' && !isConnected) || isLoading}
+            disabled={
+              !isConnected || 
+              isLoading || 
+              (type === 'sell' && balanceCheck && !balanceCheck.hasSufficient) ||
+              transferPending ||
+              receiptLoading
+            }
             className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Traitement en cours...' : type === 'buy' ? 'Buy' : 'Sell'}
+            {isLoading || transferPending || receiptLoading
+              ? 'Processing...' 
+              : type === 'buy' 
+                ? 'Buy' 
+                : 'Sell'}
           </button>
         </form>
       ) : (
-        // Affichage conditionnel selon le type après soumission
         <>
           {type === 'buy' && (
-            // Informations de transfert pour Buy
             <div className="space-y-4">
               <BuyInfo 
                 amount={transferInfo.amount}
