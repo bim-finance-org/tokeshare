@@ -18,7 +18,16 @@ interface SwapQuoteResult {
   exchangeRate: string | null;
 }
 
-// Hook de debounce personnalisé avec logique plus intelligente
+/**
+ * Attends que l'utilisateur ait fini de taper avant de mettre à jour la valeur.
+ * Retourne un indicateur d'activité de saisie.
+ *
+ * @param value La valeur à surveiller qui est l'input amount.
+ * @param delay Le délai d'attente (en millisecondes) avant de considérer la saisie comme "terminée".
+ * @returns Un objet contenant :
+ *   - debouncedValue : la version retardée de value (change seulement après un délai sans modification)
+ *   - isTyping : booléen indiquant si l'utilisateur est en train d'écrire
+ */
 const useSmartDebounce = (value: string, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
   const [isTyping, setIsTyping] = useState(false);
@@ -46,21 +55,30 @@ const useSmartDebounce = (value: string, delay: number) => {
   return { debouncedValue, isTyping };
 };
 
+
+/**
+ * Vas récupérer la valeur de l'ouput amount en fonction de l'input amount, uniquement si l'utilisateur a arrêté d'écrire et si la valeur de 'paramsKey' a changé.
+ * @param params Objet contenant les paramètres du swap (tokens, montant, direction).
+ * @returns Un objet avec :
+ *   - outputAmount : le montant obtenu après le swap 
+ *   - isLoading : booléen, true si le fetch est en cours ou si l'utilisateur tape
+ *   - error : message d'erreur 
+ *   - exchangeRate : taux de change calculé 
+ */
 export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult => {
   const [outputAmount, setOutputAmount] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exchangeRate, setExchangeRate] = useState<string | null>(null);
-  const [lastSuccessfulParams, setLastSuccessfulParams] = useState<string | null>(null);
+  const [lastParamsKey, setLastParamsKey] = useState<string | null>(null);
 
   const { getSwapRoute, getConversion } = useSwap();
 
-  // Debounce intelligent avec délai adaptatif
   const inputAmount = params?.inputAmount || '';
-  const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, 1500);
+  const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, 1200);
 
   useEffect(() => {
-    if (!params || !debouncedAmount || parseFloat(debouncedAmount) <= 0) {
+    if (!params || !debouncedAmount || isNaN(Number(debouncedAmount)) || parseFloat(debouncedAmount) < 0.1) {
       setOutputAmount(null);
       setExchangeRate(null);
       setError(null);
@@ -69,101 +87,62 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
     }
 
     const amount = parseFloat(debouncedAmount);
-    
-    // Seuil minimum plus élevé pour éviter les micro-transactions
-    if (amount < 0.1) {
-      setOutputAmount(null);
-      setExchangeRate(null);
-      return;
-    }
 
-    // Arrondir à 1 décimale pour grouper les appels similaires
-    const roundedAmount = Math.round(amount * 10) / 10;
-    
-    // Créer une clé unique pour ces paramètres
-    const paramsKey = `${params.inputToken}-${params.outputToken}-${roundedAmount}-${params.direction}`;
-    
-    // Ne faire l'appel que si les paramètres ont vraiment changé
-    if (paramsKey === lastSuccessfulParams) {
-      return;
-    }
+    const paramsKey = [
+      params.inputToken,
+      params.outputToken,
+      amount.toFixed(6),
+      params.direction
+    ].join('-');
 
-    // Eviter les appels pour des changements de moins de 5% du montant précédent
-    if (lastSuccessfulParams) {
-      const lastAmount = parseFloat(lastSuccessfulParams.split('-')[2]);
-      const changePercentage = Math.abs(roundedAmount - lastAmount) / lastAmount;
-      if (changePercentage < 0.05) {
-        return;
-      }
-    }
+    if (paramsKey === lastParamsKey) return;
+
+    setIsLoading(true);
+    setError(null);
 
     const fetchQuote = async () => {
-      setIsLoading(true);
-      setError(null);
-
       try {
         if (params.direction === 'stablecoin-to-tgg') {
-          // Direction: Stablecoin → TGG
-          // 1. Obtenir le montant de PAXG via KyberSwap
           const inputDecimals = getTokenDecimals(params.inputToken);
-          if (inputDecimals === undefined) {
-            throw new Error(`Impossible de déterminer les décimales pour le token ${params.inputToken}`);
-          }
+          if (inputDecimals == null) throw new Error('Décimales manquantes');
+          const amountInBase = (amount * 10 ** inputDecimals).toString();
 
-          const amountInBaseUnits = (roundedAmount * Math.pow(10, inputDecimals)).toString();
-          
-          const routeSummary = await getSwapRoute({
+          const route = await getSwapRoute({
             tokenIn: params.inputToken,
             tokenOut: CONTRACTS.PAXG as Address,
-            amountIn: amountInBaseUnits,
+            amountIn: amountInBase,
             gasInclude: true,
             slippageTolerance: 200
           });
 
-          // 2. Convertir le montant PAXG en TGG
-          const paxgAmountReceived = parseFloat(routeSummary.amountOut) / Math.pow(10, 18); // PAXG a 18 décimales
-          const tggAmount = paxgAmountReceived * 31.1034768; // 1 once troy = 31.1034768 grammes
-          
+          const paxgAmount = parseFloat(route.amountOut) / 1e18;
+          const tggAmount = paxgAmount * 31.1034768;
           setOutputAmount(tggAmount.toFixed(6));
-          
-          // Calculer le taux de change
-          const rate = tggAmount / roundedAmount;
-          setExchangeRate(`1 ${getTokenSymbol(params.inputToken)} = ${rate.toFixed(6)} TGG`);
+          setExchangeRate(`1 ${getTokenSymbol(params.inputToken)} ≈ ${(tggAmount/amount).toFixed(6)} TGG`);
 
         } else {
-          // Direction: TGG → Stablecoin
-          // 1. Convertir TGG en PAXG
-          const paxgAmount = await getConversion({ tggAmount: roundedAmount.toString() });
-          const paxgAmountInBaseUnits = (paxgAmount * Math.pow(10, 18)).toString();
+          // 1. TGG -> PAXG
+          const paxgAmount = await getConversion({ tggAmount: amount.toString() });
+          const paxgAmountBase = (paxgAmount * 1e18).toString();
 
-          // 2. Obtenir le montant de stablecoin via KyberSwap
-          const routeSummary = await getSwapRoute({
+          // 2. PAXG -> Stablecoin
+          const route = await getSwapRoute({
             tokenIn: CONTRACTS.PAXG as Address,
             tokenOut: params.outputToken,
-            amountIn: paxgAmountInBaseUnits,
+            amountIn: paxgAmountBase,
             gasInclude: true,
             slippageTolerance: 200
           });
 
           const outputDecimals = getTokenDecimals(params.outputToken);
-          if (outputDecimals === undefined) {
-            throw new Error(`Impossible de déterminer les décimales pour le token ${params.outputToken}`);
-          }
-
-          const stablecoinAmount = parseFloat(routeSummary.amountOut) / Math.pow(10, outputDecimals);
-          
+          if (outputDecimals == null) throw new Error('Décimales manquantes');
+          const stablecoinAmount = parseFloat(route.amountOut) / (10 ** outputDecimals);
           setOutputAmount(stablecoinAmount.toFixed(4));
-          
-          // Calculer le taux de change
-          const rate = stablecoinAmount / roundedAmount;
-          setExchangeRate(`1 TGG = ${rate.toFixed(4)} ${getTokenSymbol(params.outputToken)}`);
+          setExchangeRate(`1 TGG ≈ ${(stablecoinAmount/amount).toFixed(4)} ${getTokenSymbol(params.outputToken)}`);
         }
-
-        // Marquer ces paramètres comme ayant été traités avec succès
-        setLastSuccessfulParams(paramsKey);
+        setLastParamsKey(paramsKey);
 
       } catch (err) {
-        console.error('Erreur lors de la récupération du quote:', err);
         setError(err instanceof Error ? err.message : 'Erreur inconnue');
         setOutputAmount(null);
         setExchangeRate(null);
@@ -174,19 +153,18 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
 
     fetchQuote();
 
-  }, [params?.inputToken, params?.outputToken, debouncedAmount, params?.direction, getSwapRoute, getConversion]);
+  }, [params, debouncedAmount]);
 
   return {
     outputAmount,
-    isLoading: isLoading || isTyping, // Afficher loading pendant la frappe aussi
+    isLoading: isLoading || isTyping,
     error,
-    exchangeRate
+    exchangeRate,
   };
 };
 
-// Fonction helper pour obtenir le symbole du token
+
 const getTokenSymbol = (tokenAddress: Address): string => {
-  // Map des adresses vers les symboles
   const tokenSymbols: Record<string, string> = {
     [CONTRACTS.TGG as string]: 'TGG',
     [CONTRACTS.PAXG as string]: 'PAXG',
