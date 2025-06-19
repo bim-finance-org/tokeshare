@@ -2,8 +2,12 @@ import { useReadContract } from 'wagmi';
 import { parseUnits, Address } from 'viem';
 import { CONTRACTS } from '@/contracts/contracts';
 import { TGG_ABI } from '@/contracts/abis/tgg_abi';
+import { NUMBER_TO_FIXE_6 } from '@/constants/constants';
 
-export function useTGGBalance(userAddress: Address | undefined) {
+export function useTGGBalance(userAddress: Address) {
+
+  const TGG_DECIMALS = 18;
+
   const { data: balance, isLoading, error } = useReadContract({
     address: CONTRACTS.TGG as Address,
     abi: TGG_ABI,
@@ -15,7 +19,7 @@ export function useTGGBalance(userAddress: Address | undefined) {
   });
 
   const checkSufficientBalance = (requiredAmount: string) => {
-    if (!balance || !requiredAmount || parseFloat(requiredAmount) <= 0) {
+    if (!balance || !requiredAmount || parseFloat(requiredAmount) == 0) {
       return {
         hasSufficient: false,
         formattedBalance: '0',
@@ -24,9 +28,9 @@ export function useTGGBalance(userAddress: Address | undefined) {
       };
     }
 
-    const requiredAmountInWei = parseUnits(requiredAmount, 18);
+    const requiredAmountInWei = parseUnits(requiredAmount, TGG_DECIMALS);
     const balanceBigInt = balance as bigint;
-    const formattedBalance = (Number(balanceBigInt) / Math.pow(10, 18)).toFixed(6);
+    const formattedBalance = (Number(balanceBigInt) / Math.pow(10, TGG_DECIMALS)).toFixed(NUMBER_TO_FIXE_6);
     
     return {
       hasSufficient: balanceBigInt >= requiredAmountInWei,
@@ -38,7 +42,7 @@ export function useTGGBalance(userAddress: Address | undefined) {
 
   return {
     balance,
-    formattedBalance: balance ? (Number(balance as bigint) / Math.pow(10, 18)).toFixed(6) : '0',
+    formattedBalance: balance ? (Number(balance as bigint) / Math.pow(10, TGG_DECIMALS)).toFixed(NUMBER_TO_FIXE_6) : '0',
     checkSufficientBalance,
     isLoading,
     error

@@ -15,6 +15,7 @@ import { useTGGBalance } from '@/hooks/useTGGBalance'
 import { Address } from 'viem'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { INTERVAL_PRICE_UPDATE } from '@/constants/constants'
 
 const Sell = () => {
   const { 
@@ -45,7 +46,7 @@ const Sell = () => {
       setTggPrice(calculatedTggPrice);
     };
     updatePrice();
-    const interval = setInterval(updatePrice, 5000);
+    const interval = setInterval(updatePrice, INTERVAL_PRICE_UPDATE);
     return () => clearInterval(interval);
   }, [paxgPrice]);
   
@@ -86,17 +87,8 @@ const Sell = () => {
       return;
     }
 
-    const balanceCheck = checkSufficientBalance(amountToSell);
-    
-    if (!balanceCheck.hasSufficient || parseFloat(amountToSell) <= 0) {
-      setShowBalanceError(true);
-      return;
-    }
-
     setShowUserForm(true);
   };
-
-  const balanceCheck = checkSufficientBalance(amountToSell);
 
   if (showUserForm) {
     return (
@@ -150,7 +142,7 @@ const Sell = () => {
         <Blockchains section="sell" />
         <div className="space-y-1 ml-2">
           <p className="text-color4 text-sm font-medium">TGG Price: ${tggPrice.toFixed(2)}</p>
-          <p className="text-color4 text-sm font-medium">Delivery time: 0 - 2 Days</p>
+          <p className="text-color4 text-sm font-medium">Delivery time: 2 - 4 Days</p>
           {isConnected && (
             <p className="text-color4 text-sm font-medium">
               Your TGG Balance: {isLoadingBalance ? 'Loading...' : formattedBalance}
@@ -158,16 +150,6 @@ const Sell = () => {
           )}
         </div>
       </div>
-
-      {showBalanceError && isConnected && !balanceCheck.hasSufficient && parseFloat(amountToSell) > 0 && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Insufficient TGG Balance</AlertTitle>
-          <AlertDescription>
-            You need {balanceCheck.formattedRequired} TGG but only have {balanceCheck.formattedBalance} TGG in your wallet.
-          </AlertDescription>
-        </Alert>
-      )}
 
       <div className="mt-6">
         {isConnected ? (

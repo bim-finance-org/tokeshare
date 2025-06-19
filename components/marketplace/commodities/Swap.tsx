@@ -16,50 +16,42 @@ import { Address } from "viem";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, ExternalLink } from "lucide-react";
+import { SwapDirection } from "@/enums/Directions";
 
 // Définir le type pour les propriétés acceptées par TradeWidget
 type TradeWidgetType = "stablecoin" | "crypto" | "fiat";
 
 const Swap = () => {
-  // Utiliser le context au lieu de useState + localStorage
   const { 
     swap: { token: stablecoin, blockchain: selectedBlockchain },
     updateSwapToken: setStablecoin,
     updateSwapBlockchain: setSelectedBlockchain
   } = useContext(TokenContexts);
-  
-  // État local qui reste inchangé
+
   const [stablecoinAmount, setStablecoinAmount] = useState("10");
   const [tggAmount, setTggAmount] = useState("0");
   const [tggPrice, setTggPrice] = useState<number>(0);
   const [isTggFirst, setIsTggFirst] = useState(false);
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
+  const [errorTransaction, setErrorTransaction] = useState("");
   const { isConnected, address } = useAccount();
   
-  // Hooks pour le swap
+
   const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
-  
-  // Hook pour les toasts
-  const { toast } = useToast();
-  
-  // Récupérer les prix via les hooks
   const { data: paxgPrice, isLoading } = usePaxgPrice();
   
-  // Préparer les paramètres pour le hook useSwapQuote
   const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
   const inputToken = isTggFirst ? CONTRACTS.TGG as Address : (tokenAddresses as Record<string, string>)[stablecoin] as Address;
   const outputToken = isTggFirst ? (tokenAddresses as Record<string, string>)[stablecoin] as Address : CONTRACTS.TGG as Address;
   const inputAmount = isTggFirst ? tggAmount : stablecoinAmount;
-  const direction = isTggFirst ? 'tgg-to-stablecoin' : 'stablecoin-to-tgg';
+  const direction = isTggFirst ? SwapDirection.TGGToStablecoin : SwapDirection.StablecoinToTGG;
   
-  // Hook pour obtenir les vrais montants de swap via KyberSwap
   const swapQuoteParams = inputToken && outputToken && inputAmount && parseFloat(inputAmount) > 0 ? {
     inputToken,
     outputToken,
     inputAmount,
-    direction: direction as 'stablecoin-to-tgg' | 'tgg-to-stablecoin'
+    direction: direction as SwapDirection
   } : null;
   
   const { 
@@ -74,7 +66,6 @@ const Swap = () => {
     if (paxgPrice !== undefined) {
       const calculatedTggPrice = calculateTGGPrice(paxgPrice);
       setTggPrice(calculatedTggPrice);
-      console.log("TGG price updated:", calculatedTggPrice, "from PAXG:", paxgPrice);
     }
   }, [paxgPrice]);
 
@@ -90,6 +81,13 @@ const Swap = () => {
       }
     }
   }, [calculatedOutputAmount, isTggFirst, isLoadingQuote]);
+
+  useEffect(() => {
+    if (errorTransaction) {
+      const timeout = setTimeout(() => setErrorTransaction(""), 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [errorTransaction]);
 
   // Handle stablecoin amount change
   const handleStablecoinAmountChange = (amount: string) => {
@@ -132,25 +130,17 @@ const Swap = () => {
       );
     }
     
-    // Utiliser le taux de change calculé par KyberSwap si disponible
     if (exchangeRate) {
       return exchangeRate;
     }
-    
-    // Fallback au calcul basique si pas de données KyberSwap
-    return `1 TGG = ${tggPrice.toFixed(2)} ${stablecoin}`;
   };
 
   const swaping = async () => {
     setIsPreparingSwap(true);
     
     try {
-      // Récupérer les adresses selon la blockchain
       const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
-      
-      // Adresse PAXG (token de backing pour TGG)
-      const paxgAddress = CONTRACTS.PAXG as Address; // PAXG sur Polygon
-      
+      const paxgAddress = CONTRACTS.PAXG as Address;
       const routerAddress = TRUSTED_AGGREGATORS.kyberSwap as Address;
 
       if (!isTggFirst) {
@@ -158,22 +148,9 @@ const Swap = () => {
         const inputTokenAddress = (tokenAddresses as Record<string, string>)[stablecoin];
         
         if (!inputTokenAddress) {
-          toast({
-            variant: "destructive",
-            title: "Configuration Error",
-            description: `Token address for ${stablecoin} not found on ${selectedBlockchain}`,
-          });
           setIsPreparingSwap(false);
           return;
         }
-
-        console.log("stablecoinAmount", stablecoinAmount);
-
-        // Notification pour informer l'utilisateur que la préparation commence
-        toast({
-          title: "Preparing swap...",
-          description: "Checking balances and preparing transaction. Please wait for approval prompts.",
-        });
 
         await swapMint({
           inputToken: inputTokenAddress as Address,
@@ -188,20 +165,9 @@ const Swap = () => {
         const outputTokenAddress = (tokenAddresses as Record<string, string>)[stablecoin];
         
         if (!outputTokenAddress) {
-          toast({
-            variant: "destructive",
-            title: "Configuration Error",
-            description: `Token address for ${stablecoin} not found on ${selectedBlockchain}`,
-          });
           setIsPreparingSwap(false);
           return;
         }
-
-        // Notification pour informer l'utilisateur que la préparation commence
-        toast({
-          title: "Preparing swap...",
-          description: "Checking TGG balance and preparing transaction. Please wait for approval prompts.",
-        });
 
         await swapWithdraw({
           tggAmount,
@@ -212,91 +178,18 @@ const Swap = () => {
       }
       
     } catch (error: unknown) {
-      console.error("❌ Erreur lors du swap:", error);
-      
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      // Messages d'erreur plus informatifs avec toast
-      if (errorMessage.includes('Solde insuffisant') || errorMessage.includes('Insufficient balance')) {
-        toast({
-          variant: "destructive",
-          title: "Insufficient Balance",
-          description: "You need to have at least 1 USDC in your wallet on Polygon.",
-        });
-      } else if (errorMessage.includes('User rejected')) {
-        toast({
-          variant: "destructive",
-          title: "Transaction Cancelled",
-          description: "The transaction was cancelled by the user.",
-        });
-      } else if (errorMessage.includes('TRANSFER_FROM_FAILED')) {
-        toast({
-          variant: "destructive",
-          title: "Transfer Failed",
-          description: "Please verify you have enough USDC and your wallet is on the Polygon network.",
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Swap Error",
-          description: errorMessage || 'Unknown error',
-        });
-      }
+      setErrorTransaction(errorMessage);
     } finally {
-      // Toujours remettre à false, même en cas d'erreur
       setIsPreparingSwap(false);
     }
   };
 
-  // Effect pour gérer la transition des états et les notifications
   useEffect(() => {
     if (isPending) {
-      // Quand la transaction devient pending, on arrête la préparation
       setIsPreparingSwap(false);
     }
   }, [isPending]);
-
-  // Effect pour gérer les notifications de succès de transaction
-  useEffect(() => {
-    if (hash) {
-      toast({
-        title: "Transaction Sent!",
-        description: (
-          <div className="flex flex-col gap-2">
-            <p>Your transaction is being processed.</p>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                {hash.slice(0, 6)}...{hash.slice(-4)}
-              </span>
-              <button
-                onClick={() => window.open(`https://polygonscan.com/tx/${hash}`, '_blank')}
-                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-              >
-                <ExternalLink className="h-3 w-3" />
-                View
-              </button>
-            </div>
-          </div>
-        ),
-      });
-    }
-  }, [hash, toast]);
-
-  // Effect pour gérer les erreurs globales du swap
-  useEffect(() => {
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Transaction Error",
-        description: error.message || String(error),
-      });
-    }
-  }, [error, toast]);
-
-  // Debugging
-  useEffect(() => {
-    console.log("Stablecoin changed to:", stablecoin, "Exchange rate:", exchangeRate);
-  }, [stablecoin, exchangeRate]);
 
   // Déterminer quel widget est en entrée (modifiable) et lequel est en sortie (lecture seule)
   const topWidgetProps = {
@@ -352,7 +245,7 @@ const Swap = () => {
         
         {/* État de la transaction */}
         {isPreparingSwap && (
-          <Alert>
+          <Alert className="bg-color1">
             <Loader2 className="h-4 w-4 animate-spin" />
             <AlertTitle>Preparing Swap</AlertTitle>
             <AlertDescription>
@@ -362,7 +255,7 @@ const Swap = () => {
         )}
         
         {isPending && (
-          <Alert>
+          <Alert className="bg-color1">
             <Loader2 className="h-4 w-4 animate-spin" />
             <AlertTitle>Transaction Processing</AlertTitle>
             <AlertDescription>
@@ -370,12 +263,22 @@ const Swap = () => {
             </AlertDescription>
           </Alert>
         )}
+
+        {errorTransaction && (
+  <Alert className="bg-red-500">
+    <AlertCircle className="h-4 w-4" />
+    <AlertTitle>Error</AlertTitle>
+    <AlertDescription>
+      {errorTransaction}
+    </AlertDescription>
+  </Alert>
+)}
         
         {/* Informations sur les prix */}
-        <div className="bg-white/50 rounded-lg p-3 space-y-2">
+        <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
             <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
-            <Badge variant="secondary">Instant</Badge>
+            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">Instant</Badge>
           </div>
           
           <div className="flex items-center justify-between">
@@ -386,11 +289,11 @@ const Swap = () => {
                 <Skeleton className="h-4 w-16" />
               </div>
             ) : (
-              <Badge>${tggPrice.toFixed(2)}</Badge>
+              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tggPrice.toFixed(2)}</Badge>
             )}
           </div>
           
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between ">
             <span className="text-color4 text-xs sm:text-sm font-medium">Exchange rate:</span>
             {isLoading || isLoadingQuote ? (
               <div className="flex items-center gap-2">
@@ -398,7 +301,7 @@ const Swap = () => {
                 <Skeleton className="h-4 w-20" />
               </div>
             ) : (
-              <span className="text-xs sm:text-sm font-medium">{exchangeRateInfo()}</span>
+              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">{exchangeRateInfo()}</Badge>
             )}
           </div>
           
@@ -431,28 +334,8 @@ const Swap = () => {
       </div>
 
       <div className="mt-4 sm:mt-6 space-y-3">
-        {/* Affichage d'erreur globale */}
-        {!arePricesAvailable && !isLoading && !isLoadingQuote && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Prices Unavailable</AlertTitle>
-            <AlertDescription>
-              Unable to fetch prices for this conversion. Please try again later.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {/* Affichage d'erreur de quote */}
-        {quoteError && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Quote Error</AlertTitle>
-            <AlertDescription>
-              {quoteError}
-            </AlertDescription>
-          </Alert>
-        )}
-        
+
+            
         {isConnected ? (
           <button 
             onClick={swaping}

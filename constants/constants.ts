@@ -1,0 +1,8 @@
+export const SLIPPAGE_TOLERANCE = 200;
+export const NUMBER_TO_FIXE_6 = 6;
+export const NUMBER_TO_FIXE_4 = 4;
+export const NUMBER_TO_FIXE_2 = 2;
+export const DECIMALS_18 = 1e18;
+export const INTERVAL_PRICE_UPDATE = 30000;
+export const ONCE_DIVISION = 31.1034768;
+export const FEES_COEF = 0.025;

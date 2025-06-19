@@ -3,12 +3,14 @@ import { Address } from 'viem';
 import { useSwap } from './useSwap';
 import { CONTRACTS } from '@/contracts/contracts';
 import { getTokenDecimals } from '@/utils/tokenUtils';
-
+import { SwapDirection } from '@/enums/Directions';
+import { DECIMALS_18, NUMBER_TO_FIXE_4, NUMBER_TO_FIXE_6, ONCE_DIVISION, SLIPPAGE_TOLERANCE } from '@/constants/constants';
+import { calculateTGGPrice } from '@/utils/priceUtils';
 interface SwapQuoteParams {
   inputToken: Address;
   outputToken: Address;
   inputAmount: string;
-  direction: 'stablecoin-to-tgg' | 'tgg-to-stablecoin';
+  direction: SwapDirection;
 }
 
 interface SwapQuoteResult {
@@ -33,22 +35,25 @@ const useSmartDebounce = (value: string, delay: number) => {
   const [isTyping, setIsTyping] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    setIsTyping(true);
-    
+  const clear = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+  }
 
+  useEffect(() => {
+    setIsTyping(true);
+    clear();
     timeoutRef.current = setTimeout(() => {
-      setDebouncedValue(value);
+      setDebouncedValue((prev) => {
+        if (prev !== value) return value;
+        return prev;
+      });
       setIsTyping(false);
     }, delay);
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      clear()
     };
   }, [value, delay]);
 
@@ -66,6 +71,10 @@ const useSmartDebounce = (value: string, delay: number) => {
  *   - exchangeRate : taux de change calculé 
  */
 export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult => {
+
+  const DEBOUNCE_DELAY = 1000;
+  const MINIMUM_AMOUNT_TO_GET_QUOTE = 0.01;
+
   const [outputAmount, setOutputAmount] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,10 +84,11 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
   const { getSwapRoute, getConversion } = useSwap();
 
   const inputAmount = params?.inputAmount || '';
-  const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, 1200);
+  const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, DEBOUNCE_DELAY);
 
   useEffect(() => {
-    if (!params || !debouncedAmount || isNaN(Number(debouncedAmount)) || parseFloat(debouncedAmount) < 0.1) {
+    
+    if (!params || !debouncedAmount || isNaN(Number(debouncedAmount)) || parseFloat(debouncedAmount) < MINIMUM_AMOUNT_TO_GET_QUOTE) {
       setOutputAmount(null);
       setExchangeRate(null);
       setError(null);
@@ -87,11 +97,12 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
     }
 
     const amount = parseFloat(debouncedAmount);
+    
 
     const paramsKey = [
       params.inputToken,
       params.outputToken,
-      amount.toFixed(6),
+      amount.toFixed(NUMBER_TO_FIXE_6),
       params.direction
     ].join('-');
 
@@ -102,48 +113,46 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
 
     const fetchQuote = async () => {
       try {
-        if (params.direction === 'stablecoin-to-tgg') {
+        if (params.direction === SwapDirection.StablecoinToTGG) {
           const inputDecimals = getTokenDecimals(params.inputToken);
-          if (inputDecimals == null) throw new Error('Décimales manquantes');
-          const amountInBase = (amount * 10 ** inputDecimals).toString();
+          if (inputDecimals == null) throw new Error('Missing decimal');
+          const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
 
           const route = await getSwapRoute({
             tokenIn: params.inputToken,
             tokenOut: CONTRACTS.PAXG as Address,
             amountIn: amountInBase,
             gasInclude: true,
-            slippageTolerance: 200
+            slippageTolerance: SLIPPAGE_TOLERANCE
           });
 
-          const paxgAmount = parseFloat(route.amountOut) / 1e18;
-          const tggAmount = paxgAmount * 31.1034768;
-          setOutputAmount(tggAmount.toFixed(6));
-          setExchangeRate(`1 ${getTokenSymbol(params.inputToken)} ≈ ${(tggAmount/amount).toFixed(6)} TGG`);
+          const paxgAmount = parseFloat(route.amountOut) / DECIMALS_18;
+          const tggAmount = paxgAmount * ONCE_DIVISION;
+          setOutputAmount(tggAmount.toFixed(NUMBER_TO_FIXE_6));
+          setExchangeRate(`${(tggAmount/amount).toFixed(NUMBER_TO_FIXE_6)}`);
 
         } else {
-          // 1. TGG -> PAXG
           const paxgAmount = await getConversion({ tggAmount: amount.toString() });
-          const paxgAmountBase = (paxgAmount * 1e18).toString();
+          const paxgAmountBase = BigInt(Math.floor(paxgAmount * DECIMALS_18)).toString();
 
-          // 2. PAXG -> Stablecoin
           const route = await getSwapRoute({
             tokenIn: CONTRACTS.PAXG as Address,
             tokenOut: params.outputToken,
             amountIn: paxgAmountBase,
             gasInclude: true,
-            slippageTolerance: 200
+            slippageTolerance: SLIPPAGE_TOLERANCE
           });
 
           const outputDecimals = getTokenDecimals(params.outputToken);
-          if (outputDecimals == null) throw new Error('Décimales manquantes');
+          if (outputDecimals == null) throw new Error('Missing decimal');
           const stablecoinAmount = parseFloat(route.amountOut) / (10 ** outputDecimals);
-          setOutputAmount(stablecoinAmount.toFixed(4));
-          setExchangeRate(`1 TGG ≈ ${(stablecoinAmount/amount).toFixed(4)} ${getTokenSymbol(params.outputToken)}`);
+          setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
+          setExchangeRate(`${(stablecoinAmount/amount).toFixed(NUMBER_TO_FIXE_6)}`);
         }
         setLastParamsKey(paramsKey);
 
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erreur inconnue');
+        setError(err instanceof Error ? err.message : 'Unknow error');
         setOutputAmount(null);
         setExchangeRate(null);
       } finally {
@@ -162,23 +171,3 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
     exchangeRate,
   };
 };
-
-
-const getTokenSymbol = (tokenAddress: Address): string => {
-  const tokenSymbols: Record<string, string> = {
-    [CONTRACTS.TGG as string]: 'TGG',
-    [CONTRACTS.PAXG as string]: 'PAXG',
-    // Polygon addresses
-    '0xc2132d05d31c914a87c6611c10748aeb04b58e8f': 'USDT',
-    '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359': 'USDC',
-    '0x8f3cf7ad23cd3cadbD9735aff958023239c6a063': 'DAI',
-    '0xe111178a87a3bff0c8d18decba5798827539ae99': 'EURS',
-    '0x2791bca1f2de4661ed88a30c99a7a9449aa84174': 'USDCE',
-    // Base addresses
-    '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': 'USDC',
-    '0x50c5725949a6f0c72e6c4a641f24049a917db0cb': 'DAI',
-    '0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42': 'EURC',
-  };
-  
-  return tokenSymbols[tokenAddress.toLowerCase()] || 'TOKEN';
-}; 

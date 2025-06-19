@@ -6,6 +6,8 @@ import { TokenContexts } from "@/context/TokenContexts";
 import { generatePayReference } from "@/utils/RandomRefs";
 import { useTGGBalance } from "@/hooks/useTGGBalance";
 import { useTGGTransfer } from "@/hooks/useTGGTransfer";
+import { FEES_COEF, NUMBER_TO_FIXE_2 } from "@/constants/constants";
+import { Action } from "@/enums/Actions";
 
 interface UserFormProps {
   type: 'buy' | 'sell';
@@ -14,6 +16,11 @@ interface UserFormProps {
   tggAmount: string;
   tggPrice: number;
 }
+
+const BENEFICIARY = "Tokeshare";
+const IBAN = "FR76 1695 8000 0103 0490 4861 482";
+const ALIAS = "Tokeshare";
+const BANK = "Qonto";
 
 const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps) => {
   const { 
@@ -33,6 +40,9 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
   });
   const [ref, setRef] = useState<string>('');
 
+  if(address == undefined)
+    return;
+
   const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address);
   const { transferTGGToTokeShare, isPending: transferPending, error: transferError, hash } = useTGGTransfer();
 
@@ -42,10 +52,10 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
 
   const transferInfo = {
     amount: `${amount} ${currency}`,
-    beneficiary: "Tokeshare",
-    iban: "FR76 1695 8000 0103 0490 4861 482",
-    alias: "Tokeshare",
-    bank: "Qonto"
+    beneficiary: BENEFICIARY,
+    iban: IBAN,
+    alias: ALIAS,
+    bank: BANK
   };
 
   useEffect(() => {
@@ -78,7 +88,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
       if (type === 'buy') {
         const cryptoAmount = parseFloat(tggAmount);
         const fiatAmount = parseFloat(amount);
-        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2));
+        const feesValue = parseFloat((fiatAmount * FEES_COEF).toFixed(NUMBER_TO_FIXE_2));
         
         apiData = {
           ref: transactionRef, 
@@ -98,7 +108,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
         // Calculer le mont ant et les frais pour la vente
         const cryptoAmount = parseFloat(tggAmount);
         const fiatAmount = parseFloat(amount);
-        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2));
+        const feesValue = parseFloat((fiatAmount * FEES_COEF).toFixed(NUMBER_TO_FIXE_2));
         
         apiData = {
           ref: transactionRef,
@@ -155,16 +165,10 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     }
     
     try {
-      if (type === 'buy') {
+      if (type === Action.Buy) {
         setIsLoading(true);
         await handleApiSubmission();
-      } else {
-        const balanceCheck = checkSufficientBalance(tggAmount);
-        
-        if (!balanceCheck.hasSufficient) {
-          throw new Error(`Solde TGG insuffisant. Vous avez ${balanceCheck.formattedBalance} TGG mais ${tggAmount} TGG sont requis.`);
-        }
-        
+      } else {        
         transferTGGToTokeShare(tggAmount);
       }
     } catch (err) {
@@ -182,7 +186,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     }));
   };
 
-  const balanceCheck = type === 'sell' && address ? checkSufficientBalance(tggAmount) : null;
+  const balanceCheck = type === Action.Sell && address ? checkSufficientBalance(tggAmount) : null;
 
   return (
     <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4">
@@ -232,7 +236,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           </div>
 
           {/* IBAN Section - Only for Sell */}
-          {type === 'sell' && (
+          {type === Action.Sell && (
             <div className="bg-gray-200 p-4 rounded-xl">
               <label className="block text-sm mb-2">IBAN</label>
               <input
@@ -250,13 +254,13 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           {/* Wallet Connection - For both Buy and Sell */}
           <div className="bg-gray-200 p-4 rounded-xl">
             <label className="block text-sm mb-2">
-              {type === 'buy' ? 'Reception address' : 'Your wallet address'}
+              {type === Action.Buy ? 'Reception address' : 'Your wallet address'}
             </label>
             <ConnectButton/>
           </div>
 
           {/* TGG Balance Info - Only for Sell */}
-          {type === 'sell' && isConnected && (
+          {type === Action.Sell && isConnected && (
             <div className="bg-blue-50 p-4 rounded-xl">
               <div className="text-sm text-blue-800">
                 {balanceCheck && !balanceCheck.hasSufficient && (
@@ -269,7 +273,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           )}
 
           {/* Transaction Status - For Sell */}
-          {type === 'sell' && (transferPending || receiptLoading) && (
+          {type === Action.Sell && (transferPending || receiptLoading) && (
             <div className="bg-yellow-50 p-4 rounded-xl">
               <p className="text-yellow-800">
                 {transferPending ? 'Please confirm the TGG transfer in your wallet...' : 'Waiting for transaction confirmation...'}
@@ -290,7 +294,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
             disabled={
               !isConnected || 
               isLoading || 
-              (type === 'sell' && balanceCheck && !balanceCheck.hasSufficient) ||
+              (type === Action.Sell && balanceCheck && !balanceCheck.hasSufficient) ||
               transferPending ||
               receiptLoading
             }
@@ -298,14 +302,14 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           >
             {isLoading || transferPending || receiptLoading
               ? 'Processing...' 
-              : type === 'buy' 
-                ? 'Buy' 
-                : 'Sell'}
+              : type === Action.Buy 
+                ? Action.Buy 
+                : Action.Sell}
           </button>
         </form>
       ) : (
         <>
-          {type === 'buy' && (
+          {type === Action.Buy && (
             <div className="space-y-4">
               <BuyInfo 
                 amount={transferInfo.amount}
@@ -317,7 +321,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
             </div>
           )}
           
-          {type === 'sell' && (
+          {type === Action.Sell && (
             <div className="bg-gray-200 p-6 rounded-xl">
               <h2 className="text-xl font-bold mb-4 text-center">Demand of sale confirmed</h2>
               <p>Your sale operation number <span className="font-bold">{ref}</span> has been successfully processed.</p>
