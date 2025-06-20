@@ -3,6 +3,8 @@ import { parseUnits, Address } from 'viem';
 import { CONTRACTS } from '@/contracts/contracts';
 import { TGG_ABI } from '@/contracts/abis/tgg_abi';
 
+export const TOKESHARE_TGG_RECIPIENT = process.env.NEXT_PUBLIC_TOKESHARE_TGG_RECIPIENT as Address;
+
 export function useTGGTransfer() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
@@ -13,7 +15,7 @@ export function useTGGTransfer() {
       address: CONTRACTS.TGG as Address,
       abi: TGG_ABI,
       functionName: 'transfer',
-      args: [process.env.TOKESHARE_TGG_RECIPIENT as Address, amountInWei],
+      args: [TOKESHARE_TGG_RECIPIENT, amountInWei],
     });
   };
 
