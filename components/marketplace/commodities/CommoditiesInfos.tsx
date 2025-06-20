@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import Blockchain from '@/components/marketplace/real-estate/sections/Blockchain';
 import NewTabIcon from '@/components/icons/NewTabIcon';
+import { usePaxgPrice } from '@/hooks/usePaxgPrice';
+import { calculateTGGPrice } from '@/utils/priceUtils';
 
 const CommoditiesPage = () => {
   const [activeTab, setActiveTab] = useState('DETAILS');
+  const { data: paxgPrice, isLoading } = usePaxgPrice();  
 
   const handleOnesheetClick = () => {
     window.open('/TGG_Onesheet.pdf', '_blank');
@@ -60,12 +63,19 @@ const CommoditiesPage = () => {
 
               <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
                 <h3 className="text-base sm:text-lg font-semibold">Token Price</h3>
-                <p className="text-sm sm:text-base mt-1 sm:mt-0">$ 50.47</p>
+                <p className="text-sm sm:text-base mt-1 sm:mt-0"> {calculateTGGPrice(paxgPrice).toFixed(2)} $</p>
               </div>
 
               <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
                 <h3 className="text-base sm:text-lg font-semibold">Proof of Reserve</h3>
-                <p className="text-sm sm:text-base mt-1 sm:mt-0">0x0c...f80</p>
+                 <a
+    href="https://polygonscan.com/address/0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
+  >
+    0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71
+  </a>
               </div>
 
               <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between">

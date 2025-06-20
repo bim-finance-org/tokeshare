@@ -11,6 +11,7 @@ import { useAccount } from 'wagmi'
 import UserForm from './UserForm'
 import { TokenContexts } from '@/context/TokenContexts'
 import { useExchangeRates } from '@/hooks/useExchangeRates'
+import { Badge } from "@/components/ui/badge";
 
 const Buy = () => {
   // Get values from context
@@ -134,10 +135,19 @@ const Buy = () => {
 
       <div className="mb-6 mt-4 space-y-2">
         <Blockchains section="buy" />
-        <div className="space-y-1 ml-2">
-          <p className="text-color4 text-sm font-medium">TGG Price: ${tggPrice.toFixed(2)}</p>
-          <p className="text-color4 text-sm font-medium">Delivery time: 0 - 2 Days</p>
-        </div>
+        <div className="bg-color1 rounded-lg p-3 space-y-2 ">
+          <div className="flex items-center justify-between">
+            <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
+            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">2-4 Days</Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-color4 text-xs sm:text-sm font-medium">TGG Price:</span>
+
+              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tggPrice.toFixed(2)}</Badge>
+
+          </div>
+          </div>
       </div>
 
       <div className="mt-6">
