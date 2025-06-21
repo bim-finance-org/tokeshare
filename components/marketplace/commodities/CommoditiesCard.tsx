@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Commodity } from "@/types/Commodity";
 import {  calculateTGGPrice } from "@/utils/priceUtils";
 import { usePaxgPrice } from "@/hooks/usePaxgPrice";
+import { usePaxgPerformance } from "@/hooks/useGetPaxgPerf";
+import { Period } from "@/enums/Period";
 interface CommoditiesCardProps {
   commodity: Commodity;
 }
@@ -14,6 +16,9 @@ interface CommoditiesCardProps {
 const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
   const { name, image, tokenPrice: staticTokenPrice } = commodity;
   const { data: paxgPrice, isLoading } = usePaxgPrice();
+
+   const { data: perf1y, isLoading: isLoadingPerf1y, error: error1y } = usePaxgPerformance(Period.OneYear);
+   const { data: perf1d, isLoading: isLoading1d, error: error1d } = usePaxgPerformance(Period.OneDay);
 
   // Format price for display
   const formatPrice = (price: number) => {
@@ -45,13 +50,46 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
 
         <div className="mt-2 space-y-1">
           <div className="flex justify-between">
-            <p className="text-sm">Performance over 1 day</p>
-            <h6 className="font-medium">...</h6>
-          </div>
-          <div className="flex justify-between">
-            <p className="text-sm">Performance over 1 year</p>
-            <h6 className="font-medium">...</h6>
-          </div>
+  <p className="text-sm">Performance over 1 day</p>
+  {typeof perf1d?.perf1d === "number" ? (
+    <h6
+      className={
+        "font-medium " +
+        (perf1d.perf1d > 0
+          ? "text-green-500"
+          : perf1d.perf1d < 0
+          ? "text-red-500"
+          : "text-gray-500")
+      }
+    >
+      {(perf1d.perf1d > 0 ? "+" : perf1d.perf1d < 0 ? "" : "") +
+        perf1d.perf1d.toFixed(2) + " %"}
+    </h6>
+  ) : (
+    <h6 className="font-medium text-gray-500">N/A</h6>
+  )}
+</div>
+<div className="flex justify-between">
+  <p className="text-sm">Performance over 1 year</p>
+  {typeof perf1y?.perf1y === "number" ? (
+    <h6
+      className={
+        "font-medium " +
+        (perf1y.perf1y > 0
+          ? "text-green-500"
+          : perf1y.perf1y < 0
+          ? "text-red-500"
+          : "text-gray-500")
+      }
+    >
+      {(perf1y.perf1y > 0 ? "+" : perf1y.perf1y < 0 ? "" : "") +
+        perf1y.perf1y.toFixed(2) + " %"}
+    </h6>
+  ) : (
+    <h6 className="font-medium text-gray-500">N/A</h6>
+  )}
+</div>
+
         </div>
         <div className="flex justify-center mt-4 w-full">
           {name === 'Gold' ? (

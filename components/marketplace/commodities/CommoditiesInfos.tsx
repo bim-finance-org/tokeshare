@@ -3,10 +3,14 @@ import Blockchain from '@/components/marketplace/real-estate/sections/Blockchain
 import NewTabIcon from '@/components/icons/NewTabIcon';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { calculateTGGPrice } from '@/utils/priceUtils';
+import { usePaxgPerformance } from '@/hooks/useGetPaxgPerf';
+import { Period } from '@/enums/Period';
 
 const CommoditiesPage = () => {
   const [activeTab, setActiveTab] = useState('DETAILS');
   const { data: paxgPrice, isLoading } = usePaxgPrice();  
+
+  const { data: perf1y, isLoading: isLoadingPerf1y, error: error1y } = usePaxgPerformance(Period.OneYear);
 
   const handleOnesheetClick = () => {
     window.open('/TGG_Onesheet.pdf', '_blank');
@@ -58,7 +62,23 @@ const CommoditiesPage = () => {
 
               <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
                 <h3 className="text-base sm:text-lg font-semibold text-color2">Performance over 1 year</h3>
-                <p className="text-sm sm:text-base text-green-500 mt-1 sm:mt-0">+ 37.32 %</p>
+                {typeof perf1y?.perf1y === "number" ? (
+                <h6
+                  className={
+                    "font-medium " +
+                    (perf1y.perf1y > 0
+                      ? "text-green-500"
+                      : perf1y.perf1y < 0
+                      ? "text-red-500"
+                      : "text-gray-500")
+                  }
+                >
+                  {(perf1y.perf1y > 0 ? "+" : perf1y.perf1y < 0 ? "" : "") +
+                    perf1y.perf1y.toFixed(2) + " %"}
+                </h6>
+              ) : (
+                <h6 className="font-medium text-gray-500">N/A</h6>
+              )}
               </div>
 
               <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
