@@ -22,7 +22,7 @@ export function usePaxgPerformance(period: Period = Period.OneDay) {
     setIsLoading(true);
     setError(null);
 
-    fetch(`/api/paxg/performance?period=${period}`)
+    fetch(`/api/commodities/paxg/performance?period=${period}`)
       .then(async (res) => {
         if (!res.ok) {
           const json = await res.json();

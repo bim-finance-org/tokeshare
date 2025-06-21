@@ -6,19 +6,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { Commodity } from "@/types/Commodity";
 import {  calculateTGGPrice } from "@/utils/priceUtils";
-import { usePaxgPrice } from "@/hooks/usePaxgPrice";
-import { usePaxgPerformance } from "@/hooks/useGetPaxgPerf";
-import { Period } from "@/enums/Period";
+import { useCommodityData } from "@/hooks/useCommodityData";
 interface CommoditiesCardProps {
   commodity: Commodity;
 }
 
 const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
-  const { name, image, tokenPrice: staticTokenPrice } = commodity;
-  const { data: paxgPrice, isLoading } = usePaxgPrice();
+  const { name, image } = commodity;
 
-   const { data: perf1y, isLoading: isLoadingPerf1y, error: error1y } = usePaxgPerformance(Period.OneYear);
-   const { data: perf1d, isLoading: isLoading1d, error: error1d } = usePaxgPerformance(Period.OneDay);
+  const {price, perf1d, perf1y, isLoading, error} = useCommodityData(name);
 
   // Format price for display
   const formatPrice = (price: number) => {
@@ -28,9 +24,9 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
   // Display price based on availability
   const displayPrice = isLoading 
     ? "Loading..." 
-    : paxgPrice 
-      ? formatPrice(calculateTGGPrice(paxgPrice))
-      : staticTokenPrice;
+    : price 
+      ? formatPrice(calculateTGGPrice(price))
+      : null;
 
   return (
     <div className="text-color4 min-w-[280px] max-w-[400px] w-full mx-auto">
