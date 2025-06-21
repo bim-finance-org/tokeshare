@@ -22,13 +22,15 @@ const Buy = () => {
   } = useContext(TokenContexts);
 
   // Local state
-  const [amountToSend, setAmountToSend] = useState("10")
+  const [amountToSend, setAmountToSend] = useState("50")
   const [tggAmount, setTggAmount] = useState("0")
   const [tggPrice, setTggPrice] = useState<number>(0)
   const [showBuyNext, setShowBuyNext] = useState(false)
+  const [isBelowMin, setBelownMin] = useState(false)
   const { isConnected } = useAccount()
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
+    
   
   // Mise à jour du prix TGG
   useEffect(() => {
@@ -74,11 +76,18 @@ const Buy = () => {
     }
   };
 
+
+
   // Gestion du changement de montant en devise fiat
   const handleFiatAmountChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setAmountToSend(amount);
       calculateTggFromFiat(amount);
+      if(parseFloat(amount) < 50){
+        setBelownMin(true);
+      }else{
+        setBelownMin(false);
+      }
     }
   };
 
@@ -98,6 +107,7 @@ const Buy = () => {
       calculateTggFromFiat(amountToSend);
     }
   };
+
 
   if (showBuyNext) {
     return <UserForm type="buy" amount={amountToSend} currency={selectedCurrency} tggAmount={tggAmount} tggPrice={tggPrice} />
@@ -120,6 +130,12 @@ const Buy = () => {
         onValueChange={handleFiatAmountChange}
         onTokenChange={handleCurrencyChange}
       />
+
+      {isBelowMin && (
+  <div className="text-red-500 text-xs mt-2">
+    Minimum amount is 50 {selectedCurrency}
+  </div>
+)}
 
       <div className="my-4" />
 
@@ -153,11 +169,17 @@ const Buy = () => {
       <div className="mt-6">
         {isConnected ? (
           <button
-            onClick={() => setShowBuyNext(true)}
-            className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition-all duration-200"
-          >
-            Buy
-          </button>
+  onClick={() => setShowBuyNext(true)}
+  className={
+    `w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200 
+    ${isBelowMin 
+      ? "bg-color4 text-white opacity-50 cursor-not-allowed"
+      : "bg-color4 text-white hover:bg-opacity-90"}`
+  }
+  disabled={isBelowMin}
+>
+  Buy
+</button>
         ) : (
           <button
             onClick={() => setShowBuyNext(true)}

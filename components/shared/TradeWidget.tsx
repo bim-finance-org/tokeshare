@@ -76,7 +76,7 @@ const TradeWidget = ({
             label={label}
             value={value || ''}
             onChange={onValueChange}
-            placeholder='10'
+            placeholder={isTGG ? "1" : "50"}
             disabled={isTGG && type === "stablecoin"}
           />
         </div>
