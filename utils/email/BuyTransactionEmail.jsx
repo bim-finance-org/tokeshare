@@ -94,7 +94,7 @@ const BuyTransactionEmail = ({
             </Section>
             
             <Section className="mb-6">
-              <Text className="text-gray-700 text-base mb-4">Your cryptocurrency will be credited within 0 to 2 days, depending on the speed of your transfer processing. We appreciate your trust.</Text>
+              <Text className="text-gray-700 text-base mb-4">Your cryptocurrency will be credited within 2 to 4 days, depending on the speed of your transfer processing. We appreciate your trust.</Text>
               <Text className="text-gray-800 text-base mb-1">Best regards,</Text>
               <Text className="text-gray-800 text-base">The {companyName} Team</Text>
             </Section>

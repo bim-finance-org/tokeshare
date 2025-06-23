@@ -81,7 +81,6 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
   const handleApiSubmission = async () => {
     try {
       
-      
       let apiData;
       
       if (type === 'buy') {
@@ -188,7 +187,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
   const balanceCheck = type === Action.Sell && address ? checkSufficientBalance(tggAmount) : null;
 
   return (
-    <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4">
+    <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4 ">
       {!showConfirmation ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name Section */}

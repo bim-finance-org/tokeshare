@@ -99,7 +99,7 @@ const Sell = () => {
 
   if (showUserForm) {
     return (
-      <div className="p-6 w-full text-color4 max-w-md mx-auto bg-gray-100 rounded-2xl shadow-md space-y-4">
+      <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4">
         <div className="bg-gray-200 p-4 rounded-xl">
           <h1 className="text-xl font-bold mb-2">Reception address</h1>
           <p className="text-gray-600">Network: {selectedBlockchain}</p>
@@ -178,7 +178,8 @@ const Sell = () => {
       ? "bg-color4 text-white opacity-50 cursor-not-allowed"
       : "bg-color4 text-white hover:bg-opacity-90"}`
   }
-  disabled={isBelowMin}>
+  disabled={isBelowMin}
+  >
             Sell
           </button>
         ) : (
