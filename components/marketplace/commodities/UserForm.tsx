@@ -38,7 +38,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     email: '',
     iban: type === 'sell' ? '' : undefined,
   });
-  const [ref, setRef] = useState<string>('');
+  const [ref, setRef] = useState<string>(() => generatePayReference());
 
   if(address == undefined)
     return;
@@ -80,8 +80,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
 
   const handleApiSubmission = async () => {
     try {
-      const transactionRef = generatePayReference();
-      setRef(transactionRef);
+      
       
       let apiData;
       
@@ -91,7 +90,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
         const feesValue = parseFloat((fiatAmount * FEES_COEF).toFixed(NUMBER_TO_FIXE_2));
         
         apiData = {
-          ref: transactionRef, 
+          ref: ref, 
           email: formData.email,
           fullName: `${formData.firstName} ${formData.lastName}`,
           cvu: '',
@@ -111,7 +110,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
         const feesValue = parseFloat((fiatAmount * FEES_COEF).toFixed(NUMBER_TO_FIXE_2));
         
         apiData = {
-          ref: transactionRef,
+          ref: ref,
           email: formData.email,
           fullName: `${formData.firstName} ${formData.lastName}`,
           iban: formData.iban || '',
@@ -259,19 +258,6 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
             <ConnectButton/>
           </div>
 
-          {/* TGG Balance Info - Only for Sell */}
-          {type === Action.Sell && isConnected && (
-            <div className="bg-blue-50 p-4 rounded-xl">
-              <div className="text-sm text-blue-800">
-                {balanceCheck && !balanceCheck.hasSufficient && (
-                  <p className="text-red-600 mt-1">
-                    Insufficient balance. You need {tggAmount} TGG but only have {balanceCheck.formattedBalance} TGG.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Transaction Status - For Sell */}
           {type === Action.Sell && (transferPending || receiptLoading) && (
             <div className="bg-yellow-50 p-4 rounded-xl">
@@ -317,6 +303,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
                 iban={transferInfo.iban}
                 alias={transferInfo.alias}
                 bank={transferInfo.bank}
+                ref={ref}
               />
             </div>
           )}
