@@ -336,10 +336,10 @@ const SellModal = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {transaction.fiat} <span 
                       className="cursor-pointer hover:text-blue-500 hover:underline" 
-                      onClick={() => handleCopyToClipboard(parseFloat(transaction.fiatAmount.toString()).toFixed(2))}
+                      onClick={() => handleCopyToClipboard(parseFloat((transaction.fiatAmount - transaction.fees).toString()).toFixed(2))}
                       title="Click to copy fiat amount"
                     >
-                      {parseFloat(transaction.fiatAmount.toString()).toFixed(2)}
+                      {parseFloat((transaction.fiatAmount - transaction.fees).toString()).toFixed(2)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
