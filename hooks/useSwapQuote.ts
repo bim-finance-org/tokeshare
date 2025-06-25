@@ -71,8 +71,8 @@ const useSmartDebounce = (value: string, delay: number) => {
  *   - exchangeRate : taux de change calculé 
  */
 export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult => {
-
-  const DEBOUNCE_DELAY = 1000;
+  
+  const DEBOUNCE_DELAY = 500;
   const MINIMUM_AMOUNT_TO_GET_QUOTE = 0.01;
 
   const [outputAmount, setOutputAmount] = useState<string | null>(null);

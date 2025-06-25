@@ -41,18 +41,25 @@ const Swap = () => {
   const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
   const { data: paxgPrice, isLoading } = usePaxgPrice();
   
+
   const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
-  const inputToken = isTggFirst ? CONTRACTS.TGG as Address : (tokenAddresses as Record<string, string>)[stablecoin] as Address;
-  const outputToken = isTggFirst ? (tokenAddresses as Record<string, string>)[stablecoin] as Address : CONTRACTS.TGG as Address;
-  const inputAmount = isTggFirst ? tggAmount : stablecoinAmount;
-  const direction = isTggFirst ? SwapDirection.TGGToStablecoin : SwapDirection.StablecoinToTGG;
   
-  const swapQuoteParams = inputToken && outputToken && inputAmount && parseFloat(inputAmount) > 0 ? {
-    inputToken,
-    outputToken,
-    inputAmount,
-    direction: direction as SwapDirection
-  } : null;
+  const [swapQuoteParams, setSwapQuoteParams] = useState({
+    inputToken : isTggFirst ? CONTRACTS.TGG as Address : (tokenAddresses as Record<string, string>)[stablecoin] as Address,
+    outputToken : isTggFirst ? (tokenAddresses as Record<string, string>)[stablecoin] as Address : CONTRACTS.TGG as Address,
+    inputAmount : isTggFirst ? tggAmount : stablecoinAmount,
+    direction : isTggFirst ? SwapDirection.TGGToStablecoin : SwapDirection.StablecoinToTGG,
+  });
+  
+  useEffect(()=>{
+      const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
+      const inputToken = isTggFirst ? CONTRACTS.TGG as Address : (tokenAddresses as Record<string, string>)[stablecoin] as Address;
+      const outputToken = isTggFirst ? (tokenAddresses as Record<string, string>)[stablecoin] as Address : CONTRACTS.TGG as Address;
+      const inputAmount = isTggFirst ? tggAmount : stablecoinAmount;
+      const direction = isTggFirst ? SwapDirection.TGGToStablecoin : SwapDirection.StablecoinToTGG;
+      setSwapQuoteParams({inputToken,outputToken,inputAmount,direction})
+  },[isTggFirst, tggPrice,stablecoinAmount, tggAmount, stablecoin, selectedBlockchain])
+
   
   const { 
     outputAmount: calculatedOutputAmount, 
