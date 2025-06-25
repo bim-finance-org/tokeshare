@@ -33,6 +33,7 @@ const TokenInput = ({
         onChange={handleChange}
         disabled={disabled}
         placeholder={placeholder}
+        maxLength={8}
         className='bg-transparent text-2xl text-color4 font-medium outline-none w-full px-2 py-1 transition-all duration-200'
       />
     </div>

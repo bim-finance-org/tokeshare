@@ -4,7 +4,7 @@ export const usePaxgPrice = () => {
   return useQuery({
     queryKey: ['paxgPrice'],
     queryFn: async () => {
-      const response = await fetch('/api/paxg-price');
+      const response = await fetch('/api/commodities/paxg/price');
       if (!response.ok) {
         throw new Error('Failed to fetch PAXG price');
       }

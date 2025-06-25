@@ -56,17 +56,7 @@ const TradeWidget = ({
     setSelectedToken(defaultToken || 'USDC');
   }, [defaultToken]);
 
-  if(isSelectorOpen) {
-    return (
-        <TokenSelector
-          type={type}
-          blockchain={blockchain}
-          onSelect={(token) => handleTokenSelect(token)}
-          isOpen={isSelectorOpen}
-          onClose={() => setIsSelectorOpen(false)}
-        />
-    )
-  } 
+  
 
   return (
     <div className="bg-color1 p-4 rounded-xl shadow-md">
@@ -76,10 +66,24 @@ const TradeWidget = ({
             label={label}
             value={value || ''}
             onChange={onValueChange}
-            placeholder='10'
+            placeholder={isTGG ? "1" : "50"}
             disabled={isTGG && type === "stablecoin"}
           />
         </div>
+
+        
+        {isSelectorOpen &&
+   
+        <TokenSelector
+          type={type}
+          blockchain={blockchain}
+          onSelect={(token) => handleTokenSelect(token)}
+          isOpen={isSelectorOpen}
+          onClose={() => setIsSelectorOpen(false)}
+        />
+}
+        
+      
         
         {/* Bouton MAX - placé entre l'input et l'icône */}
         {!readOnly && showBalance && !(isTGG && type === "stablecoin") && (

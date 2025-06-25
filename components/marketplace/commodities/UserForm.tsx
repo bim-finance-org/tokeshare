@@ -1,9 +1,13 @@
-import React, { useState, useContext } from "react";
-import { useAccount } from 'wagmi';
+import React, { useState, useContext, useEffect } from "react";
+import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 import ConnectButton from "@/components/shared/ConnectButton";
 import BuyInfo from "./BuyInfo";
 import { TokenContexts } from "@/context/TokenContexts";
 import { generatePayReference } from "@/utils/RandomRefs";
+import { useTGGBalance } from "@/hooks/useTGGBalance";
+import { useTGGTransfer } from "@/hooks/useTGGTransfer";
+import { FEES_COEF, NUMBER_TO_FIXE_2 } from "@/constants/constants";
+import { Action } from "@/enums/Actions";
 
 interface UserFormProps {
   type: 'buy' | 'sell';
@@ -13,8 +17,12 @@ interface UserFormProps {
   tggPrice: number;
 }
 
+const BENEFICIARY = "Tokeshare";
+const IBAN = "FR76 1695 8000 0103 0490 4861 482";
+const ALIAS = "Tokeshare";
+const BANK = "Qonto";
+
 const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps) => {
-  // Récupérer les valeurs du contexte pour la blockchain
   const { 
     buy: { blockchain: buyBlockchain },
     sell: { blockchain: sellBlockchain }
@@ -30,45 +38,58 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     email: '',
     iban: type === 'sell' ? '' : undefined,
   });
-  const [ref, setRef] = useState<string>('');
+  const [ref, setRef] = useState<string>(() => generatePayReference());
 
-  // Informations de transfert pour le type 'buy'
+  if(address == undefined)
+    return;
+
+  const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address);
+  const { transferTGGToTokeShare, isPending: transferPending, error: transferError, hash } = useTGGTransfer();
+
+  const { data: receipt, isLoading: receiptLoading, isSuccess: receiptSuccess, isError: receiptError } = useWaitForTransactionReceipt({
+    hash,
+  });
+
   const transferInfo = {
     amount: `${amount} ${currency}`,
-    beneficiary: "Tokeshare",
-    iban: "FR76 1695 8000 0103 0490 4861 482",
-    alias: "Tokeshare",
-    bank: "Qonto"
+    beneficiary: BENEFICIARY,
+    iban: IBAN,
+    alias: ALIAS,
+    bank: BANK
   };
 
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    
-    // Vérifier que l'utilisateur est connecté pour les achats
-    if (type === 'buy' && !isConnected) {
-      return;
+  useEffect(() => {
+    if (receiptSuccess && hash) {
+      handleApiSubmission();
+    } else if (receiptError) {
+      setError("La transaction TGG a échoué. Veuillez contacter le support pour assistance.");
     }
-    
-    try {
-      setIsLoading(true);
-      
-      // Préparer les données pour l'API
-      let apiData;
+  }, [receiptSuccess, receiptError, hash]);
 
-      const transactionRef = generatePayReference();
-      setRef(transactionRef);
+  useEffect(() => {
+    if (transferError) {
+      if (transferError.message?.includes('User rejected') || transferError.message?.includes('rejected')) {
+        setError("Transaction annulée par l'utilisateur.");
+      } else if (transferError.message?.includes('insufficient funds')) {
+        setError("Solde insuffisant pour effectuer la transaction.");
+      } else {
+        setError("Erreur lors du transfert. Veuillez réessayer.");
+      }
+    }
+  }, [transferError]);
+
+  const handleApiSubmission = async () => {
+    try {
+      
+      let apiData;
       
       if (type === 'buy') {
-        // Calculer le montant et les frais pour l'achat
         const cryptoAmount = parseFloat(tggAmount);
         const fiatAmount = parseFloat(amount);
-        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
+        const feesValue = parseFloat((fiatAmount * FEES_COEF).toFixed(NUMBER_TO_FIXE_2));
         
-        // Données pour une transaction d'achat
         apiData = {
-          ref: transactionRef, 
+          ref: ref, 
           email: formData.email,
           fullName: `${formData.firstName} ${formData.lastName}`,
           cvu: '',
@@ -82,14 +103,13 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           fees: feesValue,
         };
       } else {
-        // Calculer le montant et les frais pour la vente
+        // Calculer le mont ant et les frais pour la vente
         const cryptoAmount = parseFloat(tggAmount);
         const fiatAmount = parseFloat(amount);
-        const feesValue = parseFloat((fiatAmount * 0.025).toFixed(2)); // Frais calculés en fiat (2.5% du montant)
+        const feesValue = parseFloat((fiatAmount * FEES_COEF).toFixed(NUMBER_TO_FIXE_2));
         
-        // Données pour une transaction de vente
         apiData = {
-          ref: transactionRef,
+          ref: ref,
           email: formData.email,
           fullName: `${formData.firstName} ${formData.lastName}`,
           iban: formData.iban || '',
@@ -104,7 +124,6 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
         console.log(apiData);
       }
       
-      // Faire l'appel API en fonction du type (achat ou vente)
       const endpoint = type === 'buy' ? '/api/transactions/buy' : '/api/transactions/sell';
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -117,21 +136,42 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
       const data = await response.json();
       
       if (!response.ok) {
+        console.log(data);
         throw new Error(data.error || 'Une erreur est survenue lors de la transaction');
       }
       
-      // Si tout va bien, afficher la confirmation
       setShowConfirmation(true);
     } catch (err) {
       console.error('Erreur lors de la soumission:', err);
       
-      // Gérer l'erreur de parsing JSON si elle se produit
       if (err instanceof SyntaxError && err.message.includes('JSON')) {
         setError("Erreur de connexion au serveur. Veuillez réessayer plus tard.");
       } else {
         setError(err instanceof Error ? err.message : 'Une erreur est survenue');
       }
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    
+    if (!isConnected) {
+      return;
+    }
+    
+    try {
+      if (type === Action.Buy) {
+        setIsLoading(true);
+        await handleApiSubmission();
+      } else {        
+        transferTGGToTokeShare(tggAmount);
+      }
+    } catch (err) {
+      console.error('Erreur lors de la soumission:', err);
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
       setIsLoading(false);
     }
   };
@@ -144,8 +184,10 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     }));
   };
 
+  const balanceCheck = type === Action.Sell && address ? checkSufficientBalance(tggAmount) : null;
+
   return (
-    <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4">
+    <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4 ">
       {!showConfirmation ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name Section */}
@@ -192,7 +234,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           </div>
 
           {/* IBAN Section - Only for Sell */}
-          {type === 'sell' && (
+          {type === Action.Sell && (
             <div className="bg-gray-200 p-4 rounded-xl">
               <label className="block text-sm mb-2">IBAN</label>
               <input
@@ -207,11 +249,20 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
             </div>
           )}
 
-          {/* Wallet Connection - Only for Buy */}
-          {type === 'buy' && (
-            <div className="bg-gray-200 p-4 rounded-xl">
-              <label className="block text-sm mb-2">Reception address</label>
-              <ConnectButton/>
+          {/* Wallet Connection - For both Buy and Sell */}
+          <div className="bg-gray-200 p-4 rounded-xl">
+            <label className="block text-sm mb-2">
+              {type === Action.Buy ? 'Reception address' : 'Your wallet address'}
+            </label>
+            <ConnectButton/>
+          </div>
+
+          {/* Transaction Status - For Sell */}
+          {type === Action.Sell && (transferPending || receiptLoading) && (
+            <div className="bg-yellow-50 p-4 rounded-xl">
+              <p className="text-yellow-800">
+                {transferPending ? 'Please confirm the TGG transfer in your wallet...' : 'Waiting for transaction confirmation...'}
+              </p>
             </div>
           )}
 
@@ -225,17 +276,25 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={(type === 'buy' && !isConnected) || isLoading}
+            disabled={
+              !isConnected || 
+              isLoading || 
+              (type === Action.Sell && balanceCheck && !balanceCheck.hasSufficient) ||
+              transferPending ||
+              receiptLoading
+            }
             className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Traitement en cours...' : type === 'buy' ? 'Buy' : 'Sell'}
+            {isLoading || transferPending || receiptLoading
+              ? 'Processing...' 
+              : type === Action.Buy 
+                ? Action.Buy 
+                : Action.Sell}
           </button>
         </form>
       ) : (
-        // Affichage conditionnel selon le type après soumission
         <>
-          {type === 'buy' && (
-            // Informations de transfert pour Buy
+          {type === Action.Buy && (
             <div className="space-y-4">
               <BuyInfo 
                 amount={transferInfo.amount}
@@ -243,11 +302,12 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
                 iban={transferInfo.iban}
                 alias={transferInfo.alias}
                 bank={transferInfo.bank}
+                ref={ref}
               />
             </div>
           )}
           
-          {type === 'sell' && (
+          {type === Action.Sell && (
             <div className="bg-gray-200 p-6 rounded-xl">
               <h2 className="text-xl font-bold mb-4 text-center">Demand of sale confirmed</h2>
               <p>Your sale operation number <span className="font-bold">{ref}</span> has been successfully processed.</p>

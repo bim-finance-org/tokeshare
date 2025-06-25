@@ -11,24 +11,36 @@ import UserForm from './UserForm'
 import { TokenContexts } from '@/context/TokenContexts'
 import { usePaxgPrice } from '@/hooks/usePaxgPrice'
 import { useExchangeRates } from '@/hooks/useExchangeRates'
+import { useTGGBalance } from '@/hooks/useTGGBalance'
+import { Address } from 'viem'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+import { INTERVAL_PRICE_UPDATE } from '@/constants/constants'
+import { Badge } from "@/components/ui/badge";
 
 const Sell = () => {
-  // Get values from context
   const { 
     sell: { token: selectedCurrency, blockchain: selectedBlockchain },
     updateSellToken: setSelectedCurrency,
     updateSellBlockchain: setSelectedBlockchain
   } = useContext(TokenContexts);
 
-  // Local state
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false)
-  const [amountToSell, setAmountToSell] = useState('10')
+  const [amountToSell, setAmountToSell] = useState('1')
   const [receiveAmount, setReceiveAmount] = useState('0')
   const [tggPrice, setTggPrice] = useState<number>(0)
   const [showUserForm, setShowUserForm] = useState(false)
-  const { isConnected } = useAccount()
+  const [showBalanceError, setShowBalanceError] = useState(false)
+  const [isBelowMin, setBelownMin] = useState(false)
+  const { isConnected, address } = useAccount()
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
+  
+  const { 
+    formattedBalance, 
+    checkSufficientBalance, 
+    isLoading: isLoadingBalance 
+  } = useTGGBalance(address as Address);
     
   useEffect(() => {
     const updatePrice = async () => {
@@ -36,19 +48,20 @@ const Sell = () => {
       setTggPrice(calculatedTggPrice);
     };
     updatePrice();
-    // Update price every 5 seconds
-    const interval = setInterval(updatePrice, 5000);
+    const interval = setInterval(updatePrice, INTERVAL_PRICE_UPDATE);
     return () => clearInterval(interval);
   }, [paxgPrice]);
   
-  // Calculer le montant à recevoir quand le prix TGG, le taux de change ou la devise change
   useEffect(() => {
     if (tggPrice > 0 && !isRatesLoading) {
       calculateReceiveAmount();
     }
   }, [tggPrice, exchangeRates, selectedCurrency, amountToSell]);
 
-  // Calcule le montant à recevoir en devise fiat
+  useEffect(() => {
+    setShowBalanceError(false);
+  }, [amountToSell]);
+
   const calculateReceiveAmount = () => {
     const tggAmount = parseFloat(amountToSell) || 0;
     const fiatValue = convertTGGToFiat(tggAmount, selectedCurrency, exchangeRates, tggPrice);
@@ -60,23 +73,33 @@ const Sell = () => {
     }
   };
   
-  // Gérer le changement de devise
   const handleCurrencyChange = (currency: string) => {
     setSelectedCurrency(currency);
     calculateReceiveAmount();
   };
   
-  // Gérer le changement du montant TGG à vendre
   const handleTggAmountChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setAmountToSell(amount);
-      // Le calcul du montant à recevoir sera déclenché par l'effet
+      if(parseFloat(amount) < 0.5){
+        setBelownMin(true);
+      }else{
+        setBelownMin(false);
+      }
     }
+  };
+
+  const handleSellClick = () => {
+    if (!isConnected) {
+      return;
+    }
+
+    setShowUserForm(true);
   };
 
   if (showUserForm) {
     return (
-      <div className="p-6 w-full text-color4 max-w-md mx-auto bg-gray-100 rounded-2xl shadow-md space-y-4">
+      <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4">
         <div className="bg-gray-200 p-4 rounded-xl">
           <h1 className="text-xl font-bold mb-2">Reception address</h1>
           <p className="text-gray-600">Network: {selectedBlockchain}</p>
@@ -103,19 +126,25 @@ const Sell = () => {
         label="YOU SEND"
         defaultToken="TGG"
         onValueChange={handleTggAmountChange}
-        onTokenChange={() => {}} // Le token "TGG" ne peut pas être changé
+        onTokenChange={() => {}}
         type="crypto"
         value={amountToSell}
         blockchain={selectedBlockchain}
         showBalance={true}
       />
 
+       {isBelowMin && (
+  <div className="text-red-500 text-xs mt-2">
+    Minimum amount is 0.5 TGG
+  </div>
+)}
+
       <div className="my-4" />
 
       <TradeWidget
         label="YOU RECEIVE"
         defaultToken={selectedCurrency}
-        onValueChange={() => {}} // Le montant à recevoir est calculé automatiquement
+        onValueChange={() => {}}
         onTokenChange={handleCurrencyChange}
         type="fiat"
         value={receiveAmount}
@@ -124,18 +153,33 @@ const Sell = () => {
 
       <div className="mb-6 mt-4 space-y-2">
         <Blockchains section="sell" />
-        <div className="space-y-1 ml-2">
-          <p className="text-color4 text-sm font-medium">TGG Price: ${tggPrice.toFixed(2)}</p>
-          <p className="text-color4 text-sm font-medium">Delivery time: 0 - 2 Days</p>
-        </div>
+        <div className="bg-color1 rounded-lg p-3 space-y-2 ">
+          <div className="flex items-center justify-between">
+            <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
+            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">2-4 Days</Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-color4 text-xs sm:text-sm font-medium">TGG Price:</span>
+
+              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tggPrice.toFixed(2)}</Badge>
+
+          </div>
+          </div>
       </div>
 
       <div className="mt-6">
         {isConnected ? (
           <button
-            onClick={() => setShowUserForm(true)}
-            className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition-all duration-200"
-          >
+            onClick={handleSellClick}
+            className={
+    `w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200 
+    ${isBelowMin 
+      ? "bg-color4 text-white opacity-50 cursor-not-allowed"
+      : "bg-color4 text-white hover:bg-opacity-90"}`
+  }
+  disabled={isBelowMin}
+  >
             Sell
           </button>
         ) : (

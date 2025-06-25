@@ -6,9 +6,10 @@ interface BuyInfoProps {
   iban: string;
   alias: string;
   bank: string;
+  ref: string
 }
 
-const BuyInfo = ({ amount, beneficiary, iban, alias, bank }: BuyInfoProps) => {
+const BuyInfo = ({ amount, beneficiary, iban, alias, bank, ref }: BuyInfoProps) => {
   return (
     <div className="bg-gray-200 p-6 rounded-xl space-y-4">
       <div>
@@ -36,6 +37,10 @@ const BuyInfo = ({ amount, beneficiary, iban, alias, bank }: BuyInfoProps) => {
         <div className="flex justify-between items-center">
           <span className="text-gray-600">Bank:</span>
           <span className="font-medium">{bank}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600">Ref:</span>
+          <span className="font-medium">{ref}</span>
         </div>
       </div>
     </div>
