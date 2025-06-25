@@ -13,7 +13,7 @@ interface PopularCommoditiesCardProps {
 }
 
 const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ commodity }) => {
-  const { name, image, tokenPrice: staticTokenPrice } = commodity;
+  const { name, image } = commodity;
   const { data: paxgPrice, isLoading } = usePaxgPrice();
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -45,7 +45,7 @@ const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ commodi
     ? "Loading..." 
     : paxgPrice 
       ? formatPrice(calculateTGGPrice(paxgPrice))
-      : staticTokenPrice;
+      : null;
 
   return (
     <div
