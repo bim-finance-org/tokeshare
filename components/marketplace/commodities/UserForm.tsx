@@ -18,6 +18,13 @@ interface UserFormProps {
   setShowUserForm: Function;
 }
 
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  iban?: string;
+}
+
 const BENEFICIARY = "Tokeshare";
 const IBAN = "FR76 1695 8000 0103 0490 4861 482";
 const ALIAS = "Tokeshare";
@@ -33,12 +40,19 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice, setShowUserForm
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    iban: type === 'sell' ? '' : undefined,
+  const [formData, setFormData] = useState<FormData>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('userFormData');
+      if (saved) return JSON.parse(saved);
+    }
+    return {
+      firstName: '',
+      lastName: '',
+      email: '',
+      iban: type === 'sell' ? '' : undefined,
+    };
   });
+
   const [ref, setRef] = useState<string>(() => generatePayReference());
 
   const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address);
@@ -55,6 +69,12 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice, setShowUserForm
     alias: ALIAS,
     bank: BANK
   };
+
+  useEffect(() => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('userFormData', JSON.stringify(formData));
+  }
+}, [formData]);
 
   useEffect(() => {
     if (receiptSuccess && hash) {
@@ -176,7 +196,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice, setShowUserForm
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev: FormData) => ({
       ...prev,
       [name]: value
     }));
