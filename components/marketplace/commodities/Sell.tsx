@@ -89,27 +89,24 @@ const Sell = () => {
     }
   };
 
-  const handleSellClick = () => {
+  const handleSellClick = (val: boolean) => {
     if (!isConnected) {
       return;
     }
 
-    setShowUserForm(true);
+    setShowUserForm(val);
   };
 
   if (showUserForm) {
     return (
-      <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4">
-        <div className="bg-gray-200 p-4 rounded-xl">
-          <h1 className="text-xl font-bold mb-2">Reception address</h1>
-          <p className="text-gray-600">Network: {selectedBlockchain}</p>
-        </div>
+      <div className="w-full text-color4 max-w-md mx-auto rounded-2xl ">
         <UserForm 
           type="sell"
           amount={receiveAmount}
           currency={selectedCurrency}
           tggAmount={amountToSell}
           tggPrice={tggPrice}
+          setShowUserForm={(val:boolean) => handleSellClick(val)}
         />
       </div>
     );
@@ -171,7 +168,7 @@ const Sell = () => {
       <div className="mt-6">
         {isConnected ? (
           <button
-            onClick={handleSellClick}
+            onClick={() => handleSellClick(true)}
             className={
     `w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200 
     ${isBelowMin 

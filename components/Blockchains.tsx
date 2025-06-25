@@ -71,7 +71,7 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={toggleDropdown}
-        className={`flex items-center gap-3 px-3 py-2 ${section === 'swap' ? 'bg-color1 cursor-default' : 'bg-color1 hover:bg-gray-100 cursor-pointer'} rounded-xl shadow-md transition-all duration-200`}
+        className={`flex items-center cursor-default gap-3 px-3 py-2 bg-color1 rounded-xl shadow-md transition-all duration-200`}
       >
         <div className="w-6 h-6 flex items-center justify-center">
           {blockchain === 'Polygon' ? (
@@ -81,17 +81,17 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
           )}
         </div>
         <span className="text-color4 font-medium">{blockchain}</span>
-        {section !== 'swap' && (
+        {!section  && (
           <ArrowDownIcon strokeColor="#4F5B76" className={`w-6 h-6 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         )}
       </button>
 
-      {isOpen && section !== 'swap' && (
-        <div className="absolute z-50 top-full left-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden transform transition-all duration-200">
+      {isOpen && !section && (
+        <div className="absolute z-50 top-full left-0 mt-2 rounded-xl shadow-xl border overflow-hidden transform transition-all duration-200">
           <button 
             onClick={() => handleSelect('Polygon')}
-            className={`flex items-center gap-3 w-full px-3 pr-4 py-2 hover:bg-gray-50 transition-colors duration-200 ${
-              blockchain === 'Polygon' ? 'bg-gray-100' : ''
+            className={`flex items-center gap-3 w-full px-3 pr-4 py-2 transition-colors duration-200 ${
+              blockchain === 'Polygon' ? '' : ''
             }`}
           >
             <div className="w-6 h-6 flex items-center justify-center">
@@ -102,14 +102,14 @@ const Blockchains = ({ onSelect, section }: BlockchainsProps) => {
           
           <button 
             onClick={() => handleSelect('Base')}
-            className={`flex items-center gap-3 w-full px-3 py-2 hover:bg-gray-50 transition-colors duration-200 ${
-              blockchain === 'Base' ? 'bg-gray-100' : ''
+            className={`flex items-center gap-3 w-full px-3 py-2  transition-colors duration-200 ${
+              blockchain === 'Base' ? '' : ''
             }`}
           >
             <div className="w-6 h-6 flex items-center justify-center">
               <BaseIcon />
             </div>
-            <span className="text-color4 font-medium">Base</span>
+            
           </button>
         </div>
       )}

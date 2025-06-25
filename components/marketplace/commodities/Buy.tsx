@@ -108,9 +108,14 @@ const Buy = () => {
     }
   };
 
+  const handleSellClick = (val: boolean) => {
+
+    setShowBuyNext(val);
+  };
+
 
   if (showBuyNext) {
-    return <UserForm type="buy" amount={amountToSend} currency={selectedCurrency} tggAmount={tggAmount} tggPrice={tggPrice} />
+    return <UserForm type="buy" amount={amountToSend} currency={selectedCurrency} tggAmount={tggAmount} tggPrice={tggPrice} setShowUserForm={handleSellClick} />
   }
 
   return (
@@ -169,7 +174,7 @@ const Buy = () => {
       <div className="mt-6">
         {isConnected ? (
           <button
-  onClick={() => setShowBuyNext(true)}
+  onClick={() => handleSellClick(true)}
   className={
     `w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200 
     ${isBelowMin 
