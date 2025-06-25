@@ -273,7 +273,7 @@ export const useSwap = () => {
         throw new Error(`Erreur build API: ${data.message || 'Données de swap manquantes'}`)
       }
 
-      console.log("data.data.data", data.data.data);
+      // console.log("data.data.data", data.data.data);
       return data.data.data
     } catch (error) {
       throw error

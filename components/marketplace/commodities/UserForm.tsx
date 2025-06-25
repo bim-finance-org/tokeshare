@@ -15,6 +15,7 @@ interface UserFormProps {
   currency: string;
   tggAmount: string;
   tggPrice: number;
+  setShowUserForm: Function;
 }
 
 const BENEFICIARY = "Tokeshare";
@@ -22,7 +23,7 @@ const IBAN = "FR76 1695 8000 0103 0490 4861 482";
 const ALIAS = "Tokeshare";
 const BANK = "Qonto";
 
-const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps) => {
+const UserForm = ({ type, amount, currency, tggAmount, tggPrice, setShowUserForm }: UserFormProps) => {
   const { 
     buy: { blockchain: buyBlockchain },
     sell: { blockchain: sellBlockchain }
@@ -39,9 +40,6 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
     iban: type === 'sell' ? '' : undefined,
   });
   const [ref, setRef] = useState<string>(() => generatePayReference());
-
-  if(address == undefined)
-    return;
 
   const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address);
   const { transferTGGToTokeShare, isPending: transferPending, error: transferError, hash } = useTGGTransfer();
@@ -189,6 +187,10 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
   return (
     <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4 ">
       {!showConfirmation ? (
+        <>
+        <button onClick={() => setShowUserForm(false)} className="bg-color4 text-white p-2 rounded-sm">
+          Go back
+        </button>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name Section */}
           <div className="bg-gray-200 p-4 rounded-xl">
@@ -254,7 +256,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
             <label className="block text-sm mb-2">
               {type === Action.Buy ? 'Reception address' : 'Your wallet address'}
             </label>
-            <ConnectButton/>
+            <ConnectButton />
           </div>
 
           {/* Transaction Status - For Sell */}
@@ -279,7 +281,6 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
             disabled={
               !isConnected || 
               isLoading || 
-              (type === Action.Sell && balanceCheck && !balanceCheck.hasSufficient) ||
               transferPending ||
               receiptLoading
             }
@@ -292,6 +293,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice }: UserFormProps
                 : Action.Sell}
           </button>
         </form>
+        </>
       ) : (
         <>
           {type === Action.Buy && (

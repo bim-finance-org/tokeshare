@@ -35,9 +35,9 @@ const ConnectWalletButton = ({isTransparent = false, navbarButton = false}: Conn
 
   return (
     <button
+      type="button"
       onClick={handleConnect}
-      className={`${isTransparent ? 'bg-transparent' : 'bg-color4'} w-full border-2 border-white  px-4 text-white py-3 rounded-xl font-medium shadow-sm hover:scale-105 hover:bg-opacity-90 transition-all duration-200`}
-      
+      className={`${isTransparent ? 'bg-transparent' : 'bg-color4'} w-full border-2 border-white  px-4 text-white py-3 rounded-xl font-medium shadow-sm `}
     >
       {buttonText}
     </button>

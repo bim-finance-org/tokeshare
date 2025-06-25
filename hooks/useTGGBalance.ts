@@ -4,7 +4,7 @@ import { CONTRACTS } from '@/contracts/contracts';
 import { TGG_ABI } from '@/contracts/abis/tgg_abi';
 import { NUMBER_TO_FIXE_6 } from '@/constants/constants';
 
-export function useTGGBalance(userAddress: Address) {
+export function useTGGBalance(userAddress?: Address) {
 
   const TGG_DECIMALS = 18;
 
