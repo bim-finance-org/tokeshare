@@ -42,7 +42,14 @@ const Blockchain = () => {
 
             <div className="py-4 flex flex-col md:flex-row justify-between ">
               <h3 className="text-lg font-semibold">Owner Wallet</h3>
-              <p className="text-base mt-2 md:mt-0">...</p>
+              <a
+    href="https://polygonscan.com/address/0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
+  >
+    0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E
+  </a>
             </div>
           </div>
 
