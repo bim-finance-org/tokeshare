@@ -18,6 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, AlertCircle, ExternalLink } from "lucide-react";
 import { SwapDirection } from "@/enums/Directions";
+import { useAppKitNetwork } from "@reown/appkit/react";
+import { polygon } from '@reown/appkit/networks'
 
 // Définir le type pour les propriétés acceptées par TradeWidget
 type TradeWidgetType = "stablecoin" | "crypto" | "fiat";
@@ -40,7 +42,9 @@ const Swap = () => {
 
   const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
   const { data: paxgPrice, isLoading } = usePaxgPrice();
-  
+
+  const { switchNetwork } = useAppKitNetwork()
+
 
   const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
   
@@ -159,6 +163,8 @@ const Swap = () => {
           return;
         }
 
+        switchNetwork(polygon);
+
         await swapMint({
           inputToken: inputTokenAddress as Address,
           inputAmount: stablecoinAmount,
@@ -175,6 +181,8 @@ const Swap = () => {
           setIsPreparingSwap(false);
           return;
         }
+
+        switchNetwork(polygon);
 
         await swapWithdraw({
           tggAmount,

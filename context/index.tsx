@@ -7,19 +7,17 @@ import { polygon } from '@reown/appkit/networks'
 import React, { type ReactNode } from 'react'
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
 
-// Set up queryClient
 const queryClient = new QueryClient()
 
 if (!projectId) {
   throw new Error('Project ID is not defined')
 }
 
-// Set up metadata
 const metadata = {
-  name: 'appkit-example',
-  description: 'AppKit Example',
-  url: 'https://appkitexampleapp.com', // origin must match your domain & subdomain
-  icons: ['https://avatars.githubusercontent.com/u/179229932']
+  name: 'Tokeshare',
+  description: 'Invest in real world assets',
+  url: 'https://tokeshare.co',
+  icons: ['/logos/shorts/tokeshare_gold.png']
 }
 
 createAppKit({
@@ -27,7 +25,9 @@ createAppKit({
   projectId,
   networks: [polygon],
   defaultNetwork: polygon,
+  enableNetworkSwitch: false,
   metadata: metadata,
+  allowUnsupportedChain: true,
   themeMode: "light",
   features: {
     analytics: true,
