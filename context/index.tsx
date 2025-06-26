@@ -3,7 +3,7 @@
 import { wagmiAdapter, projectId } from '../config'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createAppKit } from '@reown/appkit/react'
-import { base, polygon, polygonAmoy } from '@reown/appkit/networks'
+import { polygon } from '@reown/appkit/networks'
 import React, { type ReactNode } from 'react'
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
 
@@ -22,15 +22,17 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/179229932']
 }
 
-// Create the modal
-const modal = createAppKit({
+createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: [base, polygon, polygonAmoy],
-  defaultNetwork: base,
+  networks: [polygon],
+  defaultNetwork: polygon,
   metadata: metadata,
+  themeMode: "light",
   features: {
-    analytics: true // Optional - defaults to your Cloud configuration
+    analytics: true,
+    swaps: false,
+    onramp: false
   },
 })
 
