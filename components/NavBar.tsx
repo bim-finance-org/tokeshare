@@ -122,7 +122,7 @@ const NavBar: React.FC<NavBarProps> = () => {
                       { name: "Real Estate", path: "/marketplace/real-estate" },
                       { name: "Commodities", path: "/marketplace/commodities" },
                       { name: "Stock & ETF", path: "/buildingInProgress" },
-                      { name: "Other", path: "/buildingInProgress" },
+                      { name: "Other", path: "/marketplace/other" },
                     ].map(({ name, path }, idx) => (
                       <li key={idx} className="text-center py-1 ">
                         <Link
