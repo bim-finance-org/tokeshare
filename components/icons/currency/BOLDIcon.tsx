@@ -1,9 +1,9 @@
-import Image from 'next/image'
-import React from 'react'
+import Image from 'next/image';
+import React from 'react';
 
 interface BOLDIconProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
 const BOLDIcon = ({ size = 24, className = '' }: BOLDIconProps) => {
@@ -15,7 +15,7 @@ const BOLDIcon = ({ size = 24, className = '' }: BOLDIconProps) => {
       height={size}
       className={`rounded-full ${className}`}
     />
-  )
-}
+  );
+};
 
-export default BOLDIcon
+export default BOLDIcon;

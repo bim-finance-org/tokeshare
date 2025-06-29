@@ -1,6 +1,6 @@
-import { NextResponse, NextRequest } from "next/server";
-import { prisma } from "@/lib/db";
-import { requireAuth, validateId, validateCryptoAmount } from "@/lib/api-utils";
+import { NextResponse, NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { requireAuth, validateId, validateCryptoAmount } from '@/lib/api-utils';
 
 /**
  * PUT to update the amount of a sell transaction
@@ -8,41 +8,38 @@ import { requireAuth, validateId, validateCryptoAmount } from "@/lib/api-utils";
  * @param params - The parameters object
  * @returns The updated transaction
  */
-export async function PUT(request: NextRequest, { params }: { params: {id:string} }) {
-	try {
-		const session = await requireAuth();
-		if (!session) {
-		return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
-		}
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const session = await requireAuth();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized. Please log in.' }, { status: 401 });
+    }
 
-		const id = validateId(params.id);
-		if (!id) {
-		return NextResponse.json({ error: "Invalid transaction ID" }, { status: 400 });
-		}
+    const id = validateId(params.id);
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid transaction ID' }, { status: 400 });
+    }
 
-		const { cryptoAmount } = await request.json();
+    const { cryptoAmount } = await request.json();
     const validAmount = validateCryptoAmount(cryptoAmount);
     if (!validAmount) {
-      return NextResponse.json({ error: "Invalid amount. Must be a positive number." }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid amount. Must be a positive number.' }, { status: 400 });
     }
 
-		const transaction = await prisma.sellTransaction.findUnique({ where: { id } });
+    const transaction = await prisma.sellTransaction.findUnique({ where: { id } });
     if (!transaction) {
-      return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
     }
 
-		const updatedTransaction = await prisma.sellTransaction.update({
-			where: { id },
-			data: {
-				cryptoAmount: cryptoAmount,
-			},
-		});
+    const updatedTransaction = await prisma.sellTransaction.update({
+      where: { id },
+      data: {
+        cryptoAmount: cryptoAmount,
+      },
+    });
 
-		return NextResponse.json(updatedTransaction);
-	} catch (error) {
-		return NextResponse.json(
-			{ error: "Error updating transaction amount" },
-			{ status: 500 }
-		);
-	}
+    return NextResponse.json(updatedTransaction);
+  } catch (error) {
+    return NextResponse.json({ error: 'Error updating transaction amount' }, { status: 500 });
+  }
 }

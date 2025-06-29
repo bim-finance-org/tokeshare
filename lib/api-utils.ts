@@ -1,9 +1,9 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/authOptions";
-import { ALLOWED_STATUS} from "@/constants/api";
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/authOptions';
+import { ALLOWED_STATUS } from '@/constants/api';
 
-export function validateStatus(status: any): status is typeof ALLOWED_STATUS[number] {
-  return typeof status === "string" && ALLOWED_STATUS.includes(status as any);
+export function validateStatus(status: any): status is (typeof ALLOWED_STATUS)[number] {
+  return typeof status === 'string' && ALLOWED_STATUS.includes(status as any);
 }
 
 export function validateId(id: string): number | null {

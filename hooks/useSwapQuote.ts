@@ -4,7 +4,13 @@ import { useSwap } from './useSwap';
 import { CONTRACTS } from '@/contracts/contracts';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { SwapDirection } from '@/enums/Directions';
-import { DECIMALS_18, NUMBER_TO_FIXE_4, NUMBER_TO_FIXE_6, ONCE_DIVISION, SLIPPAGE_TOLERANCE } from '@/constants/constants';
+import {
+  DECIMALS_18,
+  NUMBER_TO_FIXE_4,
+  NUMBER_TO_FIXE_6,
+  ONCE_DIVISION,
+  SLIPPAGE_TOLERANCE,
+} from '@/constants/constants';
 import { calculateTGGPrice } from '@/utils/priceUtils';
 interface SwapQuoteParams {
   inputToken: Address;
@@ -39,7 +45,7 @@ const useSmartDebounce = (value: string, delay: number) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-  }
+  };
 
   useEffect(() => {
     setIsTyping(true);
@@ -53,25 +59,23 @@ const useSmartDebounce = (value: string, delay: number) => {
     }, delay);
 
     return () => {
-      clear()
+      clear();
     };
   }, [value, delay]);
 
   return { debouncedValue, isTyping };
 };
 
-
 /**
  * Vas récupérer la valeur de l'ouput amount en fonction de l'input amount, uniquement si l'utilisateur a arrêté d'écrire et si la valeur de 'paramsKey' a changé.
  * @param params Objet contenant les paramètres du swap (tokens, montant, direction).
  * @returns Un objet avec :
- *   - outputAmount : le montant obtenu après le swap 
+ *   - outputAmount : le montant obtenu après le swap
  *   - isLoading : booléen, true si le fetch est en cours ou si l'utilisateur tape
- *   - error : message d'erreur 
- *   - exchangeRate : taux de change calculé 
+ *   - error : message d'erreur
+ *   - exchangeRate : taux de change calculé
  */
 export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult => {
-  
   const DEBOUNCE_DELAY = 500;
   const MINIMUM_AMOUNT_TO_GET_QUOTE = 0.01;
 
@@ -87,8 +91,12 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
   const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, DEBOUNCE_DELAY);
 
   useEffect(() => {
-    
-    if (!params || !debouncedAmount || isNaN(Number(debouncedAmount)) || parseFloat(debouncedAmount) < MINIMUM_AMOUNT_TO_GET_QUOTE) {
+    if (
+      !params ||
+      !debouncedAmount ||
+      isNaN(Number(debouncedAmount)) ||
+      parseFloat(debouncedAmount) < MINIMUM_AMOUNT_TO_GET_QUOTE
+    ) {
       setOutputAmount(null);
       setExchangeRate(null);
       setError(null);
@@ -97,14 +105,10 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
     }
 
     const amount = parseFloat(debouncedAmount);
-    
 
-    const paramsKey = [
-      params.inputToken,
-      params.outputToken,
-      amount.toFixed(NUMBER_TO_FIXE_6),
-      params.direction
-    ].join('-');
+    const paramsKey = [params.inputToken, params.outputToken, amount.toFixed(NUMBER_TO_FIXE_6), params.direction].join(
+      '-',
+    );
 
     if (paramsKey === lastParamsKey) return;
 
@@ -123,14 +127,13 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
             tokenOut: CONTRACTS.PAXG as Address,
             amountIn: amountInBase,
             gasInclude: true,
-            slippageTolerance: SLIPPAGE_TOLERANCE
+            slippageTolerance: SLIPPAGE_TOLERANCE,
           });
 
           const paxgAmount = parseFloat(route.amountOut) / DECIMALS_18;
           const tggAmount = paxgAmount * ONCE_DIVISION;
           setOutputAmount(tggAmount.toFixed(NUMBER_TO_FIXE_6));
-          setExchangeRate(`${(tggAmount/amount).toFixed(NUMBER_TO_FIXE_6)}`);
-
+          setExchangeRate(`${(tggAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
         } else {
           const paxgAmount = await getConversion({ tggAmount: amount.toString() });
           const paxgAmountBase = BigInt(Math.floor(paxgAmount * DECIMALS_18)).toString();
@@ -140,17 +143,16 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
             tokenOut: params.outputToken,
             amountIn: paxgAmountBase,
             gasInclude: true,
-            slippageTolerance: SLIPPAGE_TOLERANCE
+            slippageTolerance: SLIPPAGE_TOLERANCE,
           });
 
           const outputDecimals = getTokenDecimals(params.outputToken);
           if (outputDecimals == null) throw new Error('Missing decimal');
-          const stablecoinAmount = parseFloat(route.amountOut) / (10 ** outputDecimals);
+          const stablecoinAmount = parseFloat(route.amountOut) / 10 ** outputDecimals;
           setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
-          setExchangeRate(`${(stablecoinAmount/amount).toFixed(NUMBER_TO_FIXE_6)}`);
+          setExchangeRate(`${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
         }
         setLastParamsKey(paramsKey);
-
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknow error');
         setOutputAmount(null);
@@ -161,7 +163,6 @@ export const useSwapQuote = (params: SwapQuoteParams | null): SwapQuoteResult =>
     };
 
     fetchQuote();
-
   }, [params, debouncedAmount]);
 
   return {

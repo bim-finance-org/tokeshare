@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { prisma } from "@/lib/prisma";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { prisma } from '@/lib/prisma';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
-const EMAIL_ALREADY_EXISTS_CODE = "P2002";
+const EMAIL_ALREADY_EXISTS_CODE = 'P2002';
 
 const emailSchema = z.object({
-	email: z.string().email(),
+  email: z.string().email(),
 });
 
 async function parseAndValidateEmail(request: Request) {

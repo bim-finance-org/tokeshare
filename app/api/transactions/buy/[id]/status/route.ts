@@ -1,7 +1,7 @@
-import { NextResponse, NextRequest } from "next/server";
-import { prisma } from "@/lib/db";
-import { validateStatus, validateId, requireAuth } from "@/lib/api-utils";
-import { ALLOWED_STATUS } from "@/constants/api";
+import { NextResponse, NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { validateStatus, validateId, requireAuth } from '@/lib/api-utils';
+import { ALLOWED_STATUS } from '@/constants/api';
 
 /**
  * PUT to update the status of a buy transaction
@@ -9,44 +9,38 @@ import { ALLOWED_STATUS } from "@/constants/api";
  * @param params - The parameters object
  * @returns The updated transaction
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await requireAuth();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized. Please log in.' }, { status: 401 });
     }
 
     const id = validateId(params.id);
     if (!id) {
-      return NextResponse.json({ error: "Invalid transaction ID" }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid transaction ID' }, { status: 400 });
     }
 
     const { status } = await request.json();
     if (!validateStatus(status)) {
       return NextResponse.json(
-        { error: `Invalid status. Allowed values are: ${ALLOWED_STATUS.join(", ")}` },
-        { status: 400 }
+        { error: `Invalid status. Allowed values are: ${ALLOWED_STATUS.join(', ')}` },
+        { status: 400 },
       );
     }
 
     const transaction = await prisma.buyTransaction.findUnique({ where: { id } });
     if (!transaction) {
-      return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
     }
 
     const updatedTransaction = await prisma.buyTransaction.update({
       where: { id },
-      data: { status }
+      data: { status },
     });
 
     return NextResponse.json(updatedTransaction);
   } catch (error) {
-    return NextResponse.json(
-      { error: "Error updating transaction status" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error updating transaction status' }, { status: 500 });
   }
 }

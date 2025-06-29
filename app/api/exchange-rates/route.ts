@@ -23,7 +23,7 @@ interface CachedExchangeRates {
 async function getCachedOrFetch<Data>(
   key: string,
   fetcher: () => Promise<Data>,
-  expiration: number
+  expiration: number,
 ): Promise<{ data: Data; source: string; cachedAt: string; age: number }> {
   const cached = await getFromCache<Data>(key);
   const now = Date.now();
@@ -32,7 +32,7 @@ async function getCachedOrFetch<Data>(
       data: cached,
       source: 'redis-cache',
       cachedAt: new Date((cached as any).timestamp).toISOString(),
-      age: Math.round((now - (cached as any).timestamp) / MS_PER_SECOND)
+      age: Math.round((now - (cached as any).timestamp) / MS_PER_SECOND),
     };
   }
   const freshData = await fetcher();
@@ -41,7 +41,7 @@ async function getCachedOrFetch<Data>(
     data: freshData,
     source: 'exchange-rate-api',
     cachedAt: new Date(now).toISOString(),
-    age: 0
+    age: 0,
   };
 }
 
@@ -73,19 +73,16 @@ export async function GET() {
     const { data, source, cachedAt, age } = await getCachedOrFetch<CachedExchangeRates>(
       CACHE_KEY_EXCHANGE_RATES,
       fetchExchangeRates,
-      CACHE_EXPIRATION_SECONDS
+      CACHE_EXPIRATION_SECONDS,
     );
     return NextResponse.json({
       rates: data.rates,
       base: data.base,
       source,
       cachedAt,
-      age
+      age,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error retrieving exchange rates' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error retrieving exchange rates' }, { status: 500 });
   }
 }

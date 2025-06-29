@@ -14,7 +14,7 @@ interface CachedPrice {
 async function getCachedOrFetch<Data>(
   key: string,
   fetcher: () => Promise<Data>,
-  expiration: number
+  expiration: number,
 ): Promise<{ data: Data; source: string; cachedAt: string; age: number }> {
   const cached = await getFromCache<CachedPrice>(key);
   const now = Date.now();
@@ -23,7 +23,7 @@ async function getCachedOrFetch<Data>(
       data: cached as Data,
       source: 'redis-cache',
       cachedAt: new Date(cached.timestamp).toISOString(),
-      age: Math.round((now - cached.timestamp) / MS_PER_SECOND)
+      age: Math.round((now - cached.timestamp) / MS_PER_SECOND),
     };
   }
   const freshData = await fetcher();
@@ -32,7 +32,7 @@ async function getCachedOrFetch<Data>(
     data: freshData,
     source: 'cryptoprices-api',
     cachedAt: new Date(now).toISOString(),
-    age: 0
+    age: 0,
   };
 }
 
@@ -40,7 +40,7 @@ async function fetchPaxgPrice(): Promise<CachedPrice> {
   const response = await fetch(PAXG_PRICE_API_URL, {
     method: 'GET',
     headers: {
-      'Accept': 'text/plain',
+      Accept: 'text/plain',
       'Content-Type': 'text/plain',
     },
   });
@@ -52,7 +52,7 @@ async function fetchPaxgPrice(): Promise<CachedPrice> {
   if (isNaN(price)) throw new Error('Invalid price format');
   return {
     price,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 }
 
@@ -61,18 +61,18 @@ export async function GET() {
     const { data, source, cachedAt, age } = await getCachedOrFetch<CachedPrice>(
       CACHE_KEY_PAXG_PRICE,
       fetchPaxgPrice,
-      CACHE_EXPIRATION_SECONDS
+      CACHE_EXPIRATION_SECONDS,
     );
     return NextResponse.json({
       price: data.price,
       source,
       cachedAt,
-      age
+      age,
     });
   } catch (error) {
     return NextResponse.json(
       { error: 'Error retrieving PAXG price', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

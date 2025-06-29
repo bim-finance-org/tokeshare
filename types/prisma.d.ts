@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
 // Extends the type definition of PrismaClient
 declare module '@prisma/client' {
@@ -10,4 +10,4 @@ declare module '@prisma/client' {
 }
 
 // Export empty to make it a module
-export {} 
+export {};

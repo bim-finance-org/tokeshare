@@ -1,9 +1,7 @@
-import React from 'react'
+import React from 'react';
 
 const FiatTradeWidget = () => {
-  return (
-    <div>FiatTradeWidget</div>
-  )
-}
+  return <div>FiatTradeWidget</div>;
+};
 
-export default FiatTradeWidget
+export default FiatTradeWidget;

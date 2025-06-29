@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
 import { Period } from '@/enums/Period';
 
-const COINGECKO_URL = "https://api.coingecko.com/api/v3/coins/pax-gold/market_chart";
+const COINGECKO_URL = 'https://api.coingecko.com/api/v3/coins/pax-gold/market_chart';
 
 const CACHE_EXPIRATION_1D = 20 * 60;
 const CACHE_EXPIRATION_1Y = 6 * 60 * 60;
@@ -34,19 +34,23 @@ async function fetchAndBuildPerformance(period: string) {
   const prices: [number, number][] = json.prices;
 
   if (!prices || prices.length < MIN_PRICES_REQUIRED) {
-    throw new Error("Not enough price data");
+    throw new Error('Not enough price data');
   }
   return buildPerformanceResult(prices, period);
 }
 
-async function getCachedOrFetch<Data>(key: string, fetcher: () => Promise<Data>, expiration: number) : Promise<{data: Data, source: string}>{
+async function getCachedOrFetch<Data>(
+  key: string,
+  fetcher: () => Promise<Data>,
+  expiration: number,
+): Promise<{ data: Data; source: string }> {
   const cached = await getFromCache<Data>(key);
-  if(cached){
-    return {data: cached, source: "redis-cache"};
+  if (cached) {
+    return { data: cached, source: 'redis-cache' };
   }
   const freshData = await fetcher();
-  await setCache(key,freshData, expiration);
-  return {data: freshData, source: "coingecko-api"};
+  await setCache(key, freshData, expiration);
+  return { data: freshData, source: 'coingecko-api' };
 }
 
 function buildPerformanceResult(prices: [number, number][], period: string) {
@@ -77,22 +81,20 @@ function buildPerformanceResult(prices: [number, number][], period: string) {
 export async function GET(request: NextRequest) {
   try {
     const period = extractPeriode(request);
-    if(!period){
-      return NextResponse.json({error: "Invalid or missing period argument"}, {status: 400});
+    if (!period) {
+      return NextResponse.json({ error: 'Invalid or missing period argument' }, { status: 400 });
     }
 
     const cacheKey = `coingecko:paxg:perf:${period}`;
     const cacheExpiration = period === Period.OneYear ? CACHE_EXPIRATION_1Y : CACHE_EXPIRATION_1D;
 
-    const { data, source } = await getCachedOrFetch(
-          cacheKey,
-          () => fetchAndBuildPerformance(period),
-          cacheExpiration
-        );
+    const { data, source } = await getCachedOrFetch(cacheKey, () => fetchAndBuildPerformance(period), cacheExpiration);
 
     return NextResponse.json({ ...data, source });
-
   } catch (e) {
-    return NextResponse.json({ error: "Failed to get PAXG performance", details: e instanceof Error ? e.message : e }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to get PAXG performance', details: e instanceof Error ? e.message : e },
+      { status: 500 },
+    );
   }
 }

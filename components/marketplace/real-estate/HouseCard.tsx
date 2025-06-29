@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import React, { useRef } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
+import React, { useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
 
-import { House } from "@/types/House";
-import BedIcon from "@/components/icons/card/BedIcon";
-import SurfaceIcon from "@/components/icons/card/SurfaceIcon";
-import LocationIcon from "@/components/icons/card/LocationIcon";
-import ArrowIcon from "@/components/icons/arrows/ArrowIcon";
+import { House } from '@/types/House';
+import BedIcon from '@/components/icons/card/BedIcon';
+import SurfaceIcon from '@/components/icons/card/SurfaceIcon';
+import LocationIcon from '@/components/icons/card/LocationIcon';
+import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
 
 interface HomeCardProps {
   house: House;
@@ -25,7 +25,13 @@ const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
   return (
     <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-3xl">
       <div className="image-container">
-        <Image src={images[0]} alt={`Image of ${name}`} width={800} height={800} className="object-cover h-72 rounded-t-3xl" />
+        <Image
+          src={images[0]}
+          alt={`Image of ${name}`}
+          width={800}
+          height={800}
+          className="object-cover h-72 rounded-t-3xl"
+        />
       </div>
       <div className="px-8 py-4">
         <div className="flex items-center w-full">
@@ -80,7 +86,7 @@ const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
           </div>
         </div>
         <div className="flex justify-center">
-          {id === "1" ? (
+          {id === '1' ? (
             <Link href={`/marketplace/real-estate/${id}`}>
               <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
                 <h5 className="text-color1 hover:text-white">Learn More</h5>

@@ -1,6 +1,6 @@
-import { NextResponse, NextRequest } from "next/server";
-import { prisma } from "@/lib/db";
-import { validateId, requireAuth, validateCryptoAmount } from "@/lib/api-utils";
+import { NextResponse, NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { validateId, requireAuth, validateCryptoAmount } from '@/lib/api-utils';
 
 /**
  * PUT to update the amount of a buy transaction
@@ -12,35 +12,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   try {
     const session = await requireAuth();
     if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized. Please log in." },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized. Please log in.' }, { status: 401 });
     }
 
     const id = validateId(params.id);
     if (!id) {
-      return NextResponse.json(
-        { error: "Invalid transaction ID" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid transaction ID' }, { status: 400 });
     }
 
     const { cryptoAmount } = await request.json();
     const validAmount = validateCryptoAmount(cryptoAmount);
     if (!validAmount) {
-      return NextResponse.json(
-        { error: "Invalid amount. Must be a positive number." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid amount. Must be a positive number.' }, { status: 400 });
     }
 
     const transaction = await prisma.buyTransaction.findUnique({ where: { id } });
     if (!transaction) {
-      return NextResponse.json(
-        { error: "Transaction not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
     }
 
     const updatedTransaction = await prisma.buyTransaction.update({
@@ -50,9 +38,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(updatedTransaction);
   } catch (error) {
-    return NextResponse.json(
-      { error: "Error updating transaction amount" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error updating transaction amount' }, { status: 500 });
   }
 }

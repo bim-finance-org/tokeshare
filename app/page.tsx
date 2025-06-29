@@ -1,18 +1,18 @@
-"use client";
-import React, { useState } from "react";
-import PopularCards from "../components/home/PopularCards";
-import ArrowLineIcon from "../components/icons/arrows/ArrowLineIcon";
-import Link from "next/link";
-import Image from "next/image";
-import { Input } from "../components/ui/input";
-import Schema from "../components/home/Schema";
-import { z } from "zod";
-import { usePaxgPrice } from "../hooks/usePaxgPrice";
+'use client';
+import React, { useState } from 'react';
+import PopularCards from '../components/home/PopularCards';
+import ArrowLineIcon from '../components/icons/arrows/ArrowLineIcon';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Input } from '../components/ui/input';
+import Schema from '../components/home/Schema';
+import { z } from 'zod';
+import { usePaxgPrice } from '../hooks/usePaxgPrice';
 
 export default function Home() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Précharger le prix du PAXG
@@ -20,20 +20,20 @@ export default function Home() {
 
   const handleSubscribe = async () => {
     if (!email.trim()) {
-      setError("Please enter your email.");
+      setError('Please enter your email.');
       return;
     }
     if (!z.string().email().safeParse(email).success) {
-      setError("Invalid email address. Please enter a valid one.");
+      setError('Invalid email address. Please enter a valid one.');
       return;
     }
 
     try {
       setIsSubmitting(true);
       const body = { email };
-      const response = await fetch("/api/emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/emails', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
@@ -41,13 +41,13 @@ export default function Home() {
         throw new Error();
       }
       setSubmitted(true);
-      setEmail(""); // Réinitialisation du champ après soumission
-      setError(""); // Supprimer les erreurs après succès
+      setEmail(''); // Réinitialisation du champ après soumission
+      setError(''); // Supprimer les erreurs après succès
       setIsSubmitting(false);
     } catch (error) {
       setIsSubmitting(false);
       console.error("Erreur d'inscription:", error);
-      setError("An error occurred. Please try again later.");
+      setError('An error occurred. Please try again later.');
     }
   };
 
@@ -58,11 +58,19 @@ export default function Home() {
           <Image src="/images/bg-image-1.webp" alt="House" fill className="object-cover" />
         </div>
         <div className="absolute inset-0 flex flex-col items-start justify-center px-6 md:px-36 space-y-4">
-          <h1 className="text-white text-4xl md:text-6xl pt-48 md:pt-4 w-full md:w-2/3 lg:w-1/2">Let&apos;s redefine access to investment</h1>
-          <p className="text-white text-sm md:text-lg max-w-lg leading-relaxed text-justify">Through Tokeshare, investors from around the world can now enter the Latin American market through fractionalized and tokenized ownership. With transparency and the efficiency of blockchain, we offer a compliant and modern solution to rethink real estate investment.</p>
+          <h1 className="text-white text-4xl md:text-6xl pt-48 md:pt-4 w-full md:w-2/3 lg:w-1/2">
+            Let&apos;s redefine access to investment
+          </h1>
+          <p className="text-white text-sm md:text-lg max-w-lg leading-relaxed text-justify">
+            Through Tokeshare, investors from around the world can now enter the Latin American market through
+            fractionalized and tokenized ownership. With transparency and the efficiency of blockchain, we offer a
+            compliant and modern solution to rethink real estate investment.
+          </p>
           <p className="text-white text-sm md:text-lg">The future of finance lies in tokenization.</p>
           <Link href="/buildingInProgress">
-            <button className="rounded-lg w-48 bg-color4 px-6 py-2 text-sm md:text-lg hover:scale-105 transition-transform duration-300">Sign up</button>
+            <button className="rounded-lg w-48 bg-color4 px-6 py-2 text-sm md:text-lg hover:scale-105 transition-transform duration-300">
+              Sign up
+            </button>
           </Link>
         </div>
       </div>
@@ -76,7 +84,9 @@ export default function Home() {
         <h4 className="font-bold text-5xl text-center mb-6">Interested in Updates?</h4>
 
         {submitted ? (
-          <p className="text-green-400 font-semibold text-center">✅ Thank you! We&apos;ll keep you updated. Stay tuned! 🎉</p>
+          <p className="text-green-400 font-semibold text-center">
+            ✅ Thank you! We&apos;ll keep you updated. Stay tuned! 🎉
+          </p>
         ) : (
           <>
             <div className="relative w-full my-8">
@@ -93,9 +103,9 @@ export default function Home() {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
-                  setError(""); // Supprime l'erreur en cas de modification
+                  setError(''); // Supprime l'erreur en cas de modification
                 }}
-                className={`w-3/5 p-3 bg-transparent border ${error ? "border-red-500" : "border-color1"}`}
+                className={`w-3/5 p-3 bg-transparent border ${error ? 'border-red-500' : 'border-color1'}`}
                 disabled={isSubmitting}
               />
               <div className="relative w-full my-8">
@@ -112,7 +122,7 @@ export default function Home() {
                 disabled={isSubmitting}
                 className="bg-color1 text-white px-6 py-2 rounded-lg hover:scale-105 transition-transform duration-300 disabled:opacity-50"
               >
-                {isSubmitting ? "Subscribing..." : "Subscribe"}
+                {isSubmitting ? 'Subscribing...' : 'Subscribe'}
               </button>
             </form>
           </>

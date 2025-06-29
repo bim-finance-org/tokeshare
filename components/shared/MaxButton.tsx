@@ -1,30 +1,30 @@
-import React from 'react'
-import { useAccount } from 'wagmi'
-import { useTokenBalance } from '@/utils/blockchainUtils'
+import React from 'react';
+import { useAccount } from 'wagmi';
+import { useTokenBalance } from '@/utils/blockchainUtils';
 
 interface MaxButtonProps {
-  currency: string
-  blockchain: string
-  onMaxClick: (maxValue: string) => void
-  className?: string
+  currency: string;
+  blockchain: string;
+  onMaxClick: (maxValue: string) => void;
+  className?: string;
 }
 
 const MaxButton = ({ currency, blockchain, onMaxClick, className = '' }: MaxButtonProps) => {
-  const { isConnected } = useAccount()
-  const balance = useTokenBalance(currency, blockchain)
+  const { isConnected } = useAccount();
+  const balance = useTokenBalance(currency, blockchain);
 
   const handleMaxClick = () => {
     if (isConnected && balance && balance !== '0') {
       // Formater la balance avec max 6 décimales
-      const numBalance = parseFloat(balance)
+      const numBalance = parseFloat(balance);
       if (!isNaN(numBalance)) {
-        const formattedBalance = numBalance.toFixed(6).replace(/\.?0+$/, '') // Supprime les zéros inutiles
-        onMaxClick(formattedBalance)
+        const formattedBalance = numBalance.toFixed(6).replace(/\.?0+$/, ''); // Supprime les zéros inutiles
+        onMaxClick(formattedBalance);
       }
     }
-  }
+  };
 
-  const isDisabled = !isConnected || !balance || balance === '0' || parseFloat(balance) === 0
+  const isDisabled = !isConnected || !balance || balance === '0' || parseFloat(balance) === 0;
 
   return (
     <button
@@ -38,7 +38,7 @@ const MaxButton = ({ currency, blockchain, onMaxClick, className = '' }: MaxButt
     >
       MAX
     </button>
-  )
-}
+  );
+};
 
-export default MaxButton 
+export default MaxButton;

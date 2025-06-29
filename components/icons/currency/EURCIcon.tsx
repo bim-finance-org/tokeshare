@@ -1,9 +1,9 @@
-import Image from 'next/image'
-import React from 'react'
+import Image from 'next/image';
+import React from 'react';
 
 interface EURCIconProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
 const EURCIcon = ({ size = 24, className = '' }: EURCIconProps) => {
@@ -15,7 +15,7 @@ const EURCIcon = ({ size = 24, className = '' }: EURCIconProps) => {
       height={size}
       className={`rounded-full ${className}`}
     />
-  )
-}
+  );
+};
 
-export default EURCIcon
+export default EURCIcon;

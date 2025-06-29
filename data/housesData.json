@@ -7,7 +7,13 @@
       "surface": "115.51",
       "price": "$ 310.000",
       "city": "Playa bonita Vanderhorst",
-      "images": ["/images/img-house-4.webp", "/images/house-1/house-1-n2.png", "/images/house-1/house-1-n3.png", "/images/house-1/house-1-n4.png", "/images/house-1/house-1-n5.png"],
+      "images": [
+        "/images/img-house-4.webp",
+        "/images/house-1/house-1-n2.png",
+        "/images/house-1/house-1-n3.png",
+        "/images/house-1/house-1-n4.png",
+        "/images/house-1/house-1-n5.png"
+      ],
       "tokenPrice": "$ 77.5",
       "expectedIncome": "6% - 11%",
       "dateIncome": "No available date",
@@ -58,7 +64,13 @@
       "surface": "180",
       "price": "$ 1.000.000",
       "city": "Saint-Domingue",
-      "images": ["/images/img-house-1.webp", "/images/house-1/house-1-n2.png", "/images/house-1/house-1-n3.png", "/images/house-1/house-1-n4.png", "/images/house-1/house-1-n5.png"],
+      "images": [
+        "/images/img-house-1.webp",
+        "/images/house-1/house-1-n2.png",
+        "/images/house-1/house-1-n3.png",
+        "/images/house-1/house-1-n4.png",
+        "/images/house-1/house-1-n5.png"
+      ],
       "tokenPrice": "$ 1.000",
       "expectedIncome": "9.07 %",
       "dateIncome": "No available date",
@@ -109,7 +121,13 @@
       "surface": "80",
       "price": "$ 1.000.000",
       "city": "Saint-Domingue",
-      "images": ["/images/img-house-2.webp", "/images/house-1/house-1-n2.png", "/images/house-1/house-1-n3.png", "/images/house-1/house-1-n4.png", "/images/house-1/house-1-n5.png"],
+      "images": [
+        "/images/img-house-2.webp",
+        "/images/house-1/house-1-n2.png",
+        "/images/house-1/house-1-n3.png",
+        "/images/house-1/house-1-n4.png",
+        "/images/house-1/house-1-n5.png"
+      ],
       "tokenPrice": "$ 1.000",
       "expectedIncome": "9.07 %",
       "dateIncome": "No available date",
@@ -160,7 +178,13 @@
       "surface": "80",
       "price": "$ 1.000.000",
       "city": "Saint-Domingue",
-      "images": ["/images/img-house-3.webp", "/images/house-1/house-1-n2.png", "/images/house-1/house-1-n3.png", "/images/house-1/house-1-n4.png", "/images/house-1/house-1-n5.png"],
+      "images": [
+        "/images/img-house-3.webp",
+        "/images/house-1/house-1-n2.png",
+        "/images/house-1/house-1-n3.png",
+        "/images/house-1/house-1-n4.png",
+        "/images/house-1/house-1-n5.png"
+      ],
       "tokenPrice": "$ 1.000",
       "expectedIncome": "9.07 %",
       "dateIncome": "No available date",

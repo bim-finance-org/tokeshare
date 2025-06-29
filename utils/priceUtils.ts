@@ -24,13 +24,13 @@ export const convertWithRate = (amount: number, rate: number): number => {
 export const convertStablecoinToTGG = (
   stablecoinAmount: number,
   stablecoinRate: number,
-  tggPriceUSD: number
+  tggPriceUSD: number,
 ): number => {
   if (tggPriceUSD <= 0) return 0;
-  
+
   // Convertir stablecoin en USD
   const amountInUSD = convertWithRate(stablecoinAmount, stablecoinRate);
-  
+
   // Convertir USD en TGG
   return amountInUSD / tggPriceUSD;
 };
@@ -42,16 +42,12 @@ export const convertStablecoinToTGG = (
  * @param stablecoinRate - Taux de change du stablecoin (par rapport à l'USD)
  * @returns Montant en stablecoin
  */
-export const convertTGGToStablecoin = (
-  tggAmount: number,
-  tggPriceUSD: number,
-  stablecoinRate: number
-): number => {
+export const convertTGGToStablecoin = (tggAmount: number, tggPriceUSD: number, stablecoinRate: number): number => {
   if (stablecoinRate <= 0) return 0;
-  
+
   // Convertir TGG en USD
   const amountInUSD = tggAmount * tggPriceUSD;
-  
+
   // Convertir USD en stablecoin
   return amountInUSD / stablecoinRate;
 };
@@ -68,23 +64,23 @@ export const convertFiatToTGG = (
   fiatAmount: number,
   fiatCurrency: string,
   exchangeRates: ExchangeRates | undefined,
-  tggPriceUSD: number
+  tggPriceUSD: number,
 ): number | undefined => {
   // Vérifier si les données nécessaires sont disponibles
   if (!exchangeRates || tggPriceUSD <= 0) return undefined;
-  
+
   // Si c'est déjà en USD, pas besoin de convertir en USD
   if (fiatCurrency === 'USD') {
     return fiatAmount / tggPriceUSD;
   }
-  
+
   // Vérifier si le taux pour cette devise existe
   const fiatRate = exchangeRates[fiatCurrency as keyof ExchangeRates];
   if (fiatRate === undefined) return undefined;
-  
+
   // Convertir de la devise fiat vers USD
   const amountInUSD = fiatAmount / fiatRate;
-  
+
   // Convertir de USD vers TGG
   return amountInUSD / tggPriceUSD;
 };
@@ -101,23 +97,23 @@ export const convertTGGToFiat = (
   tggAmount: number,
   fiatCurrency: string,
   exchangeRates: ExchangeRates | undefined,
-  tggPriceUSD: number
+  tggPriceUSD: number,
 ): number | undefined => {
   // Vérifier si les données nécessaires sont disponibles
   if (!exchangeRates || tggPriceUSD <= 0) return undefined;
-  
+
   // Convertir TGG en USD
   const amountInUSD = tggAmount * tggPriceUSD;
-  
+
   // Si la devise cible est USD, retourner directement
   if (fiatCurrency === 'USD') {
     return amountInUSD;
   }
-  
+
   // Vérifier si le taux pour cette devise existe
   const fiatRate = exchangeRates[fiatCurrency as keyof ExchangeRates];
   if (fiatRate === undefined) return undefined;
-  
+
   // Convertir USD vers la devise fiat
   return amountInUSD * fiatRate;
 };

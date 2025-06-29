@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import LocationIcon from "../icons/card/LocationIcon";
-import ArrowIcon from "../icons/arrows/ArrowIcon";
-import QuadIcon from "../icons/card/QuadIcon";
-import Image from "next/image";
-import { Quad } from "@/types/Quad";
+import React, { useState, useEffect, useRef } from 'react';
+import LocationIcon from '../icons/card/LocationIcon';
+import ArrowIcon from '../icons/arrows/ArrowIcon';
+import QuadIcon from '../icons/card/QuadIcon';
+import Image from 'next/image';
+import { Quad } from '@/types/Quad';
 
 interface PopularQuadCardProps {
   quad: Quad;
@@ -58,7 +58,9 @@ const PopularQuadCard: React.FC<PopularQuadCardProps> = ({ quad }) => {
           </div>
         </div>
 
-        <div className={`mt-4 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
+        <div
+          className={`mt-4 flex ${isColumn ? 'flex-col items-start' : 'flex-row items-center'} justify-between gap-2 sm:gap-4`}
+        >
           <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{price}</h5>
 
           {/* <Link href={link} > */}

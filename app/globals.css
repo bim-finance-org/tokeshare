@@ -17,7 +17,7 @@ body {
   background: hsl(var(--color1));
 
   h1 {
-    font-family: "NewOrderBold";
+    font-family: 'NewOrderBold';
   }
 
   h2,
@@ -26,13 +26,13 @@ body {
   h5,
   h6,
   button {
-    font-family: "NewOrderSemiBold";
+    font-family: 'NewOrderSemiBold';
   }
 
   p,
   span,
   a {
-    font-family: "RubikRegular";
+    font-family: 'RubikRegular';
   }
 
   img {
@@ -41,26 +41,26 @@ body {
 }
 
 @font-face {
-  font-family: "NewOrderBold";
-  src: url("/fonts/New_Order_Bold.otf") format("opentype");
+  font-family: 'NewOrderBold';
+  src: url('/fonts/New_Order_Bold.otf') format('opentype');
   font-display: swap;
 }
 
 @font-face {
-  font-family: "NewOrderSemiBold";
-  src: url("/fonts/New_Order_Semibold.otf") format("opentype");
+  font-family: 'NewOrderSemiBold';
+  src: url('/fonts/New_Order_Semibold.otf') format('opentype');
   font-display: swap;
 }
 
 @font-face {
-  font-family: "RubikRegular";
-  src: url("/fonts/Rubik-Regular.ttf") format("truetype");
+  font-family: 'RubikRegular';
+  src: url('/fonts/Rubik-Regular.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
-  font-family: "RubikLight";
-  src: url("/fonts/Rubik-Light.ttf") format("truetype");
+  font-family: 'RubikLight';
+  src: url('/fonts/Rubik-Light.ttf') format('truetype');
   font-display: swap;
 }
 

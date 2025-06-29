@@ -1,8 +1,16 @@
-import React, { ComponentPropsWithRef } from "react";
+import React, { ComponentPropsWithRef } from 'react';
 
-const SurfaceIcon = ({ size = 24, className, ...props }: ComponentPropsWithRef<"svg"> & { size?: number }) => {
+const SurfaceIcon = ({ size = 24, className, ...props }: ComponentPropsWithRef<'svg'> & { size?: number }) => {
   return (
-    <svg width={size} height={size} className={className} {...props} viewBox="0 0 32.72 33.24" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+    <svg
+      width={size}
+      height={size}
+      className={className}
+      {...props}
+      viewBox="0 0 32.72 33.24"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+    >
       <g>
         <g>
           <g>

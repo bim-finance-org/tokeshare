@@ -1,19 +1,19 @@
-import { NextResponse, NextRequest } from "next/server";
-import { prisma } from "@/lib/db";
-import { sendTransactionEmail } from "@/utils/email/sendEmail";
-import { requireAuth } from "@/lib/api-utils";
-import { DECIMALS_FIXED_TO_TWO, FEES } from "@/constants/api";
+import { NextResponse, NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { sendTransactionEmail } from '@/utils/email/sendEmail';
+import { requireAuth } from '@/lib/api-utils';
+import { DECIMALS_FIXED_TO_TWO, FEES } from '@/constants/api';
 
 const REQUIRED_FIELDS = [
-	"iban",
-	"blockchain",
-	"crypto",
-	"cryptoAmount",
-	"fiat",
-	"fiatAmount",
-	"email",
-	"fullName",
-	"ref"
+  'iban',
+  'blockchain',
+  'crypto',
+  'cryptoAmount',
+  'fiat',
+  'fiatAmount',
+  'email',
+  'fullName',
+  'ref',
 ];
 
 function hasRequiredFields(data: any) {
@@ -26,28 +26,22 @@ function hasRequiredFields(data: any) {
  * @returns The sell transactions
  */
 export async function GET(_request: NextRequest) {
-	try {
-		const session = await requireAuth();
-			if (!session) {
-			  return NextResponse.json(
-				{ error: "Unauthorized. Please log in." },
-				{ status: 401 }
-			  );
-			}
+  try {
+    const session = await requireAuth();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized. Please log in.' }, { status: 401 });
+    }
 
-		const sellTransactions = await prisma.sellTransaction.findMany({
-			orderBy: {
-				date: "desc",
-			},
-		});
+    const sellTransactions = await prisma.sellTransaction.findMany({
+      orderBy: {
+        date: 'desc',
+      },
+    });
 
-		return NextResponse.json(sellTransactions);
-	} catch (error) {
-		return NextResponse.json(
-			{ error: "Error retrieving sell transactions" },
-			{ status: 500 }
-		);
-	}
+    return NextResponse.json(sellTransactions);
+  } catch (error) {
+    return NextResponse.json({ error: 'Error retrieving sell transactions' }, { status: 500 });
+  }
 }
 
 /**
@@ -56,55 +50,47 @@ export async function GET(_request: NextRequest) {
  * @returns The new sell transaction
  */
 export async function POST(request: NextRequest) {
-	try {
-		const data = await request.json();
+  try {
+    const data = await request.json();
 
-		if (!hasRequiredFields(data)) {
-		  return NextResponse.json({ error: "Missing data" }, { status: 400 });
-		}
+    if (!hasRequiredFields(data)) {
+      return NextResponse.json({ error: 'Missing data' }, { status: 400 });
+    }
 
-		const fiatAmount = parseFloat(data.fiatAmount);
-		const fees =
-			data.fees !== undefined
-				? parseFloat(data.fees)
-				: parseFloat((fiatAmount * FEES).toFixed(DECIMALS_FIXED_TO_TWO));
+    const fiatAmount = parseFloat(data.fiatAmount);
+    const fees =
+      data.fees !== undefined ? parseFloat(data.fees) : parseFloat((fiatAmount * FEES).toFixed(DECIMALS_FIXED_TO_TWO));
 
-		const newTransaction = await prisma.sellTransaction.create({
-			data: {
-				ref: data.ref,
-				date: new Date(),
-				email: data.email,
-				fullName: data.fullName,
-				iban: data.iban,
-				status: data.status || "pending",
-				blockchain: data.blockchain,
-				fiat: data.fiat,
-				fiatAmount: data.fiatAmount,
-				crypto: data.crypto,
-				cryptoAmount: data.cryptoAmount,
-				fees: fees,
-			},
-		});
+    const newTransaction = await prisma.sellTransaction.create({
+      data: {
+        ref: data.ref,
+        date: new Date(),
+        email: data.email,
+        fullName: data.fullName,
+        iban: data.iban,
+        status: data.status || 'pending',
+        blockchain: data.blockchain,
+        fiat: data.fiat,
+        fiatAmount: data.fiatAmount,
+        crypto: data.crypto,
+        cryptoAmount: data.cryptoAmount,
+        fees: fees,
+      },
+    });
 
-		try {
-			await sendTransactionEmail({
-				email: data.email,
-				fullName: data.fullName,
-				transactionRef: newTransaction.ref,
-				transactionType: "sell",
-			});
-		} catch (emailError) {
-			return NextResponse.json(
-				{ error: "Error sending confirmation email" },
-				{ status: 500 }
-			);
-		}
+    try {
+      await sendTransactionEmail({
+        email: data.email,
+        fullName: data.fullName,
+        transactionRef: newTransaction.ref,
+        transactionType: 'sell',
+      });
+    } catch (emailError) {
+      return NextResponse.json({ error: 'Error sending confirmation email' }, { status: 500 });
+    }
 
-		return NextResponse.json(newTransaction, { status: 201 });
-	} catch (error) {
-		return NextResponse.json(
-			{ error: "Error creating sell transaction" },
-			{ status: 500 }
-		);
-	}
+    return NextResponse.json(newTransaction, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Error creating sell transaction' }, { status: 500 });
+  }
 }

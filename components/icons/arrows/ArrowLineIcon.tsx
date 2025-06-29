@@ -1,6 +1,12 @@
-import React, { ComponentPropsWithRef } from "react";
+import React, { ComponentPropsWithRef } from 'react';
 
-const ArrowLineIcon = ({ size = 48, className, strokeColor = "#181823", fillColor = "#181823", ...props }: ComponentPropsWithRef<"svg"> & { size?: number; strokeColor?: string; fillColor?: string }) => {
+const ArrowLineIcon = ({
+  size = 48,
+  className,
+  strokeColor = '#181823',
+  fillColor = '#181823',
+  ...props
+}: ComponentPropsWithRef<'svg'> & { size?: number; strokeColor?: string; fillColor?: string }) => {
   return (
     <svg
       width={size}
