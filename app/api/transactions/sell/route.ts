@@ -1,26 +1,39 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/authOptions";
 import { sendTransactionEmail } from "@/utils/email/sendEmail";
+import { requireAuth } from "@/lib/api-utils";
+import { DECIMALS_FIXED_TO_TWO, FEES } from "@/constants/api";
+
+const REQUIRED_FIELDS = [
+	"iban",
+	"blockchain",
+	"crypto",
+	"cryptoAmount",
+	"fiat",
+	"fiatAmount",
+	"email",
+	"fullName",
+	"ref"
+];
+
+function hasRequiredFields(data: any) {
+  return REQUIRED_FIELDS.every((field) => data[field]);
+}
 
 /**
  * GET to retrieve all sell transactions
  * @param request - The request object
  * @returns The sell transactions
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
 	try {
-		// Check if user is authenticated
-		const session = await getServerSession(authOptions);
-
-		// If no session, return 401 Unauthorized
-		if (!session) {
-			return NextResponse.json(
+		const session = await requireAuth();
+			if (!session) {
+			  return NextResponse.json(
 				{ error: "Unauthorized. Please log in." },
 				{ status: 401 }
-			);
-		}
+			  );
+			}
 
 		const sellTransactions = await prisma.sellTransaction.findMany({
 			orderBy: {
@@ -46,25 +59,15 @@ export async function POST(request: NextRequest) {
 	try {
 		const data = await request.json();
 
-		if (
-			!data.iban ||
-			!data.blockchain ||
-			!data.crypto ||
-			!data.cryptoAmount ||
-			!data.fiat ||
-			!data.fiatAmount ||
-			!data.email ||
-			!data.fullName ||
-			!data.ref
-		) {
-			return NextResponse.json({ error: "Missing data" }, { status: 400 });
+		if (!hasRequiredFields(data)) {
+		  return NextResponse.json({ error: "Missing data" }, { status: 400 });
 		}
 
 		const fiatAmount = parseFloat(data.fiatAmount);
 		const fees =
 			data.fees !== undefined
 				? parseFloat(data.fees)
-				: parseFloat((fiatAmount * 0.025).toFixed(2));
+				: parseFloat((fiatAmount * FEES).toFixed(DECIMALS_FIXED_TO_TWO));
 
 		const newTransaction = await prisma.sellTransaction.create({
 			data: {

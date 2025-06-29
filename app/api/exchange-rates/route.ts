@@ -1,20 +1,67 @@
 import { NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
 
-const CACHE_EXPIRATION = 30 * 60;
-
+const CACHE_KEY_EXCHANGE_RATES = 'exchange:rates:usd';
+const CACHE_EXPIRATION_SECONDS = 30 * 60;
+const MS_PER_SECOND = 1000;
 const API_KEY = process.env.EXCHANGE_RATE_API_KEY;
+const API_URL = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`;
 
+interface ExchangeRates {
+  EUR: number;
+  CAD: number;
+  CHF: number;
+  GBP: number;
+  USD: number;
+}
 interface CachedExchangeRates {
-  rates: {
-    EUR: number;
-    CAD: number;
-    CHF: number;
-    GBP: number;
-    USD: number;
-  };
+  rates: ExchangeRates;
   base: string;
   timestamp: number;
+}
+
+async function getCachedOrFetch<Data>(
+  key: string,
+  fetcher: () => Promise<Data>,
+  expiration: number
+): Promise<{ data: Data; source: string; cachedAt: string; age: number }> {
+  const cached = await getFromCache<Data>(key);
+  const now = Date.now();
+  if (cached && now - (cached as any).timestamp < expiration * MS_PER_SECOND) {
+    return {
+      data: cached,
+      source: 'redis-cache',
+      cachedAt: new Date((cached as any).timestamp).toISOString(),
+      age: Math.round((now - (cached as any).timestamp) / MS_PER_SECOND)
+    };
+  }
+  const freshData = await fetcher();
+  await setCache(key, freshData, expiration);
+  return {
+    data: freshData,
+    source: 'exchange-rate-api',
+    cachedAt: new Date(now).toISOString(),
+    age: 0
+  };
+}
+
+async function fetchExchangeRates(): Promise<CachedExchangeRates> {
+  const response = await fetch(API_URL);
+  if (!response.ok) throw new Error('Error retrieving exchange rates');
+  const data = await response.json();
+  if (data.result === 'error') throw new Error('Error retrieving exchange rates');
+
+  return {
+    rates: {
+      EUR: data.conversion_rates.EUR,
+      CAD: data.conversion_rates.CAD,
+      CHF: data.conversion_rates.CHF,
+      GBP: data.conversion_rates.GBP,
+      USD: data.conversion_rates.USD,
+    },
+    base: data.base_code,
+    timestamp: Date.now(),
+  };
 }
 
 /**
@@ -23,74 +70,17 @@ interface CachedExchangeRates {
  */
 export async function GET() {
   try {
-    console.log('Exchange rates API route called');
-    
-    // key of cache for exchange rates
-    const cacheKey = 'exchange:rates:usd';
-    
-    // try to retrieve from redis cache
-    const cachedData = await getFromCache<CachedExchangeRates>(cacheKey);
-    
-    if (cachedData) {
-      
-      // check if the data is still fresh (less than 30 minutes)
-      const cachedTimestamp = cachedData.timestamp;
-      const currentTime = Date.now();
-      const dataAge = currentTime - cachedTimestamp;
-      
-      if (dataAge < CACHE_EXPIRATION * 1000) {
-        return NextResponse.json({
-          rates: cachedData.rates,
-          base: cachedData.base,
-          source: 'redis-cache',
-          cachedAt: new Date(cachedTimestamp).toISOString(),
-          age: Math.round(dataAge / 1000)
-        });
-      }
-    }
-    
-    // if we arrive here, either there is no data in cache, or it is expired
-    // so we retrieve new data from the API
-    const apiUrl = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`;
-    
-    const response = await fetch(apiUrl);
-    
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: 'Error retrieving exchange rates' },
-        { status: 500 }
-      );
-    }
-    
-    const data = await response.json();
-    
-    if (data.result === 'error') {
-      return NextResponse.json(
-        { error: 'Error retrieving exchange rates' },
-        { status: 500 }
-      );
-    }
-    
-    const dataToCache: CachedExchangeRates = {
-      rates: {
-        EUR: data.conversion_rates.EUR,
-        CAD: data.conversion_rates.CAD,
-        CHF: data.conversion_rates.CHF,
-        GBP: data.conversion_rates.GBP,
-        USD: data.conversion_rates.USD,
-      },
-      base: data.base_code,
-      timestamp: Date.now()
-    };
-
-    await setCache(cacheKey, dataToCache, CACHE_EXPIRATION);
-    
+    const { data, source, cachedAt, age } = await getCachedOrFetch<CachedExchangeRates>(
+      CACHE_KEY_EXCHANGE_RATES,
+      fetchExchangeRates,
+      CACHE_EXPIRATION_SECONDS
+    );
     return NextResponse.json({
-      rates: dataToCache.rates,
-      base: dataToCache.base,
-      source: 'exchange-rate-api',
-      cachedAt: new Date(dataToCache.timestamp).toISOString(),
-      age: 0
+      rates: data.rates,
+      base: data.base,
+      source,
+      cachedAt,
+      age
     });
   } catch (error) {
     return NextResponse.json(
@@ -98,4 +88,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}
