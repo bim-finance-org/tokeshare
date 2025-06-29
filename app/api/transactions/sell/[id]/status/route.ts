@@ -9,7 +9,7 @@ import { ALLOWED_STATUS } from '@/constants/api';
  * @param params - The parameters object
  * @returns The updated transaction
  */
-export async function PUT(request: NextRequest, { params }: { params: any }) {
+export async function PUT(request: NextRequest, { params }: any) {
   try {
     const session = await requireAuth();
     if (!session) {

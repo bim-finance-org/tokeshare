@@ -8,7 +8,7 @@ import { requireAuth, validateId, validateCryptoAmount } from '@/lib/api-utils';
  * @param params - The parameters object
  * @returns The updated transaction
  */
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: any) {
   try {
     const session = await requireAuth();
     if (!session) {

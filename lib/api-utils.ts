@@ -6,7 +6,7 @@ export function validateStatus(status: any): status is (typeof ALLOWED_STATUS)[n
   return typeof status === 'string' && ALLOWED_STATUS.includes(status as any);
 }
 
-export function validateId(id: string): number | null {
+export function validateId(id: any): number | null {
   const parsed = parseInt(id);
   return isNaN(parsed) ? null : parsed;
 }
