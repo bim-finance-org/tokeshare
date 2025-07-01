@@ -13,11 +13,12 @@ import ArrowIcon from "@/components/icons/arrows/ArrowIcon";
 const images = [
   "/images/frenchTacos/image_3.jpg",
   "/images/frenchTacos/image_1.jpg",
+  "/images/frenchTacos/image_8.png",
   "/images/frenchTacos/image_6.jpg",
   "/images/frenchTacos/image_2.jpg",
   "/images/frenchTacos/image_7.jpg",
-  "/images/frenchTacos/image_5.jpg",
   "/images/frenchTacos/image_4.jpg",
+  "/images/frenchTacos/image_9.jpg",
 ];
 
 const FrenchTacosCarousel: React.FC = () => {
@@ -36,7 +37,7 @@ const FrenchTacosCarousel: React.FC = () => {
       {/* Titre & badge blockchain */}
       <div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center">
         <h1 className="w-2/3 md:w-1/2 text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-color4 mb-4">
-          French Tacos
+          Tokeshare French Tacos
         </h1>
         <div className="flex space-x-3">
           <span className="bg-color4 text-white px-4 py-1 rounded font-semibold">BASE</span>
