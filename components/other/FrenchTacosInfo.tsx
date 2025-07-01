@@ -1,0 +1,46 @@
+"use client"
+
+import React, { useState } from 'react'
+import FrenchTacosHighlights from './FrenchTacosHighlights';
+import FrenchTacosFinancials from './FrenchTacosFinancials';
+import FrenchTacosDetails from './FrenchTacosDetails';
+import FrenchTacosBlockchain from './FrenchTacosBlockchain';
+import FrenchTacosOffering from './FrenchTacosOffering';
+
+
+const FrenchTacosInfo = () => {
+
+    const TABS = ["HIGHLIGHTS", "FINANCIALS", "DETAILS", "BLOCKCHAIN", "OFFERING"];
+      // Onglet actif
+      const [activeTab, setActiveTab] = useState("HIGHLIGHTS");
+
+  return (
+    <section className="px-4 sm:px-8 lg:px-16 py-6 w-4/5 mx-auto flex flex-col items-center sm:items-start">
+      {/* Navbar responsive */}
+      <div className="w-full mb-6">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 justify-center">
+          {TABS.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`relative w-full sm:w-1/4 p-2 rounded-full text-md md:text-lg lg:text-xl  font-medium transition-colors shadow-md
+              ${activeTab === tab ? "bg-gray-900 text-white " + "after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 " + "after:border-l-8 after:border-l-transparent after:border-r-8 after:border-r-transparent " + "after:border-t-8 after:border-t-gray-900" : "bg-gray-200 text-gray-800 hover:bg-gray-300"}
+              `}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Contenu conditionnel selon l’onglet actif */}
+      {activeTab === "HIGHLIGHTS" && <FrenchTacosHighlights/>}
+      {activeTab === "FINANCIALS" && <FrenchTacosFinancials/>}
+      {activeTab === "DETAILS" && <FrenchTacosDetails/>}
+      {activeTab === "BLOCKCHAIN" && <FrenchTacosBlockchain/>}
+      {activeTab === "OFFERING" && <FrenchTacosOffering/> }
+    </section>
+  )
+}
+
+export default FrenchTacosInfo

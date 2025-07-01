@@ -9,10 +9,8 @@ const TacosCard = () => {
   return (
     <div className='bg-color1 shadow-lg max-w-3xl w-[500px] rounded-3xl overflow-hidden text-color4'>
       <div className='image-container'>
-        {/* <Image src="/images/french-tacos.jpg" alt="French Tacos Las Terrenas" width={1200} height={300} className="object-cover h-72 w-full" /> */}
-        <div className="h-72 w-full bg-gradient-to-br from-orange-400 to-yellow-300 flex items-center justify-center text-6xl sm:text-7xl text-white font-bold">
-          French Tacos
-        </div>
+        <Image src="/images/frenchTacos/image_3.jpg" alt="French Tacos Las Terrenas" width={1200} height={300} className="object-cover h-72 w-full" />
+       
       </div>
 
       <div className='px-12 py-8'>
@@ -56,7 +54,7 @@ const TacosCard = () => {
         </div>
 
         <div className="flex justify-center">
-          <Link href="/marketplace/tokens/french-tacos">
+          <Link href="/marketplace/other/french-tacos">
             <button className="flex items-center justify-between bg-color2 rounded-3xl px-8 mt-4 text-xl w-72 hover:bg-color4 hover:text-white transition-colors duration-300 shadow-md font-semibold">
               <span className="text-color1 hover:text-white">Learn More</span>
               <ArrowIcon size={32} className='text-white'/>
