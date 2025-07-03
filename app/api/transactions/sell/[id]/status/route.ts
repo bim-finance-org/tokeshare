@@ -9,14 +9,16 @@ import { ALLOWED_STATUS } from '@/constants/api';
  * @param params - The parameters object
  * @returns The updated transaction
  */
-export async function PUT(request: NextRequest, { params }: any) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const session = await requireAuth();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized. Please log in.' }, { status: 401 });
     }
 
-    const id = validateId(params.id);
+    const { params } = context;
+    const { id: rawId } = await params;
+    const id = validateId(rawId);
     if (!id) {
       return NextResponse.json({ error: 'Invalid transaction ID' }, { status: 400 });
     }
