@@ -54,8 +54,8 @@ export const useSwap = () => {
 
   // Fonction pour vérifier le solde du token
   const checkTokenBalance = async (tokenAddress: Address, userAddress: Address): Promise<bigint> => {
-    if (!publicClient) throw new Error('Public client not available')
-    
+    if (!publicClient) throw new Error('Public client not available');
+
     try {
       const balance = (await publicClient.readContract({
         address: tokenAddress,
@@ -75,8 +75,8 @@ export const useSwap = () => {
     ownerAddress: Address,
     spenderAddress: Address,
   ): Promise<bigint> => {
-    if (!publicClient) throw new Error('Public client not available')
-    
+    if (!publicClient) throw new Error('Public client not available');
+
     try {
       const allowance = (await publicClient.readContract({
         address: tokenAddress,
@@ -91,13 +91,9 @@ export const useSwap = () => {
   };
 
   // Fonction pour approuver un montant
-  const approveToken = async (
-    tokenAddress: Address,
-    spenderAddress: Address,
-    amount: bigint
-  ): Promise<void> => {
-    if (!walletClient) throw new Error('Wallet client not available')
-    
+  const approveToken = async (tokenAddress: Address, spenderAddress: Address, amount: bigint): Promise<void> => {
+    if (!walletClient) throw new Error('Wallet client not available');
+
     try {
       const hash = await walletClient.writeContract({
         address: tokenAddress,
@@ -117,8 +113,8 @@ export const useSwap = () => {
 
   // Fonction pour lire les fees du contrat ZAP (pour usage dans les fonctions async)
   const getZapFees = async (): Promise<{ zapMintFee: number; zapWithdrawFee: number }> => {
-    if (!publicClient) throw new Error('Public client not available')
-    
+    if (!publicClient) throw new Error('Public client not available');
+
     try {
       const [zapMintFeeRaw, zapWithdrawFeeRaw] = await Promise.all([
         publicClient.readContract({
@@ -140,17 +136,17 @@ export const useSwap = () => {
 
       return { zapMintFee, zapWithdrawFee };
     } catch (error) {
-      throw error
+      throw error;
     }
   };
 
   const getConversion = async (params: { tggAmount: string }) => {
     try {
-      const { zapWithdrawFee } = await getZapFees()
-      
-      let conversion = (parseFloat(params.tggAmount) * 10**9 / 31_103_476_800)
+      const { zapWithdrawFee } = await getZapFees();
 
-      conversion = conversion - conversion * zapWithdrawFee
+      let conversion = (parseFloat(params.tggAmount) * 10 ** 9) / 31_103_476_800;
+
+      conversion = conversion - conversion * zapWithdrawFee;
 
       return conversion;
     } catch (error) {
@@ -209,7 +205,7 @@ export const useSwap = () => {
       const data = await response.json();
 
       if (data.code !== 0 || !data.data?.routeSummary) {
-        throw new Error(`API Error: ${data.message}`)
+        throw new Error(`API Error: ${data.message}`);
       }
 
       return data.data.routeSummary;
@@ -256,17 +252,17 @@ export const useSwap = () => {
       });
 
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP Error ${response.status}: ${errorText}`)
+        const errorText = await response.text();
+        throw new Error(`HTTP Error ${response.status}: ${errorText}`);
       }
 
       const data: BuildRouteResponse = await response.json();
 
       if (data.code !== 0 || !data.data?.data) {
-        throw new Error(`API build error: ${data.message}`)
+        throw new Error(`API build error: ${data.message}`);
       }
 
-      return data.data.data
+      return data.data.data;
     } catch (error) {
       throw error;
     }
@@ -295,15 +291,13 @@ export const useSwap = () => {
       const amountBigInt = BigInt(amountInBaseUnits);
       const balance = await checkTokenBalance(params.inputToken, params.walletAddress);
       if (balance < amountBigInt) {
-        throw new Error(`Insufficient balance. Required: ${amountInBaseUnits}, Available: ${(Number(balance) / Math.pow(10, decimals)).toString()}`)
+        throw new Error(
+          `Insufficient balance. Required: ${amountInBaseUnits}, Available: ${(Number(balance) / Math.pow(10, decimals)).toString()}`,
+        );
       }
 
-      const currentAllowance = await checkAllowance(
-        params.inputToken,
-        params.walletAddress,
-        CONTRACTS.ZAP as Address
-      )
-      
+      const currentAllowance = await checkAllowance(params.inputToken, params.walletAddress, CONTRACTS.ZAP as Address);
+
       // 3. Approuver si nécessaire
       if (currentAllowance < amountBigInt) {
         const approvalAmount = amountBigInt;
@@ -347,13 +341,14 @@ export const useSwap = () => {
     walletAddress: Address;
   }) => {
     try {
-
       // 1. Vérifier les soldes TGG
-      const tggBalance = await checkTokenBalance(CONTRACTS.TGG as Address, params.walletAddress)
-      const tggAmountBigInt = BigInt((parseFloat(params.tggAmount) * Math.pow(10, 18)).toString())
+      const tggBalance = await checkTokenBalance(CONTRACTS.TGG as Address, params.walletAddress);
+      const tggAmountBigInt = BigInt((parseFloat(params.tggAmount) * Math.pow(10, 18)).toString());
 
       if (tggBalance < tggAmountBigInt) {
-        throw new Error(`Insufficient TGG balance. Required: ${params.tggAmount}, Available: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`)
+        throw new Error(
+          `Insufficient TGG balance. Required: ${params.tggAmount}, Available: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`,
+        );
       }
 
       // 2. Vérifier l'allowance TGG pour le contrat ZAP

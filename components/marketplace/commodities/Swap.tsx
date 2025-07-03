@@ -274,17 +274,17 @@ const Swap = () => {
         )}
 
         {errorTransaction && (
-  <Alert className="bg-red-500">
-    <AlertCircle className="h-4 w-4" />
-    <AlertTitle>Error</AlertTitle>
-    <AlertDescription>
-  {errorTransaction.includes("User rejected the request")
-    ? "Transaction cancelled by the user."
-    : errorTransaction}
-</AlertDescription>
-  </Alert>
-)}
-        
+          <Alert className="bg-red-500">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {errorTransaction.includes('User rejected the request')
+                ? 'Transaction cancelled by the user.'
+                : errorTransaction}
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Informations sur les prix */}
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
