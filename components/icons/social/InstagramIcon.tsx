@@ -1,8 +1,16 @@
-import React, { ComponentPropsWithRef } from "react";
+import React, { ComponentPropsWithRef } from 'react';
 
-const InstagramIcon = ({ size = 24, className, ...props }: ComponentPropsWithRef<"svg"> & { size?: number }) => {
+const InstagramIcon = ({ size = 24, className, ...props }: ComponentPropsWithRef<'svg'> & { size?: number }) => {
   return (
-    <svg width={size} height={size} className={className} {...props} viewBox="0 0 40.98 37.96" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+    <svg
+      width={size}
+      height={size}
+      className={className}
+      {...props}
+      viewBox="0 0 40.98 37.96"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+    >
       <g>
         <path
           fill="#A0B0D5"

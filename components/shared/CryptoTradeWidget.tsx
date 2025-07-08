@@ -1,9 +1,7 @@
-import React from 'react'
+import React from 'react';
 
 const CryptoTradeWidget = () => {
-  return (
-    <div>CryptoTradeWidget</div>
-  )
-}
+  return <div>CryptoTradeWidget</div>;
+};
 
-export default CryptoTradeWidget
+export default CryptoTradeWidget;

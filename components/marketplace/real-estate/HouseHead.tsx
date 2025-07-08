@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import { House } from "@/types/House";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import ArrowIcon from "@/components/icons/arrows/ArrowIcon";
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { House } from '@/types/House';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
 
 interface HouseHeadProps {
   house: House;
@@ -27,20 +27,28 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
     };
 
     handleResize(); // Vérifier au chargement
-    window.addEventListener("resize", handleResize); // Écouteur de redimensionnement
+    window.addEventListener('resize', handleResize); // Écouteur de redimensionnement
 
-    return () => window.removeEventListener("resize", handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
     <section className="flex flex-col items-center justify-center pt-16 px-4 sm:px-8 lg:px-16 py-6 w-full">
       {/* Titre et Actions */}
       <div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center ">
-        <h1 className="w-2/3 md:w-1/2 text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-color4 mb-4">{name}</h1>
+        <h1 className="w-2/3 md:w-1/2 text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-color4 mb-4">
+          {name}
+        </h1>
         <div className="flex space-x-3">
-          <button className="text-xs sm:text-sm md:text-base lg:text-lg px-3 py-1 border rounded text-color4 border-color4 ">View Smart Contracts</button>
-          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-blue-500 text-white px-3 py-1 rounded transform hover:scale-105 transition">POL</button>
-          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-color4 text-white px-3 py-1 rounded transform hover:scale-105 transition">BASE</button>
+          <button className="text-xs sm:text-sm md:text-base lg:text-lg px-3 py-1 border rounded text-color4 border-color4 ">
+            View Smart Contracts
+          </button>
+          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-blue-500 text-white px-3 py-1 rounded transform hover:scale-105 transition">
+            POL
+          </button>
+          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-color4 text-white px-3 py-1 rounded transform hover:scale-105 transition">
+            BASE
+          </button>
         </div>
       </div>
 
@@ -61,8 +69,8 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
               spaceBetween={10}
               slidesPerView={1}
               navigation={{
-                prevEl: ".prev-button",
-                nextEl: ".next-button",
+                prevEl: '.prev-button',
+                nextEl: '.next-button',
               }}
               pagination={{ clickable: true }}
               loop
@@ -71,7 +79,13 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
                 <SwiperSlide key={index}>
                   <div className="flex justify-center">
                     <div className="relative w-1/2 h-48 sm:h-64">
-                      <Image src={img} alt={`House ${index + 1}`} layout="fill" objectFit="cover" className="rounded-lg shadow-lg" />
+                      <Image
+                        src={img}
+                        alt={`House ${index + 1}`}
+                        layout="fill"
+                        objectFit="cover"
+                        className="rounded-lg shadow-lg"
+                      />
                     </div>
                   </div>
                 </SwiperSlide>
@@ -93,8 +107,8 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
               spaceBetween={10}
               slidesPerView={3}
               navigation={{
-                prevEl: ".prev-button",
-                nextEl: ".next-button",
+                prevEl: '.prev-button',
+                nextEl: '.next-button',
               }}
               pagination={{ clickable: true }}
               loop
@@ -102,7 +116,13 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
               {images.map((img, index) => (
                 <SwiperSlide key={index}>
                   <div className="relative w-full h-48 sm:h-72">
-                    <Image src={img} alt={`House ${index + 1}`} layout="fill" objectFit="cover" className="rounded-lg shadow-lg" />
+                    <Image
+                      src={img}
+                      alt={`House ${index + 1}`}
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-lg shadow-lg"
+                    />
                   </div>
                 </SwiperSlide>
               ))}
@@ -113,8 +133,12 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
 
       {/* Investissement */}
       <div className="text-center w-full mt-6">
-        <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">TOTAL INVESTMENT: {price.toLocaleString()}</h2>
-        <button className="text-sm sm:text-md md:text-lg lg:text-xl mt-4 px-10 sm:px-12 py-2 bg-color2 text-white rounded-full hover:bg-color4 transition">SOON</button>
+        <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">
+          TOTAL INVESTMENT: {price.toLocaleString()}
+        </h2>
+        <button className="text-sm sm:text-md md:text-lg lg:text-xl mt-4 px-10 sm:px-12 py-2 bg-color2 text-white rounded-full hover:bg-color4 transition">
+          SOON
+        </button>
       </div>
     </section>
   );

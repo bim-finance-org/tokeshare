@@ -16,11 +16,11 @@ export const useExchangeRates = (refetchInterval = 30 * 60 * 1000) => {
     queryKey: ['exchangeRates'],
     queryFn: async (): Promise<ExchangeRates> => {
       const response = await fetch('/api/exchange-rates');
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch exchange rates');
       }
-      
+
       const data = await response.json();
       return data.rates;
     },
@@ -44,24 +44,24 @@ export const convertCurrency = (
   amount: number,
   from: keyof ExchangeRates | 'USD',
   to: keyof ExchangeRates | 'USD',
-  rates: ExchangeRates | undefined
+  rates: ExchangeRates | undefined,
 ): number | undefined => {
   if (!rates) return undefined;
-  
+
   // Si les devises sont identiques, retourner le montant directement
   if (from === to) return amount;
-  
+
   // Convertir en USD d'abord (si pas déjà en USD)
   let amountInUSD = amount;
   if (from !== 'USD') {
     amountInUSD = amount / rates[from];
   }
-  
+
   // Puis convertir d'USD vers la devise cible
   if (to === 'USD') {
     return amountInUSD;
   }
-  
+
   return amountInUSD * rates[to];
 };
 
@@ -78,6 +78,6 @@ export const formatCurrency = (amount: number, currency: string): string => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-  
+
   return formatter.format(amount);
-}; 
+};

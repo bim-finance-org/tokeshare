@@ -1,1 +1,1 @@
-export type ListFiat = "EUR" | "USD" | "CHF" | "GBP" | "CAD";
+export type ListFiat = 'EUR' | 'USD' | 'CHF' | 'GBP' | 'CAD';

@@ -1,9 +1,9 @@
-import React from 'react'
-import Image from 'next/image'
+import React from 'react';
+import Image from 'next/image';
 
 interface DAIIconProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
 const DAIIcon = ({ size = 24, className = '' }: DAIIconProps) => {
@@ -15,7 +15,7 @@ const DAIIcon = ({ size = 24, className = '' }: DAIIconProps) => {
       height={size}
       className={`rounded-full ${className}`}
     />
-  )
-}
+  );
+};
 
-export default DAIIcon
+export default DAIIcon;

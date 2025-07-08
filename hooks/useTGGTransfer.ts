@@ -2,8 +2,8 @@ import { useWriteContract } from 'wagmi';
 import { parseUnits, Address } from 'viem';
 import { CONTRACTS } from '@/contracts/contracts';
 import { TGG_ABI } from '@/contracts/abis/tgg_abi';
-import { useAppKitNetwork } from "@reown/appkit/react";
-import { polygon } from '@reown/appkit/networks'
+import { useAppKitNetwork } from '@reown/appkit/react';
+import { polygon } from '@reown/appkit/networks';
 
 export const TOKESHARE_TGG_RECIPIENT = process.env.NEXT_PUBLIC_TOKESHARE_TGG_RECIPIENT as Address;
 
@@ -15,7 +15,7 @@ export function useTGGTransfer() {
     const amountInWei = parseUnits(amount, 18);
 
     switchNetwork(polygon);
-    
+
     return writeContract({
       address: CONTRACTS.TGG as Address,
       abi: TGG_ABI,
@@ -28,6 +28,6 @@ export function useTGGTransfer() {
     transferTGGToTokeShare,
     isPending,
     error,
-    hash
+    hash,
   };
-} 
+}

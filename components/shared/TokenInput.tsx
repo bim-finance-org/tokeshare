@@ -1,21 +1,14 @@
-import React from 'react'
+import React from 'react';
 
 interface TokenInputProps {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  placeholder?: string
-  disabled?: boolean
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
 }
 
-const TokenInput = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-  disabled = false,
-}: TokenInputProps) => {
-
+const TokenInput = ({ label, value, onChange, placeholder, disabled = false }: TokenInputProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     // N'accepte que les chiffres et le point décimal
@@ -26,18 +19,18 @@ const TokenInput = ({
 
   return (
     <div className="w-32 sm:w-40">
-      <p className='text-color4 text-lg font-medium'>{label}</p>
-      <input 
+      <p className="text-color4 text-lg font-medium">{label}</p>
+      <input
         type="text"
         value={value}
         onChange={handleChange}
         disabled={disabled}
         placeholder={placeholder}
         maxLength={8}
-        className='bg-transparent text-2xl text-color4 font-medium outline-none w-full px-2 py-1 transition-all duration-200'
+        className="bg-transparent text-2xl text-color4 font-medium outline-none w-full px-2 py-1 transition-all duration-200"
       />
     </div>
-  )
-}
+  );
+};
 
-export default TokenInput
+export default TokenInput;

@@ -16,12 +16,12 @@ const TOKEN_ADDRESSES: Record<string, Record<string, string>> = {
 export const useAllTokenBalances = (blockchain: string) => {
   const { address } = useAccount();
   const tokens = TOKEN_ADDRESSES[blockchain] || {};
-  
+
   // Préparer les contrats pour multicall - seulement les tokens avec des adresses valides
-  const validTokens = Object.entries(tokens).filter(([_, tokenAddress]) => 
-    tokenAddress && tokenAddress !== '0x...' && tokenAddress !== ''
+  const validTokens = Object.entries(tokens).filter(
+    ([_, tokenAddress]) => tokenAddress && tokenAddress !== '0x...' && tokenAddress !== '',
   );
-  
+
   const contracts = validTokens.map(([_, tokenAddress]) => ({
     address: tokenAddress as Address,
     abi: ERC20_ABI,
@@ -29,7 +29,11 @@ export const useAllTokenBalances = (blockchain: string) => {
     args: [address],
   }));
 
-  const { data: balances, isLoading, error } = useReadContracts({
+  const {
+    data: balances,
+    isLoading,
+    error,
+  } = useReadContracts({
     contracts,
     query: {
       enabled: !!address && contracts.length > 0,
@@ -37,21 +41,24 @@ export const useAllTokenBalances = (blockchain: string) => {
   });
 
   // Formater les résultats avec les decimals préremplies
-  const formattedBalances = validTokens.reduce((acc, [symbol, tokenAddress], index) => {
-    const balance = balances?.[index];
-    const rawBalance = balance?.result || BigInt(0);
-    const decimals = getTokenDecimals(tokenAddress as Address);
-    const formattedBalance = rawBalance ? (Number(rawBalance) / Math.pow(10, decimals)).toFixed(6) : '0';
-    
-    acc[symbol] = {
-      raw: rawBalance as bigint,
-      formatted: formattedBalance,
-      address: tokenAddress,
-      decimals: decimals,
-    };
-    
-    return acc;
-  }, {} as Record<string, { raw: bigint; formatted: string; address: string; decimals: number }>);
+  const formattedBalances = validTokens.reduce(
+    (acc, [symbol, tokenAddress], index) => {
+      const balance = balances?.[index];
+      const rawBalance = balance?.result || BigInt(0);
+      const decimals = getTokenDecimals(tokenAddress as Address);
+      const formattedBalance = rawBalance ? (Number(rawBalance) / Math.pow(10, decimals)).toFixed(6) : '0';
+
+      acc[symbol] = {
+        raw: rawBalance as bigint,
+        formatted: formattedBalance,
+        address: tokenAddress,
+        decimals: decimals,
+      };
+
+      return acc;
+    },
+    {} as Record<string, { raw: bigint; formatted: string; address: string; decimals: number }>,
+  );
 
   return {
     balances: formattedBalances,
@@ -67,7 +74,7 @@ export const useTokenBalance = (currency: string, blockchain: string) => {
 
   const { data: balance } = useBalance({
     address,
-    token: tokenAddress ? tokenAddress as `0x${string}` : undefined,
+    token: tokenAddress ? (tokenAddress as `0x${string}`) : undefined,
   });
 
   return balance?.formatted || '0';
@@ -77,42 +84,49 @@ export const useTokenBalance = (currency: string, blockchain: string) => {
 export const useMultipleTokenBalances = (tokens: string[], blockchain: string) => {
   const { address } = useAccount();
   const tokenAddresses = TOKEN_ADDRESSES[blockchain] || {};
-  
-  const validTokens = tokens.filter(token => 
-    tokenAddresses[token] && tokenAddresses[token] !== '0x...' && tokenAddresses[token] !== ''
+
+  const validTokens = tokens.filter(
+    (token) => tokenAddresses[token] && tokenAddresses[token] !== '0x...' && tokenAddresses[token] !== '',
   );
 
-  const contracts = validTokens.map(token => ({
+  const contracts = validTokens.map((token) => ({
     address: tokenAddresses[token] as Address,
     abi: ERC20_ABI,
     functionName: 'balanceOf',
     args: [address],
   }));
 
-  const { data: balances, isLoading, error } = useReadContracts({
+  const {
+    data: balances,
+    isLoading,
+    error,
+  } = useReadContracts({
     contracts,
     query: {
       enabled: !!address && contracts.length > 0,
     },
   });
 
-  const formattedBalances = tokens.reduce((acc, token, index) => {
-    const tokenAddress = tokenAddresses[token];
-    if (tokenAddress && tokenAddress !== '0x...' && tokenAddress !== '') {
-      const validIndex = validTokens.indexOf(token);
-      const balance = balances?.[validIndex];
-      const rawBalance = balance?.result || BigInt(0);
-      const decimals = getTokenDecimals(tokenAddress as Address);
-      acc[token] = rawBalance ? (Number(rawBalance) / Math.pow(10, decimals)).toFixed(6) : '0';
-    } else {
-      acc[token] = '0';
-    }
-    return acc;
-  }, {} as Record<string, string>);
+  const formattedBalances = tokens.reduce(
+    (acc, token, index) => {
+      const tokenAddress = tokenAddresses[token];
+      if (tokenAddress && tokenAddress !== '0x...' && tokenAddress !== '') {
+        const validIndex = validTokens.indexOf(token);
+        const balance = balances?.[validIndex];
+        const rawBalance = balance?.result || BigInt(0);
+        const decimals = getTokenDecimals(tokenAddress as Address);
+        acc[token] = rawBalance ? (Number(rawBalance) / Math.pow(10, decimals)).toFixed(6) : '0';
+      } else {
+        acc[token] = '0';
+      }
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
   return {
     balances: formattedBalances,
     isLoading,
     error,
   };
-}; 
+};

@@ -1,37 +1,36 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect, useContext } from 'react'
-import TradeWidget from '@/components/shared/TradeWidget'
-import BankIcon from '@/components/icons/BankIcon'
-import Blockchains from '@/components/Blockchains'
-import { calculateTGGPrice, convertFiatToTGG, convertTGGToFiat } from '@/utils/priceUtils'
-import { usePaxgPrice } from '@/hooks/usePaxgPrice'
-import ConnectButton from '@/components/shared/ConnectButton'
-import { useAccount } from 'wagmi'
-import UserForm from './UserForm'
-import { TokenContexts } from '@/context/TokenContexts'
-import { useExchangeRates } from '@/hooks/useExchangeRates'
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect, useContext } from 'react';
+import TradeWidget from '@/components/shared/TradeWidget';
+import BankIcon from '@/components/icons/BankIcon';
+import Blockchains from '@/components/Blockchains';
+import { calculateTGGPrice, convertFiatToTGG, convertTGGToFiat } from '@/utils/priceUtils';
+import { usePaxgPrice } from '@/hooks/usePaxgPrice';
+import ConnectButton from '@/components/shared/ConnectButton';
+import { useAccount } from 'wagmi';
+import UserForm from './UserForm';
+import { TokenContexts } from '@/context/TokenContexts';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { Badge } from '@/components/ui/badge';
 
 const Buy = () => {
   // Get values from context
-  const { 
+  const {
     buy: { token: selectedCurrency, blockchain: selectedBlockchain },
     updateBuyToken: setSelectedCurrency,
-    updateBuyBlockchain: setSelectedBlockchain
+    updateBuyBlockchain: setSelectedBlockchain,
   } = useContext(TokenContexts);
 
   // Local state
-  const [amountToSend, setAmountToSend] = useState("50")
-  const [tggAmount, setTggAmount] = useState("0")
-  const [tggPrice, setTggPrice] = useState<number>(0)
-  const [showBuyNext, setShowBuyNext] = useState(false)
-  const [isBelowMin, setBelownMin] = useState(false)
-  const { isConnected } = useAccount()
+  const [amountToSend, setAmountToSend] = useState('50');
+  const [tggAmount, setTggAmount] = useState('0');
+  const [tggPrice, setTggPrice] = useState<number>(0);
+  const [showBuyNext, setShowBuyNext] = useState(false);
+  const [isBelowMin, setBelownMin] = useState(false);
+  const { isConnected } = useAccount();
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
-    
-  
+
   // Mise à jour du prix TGG
   useEffect(() => {
     const updatePrice = async () => {
@@ -58,7 +57,7 @@ const Buy = () => {
       if (tggValue !== undefined) {
         setTggAmount(tggValue.toFixed(4));
       } else {
-        setTggAmount("0");
+        setTggAmount('0');
       }
     }
   };
@@ -71,21 +70,19 @@ const Buy = () => {
       if (fiatValue !== undefined) {
         setAmountToSend(fiatValue.toFixed(2));
       } else {
-        setAmountToSend("0");
+        setAmountToSend('0');
       }
     }
   };
-
-
 
   // Gestion du changement de montant en devise fiat
   const handleFiatAmountChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setAmountToSend(amount);
       calculateTggFromFiat(amount);
-      if(parseFloat(amount) < 50){
+      if (parseFloat(amount) < 50) {
         setBelownMin(true);
-      }else{
+      } else {
         setBelownMin(false);
       }
     }
@@ -109,20 +106,27 @@ const Buy = () => {
   };
 
   const handleSellClick = (val: boolean) => {
-
     setShowBuyNext(val);
   };
 
-
   if (showBuyNext) {
-    return <UserForm type="buy" amount={amountToSend} currency={selectedCurrency} tggAmount={tggAmount} tggPrice={tggPrice} setShowUserForm={handleSellClick} />
+    return (
+      <UserForm
+        type="buy"
+        amount={amountToSend}
+        currency={selectedCurrency}
+        tggAmount={tggAmount}
+        tggPrice={tggPrice}
+        setShowUserForm={handleSellClick}
+      />
+    );
   }
 
   return (
     <div className="p-6 w-full relative">
       {/* Bouton Bank transfer */}
       <div className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-3 shadow-md ">
-        <BankIcon />  
+        <BankIcon />
         <span className="font-medium">Bank transfer</span>
       </div>
 
@@ -131,16 +135,12 @@ const Buy = () => {
         type="fiat"
         label="YOU SEND"
         defaultToken={selectedCurrency}
-        value={amountToSend}  
+        value={amountToSend}
         onValueChange={handleFiatAmountChange}
         onTokenChange={handleCurrencyChange}
       />
 
-      {isBelowMin && (
-  <div className="text-red-500 text-xs mt-2">
-    Minimum amount is 50 {selectedCurrency}
-  </div>
-)}
+      {isBelowMin && <div className="text-red-500 text-xs mt-2">Minimum amount is 50 {selectedCurrency}</div>}
 
       <div className="my-4" />
 
@@ -161,30 +161,25 @@ const Buy = () => {
             <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
             <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">2-4 Days</Badge>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <span className="text-color4 text-xs sm:text-sm font-medium">TGG Price:</span>
 
-              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tggPrice.toFixed(2)}</Badge>
-
+            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tggPrice.toFixed(2)}</Badge>
           </div>
-          </div>
+        </div>
       </div>
 
       <div className="mt-6">
         {isConnected ? (
           <button
-  onClick={() => handleSellClick(true)}
-  className={
-    `w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200 
-    ${isBelowMin 
-      ? "bg-color4 text-white opacity-50 cursor-not-allowed"
-      : "bg-color4 text-white hover:bg-opacity-90"}`
-  }
-  disabled={isBelowMin}
->
-  Buy
-</button>
+            onClick={() => handleSellClick(true)}
+            className={`w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200 
+    ${isBelowMin ? 'bg-color4 text-white opacity-50 cursor-not-allowed' : 'bg-color4 text-white hover:bg-opacity-90'}`}
+            disabled={isBelowMin}
+          >
+            Buy
+          </button>
         ) : (
           <button
             onClick={() => setShowBuyNext(true)}
@@ -195,7 +190,7 @@ const Buy = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Buy
+export default Buy;

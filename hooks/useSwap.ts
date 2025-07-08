@@ -1,31 +1,39 @@
-import { CONTRACTS } from '@/contracts/contracts'
-import { useZAPContract } from './useContracts'
-import { Address } from 'viem'
-import { usePublicClient, useWalletClient, useReadContract } from 'wagmi'
-import { RouteParams } from '@/interfaces/RouteParams'
-import { RouteSummary } from '@/interfaces/RouteSummary'
-import { BuildRouteParams } from '@/interfaces/BuildRouteParams'
-import { BuildRouteResponse } from '@/interfaces/BuildRouteResponse'
-import { ERC20_ABI } from '@/contracts/abis/erc20_abi'
-import { ZAP_ABI } from '@/contracts/abis/zap_abi'
-import { getTokenDecimals } from '@/utils/tokenUtils'
+import { CONTRACTS } from '@/contracts/contracts';
+import { useZAPContract } from './useContracts';
+import { Address } from 'viem';
+import { usePublicClient, useWalletClient, useReadContract } from 'wagmi';
+import { RouteParams } from '@/interfaces/RouteParams';
+import { RouteSummary } from '@/interfaces/RouteSummary';
+import { BuildRouteParams } from '@/interfaces/BuildRouteParams';
+import { BuildRouteResponse } from '@/interfaces/BuildRouteResponse';
+import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
+import { ZAP_ABI } from '@/contracts/abis/zap_abi';
+import { getTokenDecimals } from '@/utils/tokenUtils';
 
 // Hook React pour lire les fees du contrat ZAP de manière réactive
 export const useZapFees = () => {
-  const { data: zapMintFeeRaw, isLoading: isLoadingMintFee, error: mintFeeError } = useReadContract({
+  const {
+    data: zapMintFeeRaw,
+    isLoading: isLoadingMintFee,
+    error: mintFeeError,
+  } = useReadContract({
     address: CONTRACTS.ZAP as Address,
     abi: ZAP_ABI,
-    functionName: 'zapMintFee'
-  })
+    functionName: 'zapMintFee',
+  });
 
-  const { data: zapWithdrawFeeRaw, isLoading: isLoadingWithdrawFee, error: withdrawFeeError } = useReadContract({
+  const {
+    data: zapWithdrawFeeRaw,
+    isLoading: isLoadingWithdrawFee,
+    error: withdrawFeeError,
+  } = useReadContract({
     address: CONTRACTS.ZAP as Address,
     abi: ZAP_ABI,
-    functionName: 'zapWithdrawFee'
-  })
+    functionName: 'zapWithdrawFee',
+  });
 
-  const zapMintFee = zapMintFeeRaw ? Number(zapMintFeeRaw) / 100 : 0 // Convertir en pourcentage
-  const zapWithdrawFee = zapWithdrawFeeRaw ? Number(zapWithdrawFeeRaw) / 100 : 0 // Convertir en pourcentage
+  const zapMintFee = zapMintFeeRaw ? Number(zapMintFeeRaw) / 100 : 0; // Convertir en pourcentage
+  const zapWithdrawFee = zapWithdrawFeeRaw ? Number(zapWithdrawFeeRaw) / 100 : 0; // Convertir en pourcentage
 
   return {
     zapMintFee,
@@ -34,123 +42,117 @@ export const useZapFees = () => {
     error: mintFeeError || withdrawFeeError,
     raw: {
       zapMintFeeRaw,
-      zapWithdrawFeeRaw
-    }
-  }
-}
+      zapWithdrawFeeRaw,
+    },
+  };
+};
 
 export const useSwap = () => {
-  const { zapMint, zapWithdraw, isPending, error, hash } = useZAPContract()
-  const publicClient = usePublicClient()
-  const { data: walletClient } = useWalletClient()
+  const { zapMint, zapWithdraw, isPending, error, hash } = useZAPContract();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
 
   // Fonction pour vérifier le solde du token
   const checkTokenBalance = async (tokenAddress: Address, userAddress: Address): Promise<bigint> => {
-    if (!publicClient) throw new Error('Public client not available')
-    
+    if (!publicClient) throw new Error('Public client not available');
+
     try {
-      const balance = await publicClient.readContract({
+      const balance = (await publicClient.readContract({
         address: tokenAddress,
         abi: ERC20_ABI,
         functionName: 'balanceOf',
-        args: [userAddress]
-      }) as bigint
-      return balance
+        args: [userAddress],
+      })) as bigint;
+      return balance;
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   // Fonction pour vérifier l'allowance
   const checkAllowance = async (
-    tokenAddress: Address, 
-    ownerAddress: Address, 
-    spenderAddress: Address
+    tokenAddress: Address,
+    ownerAddress: Address,
+    spenderAddress: Address,
   ): Promise<bigint> => {
-    if (!publicClient) throw new Error('Public client not available')
-    
+    if (!publicClient) throw new Error('Public client not available');
+
     try {
-      const allowance = await publicClient.readContract({
+      const allowance = (await publicClient.readContract({
         address: tokenAddress,
         abi: ERC20_ABI,
         functionName: 'allowance',
-        args: [ownerAddress, spenderAddress]
-      }) as bigint
-      return allowance
+        args: [ownerAddress, spenderAddress],
+      })) as bigint;
+      return allowance;
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   // Fonction pour approuver un montant
-  const approveToken = async (
-    tokenAddress: Address,
-    spenderAddress: Address,
-    amount: bigint
-  ): Promise<void> => {
-    if (!walletClient) throw new Error('Wallet client not available')
-    
+  const approveToken = async (tokenAddress: Address, spenderAddress: Address, amount: bigint): Promise<void> => {
+    if (!walletClient) throw new Error('Wallet client not available');
+
     try {
       const hash = await walletClient.writeContract({
         address: tokenAddress,
         abi: ERC20_ABI,
         functionName: 'approve',
-        args: [spenderAddress, amount]
-      })
-      
+        args: [spenderAddress, amount],
+      });
+
       // Attendre la confirmation
       if (publicClient) {
-        await publicClient.waitForTransactionReceipt({ hash })
+        await publicClient.waitForTransactionReceipt({ hash });
       }
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   // Fonction pour lire les fees du contrat ZAP (pour usage dans les fonctions async)
   const getZapFees = async (): Promise<{ zapMintFee: number; zapWithdrawFee: number }> => {
-    if (!publicClient) throw new Error('Public client not available')
-    
+    if (!publicClient) throw new Error('Public client not available');
+
     try {
       const [zapMintFeeRaw, zapWithdrawFeeRaw] = await Promise.all([
         publicClient.readContract({
           address: CONTRACTS.ZAP as Address,
           abi: ZAP_ABI,
-          functionName: 'zapMintFee'
+          functionName: 'zapMintFee',
         }) as Promise<bigint>,
         publicClient.readContract({
           address: CONTRACTS.ZAP as Address,
           abi: ZAP_ABI,
-          functionName: 'zapWithdrawFee'
-        }) as Promise<bigint>
-      ])
+          functionName: 'zapWithdrawFee',
+        }) as Promise<bigint>,
+      ]);
 
-      // Convertir les valeurs BigInt en pourcentage 
+      // Convertir les valeurs BigInt en pourcentage
       // Supposons que les fees sont exprimées en basis points (1% = 100, 0.5% = 50)
-      const zapMintFee = Number(zapMintFeeRaw) / 10000 // Convertir en pourcentage
-      const zapWithdrawFee = Number(zapWithdrawFeeRaw) / 10000 // Convertir en pourcentage
+      const zapMintFee = Number(zapMintFeeRaw) / 10000; // Convertir en pourcentage
+      const zapWithdrawFee = Number(zapWithdrawFeeRaw) / 10000; // Convertir en pourcentage
 
-      return { zapMintFee, zapWithdrawFee }
+      return { zapMintFee, zapWithdrawFee };
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
-  const getConversion = async (params: {
-    tggAmount: string
-  }) => {
+  const getConversion = async (params: { tggAmount: string }) => {
     try {
-      const { zapWithdrawFee } = await getZapFees()
-      
-      let conversion = (parseFloat(params.tggAmount) * 10**9 / 31_103_476_800)
+      const { zapWithdrawFee } = await getZapFees();
 
-      conversion = conversion - conversion * zapWithdrawFee
+      let conversion = (parseFloat(params.tggAmount) * 10 ** 9) / 31_103_476_800;
 
-      return conversion
+      conversion = conversion - conversion * zapWithdrawFee;
+
+      return conversion;
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   // FIXÉ : Endpoint correct pour l'API V1 de KyberSwap
   const getSwapRoute = async (params: RouteParams): Promise<RouteSummary> => {
@@ -166,8 +168,8 @@ export const useSwap = () => {
       ...(params.feeAmount && { feeAmount: params.feeAmount }),
       ...(params.feeReceiver && { feeReceiver: params.feeReceiver }),
       ...(params.isInBps && { isInBps: params.isInBps.toString() }),
-      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order'
-    })
+      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order',
+    });
 
     console.log({
       tokenIn: params.tokenIn,
@@ -180,49 +182,49 @@ export const useSwap = () => {
       ...(params.chargeFeeBy && { chargeFeeBy: params.chargeFeeBy }),
       ...(params.feeAmount && { feeAmount: params.feeAmount }),
       ...(params.feeReceiver && { feeReceiver: params.feeReceiver }),
-      ...(params.isInBps && { isInBps: params.isInBps.toString() })
+      ...(params.isInBps && { isInBps: params.isInBps.toString() }),
     });
 
     // FIXÉ : Utilisation du bon endpoint pour Polygon
-    const url = `https://aggregator-api.kyberswap.com/polygon/api/v1/routes?${queryParams}`
-    
+    const url = `https://aggregator-api.kyberswap.com/polygon/api/v1/routes?${queryParams}`;
+
     try {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
-          'X-Client-Id': 'tokeshare-dapp'
-        }
-      })
+          Accept: 'application/json',
+          'X-Client-Id': 'tokeshare-dapp',
+        },
+      });
 
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Erreur HTTP ${response.status}: ${errorText}`)
+        const errorText = await response.text();
+        throw new Error(`Erreur HTTP ${response.status}: ${errorText}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.code !== 0 || !data.data?.routeSummary) {
-        throw new Error(`API Error: ${data.message}`)
+        throw new Error(`API Error: ${data.message}`);
       }
 
-      return data.data.routeSummary
+      return data.data.routeSummary;
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   // FIXÉ : Fonction pour construire les données de swap avec l'API V1 POST
   const buildSwapData = async (params: BuildRouteParams): Promise<string> => {
-    const url = 'https://aggregator-api.kyberswap.com/polygon/api/v1/route/build'
+    const url = 'https://aggregator-api.kyberswap.com/polygon/api/v1/route/build';
 
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-Client-Id': 'tokeshare-dapp'
+          Accept: 'application/json',
+          'X-Client-Id': 'tokeshare-dapp',
         },
         body: JSON.stringify({
           routeSummary: params.routeSummary,
@@ -233,11 +235,11 @@ export const useSwap = () => {
           source: params.source || 'tokeshare-dapp',
           enableGasEstimation: false,
           ...(params.permit && { permit: params.permit }),
-          ...(params.ignoreCappedSlippage && { ignoreCappedSlippage: params.ignoreCappedSlippage })
-        })
-      })
+          ...(params.ignoreCappedSlippage && { ignoreCappedSlippage: params.ignoreCappedSlippage }),
+        }),
+      });
 
-      console.log("params", {
+      console.log('params', {
         routeSummary: params.routeSummary,
         sender: params.sender,
         recipient: params.recipient,
@@ -246,35 +248,33 @@ export const useSwap = () => {
         source: params.source || 'tokeshare-dapp',
         enableGasEstimation: false,
         ...(params.permit && { permit: params.permit }),
-        ...(params.ignoreCappedSlippage && { ignoreCappedSlippage: params.ignoreCappedSlippage })
+        ...(params.ignoreCappedSlippage && { ignoreCappedSlippage: params.ignoreCappedSlippage }),
       });
 
-      
-
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP Error ${response.status}: ${errorText}`)
+        const errorText = await response.text();
+        throw new Error(`HTTP Error ${response.status}: ${errorText}`);
       }
 
-      const data: BuildRouteResponse = await response.json()
+      const data: BuildRouteResponse = await response.json();
 
       if (data.code !== 0 || !data.data?.data) {
-        throw new Error(`API build error: ${data.message}`)
+        throw new Error(`API build error: ${data.message}`);
       }
 
-      return data.data.data
+      return data.data.data;
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   // FIXÉ : Fonction swapMint mise à jour avec vérifications
   const performSwapMint = async (params: {
-    inputToken: Address
-    inputAmount: string
-    outputToken: Address
-    routerAddress: Address
-    walletAddress: Address
+    inputToken: Address;
+    inputAmount: string;
+    outputToken: Address;
+    routerAddress: Address;
+    walletAddress: Address;
   }) => {
     try {
       // Utiliser getTokenDecimals pour obtenir les bonnes décimales
@@ -282,28 +282,26 @@ export const useSwap = () => {
       if (decimals === undefined) {
         throw new Error(`Not available decimals for this token ${params.inputToken}`);
       }
-      
+
       const amountInBaseUnits = (parseFloat(params.inputAmount) * Math.pow(10, decimals)).toString();
       if (isNaN(parseFloat(amountInBaseUnits))) {
         throw new Error(`Invalid amount`);
       }
-      
+
       const amountBigInt = BigInt(amountInBaseUnits);
       const balance = await checkTokenBalance(params.inputToken, params.walletAddress);
       if (balance < amountBigInt) {
-        throw new Error(`Insufficient balance. Required: ${amountInBaseUnits}, Available: ${(Number(balance) / Math.pow(10, decimals)).toString()}`)
+        throw new Error(
+          `Insufficient balance. Required: ${amountInBaseUnits}, Available: ${(Number(balance) / Math.pow(10, decimals)).toString()}`,
+        );
       }
 
-      const currentAllowance = await checkAllowance(
-        params.inputToken,
-        params.walletAddress,
-        CONTRACTS.ZAP as Address
-      )
-      
+      const currentAllowance = await checkAllowance(params.inputToken, params.walletAddress, CONTRACTS.ZAP as Address);
+
       // 3. Approuver si nécessaire
       if (currentAllowance < amountBigInt) {
-        const approvalAmount = amountBigInt
-        await approveToken(params.inputToken, CONTRACTS.ZAP as Address, approvalAmount)
+        const approvalAmount = amountBigInt;
+        await approveToken(params.inputToken, CONTRACTS.ZAP as Address, approvalAmount);
       }
 
       const routeSummary = await getSwapRoute({
@@ -311,78 +309,75 @@ export const useSwap = () => {
         tokenOut: params.outputToken,
         amountIn: amountInBaseUnits, // ✅ Utiliser les unités de base pour l'API
         gasInclude: true,
-        slippageTolerance: 200
-      })
+        slippageTolerance: 200,
+      });
 
       const swapData = await buildSwapData({
         routeSummary,
         sender: CONTRACTS.ZAP as Address,
         recipient: CONTRACTS.ZAP as Address,
         slippageTolerance: 200,
-        source: 'tokeshare-dapp'
-      })
-
-    
+        source: 'tokeshare-dapp',
+      });
 
       const result = await zapMint(
         params.inputToken,
         params.inputAmount,
         swapData,
         params.routerAddress,
-        params.walletAddress
-      )
+        params.walletAddress,
+      );
 
-      return result
-
+      return result;
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   const performSwapWithdraw = async (params: {
-    tggAmount: string
-    outputToken: Address
-    routerAddress: Address
-    walletAddress: Address
+    tggAmount: string;
+    outputToken: Address;
+    routerAddress: Address;
+    walletAddress: Address;
   }) => {
     try {
-
       // 1. Vérifier les soldes TGG
-      const tggBalance = await checkTokenBalance(CONTRACTS.TGG as Address, params.walletAddress)
-      const tggAmountBigInt = BigInt((parseFloat(params.tggAmount) * Math.pow(10, 18)).toString())
+      const tggBalance = await checkTokenBalance(CONTRACTS.TGG as Address, params.walletAddress);
+      const tggAmountBigInt = BigInt((parseFloat(params.tggAmount) * Math.pow(10, 18)).toString());
 
       if (tggBalance < tggAmountBigInt) {
-        throw new Error(`Insufficient TGG balance. Required: ${params.tggAmount}, Available: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`)
+        throw new Error(
+          `Insufficient TGG balance. Required: ${params.tggAmount}, Available: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`,
+        );
       }
 
       // 2. Vérifier l'allowance TGG pour le contrat ZAP
       const currentAllowance = await checkAllowance(
         CONTRACTS.TGG as Address,
         params.walletAddress,
-        CONTRACTS.ZAP as Address
-      )
+        CONTRACTS.ZAP as Address,
+      );
 
       if (currentAllowance < tggAmountBigInt) {
-        await approveToken(CONTRACTS.TGG as Address, CONTRACTS.ZAP as Address, tggAmountBigInt)
+        await approveToken(CONTRACTS.TGG as Address, CONTRACTS.ZAP as Address, tggAmountBigInt);
       }
 
       // 3. Obtenir la route de swap PAXG → outputToken
 
-      const conversion = await getConversion({ tggAmount: params.tggAmount })
-      
-      // Convertir en entier avant BigInt (Math.floor pour éviter les décimales)
-      const conversionInteger = Math.floor(conversion * Math.pow(10, 18))
-      const conversionBigInt = BigInt(conversionInteger)
-      const paxgAmountInBaseUnits = conversionBigInt.toString()
+      const conversion = await getConversion({ tggAmount: params.tggAmount });
 
+      // Convertir en entier avant BigInt (Math.floor pour éviter les décimales)
+      const conversionInteger = Math.floor(conversion * Math.pow(10, 18));
+      const conversionBigInt = BigInt(conversionInteger);
+      const paxgAmountInBaseUnits = conversionBigInt.toString();
 
       const routeSummary = await getSwapRoute({
         tokenIn: CONTRACTS.PAXG as Address,
         tokenOut: params.outputToken,
         amountIn: paxgAmountInBaseUnits,
         gasInclude: true,
-        slippageTolerance: 200
-      })
+        slippageTolerance: 200,
+      });
 
       // 4. Construire les données de swap automatiquement
       const swapData = await buildSwapData({
@@ -390,8 +385,8 @@ export const useSwap = () => {
         sender: CONTRACTS.ZAP as Address,
         recipient: CONTRACTS.ZAP as Address,
         slippageTolerance: 200,
-        source: 'tokeshare-dapp'
-      })
+        source: 'tokeshare-dapp',
+      });
 
       // 5. Exécuter le zapWithdraw avec le swapData construit
       const result = await zapWithdraw(
@@ -399,15 +394,14 @@ export const useSwap = () => {
         params.outputToken,
         swapData,
         params.routerAddress,
-        params.walletAddress
-      )
+        params.walletAddress,
+      );
 
-
-      return result
+      return result;
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   return {
     swapMint: performSwapMint,
@@ -422,6 +416,6 @@ export const useSwap = () => {
     approveToken,
     useZapFees,
     getZapFees,
-    getConversion
-  }
-}
+    getConversion,
+  };
+};

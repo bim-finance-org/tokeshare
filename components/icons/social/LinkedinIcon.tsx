@@ -1,8 +1,16 @@
-import React, { ComponentPropsWithRef } from "react";
+import React, { ComponentPropsWithRef } from 'react';
 
-const LinkedinIcon = ({ size = 24, className, ...props }: ComponentPropsWithRef<"svg"> & { size?: number }) => {
+const LinkedinIcon = ({ size = 24, className, ...props }: ComponentPropsWithRef<'svg'> & { size?: number }) => {
   return (
-    <svg width={size} height={size} className={className} {...props} viewBox="0 0 42.8 37.96" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+    <svg
+      width={size}
+      height={size}
+      className={className}
+      {...props}
+      viewBox="0 0 42.8 37.96"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+    >
       <g>
         <path
           fill="#A0B0D5"

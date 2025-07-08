@@ -1,9 +1,9 @@
-import Image from 'next/image'
-import React from 'react'
+import Image from 'next/image';
+import React from 'react';
 
 interface CADIconProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
 const CADIcon = ({ size = 24, className = '' }: CADIconProps) => {
@@ -15,7 +15,7 @@ const CADIcon = ({ size = 24, className = '' }: CADIconProps) => {
       height={size}
       className={`rounded-full ${className}`}
     />
-  )
-}
+  );
+};
 
-export default CADIcon
+export default CADIcon;

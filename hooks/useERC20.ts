@@ -1,9 +1,9 @@
-import { useReadContract, useWriteContract } from 'wagmi'
-import { parseUnits, formatUnits, Address } from 'viem'
-import { ERC20_ABI } from '@/contracts/abis/erc20_abi'
+import { useReadContract, useWriteContract } from 'wagmi';
+import { parseUnits, formatUnits, Address } from 'viem';
+import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 
 export function useERC20(tokenAddress: Address) {
-  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
 
   // Obtenir le solde d'un token pour une adresse
   const useBalance = (userAddress: Address) => {
@@ -15,8 +15,8 @@ export function useERC20(tokenAddress: Address) {
       query: {
         enabled: !!userAddress && !!tokenAddress,
       },
-    })
-  }
+    });
+  };
 
   // Obtenir l'allowance d'un token
   const useAllowance = (owner: Address, spender: Address) => {
@@ -28,8 +28,8 @@ export function useERC20(tokenAddress: Address) {
       query: {
         enabled: !!owner && !!spender && !!tokenAddress,
       },
-    })
-  }
+    });
+  };
 
   // Obtenir les décimales du token
   const useDecimals = () => {
@@ -40,32 +40,32 @@ export function useERC20(tokenAddress: Address) {
       query: {
         enabled: !!tokenAddress,
       },
-    })
-  }
+    });
+  };
 
   // Approuver un montant
   const approve = async (spender: Address, amount: string, decimals: number = 18) => {
-    const parsedAmount = parseUnits(amount, decimals)
-    
+    const parsedAmount = parseUnits(amount, decimals);
+
     return writeContract({
       address: tokenAddress,
       abi: ERC20_ABI,
       functionName: 'approve',
       args: [spender, parsedAmount],
-    })
-  }
+    });
+  };
 
   // Approuver le montant maximum
   const approveMax = async (spender: Address) => {
-    const maxAmount = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
-    
+    const maxAmount = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+
     return writeContract({
       address: tokenAddress,
       abi: ERC20_ABI,
       functionName: 'approve',
       args: [spender, maxAmount],
-    })
-  }
+    });
+  };
 
   return {
     useBalance,
@@ -76,5 +76,5 @@ export function useERC20(tokenAddress: Address) {
     isPending,
     error,
     hash,
-  }
-} 
+  };
+}

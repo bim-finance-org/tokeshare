@@ -8,30 +8,34 @@ type ConnectWalletButtonProps = {
   navbarButton?: boolean;
 };
 
-const ConnectWalletButton = ({isTransparent = false, navbarButton = false}: ConnectWalletButtonProps) => {
+const ConnectWalletButton = ({ isTransparent = false, navbarButton = false }: ConnectWalletButtonProps) => {
   const { open } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
-  
+
   // Format address to show first 6 and last 4 characters
   const formatAddress = (addr: string) => {
     if (!addr) return '';
     return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
   };
-  
+
   const handleConnect = async () => {
     try {
       // Open the AppKit modal to connect wallet
       open({ view: isConnected ? 'Account' : 'Connect' });
     } catch (error) {
-      console.error("Erreur de connexion :", error);
+      console.error('Erreur de connexion :', error);
       // Gérez l'erreur, par exemple avec un message d'alerte
     }
   };
 
   // Determine button text based on connection status
-  const buttonText = isConnected 
-    ? (navbarButton ? formatAddress(address || '') : formatAddress(address || ''))
-    : (navbarButton ? 'My Account' : 'Connect Wallet');
+  const buttonText = isConnected
+    ? navbarButton
+      ? formatAddress(address || '')
+      : formatAddress(address || '')
+    : navbarButton
+      ? 'My Account'
+      : 'Connect Wallet';
 
   return (
     <button

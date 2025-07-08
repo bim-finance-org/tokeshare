@@ -1,7 +1,6 @@
-import { NextResponse, NextRequest } from "next/server";
-import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/authOptions";
+import { NextResponse, NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { requireAuth, validateId, validateCryptoAmount } from '@/lib/api-utils';
 
 /**
  * PUT to update the amount of a sell transaction
@@ -9,66 +8,40 @@ import { authOptions } from "@/lib/authOptions";
  * @param params - The parameters object
  * @returns The updated transaction
  */
-export async function PUT(request: NextRequest, { params }: { params: any }) {
-	try {
-		// Check if user is authenticated
-		const session = await getServerSession(authOptions);
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  try {
+    const session = await requireAuth();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized. Please log in.' }, { status: 401 });
+    }
 
-		// If no session, return 401 Unauthorized
-		if (!session) {
-			return NextResponse.json(
-				{ error: "Unauthorized. Please log in." },
-				{ status: 401 }
-			);
-		}
+    const { params } = context;
+    const { id: rawId } = await params;
+    const id = validateId(rawId);
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid transaction ID' }, { status: 400 });
+    }
 
-		const id = parseInt(params.id);
+    const { cryptoAmount } = await request.json();
+    const validAmount = validateCryptoAmount(cryptoAmount);
+    if (!validAmount) {
+      return NextResponse.json({ error: 'Invalid amount. Must be a positive number.' }, { status: 400 });
+    }
 
-		if (isNaN(id)) {
-			return NextResponse.json(
-				{ error: "Invalid transaction ID" },
-				{ status: 400 }
-			);
-		}
+    const transaction = await prisma.sellTransaction.findUnique({ where: { id } });
+    if (!transaction) {
+      return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
+    }
 
-		const data = await request.json();
+    const updatedTransaction = await prisma.sellTransaction.update({
+      where: { id },
+      data: {
+        cryptoAmount: cryptoAmount,
+      },
+    });
 
-		if (
-			data.cryptoAmount === undefined ||
-			isNaN(parseFloat(data.cryptoAmount)) ||
-			parseFloat(data.cryptoAmount) <= 0
-		) {
-			return NextResponse.json(
-				{ error: "Invalid amount. Must be a positive number." },
-				{ status: 400 }
-			);
-		}
-
-		const cryptoAmount = parseFloat(data.cryptoAmount);
-
-		const transaction = await prisma.sellTransaction.findUnique({
-			where: { id },
-		});
-
-		if (!transaction) {
-			return NextResponse.json(
-				{ error: "Transaction not found" },
-				{ status: 404 }
-			);
-		}
-
-		const updatedTransaction = await prisma.sellTransaction.update({
-			where: { id },
-			data: {
-				cryptoAmount: cryptoAmount,
-			},
-		});
-
-		return NextResponse.json(updatedTransaction);
-	} catch (error) {
-		return NextResponse.json(
-			{ error: "Error updating transaction amount" },
-			{ status: 500 }
-		);
-	}
+    return NextResponse.json(updatedTransaction);
+  } catch (error) {
+    return NextResponse.json({ error: 'Error updating transaction amount' }, { status: 500 });
+  }
 }

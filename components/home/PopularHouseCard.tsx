@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import LocationIcon from "../icons/card/LocationIcon";
-import SurfaceIcon from "../icons/card/SurfaceIcon";
-import BedIcon from "../icons/card/BedIcon";
-import ArrowIcon from "../icons/arrows/ArrowIcon";
-import Image from "next/image";
-import { House } from "@/types/House";
+import React, { useState, useEffect, useRef } from 'react';
+import LocationIcon from '../icons/card/LocationIcon';
+import SurfaceIcon from '../icons/card/SurfaceIcon';
+import BedIcon from '../icons/card/BedIcon';
+import ArrowIcon from '../icons/arrows/ArrowIcon';
+import Image from 'next/image';
+import { House } from '@/types/House';
 
 interface PopularHouseCardProps {
   house: House;
@@ -60,7 +60,9 @@ const PopularHouseCard: React.FC<PopularHouseCardProps> = ({ house }) => {
           </div>
         </div>
 
-        <div className={`mt-2 flex ${isColumn ? "flex-col items-start" : "flex-row items-center"} justify-between gap-2 sm:gap-4`}>
+        <div
+          className={`mt-2 flex ${isColumn ? 'flex-col items-start' : 'flex-row items-center'} justify-between gap-2 sm:gap-4`}
+        >
           <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{price}</h5>
 
           {/* <Link href={link} > */}
