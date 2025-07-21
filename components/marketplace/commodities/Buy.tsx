@@ -10,15 +10,15 @@ import {
   convertTGGToFiat,
 } from "@/utils/priceUtils";
 import { usePaxgPrice } from "@/hooks/usePaxgPrice";
-import ConnectButton from "@/components/shared/ConnectButton";
 import { useAccount } from "wagmi";
 import UserForm from "./UserForm";
 import { TokenContexts } from "@/context/TokenContexts";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
 import { Badge } from "@/components/ui/badge";
 import { ExchangeSection } from "@/types/ExchangeSection";
+import { TokenInfo } from "@/config/token";
 
-const Buy = () => {
+const Buy = ({ token }: { token: TokenInfo }) => {
   // Get values from context
   const {
     buy: { token: selectedCurrency, blockchain: selectedBlockchain },
@@ -174,7 +174,7 @@ const Buy = () => {
       />
 
       <div className="mb-6 mt-4 space-y-2">
-        <Blockchains section={ExchangeSection.Buy} />
+        <Blockchains section={ExchangeSection.Buy} tokenSymbol={token.symbol} />
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
             <span className="text-color4 text-xs sm:text-sm font-medium">

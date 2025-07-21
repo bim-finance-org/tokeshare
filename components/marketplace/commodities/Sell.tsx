@@ -18,8 +18,9 @@ import { AlertCircle } from "lucide-react";
 import { INTERVAL_PRICE_UPDATE } from "@/constants/constants";
 import { Badge } from "@/components/ui/badge";
 import { ExchangeSection } from "@/types/ExchangeSection";
+import { TokenInfo } from "@/config/token";
 
-const Sell = () => {
+const Sell = ({ token }: { token: TokenInfo }) => {
   const {
     sell: { token: selectedCurrency, blockchain: selectedBlockchain },
     updateSellToken: setSelectedCurrency,
@@ -118,6 +119,10 @@ const Sell = () => {
     );
   }
 
+  if (token.symbol === "TFT_001") {
+    return <div className="p-6 h-96 mx-48"></div>;
+  }
+
   return (
     <div className="p-6 w-full">
       <div className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-3 shadow-md">
@@ -155,7 +160,10 @@ const Sell = () => {
       />
 
       <div className="mb-6 mt-4 space-y-2">
-        <Blockchains section={ExchangeSection.Sell} />
+        <Blockchains
+          section={ExchangeSection.Sell}
+          tokenSymbol={token.symbol}
+        />
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
             <span className="text-color4 text-xs sm:text-sm font-medium">

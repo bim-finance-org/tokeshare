@@ -13,7 +13,7 @@ import { Blockchain } from "@/types/Blockchain";
 
 interface StableCoinsProps {
   onSelect: (currency: string) => void;
-  blockchain: Blockchain;
+  blockchain: Blockchain | null;
 }
 
 // Define which stablecoins are available on each blockchain
@@ -23,6 +23,10 @@ const BLOCKCHAIN_STABLECOINS = {
 };
 
 const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
+  if (blockchain === null) {
+    return;
+  }
+
   const availableStablecoins =
     BLOCKCHAIN_STABLECOINS[blockchain as keyof typeof BLOCKCHAIN_STABLECOINS] ||
     [];

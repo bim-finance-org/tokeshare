@@ -61,8 +61,8 @@ const Exchange: React.FC<ExchangeProps> = ({ token }) => {
         ) : (
           <>
             {activeTab === ExchangeSection.Swap && <Swap token={token} />}
-            {activeTab === ExchangeSection.Buy && <Buy />}
-            {activeTab === ExchangeSection.Sell && <Sell />}
+            {activeTab === ExchangeSection.Buy && <Buy token={token} />}
+            {activeTab === ExchangeSection.Sell && <Sell token={token} />}
           </>
         )}
       </div>

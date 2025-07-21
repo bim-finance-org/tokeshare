@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import TokenInput from './TokenInput'
-import TokenSelector from './TokenSelector'
-import TokenDisplay from '@/components/TokenDisplay'
-import { useAccount } from 'wagmi'
-import CryptoBalance from './CryptoBalance'
-import MaxButton from './MaxButton'
+import React, { useState, useEffect } from "react";
+import TokenInput from "./TokenInput";
+import TokenSelector from "./TokenSelector";
+import TokenDisplay from "@/components/TokenDisplay";
+import { useAccount } from "wagmi";
+import CryptoBalance from "./CryptoBalance";
+import MaxButton from "./MaxButton";
+import { Blockchain } from "@/types/Blockchain";
 
 interface TradeWidgetProps {
-  type: 'fiat' | 'crypto' | 'stablecoin';
-  blockchain?: string;
+  type: "fiat" | "crypto" | "stablecoin";
+  blockchain?: Blockchain;
   label: string;
   defaultToken?: string;
   value?: string;
@@ -20,7 +21,7 @@ interface TradeWidgetProps {
 
 const TradeWidget = ({
   type,
-  blockchain = 'Polygon',
+  blockchain = Blockchain.Polygon,
   label,
   defaultToken,
   value,
@@ -29,12 +30,12 @@ const TradeWidget = ({
   showBalance = false,
   readOnly = false,
 }: TradeWidgetProps) => {
-  const [selectedToken, setSelectedToken] = useState(defaultToken || 'USDC');
+  const [selectedToken, setSelectedToken] = useState(defaultToken || "USDC");
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const { address } = useAccount();
 
   // Vérifie si le token est TGG
-  const isTGG = selectedToken === 'TGG';
+  const isTGG = selectedToken === "TGG";
 
   const handleTokenSelect = (token: string) => {
     console.log(token);
@@ -53,10 +54,8 @@ const TradeWidget = ({
   };
 
   useEffect(() => {
-    setSelectedToken(defaultToken || 'USDC');
+    setSelectedToken(defaultToken || "USDC");
   }, [defaultToken]);
-
-  
 
   return (
     <div className="bg-color1 p-4 rounded-xl shadow-md">
@@ -64,27 +63,23 @@ const TradeWidget = ({
         <div>
           <TokenInput
             label={label}
-            value={value || ''}
+            value={value || ""}
             onChange={onValueChange}
             placeholder={isTGG ? "1" : "50"}
             disabled={isTGG && type === "stablecoin"}
           />
         </div>
 
-        
-        {isSelectorOpen &&
-   
-        <TokenSelector
-          type={type}
-          blockchain={blockchain}
-          onSelect={(token) => handleTokenSelect(token)}
-          isOpen={isSelectorOpen}
-          onClose={() => setIsSelectorOpen(false)}
-        />
-}
-        
-      
-        
+        {isSelectorOpen && (
+          <TokenSelector
+            type={type}
+            blockchain={blockchain}
+            onSelect={(token) => handleTokenSelect(token)}
+            isOpen={isSelectorOpen}
+            onClose={() => setIsSelectorOpen(false)}
+          />
+        )}
+
         {/* Bouton MAX - placé entre l'input et l'icône */}
         {!readOnly && showBalance && !(isTGG && type === "stablecoin") && (
           <div className="flex items-end pb-3">
@@ -95,7 +90,7 @@ const TradeWidget = ({
             />
           </div>
         )}
-        
+
         <div className="flex flex-col items-end gap-2">
           <TokenDisplay
             token={selectedToken}
@@ -103,15 +98,12 @@ const TradeWidget = ({
             onTokenClick={() => !isTGG && setIsSelectorOpen(true)}
           />
           {showBalance && (
-            <CryptoBalance 
-              currency={selectedToken} 
-              blockchain={blockchain}
-            />
+            <CryptoBalance currency={selectedToken} blockchain={blockchain} />
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TradeWidget
+export default TradeWidget;
