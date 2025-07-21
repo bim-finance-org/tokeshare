@@ -1,12 +1,12 @@
-import React from 'react'
-import Image from 'next/image'
+import React from "react";
+import Image from "next/image";
 
 interface BaseIconProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
-const BaseIcon = ({ size = 24, className = '' }: BaseIconProps) => {
+const BaseIcon = ({ size = 24, className = "" }: BaseIconProps) => {
   return (
     <Image
       src="/images/blockchains/base.png"
@@ -15,7 +15,7 @@ const BaseIcon = ({ size = 24, className = '' }: BaseIconProps) => {
       height={size}
       className={`rounded-full ${className}`}
     />
-  )
-}
+  );
+};
 
-export default BaseIcon
+export default BaseIcon;

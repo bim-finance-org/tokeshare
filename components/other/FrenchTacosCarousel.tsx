@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import ArrowIcon from "@/components/icons/arrows/ArrowIcon";
+import Link from "next/link";
 
 // Images du French Tacos (mets tes vraies images ici)
 const images = [
@@ -40,7 +41,9 @@ const FrenchTacosCarousel: React.FC = () => {
           Tokeshare French Tacos
         </h1>
         <div className="flex space-x-3">
-          <span className="bg-color4 text-white px-4 py-1 rounded font-semibold">BASE</span>
+          <span className="bg-color4 text-white px-4 py-1 rounded font-semibold">
+            BASE
+          </span>
         </div>
       </div>
 
@@ -49,10 +52,16 @@ const FrenchTacosCarousel: React.FC = () => {
         {isMobile ? (
           <>
             <button className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 prev-button">
-              <ArrowIcon size={24} className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180" />
+              <ArrowIcon
+                size={24}
+                className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180"
+              />
             </button>
             <button className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 next-button">
-              <ArrowIcon size={24} className="text-color5 hover:scale-110 hover:text-color2 transition" />
+              <ArrowIcon
+                size={24}
+                className="text-color5 hover:scale-110 hover:text-color2 transition"
+              />
             </button>
             <Swiper
               modules={[Navigation, Pagination]}
@@ -69,7 +78,12 @@ const FrenchTacosCarousel: React.FC = () => {
                 <SwiperSlide key={i}>
                   <div className="flex justify-center">
                     <div className="relative w-3/4 h-56 sm:h-72">
-                      <Image src={img} alt={`French Tacos ${i + 1}`} fill className="object-cover rounded-lg shadow-lg" />
+                      <Image
+                        src={img}
+                        alt={`French Tacos ${i + 1}`}
+                        fill
+                        className="object-cover rounded-lg shadow-lg"
+                      />
                     </div>
                   </div>
                 </SwiperSlide>
@@ -79,10 +93,16 @@ const FrenchTacosCarousel: React.FC = () => {
         ) : (
           <>
             <button className="absolute left-0 sm:-left-10 top-1/2 transform -translate-y-1/2 z-10 prev-button">
-              <ArrowIcon size={32} className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180" />
+              <ArrowIcon
+                size={32}
+                className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180"
+              />
             </button>
             <button className="absolute right-0 sm:-right-10 top-1/2 transform -translate-y-1/2 z-10 next-button">
-              <ArrowIcon size={32} className="text-color5 hover:scale-110 hover:text-color2 transition" />
+              <ArrowIcon
+                size={32}
+                className="text-color5 hover:scale-110 hover:text-color2 transition"
+              />
             </button>
             <Swiper
               modules={[Navigation, Pagination]}
@@ -98,7 +118,12 @@ const FrenchTacosCarousel: React.FC = () => {
               {images.map((img, i) => (
                 <SwiperSlide key={i}>
                   <div className="relative w-full h-56 sm:h-72">
-                    <Image src={img} alt={`French Tacos ${i + 1}`} fill className="object-cover rounded-lg shadow-lg" />
+                    <Image
+                      src={img}
+                      alt={`French Tacos ${i + 1}`}
+                      fill
+                      className="object-cover rounded-lg shadow-lg"
+                    />
                   </div>
                 </SwiperSlide>
               ))}
@@ -109,10 +134,15 @@ const FrenchTacosCarousel: React.FC = () => {
 
       {/* Investissement / Actions */}
       <div className="text-center w-full mt-6">
-        <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">TOTAL INVESTMENT: $31,250</h2>
-        <button className="text-sm sm:text-md md:text-lg lg:text-xl mt-4 px-10 sm:px-12 py-2 bg-color2 text-white rounded-full hover:bg-color4 transition">
-          SOON
-        </button>
+        <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">
+          TOTAL INVESTMENT: $31,250
+        </h2>
+
+        <Link href="/marketplace/other/french-tacos/trade">
+          <button className="text-sm sm:text-md md:text-lg lg:text-xl mt-4 px-10 sm:px-12 py-2 bg-color2 text-white rounded-full hover:bg-color4 transition">
+            BUY
+          </button>
+        </Link>
       </div>
     </section>
   );
