@@ -83,7 +83,6 @@ export function useMarketplaceContract() {
 
     const stableDecimals = getTokenDecimals(stableToPay);
     const tokenDecimals = getTokenDecimals(tokenSymbol);
-    console.log(stableDecimals);
 
     if (stableDecimals === undefined || tokenDecimals === undefined) {
       throw new Error("Impossible d’obtenir les décimales des tokens");

@@ -13,7 +13,7 @@ import { usePaxgPrice } from "@/hooks/usePaxgPrice";
 import { useAccount } from "wagmi";
 import UserForm from "./UserForm";
 import { TokenContexts } from "@/context/TokenContexts";
-import { useExchangeRates } from "@/hooks/useExchangeRates";
+import { ExchangeRates, useExchangeRates } from "@/hooks/useExchangeRates";
 import { Badge } from "@/components/ui/badge";
 import { ExchangeSection } from "@/types/ExchangeSection";
 import { TokenInfo } from "@/config/token";
@@ -69,7 +69,15 @@ const Buy = ({ token }: { token: TokenInfo }) => {
       }
     } else if (token.symbol === "TFT_001") {
       if (tggPrice > 0) {
-        tggValue = numericAmount / 31.25;
+        if (selectedCurrency === "USD") {
+          tggValue = numericAmount / 31.25;
+        } else {
+          if (!exchangeRates) return;
+          const fiatRate =
+            exchangeRates[selectedCurrency as keyof ExchangeRates];
+          const amountInUSD = numericAmount / fiatRate;
+          tggValue = amountInUSD / 31.25;
+        }
       }
     }
     if (tggValue !== undefined) {
