@@ -2,15 +2,11 @@ import React, { useState, useEffect, useContext } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import Image from 'next/image';
 import Blockchains from '@/components/Blockchains';
-import { calculateTGGPrice } from '@/utils/priceUtils';
 import { useAccount } from 'wagmi';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { TokenContexts } from '@/context/TokenContexts';
-import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { useSwap } from '@/hooks/useSwap';
 import { useSwapQuote } from '@/hooks/useSwapQuote';
-import { POLYGON_ADDRESSES } from '@/utils/addresses/polygonAddresses';
-import { BASE_ADDRESSES } from '@/utils/addresses/baseAddresses';
 import { CONTRACTS, TRUSTED_AGGREGATORS } from '@/contracts/contracts';
 import { Address } from 'viem';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -18,72 +14,66 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 import { SwapDirection } from '@/enums/Directions';
-import { useAppKitNetwork } from '@reown/appkit/react';
-import { polygon } from '@reown/appkit/networks';
+import { TokenInfo } from '@/config/token';
+import { Blockchain } from '@/types/Blockchain';
+import { getTokenAddress } from '@/utils/token';
+import { useTokenPrice } from '@/hooks/useTokenPrice';
+import { ExchangeSection } from '@/types/ExchangeSection';
+import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
+import { useAutoSwitchNetwork } from '@/hooks/useAutoSwitchNetwork';
 
 // Définir le type pour les propriétés acceptées par TradeWidget
 type TradeWidgetType = 'stablecoin' | 'crypto' | 'fiat';
 
-const Swap = () => {
+export type SwapQuoteParams = {
+  inputToken: Address;
+  outputToken: Address;
+  inputAmount: string;
+  direction: SwapDirection;
+};
+
+const Swap = ({ token }: { token: TokenInfo }) => {
   const {
     swap: { token: stablecoin, blockchain: selectedBlockchain },
     updateSwapToken: setStablecoin,
     updateSwapBlockchain: setSelectedBlockchain,
   } = useContext(TokenContexts);
 
+  useAutoSwitchNetwork(selectedBlockchain);
+
   const [stablecoinAmount, setStablecoinAmount] = useState('10');
-  const [tggAmount, setTggAmount] = useState('0');
-  const [tggPrice, setTggPrice] = useState<number>(0);
+  const [amount, setAmount] = useState('0');
   const [isTggFirst, setIsTggFirst] = useState(false);
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
   const [errorTransaction, setErrorTransaction] = useState('');
+
   const { isConnected, address } = useAccount();
-
   const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
-  const { data: paxgPrice, isLoading } = usePaxgPrice();
+  const { buyTokenOnMarketplace } = useMarketplaceContract();
+  const { price: tokenPrice, isLoading: isPriceLoading } = useTokenPrice(token.symbol);
 
-  const { switchNetwork } = useAppKitNetwork();
-
-  const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
-
-  const [swapQuoteParams, setSwapQuoteParams] = useState({
-    inputToken: isTggFirst
-      ? (CONTRACTS.TGG as Address)
-      : ((tokenAddresses as Record<string, string>)[stablecoin] as Address),
-    outputToken: isTggFirst
-      ? ((tokenAddresses as Record<string, string>)[stablecoin] as Address)
-      : (CONTRACTS.TGG as Address),
-    inputAmount: isTggFirst ? tggAmount : stablecoinAmount,
-    direction: isTggFirst ? SwapDirection.TGGToStablecoin : SwapDirection.StablecoinToTGG,
-  });
+  const [swapQuoteParams, setSwapQuoteParams] = useState<SwapQuoteParams | null>(null);
 
   useEffect(() => {
-    const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
-    const inputToken = isTggFirst
-      ? (CONTRACTS.TGG as Address)
-      : ((tokenAddresses as Record<string, string>)[stablecoin] as Address);
-    const outputToken = isTggFirst
-      ? ((tokenAddresses as Record<string, string>)[stablecoin] as Address)
-      : (CONTRACTS.TGG as Address);
-    const inputAmount = isTggFirst ? tggAmount : stablecoinAmount;
-    const direction = isTggFirst ? SwapDirection.TGGToStablecoin : SwapDirection.StablecoinToTGG;
-    setSwapQuoteParams({ inputToken, outputToken, inputAmount, direction });
-  }, [isTggFirst, tggPrice, stablecoinAmount, tggAmount, stablecoin, selectedBlockchain]);
+    const inputToken = getTokenAddress(isTggFirst ? token.symbol : stablecoin, selectedBlockchain);
+    const outputToken = getTokenAddress(isTggFirst ? stablecoin : token.symbol, selectedBlockchain);
+
+    const inputAmount = isTggFirst ? amount : stablecoinAmount;
+    const direction = isTggFirst ? SwapDirection.TokenToStablecoin : SwapDirection.StablecoinToToken;
+
+    if (inputToken && outputToken) {
+      setSwapQuoteParams({ inputToken, outputToken, inputAmount, direction });
+    } else {
+      setSwapQuoteParams(null);
+    }
+  }, [isTggFirst, amount, stablecoinAmount, stablecoin, selectedBlockchain]);
 
   const {
     outputAmount: calculatedOutputAmount,
     isLoading: isLoadingQuote,
     error: quoteError,
     exchangeRate,
-  } = useSwapQuote(swapQuoteParams);
-
-  // Mise à jour du prix TGG quand paxgPrice change
-  useEffect(() => {
-    if (paxgPrice !== undefined) {
-      const calculatedTggPrice = calculateTGGPrice(paxgPrice);
-      setTggPrice(calculatedTggPrice);
-    }
-  }, [paxgPrice]);
+  } = useSwapQuote(swapQuoteParams, token.symbol);
 
   // Mettre à jour automatiquement le montant de sortie basé sur les calculs KyberSwap
   useEffect(() => {
@@ -93,7 +83,7 @@ const Swap = () => {
         setStablecoinAmount(calculatedOutputAmount);
       } else {
         // Stablecoin → TGG
-        setTggAmount(calculatedOutputAmount);
+        setAmount(calculatedOutputAmount);
       }
     }
   }, [calculatedOutputAmount, isTggFirst, isLoadingQuote]);
@@ -115,7 +105,7 @@ const Swap = () => {
   // Handle TGG amount change
   const handleTggAmountChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
-      setTggAmount(amount);
+      setAmount(amount);
     }
   };
 
@@ -125,19 +115,22 @@ const Swap = () => {
   };
 
   // Handle blockchain selection
-  const handleBlockchainSelect = (blockchain: string) => {
+  const handleBlockchainSelect = (blockchain: Blockchain) => {
     setSelectedBlockchain(blockchain);
-    setStablecoin(blockchain === 'Polygon' ? 'USDT' : 'USDC');
+    setStablecoin(blockchain === Blockchain.Polygon ? 'USDT' : 'USDC');
   };
 
   // Handle swap button click
   const handleSwap = () => {
+    if (token.symbol === 'TFT_001') {
+      return;
+    }
     setIsTggFirst(!isTggFirst);
   };
 
   // Préparation des informations d'échange
   const exchangeRateInfo = () => {
-    if (isLoading || isLoadingQuote) {
+    if (isPriceLoading || isLoadingQuote) {
       return (
         <div className="flex items-center gap-2">
           <Loader2 className="h-3 w-3 animate-spin" />
@@ -151,49 +144,65 @@ const Swap = () => {
     }
   };
 
+  const swapIn = async (symbol: string) => {
+    if (symbol == 'TGG') {
+      const paxgAddress = CONTRACTS.PAXG as Address;
+      const routerAddress = TRUSTED_AGGREGATORS.kyberSwap as Address;
+      const inputTokenAddress = getTokenAddress(stablecoin, selectedBlockchain);
+
+      if (!inputTokenAddress) {
+        setIsPreparingSwap(false);
+        return;
+      }
+
+      await swapMint({
+        inputToken: inputTokenAddress as Address,
+        inputAmount: stablecoinAmount,
+        outputToken: paxgAddress,
+        routerAddress: routerAddress,
+        walletAddress: address as Address,
+      });
+    } else if (symbol == 'TFT_001') {
+      try {
+        setIsPreparingSwap(true);
+        const receipt = await buyTokenOnMarketplace(token.symbol, amount, stablecoin);
+      } catch (err) {
+        setErrorTransaction(err instanceof Error ? err.message : String(err));
+      } finally {
+        setIsPreparingSwap(false);
+      }
+    }
+  };
+
+  const swapOut = async (symbol: string) => {
+    if (symbol == 'TGG') {
+      const routerAddress = TRUSTED_AGGREGATORS.kyberSwap as Address;
+
+      const outputTokenAddress = getTokenAddress(stablecoin, selectedBlockchain);
+
+      if (!outputTokenAddress) {
+        setIsPreparingSwap(false);
+        return;
+      }
+
+      await swapWithdraw({
+        amount,
+        outputToken: outputTokenAddress as Address,
+        routerAddress: routerAddress as Address,
+        walletAddress: address as Address,
+      });
+    } else if (symbol == 'TFT_001') {
+    }
+  };
+
   const swaping = async () => {
     setIsPreparingSwap(true);
 
     try {
-      const tokenAddresses = selectedBlockchain === 'Polygon' ? POLYGON_ADDRESSES : BASE_ADDRESSES;
-      const paxgAddress = CONTRACTS.PAXG as Address;
-      const routerAddress = TRUSTED_AGGREGATORS.kyberSwap as Address;
-
       if (!isTggFirst) {
-        // Direction: Stablecoin → TGG (swapMint)
-        const inputTokenAddress = (tokenAddresses as Record<string, string>)[stablecoin];
-
-        if (!inputTokenAddress) {
-          setIsPreparingSwap(false);
-          return;
-        }
-
-        switchNetwork(polygon);
-
-        await swapMint({
-          inputToken: inputTokenAddress as Address,
-          inputAmount: stablecoinAmount,
-          outputToken: paxgAddress,
-          routerAddress: routerAddress,
-          walletAddress: address as Address,
-        });
+        swapIn(token.symbol);
       } else {
-        // Direction: TGG → Stablecoin (swapWithdraw)
-        const outputTokenAddress = (tokenAddresses as Record<string, string>)[stablecoin];
-
-        if (!outputTokenAddress) {
-          setIsPreparingSwap(false);
-          return;
-        }
-
-        switchNetwork(polygon);
-
-        await swapWithdraw({
-          tggAmount,
-          outputToken: outputTokenAddress as Address,
-          routerAddress: routerAddress as Address,
-          walletAddress: address as Address,
-        });
+        swapOut(token.symbol);
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -213,8 +222,8 @@ const Swap = () => {
   const topWidgetProps = {
     type: (isTggFirst ? 'crypto' : 'stablecoin') as TradeWidgetType,
     label: 'YOU SEND',
-    defaultToken: isTggFirst ? 'TGG' : stablecoin,
-    value: isTggFirst ? tggAmount : stablecoinAmount,
+    defaultToken: isTggFirst ? token.symbol : stablecoin,
+    value: isTggFirst ? amount : stablecoinAmount,
     onValueChange: isTggFirst ? handleTggAmountChange : handleStablecoinAmountChange,
     onTokenChange: handleTokenChange,
     blockchain: selectedBlockchain,
@@ -225,8 +234,8 @@ const Swap = () => {
   const bottomWidgetProps = {
     type: (isTggFirst ? 'stablecoin' : 'crypto') as TradeWidgetType,
     label: 'YOU RECEIVE',
-    defaultToken: isTggFirst ? stablecoin : 'TGG',
-    value: isTggFirst ? stablecoinAmount : tggAmount,
+    defaultToken: isTggFirst ? stablecoin : token.symbol,
+    value: isTggFirst ? stablecoinAmount : amount,
     onValueChange: () => {}, // Fonction vide car en lecture seule
     onTokenChange: handleTokenChange,
     blockchain: selectedBlockchain,
@@ -235,7 +244,8 @@ const Swap = () => {
   };
 
   // Vérifier si les prix sont disponibles pour permettre l'affichage
-  const arePricesAvailable = tggPrice > 0 && !isLoadingQuote;
+  let arePricesAvailable;
+  if (tokenPrice) arePricesAvailable = tokenPrice > 0 && !isLoadingQuote;
 
   return (
     <div className="p-3 sm:p-6 w-full relative">
@@ -252,7 +262,7 @@ const Swap = () => {
       </div>
 
       <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-        <Blockchains section="swap" onSelect={handleBlockchainSelect} />
+        <Blockchains section={ExchangeSection.Swap} onSelect={handleBlockchainSelect} tokenSymbol={token.symbol} />
 
         {/* État de la transaction */}
         {isPreparingSwap && (
@@ -277,11 +287,7 @@ const Swap = () => {
           <Alert className="bg-red-500">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              {errorTransaction.includes('User rejected the request')
-                ? 'Transaction cancelled by the user.'
-                : errorTransaction}
-            </AlertDescription>
+            <AlertDescription>{errorTransaction}</AlertDescription>
           </Alert>
         )}
 
@@ -293,20 +299,20 @@ const Swap = () => {
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">TGG Price:</span>
-            {isLoading ? (
+            <span className="text-color4 text-xs sm:text-sm font-medium">{token.symbol} Price:</span>
+            {isPriceLoading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <Skeleton className="h-4 w-16" />
               </div>
             ) : (
-              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tggPrice.toFixed(2)}</Badge>
+              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tokenPrice?.toFixed(2)}</Badge>
             )}
           </div>
 
           <div className="flex items-center justify-between ">
             <span className="text-color4 text-xs sm:text-sm font-medium">Exchange rate:</span>
-            {isLoading || isLoadingQuote ? (
+            {isPriceLoading || isLoadingQuote ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <Skeleton className="h-4 w-20" />

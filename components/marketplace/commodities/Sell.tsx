@@ -17,8 +17,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { INTERVAL_PRICE_UPDATE } from '@/constants/constants';
 import { Badge } from '@/components/ui/badge';
+import { ExchangeSection } from '@/types/ExchangeSection';
+import { TokenInfo } from '@/config/token';
 
-const Sell = () => {
+const Sell = ({ token }: { token: TokenInfo }) => {
   const {
     sell: { token: selectedCurrency, blockchain: selectedBlockchain },
     updateSellToken: setSelectedCurrency,
@@ -100,10 +102,19 @@ const Sell = () => {
           type="sell"
           amount={receiveAmount}
           currency={selectedCurrency}
+          crypto={token.symbol}
           tggAmount={amountToSell}
           tggPrice={tggPrice}
           setShowUserForm={(val: boolean) => handleSellClick(val)}
         />
+      </div>
+    );
+  }
+
+  if (token.symbol === 'TFT_001') {
+    return (
+      <div className="p-6 h-96">
+        <p className="text-color4 text-2xl flex justify-center">COMMING SOON !</p>
       </div>
     );
   }
@@ -141,7 +152,7 @@ const Sell = () => {
       />
 
       <div className="mb-6 mt-4 space-y-2">
-        <Blockchains section="sell" />
+        <Blockchains section={ExchangeSection.Sell} tokenSymbol={token.symbol} />
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
             <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>

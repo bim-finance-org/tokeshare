@@ -1,20 +1,21 @@
 'use client';
 
 import React, { createContext, useState, ReactNode } from 'react';
+import { Blockchain } from '@/types/Blockchain';
 
 export const TokenContexts = createContext({
   // États
-  swap: { token: 'USDT', blockchain: 'Polygon' },
-  buy: { token: 'USD', blockchain: 'Polygon' },
-  sell: { token: 'USD', blockchain: 'Polygon' },
+  swap: { token: 'USDT', blockchain: Blockchain.Polygon },
+  buy: { token: 'USD', blockchain: Blockchain.Polygon },
+  sell: { token: 'USD', blockchain: Blockchain.Polygon },
 
   // Actions
   updateSwapToken: (token: string) => {},
-  updateSwapBlockchain: (blockchain: string) => {},
+  updateSwapBlockchain: (blockchain: Blockchain) => {},
   updateBuyToken: (token: string) => {},
-  updateBuyBlockchain: (blockchain: string) => {},
+  updateBuyBlockchain: (blockchain: Blockchain) => {},
   updateSellToken: (token: string) => {},
-  updateSellBlockchain: (blockchain: string) => {},
+  updateSellBlockchain: (blockchain: Blockchain) => {},
 });
 
 export const TokenProvider = ({ children }: { children: ReactNode }) => {
@@ -22,20 +23,26 @@ export const TokenProvider = ({ children }: { children: ReactNode }) => {
   const [swapToken, setSwapToken] = useState(() =>
     typeof window !== 'undefined' ? localStorage.getItem('swapToken') || 'USDT' : 'USDT',
   );
-  const [swapBlockchain, setSwapBlockchain] = useState(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('swapBlockchain') || 'Polygon' : 'Polygon',
+  const [swapBlockchain, setSwapBlockchain] = useState<Blockchain>(() =>
+    typeof window !== 'undefined'
+      ? (localStorage.getItem('swapBlockchain') as Blockchain) || Blockchain.Polygon
+      : Blockchain.Polygon,
   );
   const [buyToken, setBuyToken] = useState(() =>
     typeof window !== 'undefined' ? localStorage.getItem('buyToken') || 'EUR' : 'EUR',
   );
-  const [buyBlockchain, setBuyBlockchain] = useState(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('buyBlockchain') || 'Polygon' : 'Polygon',
+  const [buyBlockchain, setBuyBlockchain] = useState<Blockchain>(() =>
+    typeof window !== 'undefined'
+      ? (localStorage.getItem('buyBlockchain') as Blockchain) || Blockchain.Polygon
+      : Blockchain.Polygon,
   );
   const [sellToken, setSellToken] = useState(() =>
     typeof window !== 'undefined' ? localStorage.getItem('sellToken') || 'USD' : 'USD',
   );
-  const [sellBlockchain, setSellBlockchain] = useState(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('sellBlockchain') || 'Polygon' : 'Polygon',
+  const [sellBlockchain, setSellBlockchain] = useState<Blockchain>(() =>
+    typeof window !== 'undefined'
+      ? (localStorage.getItem('sellBlockchain') as Blockchain) || Blockchain.Polygon
+      : Blockchain.Polygon,
   );
 
   // Save to localStorage when values change

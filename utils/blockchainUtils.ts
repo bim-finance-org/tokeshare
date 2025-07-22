@@ -1,96 +1,19 @@
 import { useAccount, useBalance } from 'wagmi';
-import { parseEther, Address } from 'viem';
+import { Address } from 'viem';
 import { useReadContracts } from 'wagmi';
-import { POLYGON_ADDRESSES } from '@/utils/addresses/polygonAddresses';
-import { BASE_ADDRESSES } from '@/utils/addresses/baseAddresses';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { getTokenDecimals } from '@/utils/tokenUtils';
-
-// Token contract addresses for different blockchains
-const TOKEN_ADDRESSES: Record<string, Record<string, string>> = {
-  Polygon: POLYGON_ADDRESSES,
-  Base: BASE_ADDRESSES,
-};
+import { Blockchain } from '@/types/Blockchain';
+import { getBlockchainTokens, getTokenAddress } from './token';
+import { TOKENS } from '@/config/token';
 
 // Hook pour récupérer toutes les balances d'une blockchain en une fois
-export const useAllTokenBalances = (blockchain: string) => {
+export const useAllTokenBalances = (blockchain: Blockchain) => {
   const { address } = useAccount();
-  const tokens = TOKEN_ADDRESSES[blockchain] || {};
+  const tokens = getBlockchainTokens(blockchain);
 
-  // Préparer les contrats pour multicall - seulement les tokens avec des adresses valides
-  const validTokens = Object.entries(tokens).filter(
-    ([_, tokenAddress]) => tokenAddress && tokenAddress !== '0x...' && tokenAddress !== '',
-  );
-
-  const contracts = validTokens.map(([_, tokenAddress]) => ({
-    address: tokenAddress as Address,
-    abi: ERC20_ABI,
-    functionName: 'balanceOf',
-    args: [address],
-  }));
-
-  const {
-    data: balances,
-    isLoading,
-    error,
-  } = useReadContracts({
-    contracts,
-    query: {
-      enabled: !!address && contracts.length > 0,
-    },
-  });
-
-  // Formater les résultats avec les decimals préremplies
-  const formattedBalances = validTokens.reduce(
-    (acc, [symbol, tokenAddress], index) => {
-      const balance = balances?.[index];
-      const rawBalance = balance?.result || BigInt(0);
-      const decimals = getTokenDecimals(tokenAddress as Address);
-      const formattedBalance = rawBalance ? (Number(rawBalance) / Math.pow(10, decimals)).toFixed(6) : '0';
-
-      acc[symbol] = {
-        raw: rawBalance as bigint,
-        formatted: formattedBalance,
-        address: tokenAddress,
-        decimals: decimals,
-      };
-
-      return acc;
-    },
-    {} as Record<string, { raw: bigint; formatted: string; address: string; decimals: number }>,
-  );
-
-  return {
-    balances: formattedBalances,
-    isLoading,
-    error,
-  };
-};
-
-// Hook original pour un seul token (gardé pour compatibilité)
-export const useTokenBalance = (currency: string, blockchain: string) => {
-  const { address } = useAccount();
-  const tokenAddress = TOKEN_ADDRESSES[blockchain]?.[currency];
-
-  const { data: balance } = useBalance({
-    address,
-    token: tokenAddress ? (tokenAddress as `0x${string}`) : undefined,
-  });
-
-  return balance?.formatted || '0';
-};
-
-// Hook pour récupérer les balances de tokens spécifiques
-export const useMultipleTokenBalances = (tokens: string[], blockchain: string) => {
-  const { address } = useAccount();
-  const tokenAddresses = TOKEN_ADDRESSES[blockchain] || {};
-
-  const validTokens = tokens.filter(
-    (token) => tokenAddresses[token] && tokenAddresses[token] !== '0x...' && tokenAddresses[token] !== '',
-  );
-
-  const contracts = validTokens.map((token) => ({
-    address: tokenAddresses[token] as Address,
+  const contracts = tokens.map((token) => ({
+    address: token.addresses[blockchain] as Address,
     abi: ERC20_ABI,
     functionName: 'balanceOf',
     args: [address],
@@ -108,17 +31,72 @@ export const useMultipleTokenBalances = (tokens: string[], blockchain: string) =
   });
 
   const formattedBalances = tokens.reduce(
-    (acc, token, index) => {
-      const tokenAddress = tokenAddresses[token];
-      if (tokenAddress && tokenAddress !== '0x...' && tokenAddress !== '') {
-        const validIndex = validTokens.indexOf(token);
-        const balance = balances?.[validIndex];
-        const rawBalance = balance?.result || BigInt(0);
-        const decimals = getTokenDecimals(tokenAddress as Address);
-        acc[token] = rawBalance ? (Number(rawBalance) / Math.pow(10, decimals)).toFixed(6) : '0';
-      } else {
-        acc[token] = '0';
-      }
+    (acc, token, idx) => {
+      const balance = balances?.[idx];
+      const raw = balance?.result ? BigInt(balance.result) : BigInt(0);
+      const decimals = token.decimals;
+      acc[token.symbol] = {
+        raw,
+        formatted: raw ? (Number(raw) / Math.pow(10, decimals)).toFixed(6) : '0',
+        address: token.addresses[blockchain],
+        decimals,
+      };
+      return acc;
+    },
+    {} as Record<string, { raw: bigint; formatted: string; address?: string; decimals: number }>,
+  );
+
+  return {
+    balances: formattedBalances,
+    isLoading,
+    error,
+  };
+};
+
+// Hook original pour un seul token (gardé pour compatibilité)
+export const useTokenBalance = (symbol: string, blockchain: Blockchain) => {
+  const { address } = useAccount();
+  const tokenAddress = getTokenAddress(symbol, blockchain);
+
+  const { data: balance } = useBalance({
+    address,
+    token: tokenAddress,
+  });
+
+  return balance?.formatted || '0';
+};
+
+// Hook pour récupérer les balances de tokens spécifiques
+export const useMultipleTokenBalances = (symbols: string[], blockchain: Blockchain) => {
+  const { address } = useAccount();
+
+  const validTokens = symbols
+    .map((symbol) => TOKENS[symbol])
+    .filter((token) => !!token && !!token.addresses[blockchain]);
+
+  const contracts = validTokens.map((token) => ({
+    address: token.addresses[blockchain] as Address,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: [address],
+  }));
+
+  const {
+    data: balances,
+    isLoading,
+    error,
+  } = useReadContracts({
+    contracts,
+    query: {
+      enabled: !!address && contracts.length > 0,
+    },
+  });
+
+  const formattedBalances = validTokens.reduce(
+    (acc, token, idx) => {
+      const balance = balances?.[idx];
+      const raw = balance?.result || BigInt(0);
+      acc[token.symbol] = raw ? (Number(raw) / Math.pow(10, token.decimals)).toFixed(6) : '0';
       return acc;
     },
     {} as Record<string, string>,

@@ -9,10 +9,11 @@ import EURCIcon from './icons/currency/EURCIcon';
 import EURAIcon from './icons/currency/EURAIcon';
 import { useAccount } from 'wagmi';
 import { useAllTokenBalances } from '@/utils/blockchainUtils';
+import { Blockchain } from '@/types/Blockchain';
 
 interface StableCoinsProps {
   onSelect: (currency: string) => void;
-  blockchain: string;
+  blockchain: Blockchain | null;
 }
 
 // Define which stablecoins are available on each blockchain
@@ -22,6 +23,10 @@ const BLOCKCHAIN_STABLECOINS = {
 };
 
 const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
+  if (blockchain === null) {
+    return;
+  }
+
   const availableStablecoins = BLOCKCHAIN_STABLECOINS[blockchain as keyof typeof BLOCKCHAIN_STABLECOINS] || [];
   const { isConnected } = useAccount();
 

@@ -13,6 +13,7 @@ interface UserFormProps {
   type: 'buy' | 'sell';
   amount: string;
   currency: string;
+  crypto: string;
   tggAmount: string;
   tggPrice: number;
   setShowUserForm: Function;
@@ -30,7 +31,7 @@ const IBAN = 'FR76 1695 8000 0103 0490 4861 482';
 const ALIAS = 'Tokeshare';
 const BANK = 'Qonto';
 
-const UserForm = ({ type, amount, currency, tggAmount, tggPrice, setShowUserForm }: UserFormProps) => {
+const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShowUserForm }: UserFormProps) => {
   const {
     buy: { blockchain: buyBlockchain },
     sell: { blockchain: sellBlockchain },
@@ -120,7 +121,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice, setShowUserForm
           blockchain: buyBlockchain,
           fiat: currency,
           fiatAmount: fiatAmount,
-          crypto: 'TGG',
+          crypto: crypto,
           cryptoAmount: cryptoAmount,
           fees: feesValue,
         };
@@ -139,7 +140,7 @@ const UserForm = ({ type, amount, currency, tggAmount, tggPrice, setShowUserForm
           blockchain: sellBlockchain,
           fiat: currency,
           fiatAmount: fiatAmount,
-          crypto: 'TGG',
+          crypto: crypto,
           cryptoAmount: cryptoAmount,
           fees: feesValue,
         };

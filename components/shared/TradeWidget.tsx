@@ -5,10 +5,11 @@ import TokenDisplay from '@/components/TokenDisplay';
 import { useAccount } from 'wagmi';
 import CryptoBalance from './CryptoBalance';
 import MaxButton from './MaxButton';
+import { Blockchain } from '@/types/Blockchain';
 
 interface TradeWidgetProps {
   type: 'fiat' | 'crypto' | 'stablecoin';
-  blockchain?: string;
+  blockchain?: Blockchain;
   label: string;
   defaultToken?: string;
   value?: string;
@@ -20,7 +21,7 @@ interface TradeWidgetProps {
 
 const TradeWidget = ({
   type,
-  blockchain = 'Polygon',
+  blockchain = Blockchain.Polygon,
   label,
   defaultToken,
   value,
@@ -34,7 +35,7 @@ const TradeWidget = ({
   const { address } = useAccount();
 
   // Vérifie si le token est TGG
-  const isTGG = selectedToken === 'TGG';
+  const isTGG = selectedToken === 'TGG' || selectedToken === 'TFT_001';
 
   const handleTokenSelect = (token: string) => {
     console.log(token);

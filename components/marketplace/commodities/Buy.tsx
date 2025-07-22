@@ -6,14 +6,15 @@ import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/Blockchains';
 import { calculateTGGPrice, convertFiatToTGG, convertTGGToFiat } from '@/utils/priceUtils';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
-import ConnectButton from '@/components/shared/ConnectButton';
 import { useAccount } from 'wagmi';
 import UserForm from './UserForm';
 import { TokenContexts } from '@/context/TokenContexts';
-import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { ExchangeRates, useExchangeRates } from '@/hooks/useExchangeRates';
 import { Badge } from '@/components/ui/badge';
+import { ExchangeSection } from '@/types/ExchangeSection';
+import { TokenInfo } from '@/config/token';
 
-const Buy = () => {
+const Buy = ({ token }: { token: TokenInfo }) => {
   // Get values from context
   const {
     buy: { token: selectedCurrency, blockchain: selectedBlockchain },
@@ -51,14 +52,28 @@ const Buy = () => {
 
   // Calcule le montant TGG à partir du montant fiat
   const calculateTggFromFiat = (fiatAmount: string) => {
-    if (tggPrice > 0) {
-      const numericAmount = parseFloat(fiatAmount) || 0;
-      const tggValue = convertFiatToTGG(numericAmount, selectedCurrency, exchangeRates, tggPrice);
-      if (tggValue !== undefined) {
-        setTggAmount(tggValue.toFixed(4));
-      } else {
-        setTggAmount('0');
+    const numericAmount = parseFloat(fiatAmount) || 0;
+    let tggValue;
+    if (token.symbol === 'TGG') {
+      if (tggPrice > 0) {
+        tggValue = convertFiatToTGG(numericAmount, selectedCurrency, exchangeRates, tggPrice);
       }
+    } else if (token.symbol === 'TFT_001') {
+      if (tggPrice > 0) {
+        if (selectedCurrency === 'USD') {
+          tggValue = numericAmount / 31.25;
+        } else {
+          if (!exchangeRates) return;
+          const fiatRate = exchangeRates[selectedCurrency as keyof ExchangeRates];
+          const amountInUSD = numericAmount / fiatRate;
+          tggValue = amountInUSD / 31.25;
+        }
+      }
+    }
+    if (tggValue !== undefined) {
+      setTggAmount(tggValue.toFixed(4));
+    } else {
+      setTggAmount('0');
     }
   };
 
@@ -115,6 +130,7 @@ const Buy = () => {
         type="buy"
         amount={amountToSend}
         currency={selectedCurrency}
+        crypto={token.symbol}
         tggAmount={tggAmount}
         tggPrice={tggPrice}
         setShowUserForm={handleSellClick}
@@ -147,7 +163,7 @@ const Buy = () => {
       {/* Affichage du montant en TGG */}
       <TradeWidget
         label="YOU RECEIVE"
-        defaultToken="TGG"
+        defaultToken={token.symbol}
         value={tggAmount}
         onValueChange={handleTggAmountChange}
         onTokenChange={() => {}} // TGG ne peut pas être changé
@@ -155,7 +171,7 @@ const Buy = () => {
       />
 
       <div className="mb-6 mt-4 space-y-2">
-        <Blockchains section="buy" />
+        <Blockchains section={ExchangeSection.Buy} tokenSymbol={token.symbol} />
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
             <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
@@ -163,9 +179,11 @@ const Buy = () => {
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">TGG Price:</span>
+            <span className="text-color4 text-xs sm:text-sm font-medium">{token.symbol} Price:</span>
 
-            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tggPrice.toFixed(2)}</Badge>
+            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">
+              ${token.symbol === 'TGG' ? tggPrice.toFixed(2) : '31.25'}
+            </Badge>
           </div>
         </div>
       </div>

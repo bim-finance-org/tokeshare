@@ -1,4 +1,4 @@
-import { ExchangeRates } from '../hooks/useExchangeRates';
+import { ExchangeRates } from "../hooks/useExchangeRates";
 
 /**
  * Calcule le prix du TGG basé sur le prix du PAXG
@@ -70,7 +70,7 @@ export const convertFiatToTGG = (
   if (!exchangeRates || tggPriceUSD <= 0) return undefined;
 
   // Si c'est déjà en USD, pas besoin de convertir en USD
-  if (fiatCurrency === 'USD') {
+  if (fiatCurrency === "USD") {
     return fiatAmount / tggPriceUSD;
   }
 
@@ -106,7 +106,7 @@ export const convertTGGToFiat = (
   const amountInUSD = tggAmount * tggPriceUSD;
 
   // Si la devise cible est USD, retourner directement
-  if (fiatCurrency === 'USD') {
+  if (fiatCurrency === "USD") {
     return amountInUSD;
   }
 

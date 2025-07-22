@@ -112,7 +112,10 @@ export const useSwap = () => {
   };
 
   // Fonction pour lire les fees du contrat ZAP (pour usage dans les fonctions async)
-  const getZapFees = async (): Promise<{ zapMintFee: number; zapWithdrawFee: number }> => {
+  const getZapFees = async (): Promise<{
+    zapMintFee: number;
+    zapWithdrawFee: number;
+  }> => {
     if (!publicClient) throw new Error('Public client not available');
 
     try {
@@ -163,7 +166,9 @@ export const useSwap = () => {
       ...(params.saveGas && { saveGas: params.saveGas.toString() }),
       ...(params.gasInclude && { gasInclude: params.gasInclude.toString() }),
       ...(params.gasPrice && { gasPrice: params.gasPrice }),
-      ...(params.slippageTolerance && { slippageTolerance: params.slippageTolerance.toString() }),
+      ...(params.slippageTolerance && {
+        slippageTolerance: params.slippageTolerance.toString(),
+      }),
       ...(params.chargeFeeBy && { chargeFeeBy: params.chargeFeeBy }),
       ...(params.feeAmount && { feeAmount: params.feeAmount }),
       ...(params.feeReceiver && { feeReceiver: params.feeReceiver }),
@@ -178,7 +183,9 @@ export const useSwap = () => {
       ...(params.saveGas && { saveGas: params.saveGas.toString() }),
       ...(params.gasInclude && { gasInclude: params.gasInclude.toString() }),
       ...(params.gasPrice && { gasPrice: params.gasPrice }),
-      ...(params.slippageTolerance && { slippageTolerance: params.slippageTolerance.toString() }),
+      ...(params.slippageTolerance && {
+        slippageTolerance: params.slippageTolerance.toString(),
+      }),
       ...(params.chargeFeeBy && { chargeFeeBy: params.chargeFeeBy }),
       ...(params.feeAmount && { feeAmount: params.feeAmount }),
       ...(params.feeReceiver && { feeReceiver: params.feeReceiver }),
@@ -235,7 +242,9 @@ export const useSwap = () => {
           source: params.source || 'tokeshare-dapp',
           enableGasEstimation: false,
           ...(params.permit && { permit: params.permit }),
-          ...(params.ignoreCappedSlippage && { ignoreCappedSlippage: params.ignoreCappedSlippage }),
+          ...(params.ignoreCappedSlippage && {
+            ignoreCappedSlippage: params.ignoreCappedSlippage,
+          }),
         }),
       });
 
@@ -248,7 +257,9 @@ export const useSwap = () => {
         source: params.source || 'tokeshare-dapp',
         enableGasEstimation: false,
         ...(params.permit && { permit: params.permit }),
-        ...(params.ignoreCappedSlippage && { ignoreCappedSlippage: params.ignoreCappedSlippage }),
+        ...(params.ignoreCappedSlippage && {
+          ignoreCappedSlippage: params.ignoreCappedSlippage,
+        }),
       });
 
       if (!response.ok) {
@@ -335,7 +346,7 @@ export const useSwap = () => {
   };
 
   const performSwapWithdraw = async (params: {
-    tggAmount: string;
+    amount: string;
     outputToken: Address;
     routerAddress: Address;
     walletAddress: Address;
@@ -343,11 +354,11 @@ export const useSwap = () => {
     try {
       // 1. Vérifier les soldes TGG
       const tggBalance = await checkTokenBalance(CONTRACTS.TGG as Address, params.walletAddress);
-      const tggAmountBigInt = BigInt((parseFloat(params.tggAmount) * Math.pow(10, 18)).toString());
+      const tggAmountBigInt = BigInt((parseFloat(params.amount) * Math.pow(10, 18)).toString());
 
       if (tggBalance < tggAmountBigInt) {
         throw new Error(
-          `Insufficient TGG balance. Required: ${params.tggAmount}, Available: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`,
+          `Insufficient TGG balance. Required: ${params.amount}, Available: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`,
         );
       }
 
@@ -364,7 +375,7 @@ export const useSwap = () => {
 
       // 3. Obtenir la route de swap PAXG → outputToken
 
-      const conversion = await getConversion({ tggAmount: params.tggAmount });
+      const conversion = await getConversion({ tggAmount: params.amount });
 
       // Convertir en entier avant BigInt (Math.floor pour éviter les décimales)
       const conversionInteger = Math.floor(conversion * Math.pow(10, 18));
@@ -390,7 +401,7 @@ export const useSwap = () => {
 
       // 5. Exécuter le zapWithdraw avec le swapData construit
       const result = await zapWithdraw(
-        params.tggAmount,
+        params.amount,
         params.outputToken,
         swapData,
         params.routerAddress,

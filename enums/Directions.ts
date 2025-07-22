@@ -1,4 +1,4 @@
 export enum SwapDirection {
-  StablecoinToTGG = 'stablecoin-to-tgg',
-  TGGToStablecoin = 'tgg-to-stablecoin',
+  StablecoinToToken = 'StablecoinToToken',
+  TokenToStablecoin = 'TokenToStablecoin',
 }

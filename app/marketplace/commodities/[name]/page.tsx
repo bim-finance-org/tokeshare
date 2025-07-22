@@ -8,6 +8,7 @@ import Image from 'next/image';
 import CommoditiesInfos from '@/components/marketplace/commodities/CommoditiesInfos';
 import { use } from 'react';
 import { CONTRACTS } from '@/contracts/contracts';
+import { TOKENS } from '@/config/token';
 
 interface PageProps {
   params: Promise<{ name: string }>; // params is now a Promise
@@ -53,7 +54,7 @@ const CommodityPage = ({ params }: PageProps) => {
               Buy, Sell, or Swap Tokeshare Gold Gram
             </span>
           </h2>
-          <Exchange />
+          <Exchange token={TOKENS['TGG']} />
         </div>
       </div>
       <div className="pt-6 sm:pt-8 md:pt-12">

@@ -1,10 +1,11 @@
 import React from 'react';
 import { useAccount } from 'wagmi';
 import { useTokenBalance } from '@/utils/blockchainUtils';
+import { Blockchain } from '@/types/Blockchain';
 
 interface MaxButtonProps {
   currency: string;
-  blockchain: string;
+  blockchain: Blockchain;
   onMaxClick: (maxValue: string) => void;
   className?: string;
 }

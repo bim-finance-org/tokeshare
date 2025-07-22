@@ -1,10 +1,11 @@
 import React from 'react';
 import Currencies from '../Currencies';
 import StableCoins from '../StableCoins';
+import { Blockchain } from '@/types/Blockchain';
 
 interface TokenSelectorProps {
   type: 'fiat' | 'crypto' | 'stablecoin';
-  blockchain?: string;
+  blockchain?: Blockchain;
   onSelect: (token: string) => void;
   isOpen: boolean;
   onClose: () => void;
@@ -27,7 +28,7 @@ const TokenSelector = ({ isOpen, type, blockchain, onClose, onSelect }: TokenSel
             />
           ) : (
             <StableCoins
-              blockchain={blockchain || ''}
+              blockchain={blockchain || null}
               onSelect={(currency) => {
                 onSelect(currency);
                 onClose();
