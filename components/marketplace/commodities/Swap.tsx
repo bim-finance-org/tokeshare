@@ -382,7 +382,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
                 Transaction:
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                <span className="text-xs text-black bg-gray-100 font-mono px-2 py-1 rounded">
                   {hash.slice(0, 6)}...{hash.slice(-4)}
                 </span>
                 <button

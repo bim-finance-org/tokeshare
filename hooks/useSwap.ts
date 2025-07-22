@@ -59,7 +59,7 @@ export const useSwap = () => {
     tokenAddress: Address,
     userAddress: Address
   ): Promise<bigint> => {
-    if (!publicClient) throw new Error("Public client non disponible");
+    if (!publicClient) throw new Error("Public client not available");
 
     try {
       const balance = (await publicClient.readContract({
@@ -80,7 +80,7 @@ export const useSwap = () => {
     ownerAddress: Address,
     spenderAddress: Address
   ): Promise<bigint> => {
-    if (!publicClient) throw new Error("Public client non disponible");
+    if (!publicClient) throw new Error("Public client not available");
 
     try {
       const allowance = (await publicClient.readContract({
@@ -101,7 +101,7 @@ export const useSwap = () => {
     spenderAddress: Address,
     amount: bigint
   ): Promise<void> => {
-    if (!walletClient) throw new Error("Wallet client non disponible");
+    if (!walletClient) throw new Error("Wallet client not available");
 
     try {
       const hash = await walletClient.writeContract({
@@ -125,7 +125,7 @@ export const useSwap = () => {
     zapMintFee: number;
     zapWithdrawFee: number;
   }> => {
-    if (!publicClient) throw new Error("Public client non disponible");
+    if (!publicClient) throw new Error("Public client not available");
 
     try {
       const [zapMintFeeRaw, zapWithdrawFeeRaw] = await Promise.all([
@@ -148,29 +148,18 @@ export const useSwap = () => {
 
       return { zapMintFee, zapWithdrawFee };
     } catch (error) {
-      console.error("❌ Erreur lors de la lecture des fees:", error);
       throw error;
     }
   };
 
   const getConversion = async (params: { tggAmount: string }) => {
     try {
-      // Lire les fees réelles du contrat ZAP
       const { zapWithdrawFee } = await getZapFees();
 
-      console.log("zapWithdrawFee", zapWithdrawFee);
-
-      console.log("tggAmount", params.tggAmount);
-
-      // Calcul de conversion avec la vraie fee
       let conversion =
         (parseFloat(params.tggAmount) * 10 ** 9) / 31_103_476_800;
 
-      console.log("conversion", conversion);
-
-      conversion = conversion - conversion * zapWithdrawFee; // zapWithdrawFee est déjà en pourcentage
-
-      console.log("conversion after fee", conversion);
+      conversion = conversion - conversion * zapWithdrawFee;
 
       return conversion;
     } catch (error) {
@@ -233,7 +222,7 @@ export const useSwap = () => {
       const data = await response.json();
 
       if (data.code !== 0 || !data.data?.routeSummary) {
-        throw new Error(`Erreur API: ${data.message || "Réponse invalide"}`);
+        throw new Error(`API Error: ${data.message}`);
       }
 
       return data.data.routeSummary;
@@ -286,18 +275,15 @@ export const useSwap = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Erreur HTTP ${response.status}: ${errorText}`);
+        throw new Error(`HTTP Error ${response.status}: ${errorText}`);
       }
 
       const data: BuildRouteResponse = await response.json();
 
       if (data.code !== 0 || !data.data?.data) {
-        throw new Error(
-          `Erreur build API: ${data.message || "Données de swap manquantes"}`
-        );
+        throw new Error(`API build error: ${data.message}`);
       }
 
-      // console.log("data.data.data", data.data.data);
       return data.data.data;
     } catch (error) {
       throw error;
@@ -317,7 +303,7 @@ export const useSwap = () => {
       const decimals = getTokenDecimals(params.inputToken);
       if (decimals === undefined) {
         throw new Error(
-          `Impossible de déterminer les décimales pour le token ${params.inputToken}`
+          `Not available decimals for this token ${params.inputToken}`
         );
       }
 
@@ -325,26 +311,19 @@ export const useSwap = () => {
         parseFloat(params.inputAmount) * Math.pow(10, decimals)
       ).toString();
       if (isNaN(parseFloat(amountInBaseUnits))) {
-        throw new Error(`Montant invalide: ${params.inputAmount}`);
+        throw new Error(`Invalid amount`);
       }
 
       const amountBigInt = BigInt(amountInBaseUnits);
-      console.log("amountBigInt", amountBigInt);
       const balance = await checkTokenBalance(
         params.inputToken,
         params.walletAddress
       );
       if (balance < amountBigInt) {
         throw new Error(
-          `Solde insuffisant. Requis: ${amountInBaseUnits}, Disponible: ${balance.toString()}`
+          `Insufficient balance. Required: ${amountInBaseUnits}, Available: ${(Number(balance) / Math.pow(10, decimals)).toString()}`
         );
       }
-
-      console.log("inputToken", params.inputToken);
-      console.log("walletAddress", params.walletAddress);
-      console.log("inputAmount", params.inputAmount);
-      console.log("outputToken", params.outputToken);
-      console.log("routerAddress", params.routerAddress);
 
       const currentAllowance = await checkAllowance(
         params.inputToken,
@@ -369,8 +348,6 @@ export const useSwap = () => {
         gasInclude: true,
         slippageTolerance: 200,
       });
-
-      console.log("routeSummary", routeSummary);
 
       const swapData = await buildSwapData({
         routeSummary,
@@ -401,24 +378,18 @@ export const useSwap = () => {
     walletAddress: Address;
   }) => {
     try {
-      console.log("params.tggAmount", params.amount);
-      console.log("params.outputToken", params.outputToken);
-      console.log("params.routerAddress", params.routerAddress);
-      console.log("params.walletAddress", params.walletAddress);
-
       // 1. Vérifier les soldes TGG
       const tggBalance = await checkTokenBalance(
         CONTRACTS.TGG as Address,
         params.walletAddress
       );
       const tggAmountBigInt = BigInt(
-        (parseFloat(params.amount) * Math.pow(10, 18)).toString()
-      ); // TGG a 18 décimales
-      console.log("tggAmountBigInt", tggAmountBigInt);
+        (parseFloat(params.tggAmount) * Math.pow(10, 18)).toString()
+      );
 
       if (tggBalance < tggAmountBigInt) {
         throw new Error(
-          `Solde TGG insuffisant. Requis: ${params.amount}, Disponible: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`
+          `Insufficient TGG balance. Required: ${params.tggAmount}, Available: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`
         );
       }
 
@@ -445,8 +416,6 @@ export const useSwap = () => {
       const conversionInteger = Math.floor(conversion * Math.pow(10, 18));
       const conversionBigInt = BigInt(conversionInteger);
       const paxgAmountInBaseUnits = conversionBigInt.toString();
-
-      console.log("paxgAmountInBaseUnits", paxgAmountInBaseUnits);
 
       const routeSummary = await getSwapRoute({
         tokenIn: CONTRACTS.PAXG as Address,
