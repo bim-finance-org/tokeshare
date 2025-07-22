@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef, useContext } from "react";
-import PolygonIcon from "./icons/blockchains/PolygonIcon";
-import BaseIcon from "./icons/blockchains/BaseIcon";
-import ArrowDownIcon from "./icons/arrows/ArrowDownIcon";
-import { TokenContexts } from "@/context/TokenContexts";
-import { Blockchain } from "@/types/Blockchain";
-import { ExchangeSection } from "@/types/ExchangeSection";
-import { getTokenBlockchains } from "@/utils/token";
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import PolygonIcon from './icons/blockchains/PolygonIcon';
+import BaseIcon from './icons/blockchains/BaseIcon';
+import ArrowDownIcon from './icons/arrows/ArrowDownIcon';
+import { TokenContexts } from '@/context/TokenContexts';
+import { Blockchain } from '@/types/Blockchain';
+import { ExchangeSection } from '@/types/ExchangeSection';
+import { getTokenBlockchains } from '@/utils/token';
 
 interface BlockchainsProps {
   onSelect?: (blockchain: Blockchain) => void;
@@ -38,10 +38,7 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
 
   // Si la blockchain sélectionnée n'est pas dispo pour le token, la forcer à la première dispo
   useEffect(() => {
-    if (
-      !availableBlockchains.includes(blockchain) &&
-      availableBlockchains.length > 0
-    ) {
+    if (!availableBlockchains.includes(blockchain) && availableBlockchains.length > 0) {
       updateBlockchain(availableBlockchains[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,16 +51,13 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
   // Click hors menu
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -81,8 +75,7 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
   };
 
   // Icone dynamique
-  const renderIcon = (chain: Blockchain) =>
-    chain === Blockchain.Polygon ? <PolygonIcon /> : <BaseIcon />;
+  const renderIcon = (chain: Blockchain) => (chain === Blockchain.Polygon ? <PolygonIcon /> : <BaseIcon />);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -90,14 +83,12 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
         onClick={toggleDropdown}
         className="flex items-center cursor-default gap-3 px-3 py-2 bg-color1 rounded-xl shadow-md transition-all duration-200"
       >
-        <div className="w-6 h-6 flex items-center justify-center">
-          {renderIcon(blockchain)}
-        </div>
+        <div className="w-6 h-6 flex items-center justify-center">{renderIcon(blockchain)}</div>
         <span className="text-color4 font-medium">{blockchain}</span>
         {section !== ExchangeSection.Swap && (
           <ArrowDownIcon
             strokeColor="#4F5B76"
-            className={`w-6 h-6 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            className={`w-6 h-6 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           />
         )}
       </button>
@@ -109,12 +100,10 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
               key={chain}
               onClick={() => handleSelect(chain)}
               className={`flex items-center gap-3 w-full px-3 py-2 transition-colors duration-200 ${
-                blockchain === chain ? "bg-gray-100" : ""
+                blockchain === chain ? 'bg-gray-100' : ''
               }`}
             >
-              <div className="w-6 h-6 flex items-center justify-center">
-                {renderIcon(chain)}
-              </div>
+              <div className="w-6 h-6 flex items-center justify-center">{renderIcon(chain)}</div>
               <span className="text-color4 font-medium">{chain}</span>
             </button>
           ))}

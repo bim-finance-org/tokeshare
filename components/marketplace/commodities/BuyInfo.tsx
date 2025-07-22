@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 interface BuyInfoProps {
   amount: string;
@@ -6,7 +6,7 @@ interface BuyInfoProps {
   iban: string;
   alias: string;
   bank: string;
-  ref: string
+  ref: string;
 }
 
 const BuyInfo = ({ amount, beneficiary, iban, alias, bank, ref }: BuyInfoProps) => {
@@ -16,7 +16,7 @@ const BuyInfo = ({ amount, beneficiary, iban, alias, bank, ref }: BuyInfoProps) 
         <h1 className="text-xl font-bold mb-2">Transfer information</h1>
         <p className="text-gray-600">Please use the following information to make your transfer</p>
       </div>
-      
+
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span className="text-gray-600">Amount:</span>
@@ -44,7 +44,7 @@ const BuyInfo = ({ amount, beneficiary, iban, alias, bank, ref }: BuyInfoProps) 
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BuyInfo
+export default BuyInfo;

@@ -1,76 +1,79 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { CheckCircle } from 'lucide-react';
 
 interface BuyTransaction {
-  id: number
-  status: 'completed' | 'pending' | 'failed' | 'received'
-  walletAddress: string
-  blockchain: string
-  crypto: string
-  cryptoAmount: number
-  fiatAmount: number
-  fiat: string
-  ref: string
-  date: Date
-  email: string
-  cvu: string
-  fees: number
+  id: number;
+  status: 'completed' | 'pending' | 'failed' | 'received';
+  walletAddress: string;
+  blockchain: string;
+  crypto: string;
+  cryptoAmount: number;
+  fiatAmount: number;
+  fiat: string;
+  ref: string;
+  date: Date;
+  email: string;
+  cvu: string;
+  fees: number;
 }
 
 const BuyModal = () => {
-  const [selectedStatus, setSelectedStatus] = useState<string>('all')
-  const [searchRef, setSearchRef] = useState<string>('')
-  const [transactions, setTransactions] = useState<BuyTransaction[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [expandedTransactionId, setExpandedTransactionId] = useState<number | null>(null)
-  const [validationStep, setValidationStep] = useState<number | null>(null)
-  const [newCryptoAmount, setNewCryptoAmount] = useState<number>(0)
-  const [copiedId, setCopiedId] = useState<number | null>(null)
-  const [showCopiedNotification, setShowCopiedNotification] = useState(false)
-  const router = useRouter()
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [searchRef, setSearchRef] = useState<string>('');
+  const [transactions, setTransactions] = useState<BuyTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedTransactionId, setExpandedTransactionId] = useState<number | null>(null);
+  const [validationStep, setValidationStep] = useState<number | null>(null);
+  const [newCryptoAmount, setNewCryptoAmount] = useState<number>(0);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [showCopiedNotification, setShowCopiedNotification] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchTransactions() {
       try {
-        setIsLoading(true)
-        setError(null)
-        const response = await fetch('/api/transactions/buy')
-        
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch('/api/transactions/buy');
+
         if (response.status === 401) {
           // User is not authenticated
           signOut({ callbackUrl: '/dashboard' });
           return;
         }
-        
+
         if (!response.ok) {
-          throw new Error('Error fetching data')
+          throw new Error('Error fetching data');
         }
-        
-        const data = await response.json()
-        setTransactions(data)
+
+        const data = await response.json();
+        setTransactions(data);
       } catch (error) {
-        console.error('Error fetching transactions:', error)
-        setError('Unable to load transactions. Please try again.')
+        console.error('Error fetching transactions:', error);
+        setError('Unable to load transactions. Please try again.');
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
-    fetchTransactions()
-  }, [])
+    fetchTransactions();
+  }, []);
 
-  const filteredData = transactions.filter(transaction => {
-    const statusMatch = selectedStatus === 'all' || transaction.status === selectedStatus
-    const refMatch = searchRef === '' || transaction.ref.toLowerCase().includes(searchRef.toLowerCase())
-    return statusMatch && refMatch
-  })
+  const filteredData = transactions.filter((transaction) => {
+    const statusMatch = selectedStatus === 'all' || transaction.status === selectedStatus;
+    const refMatch = searchRef === '' || transaction.ref.toLowerCase().includes(searchRef.toLowerCase());
+    return statusMatch && refMatch;
+  });
 
-  const handleChangeStatus = async (transactionId: number, newStatus: 'pending' | 'completed' | 'failed' | 'received') => {
+  const handleChangeStatus = async (
+    transactionId: number,
+    newStatus: 'pending' | 'completed' | 'failed' | 'received',
+  ) => {
     try {
       setError(null);
       const response = await fetch(`/api/transactions/buy/${transactionId}/status`, {
@@ -92,12 +95,10 @@ const BuyModal = () => {
       }
 
       // Update local state
-      setTransactions(prevTransactions =>
-        prevTransactions.map(transaction =>
-          transaction.id === transactionId
-            ? { ...transaction, status: newStatus }
-            : transaction
-        )
+      setTransactions((prevTransactions) =>
+        prevTransactions.map((transaction) =>
+          transaction.id === transactionId ? { ...transaction, status: newStatus } : transaction,
+        ),
       );
 
       // Close expanded menu
@@ -111,7 +112,7 @@ const BuyModal = () => {
   const handleReceived = async (transactionId: number) => {
     try {
       setError(null);
-      // Call API to change status to received  
+      // Call API to change status to received
       const response = await fetch(`/api/transactions/buy/${transactionId}/status`, {
         method: 'PUT',
         headers: {
@@ -131,12 +132,10 @@ const BuyModal = () => {
       }
 
       // Update local data
-      setTransactions(prevTransactions =>
-        prevTransactions.map(transaction =>
-          transaction.id === transactionId
-            ? { ...transaction, status: 'received' }
-            : transaction
-        )
+      setTransactions((prevTransactions) =>
+        prevTransactions.map((transaction) =>
+          transaction.id === transactionId ? { ...transaction, status: 'received' } : transaction,
+        ),
       );
 
       // Open interface with three buttons
@@ -155,14 +154,14 @@ const BuyModal = () => {
   const handleConfirmValidation = async (transactionId: number) => {
     try {
       setError(null);
-      
+
       // Validate input
       const cryptoAmount = newCryptoAmount;
       if (isNaN(cryptoAmount) || cryptoAmount <= 0) {
         setError('Please enter a valid amount');
         return;
       }
-      
+
       // First update the status to completed
       const statusResponse = await fetch(`/api/transactions/buy/${transactionId}/status`, {
         method: 'PUT',
@@ -202,12 +201,12 @@ const BuyModal = () => {
       const updatedTransaction = await amountResponse.json();
 
       // Update local state
-      setTransactions(prevTransactions =>
-        prevTransactions.map(transaction =>
+      setTransactions((prevTransactions) =>
+        prevTransactions.map((transaction) =>
           transaction.id === transactionId
             ? { ...transaction, status: 'completed', cryptoAmount: cryptoAmount }
-            : transaction
-        )
+            : transaction,
+        ),
       );
 
       // Reset validation step and amount
@@ -226,7 +225,8 @@ const BuyModal = () => {
   };
 
   const handleCopyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
+    navigator.clipboard
+      .writeText(text)
       .then(() => {
         // Show notification
         setShowCopiedNotification(true);
@@ -241,7 +241,7 @@ const BuyModal = () => {
   };
 
   return (
-    <div className='w-full h-full p-4 relative'>
+    <div className="w-full h-full p-4 relative">
       {/* Notification de copie */}
       {showCopiedNotification && (
         <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md flex items-center shadow-lg">
@@ -249,25 +249,39 @@ const BuyModal = () => {
           <span className="font-medium">Copied!</span>
         </div>
       )}
-      
+
       <div className="mb-4 flex gap-4">
         <div className="w-48">
-          <label htmlFor="status" className="block text-sm font-medium text-black mb-1">Filter by status</label>
+          <label htmlFor="status" className="block text-sm font-medium text-black mb-1">
+            Filter by status
+          </label>
           <select
             id="status"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="w-full px-3 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="all" className='text-black'>All statuses</option>
-            <option value="completed" className='text-black'>Completed</option>
-            <option value="pending" className='text-black'>Pending</option>
-            <option value="failed" className='text-black'>Failed</option>
-            <option value="received" className='text-black'>Received</option>
+            <option value="all" className="text-black">
+              All statuses
+            </option>
+            <option value="completed" className="text-black">
+              Completed
+            </option>
+            <option value="pending" className="text-black">
+              Pending
+            </option>
+            <option value="failed" className="text-black">
+              Failed
+            </option>
+            <option value="received" className="text-black">
+              Received
+            </option>
           </select>
         </div>
         <div className="flex-1">
-          <label htmlFor="search" className="block text-sm font-medium text-black mb-1">Search by reference</label>
+          <label htmlFor="search" className="block text-sm font-medium text-black mb-1">
+            Search by reference
+          </label>
           <input
             type="text"
             id="search"
@@ -278,7 +292,7 @@ const BuyModal = () => {
           />
         </div>
       </div>
-      
+
       {isLoading ? (
         <div className="flex justify-center items-center h-40">
           <p className="text-gray-500">Loading transactions...</p>
@@ -296,37 +310,57 @@ const BuyModal = () => {
           <table className="min-w-full bg-white border border-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wallet Address</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blockchain</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Crypto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Wallet Address
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Blockchain
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Crypto
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Amount
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fees</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ref</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CVU</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredData.map((transaction) => (
                 <tr key={transaction.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      transaction.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      transaction.status === 'received' ? 'bg-blue-100 text-blue-800' :
-                      transaction.status === 'failed' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        transaction.status === 'completed'
+                          ? 'bg-green-100 text-green-800'
+                          : transaction.status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : transaction.status === 'received'
+                              ? 'bg-blue-100 text-blue-800'
+                              : transaction.status === 'failed'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {transaction.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex items-center">
-                      <span 
-                        className="cursor-pointer hover:text-blue-500 hover:underline" 
+                      <span
+                        className="cursor-pointer hover:text-blue-500 hover:underline"
                         onClick={() => handleCopyToClipboard(transaction.walletAddress)}
                         title="Click to copy wallet address"
                       >
@@ -336,8 +370,9 @@ const BuyModal = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {transaction.crypto} <span 
-                      className="cursor-pointer hover:text-blue-500 hover:underline" 
+                    {transaction.crypto}{' '}
+                    <span
+                      className="cursor-pointer hover:text-blue-500 hover:underline"
                       onClick={() => handleCopyToClipboard(transaction.cryptoAmount.toString())}
                       title="Click to copy crypto amount"
                     >
@@ -345,9 +380,14 @@ const BuyModal = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {transaction.fiat} <span 
-                      className="cursor-pointer hover:text-blue-500 hover:underline" 
-                      onClick={() => handleCopyToClipboard(parseFloat((transaction.fiatAmount - transaction.fees).toString()).toFixed(2))}
+                    {transaction.fiat}{' '}
+                    <span
+                      className="cursor-pointer hover:text-blue-500 hover:underline"
+                      onClick={() =>
+                        handleCopyToClipboard(
+                          parseFloat((transaction.fiatAmount - transaction.fees).toString()).toFixed(2),
+                        )
+                      }
                       title="Click to copy fiat amount"
                     >
                       {parseFloat((transaction.fiatAmount - transaction.fees).toString()).toFixed(2)}
@@ -365,9 +405,10 @@ const BuyModal = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {transaction.status === 'completed' || transaction.status === 'failed' ? (
                       <div className="flex flex-col gap-2">
-                        <button 
+                        <button
                           onClick={() => handleChangeStatus(transaction.id, 'pending')}
-                          className="bg-gray-500 text-white px-4 py-2 rounded-md">
+                          className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                        >
                           Reset
                         </button>
                       </div>
@@ -383,54 +424,62 @@ const BuyModal = () => {
                           />
                         </div>
                         <div className="flex gap-2">
-                          <button 
+                          <button
                             onClick={() => handleConfirmValidation(transaction.id)}
-                            className="bg-green-500 text-white px-4 py-2 rounded-md">
+                            className="bg-green-500 text-white px-4 py-2 rounded-md"
+                          >
                             Confirm
                           </button>
-                          <button 
+                          <button
                             onClick={handleCancelValidation}
-                            className="bg-gray-500 text-white px-4 py-2 rounded-md">
+                            className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                          >
                             Cancel
                           </button>
                         </div>
                       </div>
                     ) : expandedTransactionId === transaction.id ? (
                       <div className="flex flex-col gap-2">
-                        <button 
+                        <button
                           onClick={() => handleChangeStatus(transaction.id, 'pending')}
-                          className="bg-yellow-500 text-white px-4 py-2 rounded-md">
+                          className="bg-yellow-500 text-white px-4 py-2 rounded-md"
+                        >
                           Pending
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleStartValidation(transaction.id, transaction.cryptoAmount)}
-                          className="bg-green-500 text-white px-4 py-2 rounded-md">
+                          className="bg-green-500 text-white px-4 py-2 rounded-md"
+                        >
                           Validate
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleChangeStatus(transaction.id, 'failed')}
-                          className="bg-red-500 text-white px-4 py-2 rounded-md">
+                          className="bg-red-500 text-white px-4 py-2 rounded-md"
+                        >
                           Cancel
                         </button>
                       </div>
                     ) : transaction.status === 'pending' ? (
                       <div className="flex flex-col gap-2">
-                        <button 
+                        <button
                           onClick={() => handleReceived(transaction.id)}
-                          className="bg-blue-500 text-white px-4 py-2 rounded-md">
+                          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                        >
                           Received
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleChangeStatus(transaction.id, 'failed')}
-                          className="bg-red-500 text-white px-4 py-2 rounded-md">
+                          className="bg-red-500 text-white px-4 py-2 rounded-md"
+                        >
                           Cancel
                         </button>
                       </div>
                     ) : (
                       <div className="flex flex-col gap-2">
-                        <button 
+                        <button
                           onClick={() => handleChangeStatus(transaction.id, 'failed')}
-                          className="bg-red-500 text-white px-4 py-2 rounded-md">
+                          className="bg-red-500 text-white px-4 py-2 rounded-md"
+                        >
                           Cancel
                         </button>
                       </div>
@@ -443,7 +492,7 @@ const BuyModal = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default BuyModal
+export default BuyModal;

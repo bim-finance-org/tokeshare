@@ -27,7 +27,6 @@ interface BuyEmailData extends BaseEmailData {
   tokenSymbol: string;
   tokenAmount: string | number;
   walletAddress: string;
-
 }
 
 // Interface spécifique pour les emails de vente
@@ -38,16 +37,16 @@ interface SellEmailData extends BaseEmailData {
 /**
  * Envoie un email de confirmation de transaction en fonction du type de transaction
  */
-export async function sendTransactionEmail(data: BaseEmailData & { transactionType: 'buy' | 'sell' } & Partial<BuyEmailData>) {
+export async function sendTransactionEmail(
+  data: BaseEmailData & { transactionType: 'buy' | 'sell' } & Partial<BuyEmailData>,
+) {
   if (data.transactionType === 'buy') {
     // Validation des données spécifiques à l'achat
     console.log(data);
-    if (!data.blockchain || !data.fiatAmount || 
-        !data.tokenSymbol || !data.tokenAmount || !data.walletAddress) {
-            
-      throw new Error('Données manquantes pour l\'email d\'achat');
+    if (!data.blockchain || !data.fiatAmount || !data.tokenSymbol || !data.tokenAmount || !data.walletAddress) {
+      throw new Error("Données manquantes pour l'email d'achat");
     }
-    
+
     return sendBuyTransactionEmail({
       email: data.email,
       fullName: data.fullName,
@@ -58,13 +57,13 @@ export async function sendTransactionEmail(data: BaseEmailData & { transactionTy
       fiatAmount: data.fiatAmount,
       tokenSymbol: data.tokenSymbol,
       tokenAmount: data.tokenAmount,
-      walletAddress: data.walletAddress
+      walletAddress: data.walletAddress,
     });
   } else {
     return sendSellTransactionEmail({
       email: data.email,
       fullName: data.fullName,
-      transactionRef: data.transactionRef
+      transactionRef: data.transactionRef,
     });
   }
 }
@@ -74,11 +73,11 @@ export async function sendTransactionEmail(data: BaseEmailData & { transactionTy
  */
 async function sendBuyTransactionEmail(data: BuyEmailData) {
   validateEmailConfig();
-  
+
   // Validation des données requises
   console.log(data);
   if (!data.email || !data.fullName || !data.transactionRef) {
-    throw new Error('Données manquantes pour l\'envoi de l\'email');
+    throw new Error("Données manquantes pour l'envoi de l'email");
   }
 
   try {
@@ -92,7 +91,7 @@ async function sendBuyTransactionEmail(data: BuyEmailData) {
       tokenSymbol: data.tokenSymbol,
       tokenAmount: data.tokenAmount,
       walletAddress: data.walletAddress,
-      companyName: 'TokeShare'
+      companyName: 'TokeShare',
     };
 
     // Conversion du composant React en HTML
@@ -102,7 +101,7 @@ async function sendBuyTransactionEmail(data: BuyEmailData) {
       to: data.email,
       subject: `Your purchase transaction - TokeShare`,
       html,
-      transactionType: 'buy'
+      transactionType: 'buy',
     });
   } catch (error) {
     handleEmailError(error);
@@ -114,17 +113,17 @@ async function sendBuyTransactionEmail(data: BuyEmailData) {
  */
 async function sendSellTransactionEmail(data: SellEmailData) {
   validateEmailConfig();
-  
+
   // Validation des données requises
   if (!data.email || !data.fullName || !data.transactionRef) {
-    throw new Error('Données manquantes pour l\'envoi de l\'email');
+    throw new Error("Données manquantes pour l'envoi de l'email");
   }
 
   try {
     const props = {
       fullName: data.fullName,
       transactionRef: data.transactionRef,
-      companyName: 'TokeShare'
+      companyName: 'TokeShare',
     };
 
     // Conversion du composant React en HTML
@@ -134,7 +133,7 @@ async function sendSellTransactionEmail(data: SellEmailData) {
       to: data.email,
       subject: `Your sale transaction - TokeShare`,
       html,
-      transactionType: 'sell'
+      transactionType: 'sell',
     });
   } catch (error) {
     handleEmailError(error);
@@ -144,9 +143,14 @@ async function sendSellTransactionEmail(data: SellEmailData) {
 /**
  * Fonction interne pour envoyer l'email
  */
-async function sendEmail({ to, subject, html, transactionType }: { 
-  to: string; 
-  subject: string; 
+async function sendEmail({
+  to,
+  subject,
+  html,
+  transactionType,
+}: {
+  to: string;
+  subject: string;
   html: string;
   transactionType: 'buy' | 'sell';
 }) {
@@ -155,7 +159,7 @@ async function sendEmail({ to, subject, html, transactionType }: {
     from: `TokeShare <${RESEND_FROM_EMAIL}>`,
     to,
     subject,
-    html
+    html,
   });
 
   if (emailError) {
@@ -187,5 +191,5 @@ function validateEmailConfig() {
  */
 function handleEmailError(error: unknown) {
   console.error('Error in sendTransactionEmail:', error);
-  throw new Error(error instanceof Error ? error.message : 'Erreur lors de l\'envoi de l\'email');
-} 
+  throw new Error(error instanceof Error ? error.message : "Erreur lors de l'envoi de l'email");
+}

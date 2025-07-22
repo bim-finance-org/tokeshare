@@ -1,8 +1,23 @@
-import React, { ComponentPropsWithRef } from "react";
+import React, { ComponentPropsWithRef } from 'react';
 
-const QuadIcon = ({ size = 24, className, ...props }: ComponentPropsWithRef<"svg"> & { size?: number; fillColor?: string }) => {
+const QuadIcon = ({
+  size = 24,
+  className,
+  ...props
+}: ComponentPropsWithRef<'svg'> & { size?: number; fillColor?: string }) => {
   return (
-    <svg fill="#000000" height={size} width={size} className={className} {...props} version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 470" xmlnsXlink="http://www.w3.org/1999/xlink" enableBackground="new 0 0 470 470">
+    <svg
+      fill="#000000"
+      height={size}
+      width={size}
+      className={className}
+      {...props}
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 470 470"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      enableBackground="new 0 0 470 470"
+    >
       <g>
         <path d="m97.302,233.4h-50.239c-19.023,0-34.5,15.477-34.5,34.5v167.6c0,19.023 15.477,34.5 34.5,34.5h50.239c19.023,0 34.5-15.477 34.5-34.5v-167.6c0-19.023-15.477-34.5-34.5-34.5zm0,221.6h-50.239c-10.752,0-19.5-8.748-19.5-19.5v-20.9h19.599c4.143,0 7.5-3.357 7.5-7.5s-3.357-7.5-7.5-7.5h-19.599v-40.4h19.599c4.143,0 7.5-3.357 7.5-7.5s-3.357-7.5-7.5-7.5h-19.599v-40.4h19.599c4.143,0 7.5-3.357 7.5-7.5s-3.357-7.5-7.5-7.5h-19.599v-20.9c0-10.752 8.748-19.5 19.5-19.5h50.239c10.752,0 19.5,8.748 19.5,19.5v20.9h-19.599c-4.143,0-7.5,3.357-7.5,7.5s3.357,7.5 7.5,7.5h19.599v40.4h-19.599c-4.143,0-7.5,3.357-7.5,7.5s3.357,7.5 7.5,7.5h19.599v40.4h-19.599c-4.143,0-7.5,3.357-7.5,7.5s3.357,7.5 7.5,7.5h19.599v20.9c0,10.752-8.748,19.5-19.5,19.5z" />
         <path d="m315.698,344.2h-161.396c-4.143,0-7.5,3.357-7.5,7.5s3.357,7.5 7.5,7.5h161.396c4.143,0 7.5-3.357 7.5-7.5s-3.357-7.5-7.5-7.5z" />

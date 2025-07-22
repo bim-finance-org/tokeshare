@@ -1,11 +1,11 @@
-import React from 'react'
-import Image from 'next/image'
+import React from 'react';
+import Image from 'next/image';
 const BankIcon = () => {
   return (
     <div>
-        <Image src="/images/bank-icon.png" alt="Bank Icon" width={30} height={30} />
+      <Image src="/images/bank-icon.png" alt="Bank Icon" width={30} height={30} />
     </div>
-  )
-}
- 
-export default BankIcon
+  );
+};
+
+export default BankIcon;

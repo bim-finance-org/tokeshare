@@ -1,9 +1,9 @@
-import React from 'react'
-import Image from 'next/image'
+import React from 'react';
+import Image from 'next/image';
 
 interface CRVIconProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
 const CRVIcon = ({ size = 24, className = '' }: CRVIconProps) => {
@@ -15,7 +15,7 @@ const CRVIcon = ({ size = 24, className = '' }: CRVIconProps) => {
       height={size}
       className={`rounded-full ${className}`}
     />
-  )
-}
+  );
+};
 
-export default CRVIcon
+export default CRVIcon;

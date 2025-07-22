@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React from "react";
-import Exchange from "@/components/marketplace/commodities/Exchange";
-import commoditiesData from "@/data/commoditiesData.json";
-import Contracts from "@/components/Contracts";
-import Image from "next/image";
-import CommoditiesInfos from "@/components/marketplace/commodities/CommoditiesInfos";
-import { use } from "react";
-import { CONTRACTS } from "@/contracts/contracts";
-import { TOKENS } from "@/config/token";
+import React from 'react';
+import Exchange from '@/components/marketplace/commodities/Exchange';
+import commoditiesData from '@/data/commoditiesData.json';
+import Contracts from '@/components/Contracts';
+import Image from 'next/image';
+import CommoditiesInfos from '@/components/marketplace/commodities/CommoditiesInfos';
+import { use } from 'react';
+import { CONTRACTS } from '@/contracts/contracts';
+import { TOKENS } from '@/config/token';
 
 interface PageProps {
   params: Promise<{ name: string }>; // params is now a Promise
@@ -16,16 +16,10 @@ interface PageProps {
 
 const CommodityPage = ({ params }: PageProps) => {
   const { name } = use(params); // Unwrapping params using React.use()
-  const commodity = commoditiesData.find(
-    (c) => c.name.toLowerCase() === name.toLowerCase()
-  );
+  const commodity = commoditiesData.find((c) => c.name.toLowerCase() === name.toLowerCase());
 
   if (!commodity) {
-    return (
-      <div className="h-screen flex items-center justify-center text-xl">
-        Commodity not found
-      </div>
-    );
+    return <div className="h-screen flex items-center justify-center text-xl">Commodity not found</div>;
   }
 
   const { image } = commodity;
@@ -44,21 +38,10 @@ const CommodityPage = ({ params }: PageProps) => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 p-4 sm:p-6">
             <div className="relative">
-              <Image
-                src="/images/currencies/tgg.png"
-                alt="TGG Logo"
-                width={120}
-                height={120}
-              />
+              <Image src="/images/currencies/tgg.png" alt="TGG Logo" width={120} height={120} />
             </div>
             <div className="relative mt-4 sm:mt-0">
-              <Image
-                src={image}
-                alt={name}
-                width={200}
-                height={200}
-                className="rounded-xl"
-              />
+              <Image src={image} alt={name} width={200} height={200} className="rounded-xl" />
             </div>
           </div>
         </div>
@@ -71,7 +54,7 @@ const CommodityPage = ({ params }: PageProps) => {
               Buy, Sell, or Swap Tokeshare Gold Gram
             </span>
           </h2>
-          <Exchange token={TOKENS["TGG"]} />
+          <Exchange token={TOKENS['TGG']} />
         </div>
       </div>
       <div className="pt-6 sm:pt-8 md:pt-12">

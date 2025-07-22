@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const Blockchain = () => {
   return (
@@ -31,43 +31,43 @@ const Blockchain = () => {
             <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Contract Address</h3>
               <a
-    href="https://polygonscan.com/address/0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
-  >
-    0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71
-  </a>
+                href="https://polygonscan.com/address/0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
+              >
+                0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71
+              </a>
             </div>
 
             <div className="py-4 flex flex-col md:flex-row justify-between ">
               <h3 className="text-lg font-semibold">Owner Wallet</h3>
               <a
-    href="https://polygonscan.com/address/0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
-  >
-    0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E
-  </a>
+                href="https://polygonscan.com/address/0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
+              >
+                0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E
+              </a>
             </div>
           </div>
 
           {/* Colonne de droite */}
           {/* <div className="md:pl-6"> */}
-            {/* Property Type */}
-            {/* <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
+          {/* Property Type */}
+          {/* <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
               <h3 className="text-lg font-semibold text-color2">Base Chain</h3>
               <p className="text-base mt-2 md:mt-0">...</p>
             </div> */}
 
-            {/* <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
+          {/* <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Contract Address</h3>
               <p className="text-base mt-2 md:mt-0">...</p>
             </div> */}
 
-            {/* Full Address */}
-            {/* <div className="py-4 flex flex-col md:flex-row justify-between">
+          {/* Full Address */}
+          {/* <div className="py-4 flex flex-col md:flex-row justify-between">
               <h3 className="text-lg font-semibold">Owner Wallet</h3>
               <p className="text-base mt-2 md:mt-0">...</p>
             </div> */}

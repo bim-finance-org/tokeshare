@@ -6,9 +6,9 @@
   - Exemple :
     ```ts
     export const TOKENS = {
-      USDT: { address: "0x...", decimals: 6 },
-      USDC: { address: "0x...", decimals: 6 },
-      TGG:  { address: "0x...", decimals: 18 },
+      USDT: { address: '0x...', decimals: 6 },
+      USDC: { address: '0x...', decimals: 6 },
+      TGG: { address: '0x...', decimals: 18 },
       // ...
     };
     ```

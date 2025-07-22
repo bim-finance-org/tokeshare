@@ -1,5 +1,5 @@
-import React from "react";
-import { HouseGeneralInfo, HouseHighlights } from "@/types/House";
+import React from 'react';
+import { HouseGeneralInfo, HouseHighlights } from '@/types/House';
 
 interface HighlightsProps {
   highlights: HouseHighlights;
@@ -7,7 +7,18 @@ interface HighlightsProps {
 }
 
 const Highlights: React.FC<HighlightsProps> = ({ highlights, general }) => {
-  const { tokenType, totalTokens, propertyType, fullAddress, source, country, constructionYear, bathrooms, rentalType, rented } = highlights;
+  const {
+    tokenType,
+    totalTokens,
+    propertyType,
+    fullAddress,
+    source,
+    country,
+    constructionYear,
+    bathrooms,
+    rentalType,
+    rented,
+  } = highlights;
 
   const { tokenPrice, expectedIncome, dateIncome } = general;
 

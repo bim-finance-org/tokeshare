@@ -1,6 +1,5 @@
-import { Period } from "@/enums/Period";
-import { useEffect, useState } from "react";
-
+import { Period } from '@/enums/Period';
+import { useEffect, useState } from 'react';
 
 interface PerformanceData {
   todayPrice?: number;
@@ -26,7 +25,7 @@ export function usePaxgPerformance(period: Period = Period.OneDay) {
       .then(async (res) => {
         if (!res.ok) {
           const json = await res.json();
-          throw new Error(json.error || "Unknow error");
+          throw new Error(json.error || 'Unknow error');
         }
         return res.json();
       })

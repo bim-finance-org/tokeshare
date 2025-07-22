@@ -1,29 +1,29 @@
-import React, { useState, useEffect, useContext } from "react";
-import TradeWidget from "@/components/shared/TradeWidget";
-import Image from "next/image";
-import Blockchains from "@/components/Blockchains";
-import { useAccount } from "wagmi";
-import ConnectButton from "@/components/shared/ConnectButton";
-import { TokenContexts } from "@/context/TokenContexts";
-import { useSwap } from "@/hooks/useSwap";
-import { useSwapQuote } from "@/hooks/useSwapQuote";
-import { CONTRACTS, TRUSTED_AGGREGATORS } from "@/contracts/contracts";
-import { Address } from "viem";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, AlertCircle, ExternalLink } from "lucide-react";
-import { SwapDirection } from "@/enums/Directions";
-import { TokenInfo } from "@/config/token";
-import { Blockchain } from "@/types/Blockchain";
-import { getTokenAddress } from "@/utils/token";
-import { useTokenPrice } from "@/hooks/useTokenPrice";
-import { ExchangeSection } from "@/types/ExchangeSection";
-import { useMarketplaceContract } from "@/hooks/useMarketplaceContracts";
-import { useAutoSwitchNetwork } from "@/hooks/useAutoSwitchNetwork";
+import React, { useState, useEffect, useContext } from 'react';
+import TradeWidget from '@/components/shared/TradeWidget';
+import Image from 'next/image';
+import Blockchains from '@/components/Blockchains';
+import { useAccount } from 'wagmi';
+import ConnectButton from '@/components/shared/ConnectButton';
+import { TokenContexts } from '@/context/TokenContexts';
+import { useSwap } from '@/hooks/useSwap';
+import { useSwapQuote } from '@/hooks/useSwapQuote';
+import { CONTRACTS, TRUSTED_AGGREGATORS } from '@/contracts/contracts';
+import { Address } from 'viem';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { SwapDirection } from '@/enums/Directions';
+import { TokenInfo } from '@/config/token';
+import { Blockchain } from '@/types/Blockchain';
+import { getTokenAddress } from '@/utils/token';
+import { useTokenPrice } from '@/hooks/useTokenPrice';
+import { ExchangeSection } from '@/types/ExchangeSection';
+import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
+import { useAutoSwitchNetwork } from '@/hooks/useAutoSwitchNetwork';
 
 // Définir le type pour les propriétés acceptées par TradeWidget
-type TradeWidgetType = "stablecoin" | "crypto" | "fiat";
+type TradeWidgetType = 'stablecoin' | 'crypto' | 'fiat';
 
 export type SwapQuoteParams = {
   inputToken: Address;
@@ -41,36 +41,25 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   useAutoSwitchNetwork(selectedBlockchain);
 
-  const [stablecoinAmount, setStablecoinAmount] = useState("10");
-  const [amount, setAmount] = useState("0");
+  const [stablecoinAmount, setStablecoinAmount] = useState('10');
+  const [amount, setAmount] = useState('0');
   const [isTggFirst, setIsTggFirst] = useState(false);
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
-  const [errorTransaction, setErrorTransaction] = useState("");
+  const [errorTransaction, setErrorTransaction] = useState('');
 
   const { isConnected, address } = useAccount();
   const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
   const { buyTokenOnMarketplace } = useMarketplaceContract();
-  const { price: tokenPrice, isLoading: isPriceLoading } = useTokenPrice(
-    token.symbol
-  );
+  const { price: tokenPrice, isLoading: isPriceLoading } = useTokenPrice(token.symbol);
 
-  const [swapQuoteParams, setSwapQuoteParams] =
-    useState<SwapQuoteParams | null>(null);
+  const [swapQuoteParams, setSwapQuoteParams] = useState<SwapQuoteParams | null>(null);
 
   useEffect(() => {
-    const inputToken = getTokenAddress(
-      isTggFirst ? token.symbol : stablecoin,
-      selectedBlockchain
-    );
-    const outputToken = getTokenAddress(
-      isTggFirst ? stablecoin : token.symbol,
-      selectedBlockchain
-    );
+    const inputToken = getTokenAddress(isTggFirst ? token.symbol : stablecoin, selectedBlockchain);
+    const outputToken = getTokenAddress(isTggFirst ? stablecoin : token.symbol, selectedBlockchain);
 
     const inputAmount = isTggFirst ? amount : stablecoinAmount;
-    const direction = isTggFirst
-      ? SwapDirection.TokenToStablecoin
-      : SwapDirection.StablecoinToToken;
+    const direction = isTggFirst ? SwapDirection.TokenToStablecoin : SwapDirection.StablecoinToToken;
 
     if (inputToken && outputToken) {
       setSwapQuoteParams({ inputToken, outputToken, inputAmount, direction });
@@ -101,21 +90,21 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   useEffect(() => {
     if (errorTransaction) {
-      const timeout = setTimeout(() => setErrorTransaction(""), 3000);
+      const timeout = setTimeout(() => setErrorTransaction(''), 3000);
       return () => clearTimeout(timeout);
     }
   }, [errorTransaction]);
 
   // Handle stablecoin amount change
   const handleStablecoinAmountChange = (amount: string) => {
-    if (amount === "" || /^\d*\.?\d*$/.test(amount)) {
+    if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setStablecoinAmount(amount);
     }
   };
 
   // Handle TGG amount change
   const handleTggAmountChange = (amount: string) => {
-    if (amount === "" || /^\d*\.?\d*$/.test(amount)) {
+    if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setAmount(amount);
     }
   };
@@ -128,12 +117,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   // Handle blockchain selection
   const handleBlockchainSelect = (blockchain: Blockchain) => {
     setSelectedBlockchain(blockchain);
-    setStablecoin(blockchain === Blockchain.Polygon ? "USDT" : "USDC");
+    setStablecoin(blockchain === Blockchain.Polygon ? 'USDT' : 'USDC');
   };
 
   // Handle swap button click
   const handleSwap = () => {
-    if (token.symbol === "TFT_001") {
+    if (token.symbol === 'TFT_001') {
       return;
     }
     setIsTggFirst(!isTggFirst);
@@ -156,7 +145,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   };
 
   const swapIn = async (symbol: string) => {
-    if (symbol == "TGG") {
+    if (symbol == 'TGG') {
       const paxgAddress = CONTRACTS.PAXG as Address;
       const routerAddress = TRUSTED_AGGREGATORS.kyberSwap as Address;
       const inputTokenAddress = getTokenAddress(stablecoin, selectedBlockchain);
@@ -173,14 +162,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         routerAddress: routerAddress,
         walletAddress: address as Address,
       });
-    } else if (symbol == "TFT_001") {
+    } else if (symbol == 'TFT_001') {
       try {
         setIsPreparingSwap(true);
-        const receipt = await buyTokenOnMarketplace(
-          token.symbol,
-          amount,
-          stablecoin
-        );
+        const receipt = await buyTokenOnMarketplace(token.symbol, amount, stablecoin);
       } catch (err) {
         setErrorTransaction(err instanceof Error ? err.message : String(err));
       } finally {
@@ -190,13 +175,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   };
 
   const swapOut = async (symbol: string) => {
-    if (symbol == "TGG") {
+    if (symbol == 'TGG') {
       const routerAddress = TRUSTED_AGGREGATORS.kyberSwap as Address;
 
-      const outputTokenAddress = getTokenAddress(
-        stablecoin,
-        selectedBlockchain
-      );
+      const outputTokenAddress = getTokenAddress(stablecoin, selectedBlockchain);
 
       if (!outputTokenAddress) {
         setIsPreparingSwap(false);
@@ -209,7 +191,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         routerAddress: routerAddress as Address,
         walletAddress: address as Address,
       });
-    } else if (symbol == "TFT_001") {
+    } else if (symbol == 'TFT_001') {
     }
   };
 
@@ -223,8 +205,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         swapOut(token.symbol);
       }
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       setErrorTransaction(errorMessage);
     } finally {
       setIsPreparingSwap(false);
@@ -239,13 +220,11 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   // Déterminer quel widget est en entrée (modifiable) et lequel est en sortie (lecture seule)
   const topWidgetProps = {
-    type: (isTggFirst ? "crypto" : "stablecoin") as TradeWidgetType,
-    label: "YOU SEND",
+    type: (isTggFirst ? 'crypto' : 'stablecoin') as TradeWidgetType,
+    label: 'YOU SEND',
     defaultToken: isTggFirst ? token.symbol : stablecoin,
     value: isTggFirst ? amount : stablecoinAmount,
-    onValueChange: isTggFirst
-      ? handleTggAmountChange
-      : handleStablecoinAmountChange,
+    onValueChange: isTggFirst ? handleTggAmountChange : handleStablecoinAmountChange,
     onTokenChange: handleTokenChange,
     blockchain: selectedBlockchain,
     showBalance: true,
@@ -253,8 +232,8 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   };
 
   const bottomWidgetProps = {
-    type: (isTggFirst ? "stablecoin" : "crypto") as TradeWidgetType,
-    label: "YOU RECEIVE",
+    type: (isTggFirst ? 'stablecoin' : 'crypto') as TradeWidgetType,
+    label: 'YOU RECEIVE',
     defaultToken: isTggFirst ? stablecoin : token.symbol,
     value: isTggFirst ? stablecoinAmount : amount,
     onValueChange: () => {}, // Fonction vide car en lecture seule
@@ -274,10 +253,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         <TradeWidget {...topWidgetProps} />
 
         <div className="z-10 pt-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <button
-            onClick={handleSwap}
-            className="hover:scale-110 active:scale-95 transition-transform duration-200"
-          >
+          <button onClick={handleSwap} className="hover:scale-110 active:scale-95 transition-transform duration-200">
             <Image src="/images/switch.png" alt="Swap" width={60} height={60} />
           </button>
         </div>
@@ -286,11 +262,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
       </div>
 
       <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-        <Blockchains
-          section={ExchangeSection.Swap}
-          onSelect={handleBlockchainSelect}
-          tokenSymbol={token.symbol}
-        />
+        <Blockchains section={ExchangeSection.Swap} onSelect={handleBlockchainSelect} tokenSymbol={token.symbol} />
 
         {/* État de la transaction */}
         {isPreparingSwap && (
@@ -298,8 +270,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
             <Loader2 className="h-4 w-4 animate-spin" />
             <AlertTitle>Preparing Swap</AlertTitle>
             <AlertDescription>
-              Checking balances and allowances. Please approve any pending
-              transactions in your wallet.
+              Checking balances and allowances. Please approve any pending transactions in your wallet.
             </AlertDescription>
           </Alert>
         )}
@@ -308,9 +279,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           <Alert className="bg-color1">
             <Loader2 className="h-4 w-4 animate-spin" />
             <AlertTitle>Transaction Processing</AlertTitle>
-            <AlertDescription>
-              Your transaction is being processed. Please wait...
-            </AlertDescription>
+            <AlertDescription>Your transaction is being processed. Please wait...</AlertDescription>
           </Alert>
         )}
 
@@ -325,52 +294,38 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         {/* Informations sur les prix */}
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">
-              Delivery time:
-            </span>
-            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">
-              Instant
-            </Badge>
+            <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
+            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">Instant</Badge>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">
-              {token.symbol} Price:
-            </span>
+            <span className="text-color4 text-xs sm:text-sm font-medium">{token.symbol} Price:</span>
             {isPriceLoading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <Skeleton className="h-4 w-16" />
               </div>
             ) : (
-              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">
-                ${tokenPrice?.toFixed(2)}
-              </Badge>
+              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tokenPrice?.toFixed(2)}</Badge>
             )}
           </div>
 
           <div className="flex items-center justify-between ">
-            <span className="text-color4 text-xs sm:text-sm font-medium">
-              Exchange rate:
-            </span>
+            <span className="text-color4 text-xs sm:text-sm font-medium">Exchange rate:</span>
             {isPriceLoading || isLoadingQuote ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <Skeleton className="h-4 w-20" />
               </div>
             ) : (
-              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">
-                {exchangeRateInfo()}
-              </Badge>
+              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">{exchangeRateInfo()}</Badge>
             )}
           </div>
 
           {/* Afficher les erreurs de quote si il y en a */}
           {quoteError && (
             <div className="flex items-center justify-between">
-              <span className="text-color4 text-xs sm:text-sm font-medium">
-                Quote status:
-              </span>
+              <span className="text-color4 text-xs sm:text-sm font-medium">Quote status:</span>
               <Badge variant="destructive">Error loading quote</Badge>
             </div>
           )}
@@ -378,17 +333,13 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           {/* Hash de transaction */}
           {hash && (
             <div className="flex items-center justify-between pt-2 border-t">
-              <span className="text-color4 text-xs sm:text-sm font-medium">
-                Transaction:
-              </span>
+              <span className="text-color4 text-xs sm:text-sm font-medium">Transaction:</span>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-black bg-gray-100 font-mono px-2 py-1 rounded">
                   {hash.slice(0, 6)}...{hash.slice(-4)}
                 </span>
                 <button
-                  onClick={() =>
-                    window.open(`https://polygonscan.com/tx/${hash}`, "_blank")
-                  }
+                  onClick={() => window.open(`https://polygonscan.com/tx/${hash}`, '_blank')}
                   className="inline-flex items-center text-blue-600 hover:text-blue-800"
                 >
                   <ExternalLink className="h-3 w-3" />
@@ -405,8 +356,8 @@ const Swap = ({ token }: { token: TokenInfo }) => {
             onClick={swaping}
             className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
               arePricesAvailable && !isPending && !isPreparingSwap
-                ? "bg-color4 text-white hover:bg-opacity-90"
-                : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                ? 'bg-color4 text-white hover:bg-opacity-90'
+                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
             }`}
             disabled={!arePricesAvailable || isPending || isPreparingSwap}
           >
@@ -421,7 +372,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
                 <span>Processing transaction...</span>
               </>
             ) : (
-              "Swap"
+              'Swap'
             )}
           </button>
         ) : (

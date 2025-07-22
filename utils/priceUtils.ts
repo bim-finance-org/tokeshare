@@ -24,7 +24,7 @@ export const convertWithRate = (amount: number, rate: number): number => {
 export const convertStablecoinToTGG = (
   stablecoinAmount: number,
   stablecoinRate: number,
-  tggPriceUSD: number
+  tggPriceUSD: number,
 ): number => {
   if (tggPriceUSD <= 0) return 0;
 
@@ -42,11 +42,7 @@ export const convertStablecoinToTGG = (
  * @param stablecoinRate - Taux de change du stablecoin (par rapport à l'USD)
  * @returns Montant en stablecoin
  */
-export const convertTGGToStablecoin = (
-  tggAmount: number,
-  tggPriceUSD: number,
-  stablecoinRate: number
-): number => {
+export const convertTGGToStablecoin = (tggAmount: number, tggPriceUSD: number, stablecoinRate: number): number => {
   if (stablecoinRate <= 0) return 0;
 
   // Convertir TGG en USD
@@ -68,7 +64,7 @@ export const convertFiatToTGG = (
   fiatAmount: number,
   fiatCurrency: string,
   exchangeRates: ExchangeRates | undefined,
-  tggPriceUSD: number
+  tggPriceUSD: number,
 ): number | undefined => {
   // Vérifier si les données nécessaires sont disponibles
   if (!exchangeRates || tggPriceUSD <= 0) return undefined;
@@ -101,7 +97,7 @@ export const convertTGGToFiat = (
   tggAmount: number,
   fiatCurrency: string,
   exchangeRates: ExchangeRates | undefined,
-  tggPriceUSD: number
+  tggPriceUSD: number,
 ): number | undefined => {
   // Vérifier si les données nécessaires sont disponibles
   if (!exchangeRates || tggPriceUSD <= 0) return undefined;

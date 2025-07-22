@@ -1,9 +1,9 @@
-import React from 'react'
-import Image from 'next/image'
+import React from 'react';
+import Image from 'next/image';
 
 interface EURAIconProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
 const EURAIcon = ({ size = 24, className = '' }: EURAIconProps) => {
@@ -15,7 +15,7 @@ const EURAIcon = ({ size = 24, className = '' }: EURAIconProps) => {
       height={size}
       className={`rounded-full ${className}`}
     />
-  )
-}
+  );
+};
 
-export default EURAIcon
+export default EURAIcon;

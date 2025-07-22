@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useContext } from "react";
-import TradeWidget from "../../../components/shared/TradeWidget";
-import BankIcon from "@/components/icons/BankIcon";
-import Blockchains from "@/components/Blockchains";
-import { calculateTGGPrice, convertTGGToFiat } from "@/utils/priceUtils";
-import ConnectButton from "@/components/shared/ConnectButton";
-import { useAccount } from "wagmi";
-import UserForm from "./UserForm";
-import { TokenContexts } from "@/context/TokenContexts";
-import { usePaxgPrice } from "@/hooks/usePaxgPrice";
-import { useExchangeRates } from "@/hooks/useExchangeRates";
-import { useTGGBalance } from "@/hooks/useTGGBalance";
-import { Address } from "viem";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { INTERVAL_PRICE_UPDATE } from "@/constants/constants";
-import { Badge } from "@/components/ui/badge";
-import { ExchangeSection } from "@/types/ExchangeSection";
-import { TokenInfo } from "@/config/token";
+import React, { useState, useEffect, useContext } from 'react';
+import TradeWidget from '../../../components/shared/TradeWidget';
+import BankIcon from '@/components/icons/BankIcon';
+import Blockchains from '@/components/Blockchains';
+import { calculateTGGPrice, convertTGGToFiat } from '@/utils/priceUtils';
+import ConnectButton from '@/components/shared/ConnectButton';
+import { useAccount } from 'wagmi';
+import UserForm from './UserForm';
+import { TokenContexts } from '@/context/TokenContexts';
+import { usePaxgPrice } from '@/hooks/usePaxgPrice';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { useTGGBalance } from '@/hooks/useTGGBalance';
+import { Address } from 'viem';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { INTERVAL_PRICE_UPDATE } from '@/constants/constants';
+import { Badge } from '@/components/ui/badge';
+import { ExchangeSection } from '@/types/ExchangeSection';
+import { TokenInfo } from '@/config/token';
 
 const Sell = ({ token }: { token: TokenInfo }) => {
   const {
@@ -28,8 +28,8 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   } = useContext(TokenContexts);
 
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
-  const [amountToSell, setAmountToSell] = useState("1");
-  const [receiveAmount, setReceiveAmount] = useState("0");
+  const [amountToSell, setAmountToSell] = useState('1');
+  const [receiveAmount, setReceiveAmount] = useState('0');
   const [tggPrice, setTggPrice] = useState<number>(0);
   const [showUserForm, setShowUserForm] = useState(false);
   const [showBalanceError, setShowBalanceError] = useState(false);
@@ -38,11 +38,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
-  const {
-    formattedBalance,
-    checkSufficientBalance,
-    isLoading: isLoadingBalance,
-  } = useTGGBalance(address as Address);
+  const { formattedBalance, checkSufficientBalance, isLoading: isLoadingBalance } = useTGGBalance(address as Address);
 
   useEffect(() => {
     const updatePrice = async () => {
@@ -66,17 +62,12 @@ const Sell = ({ token }: { token: TokenInfo }) => {
 
   const calculateReceiveAmount = () => {
     const tggAmount = parseFloat(amountToSell) || 0;
-    const fiatValue = convertTGGToFiat(
-      tggAmount,
-      selectedCurrency,
-      exchangeRates,
-      tggPrice
-    );
+    const fiatValue = convertTGGToFiat(tggAmount, selectedCurrency, exchangeRates, tggPrice);
 
     if (fiatValue !== undefined) {
       setReceiveAmount(fiatValue.toFixed(2));
     } else {
-      setReceiveAmount("0");
+      setReceiveAmount('0');
     }
   };
 
@@ -86,7 +77,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   };
 
   const handleTggAmountChange = (amount: string) => {
-    if (amount === "" || /^\d*\.?\d*$/.test(amount)) {
+    if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setAmountToSell(amount);
       if (parseFloat(amount) < 0.5) {
         setBelownMin(true);
@@ -120,12 +111,10 @@ const Sell = ({ token }: { token: TokenInfo }) => {
     );
   }
 
-  if (token.symbol === "TFT_001") {
+  if (token.symbol === 'TFT_001') {
     return (
       <div className="p-6 h-96">
-        <p className="text-color4 text-2xl flex justify-center">
-          COMMING SOON !
-        </p>
+        <p className="text-color4 text-2xl flex justify-center">COMMING SOON !</p>
       </div>
     );
   }
@@ -148,11 +137,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
         showBalance={true}
       />
 
-      {isBelowMin && (
-        <div className="text-red-500 text-xs mt-2">
-          Minimum amount is 0.5 TGG
-        </div>
-      )}
+      {isBelowMin && <div className="text-red-500 text-xs mt-2">Minimum amount is 0.5 TGG</div>}
 
       <div className="my-4" />
 
@@ -167,28 +152,17 @@ const Sell = ({ token }: { token: TokenInfo }) => {
       />
 
       <div className="mb-6 mt-4 space-y-2">
-        <Blockchains
-          section={ExchangeSection.Sell}
-          tokenSymbol={token.symbol}
-        />
+        <Blockchains section={ExchangeSection.Sell} tokenSymbol={token.symbol} />
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">
-              Delivery time:
-            </span>
-            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">
-              2-4 Days
-            </Badge>
+            <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
+            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">2-4 Days</Badge>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">
-              TGG Price:
-            </span>
+            <span className="text-color4 text-xs sm:text-sm font-medium">TGG Price:</span>
 
-            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">
-              ${tggPrice.toFixed(2)}
-            </Badge>
+            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tggPrice.toFixed(2)}</Badge>
           </div>
         </div>
       </div>
@@ -198,11 +172,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
           <button
             onClick={() => handleSellClick(true)}
             className={`w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200 
-    ${
-      isBelowMin
-        ? "bg-color4 text-white opacity-50 cursor-not-allowed"
-        : "bg-color4 text-white hover:bg-opacity-90"
-    }`}
+    ${isBelowMin ? 'bg-color4 text-white opacity-50 cursor-not-allowed' : 'bg-color4 text-white hover:bg-opacity-90'}`}
             disabled={isBelowMin}
           >
             Sell

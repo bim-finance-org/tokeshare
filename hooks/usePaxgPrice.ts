@@ -16,4 +16,4 @@ export const usePaxgPrice = () => {
     retry: 3, // 3 tentatives en cas d'échec
     retryDelay: 1000, // 1 seconde entre chaque tentative
   });
-}; 
+};

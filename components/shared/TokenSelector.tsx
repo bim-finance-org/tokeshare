@@ -1,23 +1,17 @@
-import React from "react";
-import Currencies from "../Currencies";
-import StableCoins from "../StableCoins";
-import { Blockchain } from "@/types/Blockchain";
+import React from 'react';
+import Currencies from '../Currencies';
+import StableCoins from '../StableCoins';
+import { Blockchain } from '@/types/Blockchain';
 
 interface TokenSelectorProps {
-  type: "fiat" | "crypto" | "stablecoin";
+  type: 'fiat' | 'crypto' | 'stablecoin';
   blockchain?: Blockchain;
   onSelect: (token: string) => void;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const TokenSelector = ({
-  isOpen,
-  type,
-  blockchain,
-  onClose,
-  onSelect,
-}: TokenSelectorProps) => {
+const TokenSelector = ({ isOpen, type, blockchain, onClose, onSelect }: TokenSelectorProps) => {
   if (!isOpen) return null;
 
   return (
@@ -25,7 +19,7 @@ const TokenSelector = ({
       <div className="absolute left-0 bottom-0 h-[85%] w-full bg-color1 z-40"></div>
       <div className="relative z-50 p-6 bg-gray-100 rounded-3xl shadow-2xl max-w-lg w-full mx-4">
         <div className="mb-6">
-          {type === "fiat" ? (
+          {type === 'fiat' ? (
             <Currencies
               onSelect={(currency) => {
                 onSelect(currency);

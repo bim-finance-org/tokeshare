@@ -1,22 +1,20 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import Buy from "@/components/marketplace/commodities/Buy";
-import Sell from "@/components/marketplace/commodities/Sell";
-import Swap from "@/components/marketplace/commodities/Swap";
-import { useAllStablePrices } from "@/hooks/useStablePrice";
+import React, { useState, useEffect } from 'react';
+import Buy from '@/components/marketplace/commodities/Buy';
+import Sell from '@/components/marketplace/commodities/Sell';
+import Swap from '@/components/marketplace/commodities/Swap';
+import { useAllStablePrices } from '@/hooks/useStablePrice';
 
-import { TokenInfo } from "@/config/token";
-import { ExchangeSection } from "@/types/ExchangeSection";
+import { TokenInfo } from '@/config/token';
+import { ExchangeSection } from '@/types/ExchangeSection';
 
 interface ExchangeProps {
   token: TokenInfo;
 }
 
 const Exchange: React.FC<ExchangeProps> = ({ token }) => {
-  const [activeTab, setActiveTab] = useState<ExchangeSection>(
-    ExchangeSection.Swap
-  );
+  const [activeTab, setActiveTab] = useState<ExchangeSection>(ExchangeSection.Swap);
 
   const { data: stablePrices, isLoading, error } = useAllStablePrices();
 
@@ -26,9 +24,7 @@ const Exchange: React.FC<ExchangeProps> = ({ token }) => {
         <button
           onClick={() => setActiveTab(ExchangeSection.Swap)}
           className={`flex-1 px-2 sm:px-4 py-2 sm:py-3 text-center text-sm sm:text-base ${
-            activeTab === ExchangeSection.Swap
-              ? "border-b-2 border-color2 text-color2 font-medium"
-              : "text-color4"
+            activeTab === ExchangeSection.Swap ? 'border-b-2 border-color2 text-color2 font-medium' : 'text-color4'
           }`}
         >
           Swap
@@ -36,9 +32,7 @@ const Exchange: React.FC<ExchangeProps> = ({ token }) => {
         <button
           onClick={() => setActiveTab(ExchangeSection.Buy)}
           className={`flex-1 px-2 sm:px-4 py-2 sm:py-3 text-center text-sm sm:text-base ${
-            activeTab === ExchangeSection.Buy
-              ? "border-b-2 border-color2 text-color2 font-medium"
-              : "text-color4"
+            activeTab === ExchangeSection.Buy ? 'border-b-2 border-color2 text-color2 font-medium' : 'text-color4'
           }`}
         >
           Buy
@@ -46,9 +40,7 @@ const Exchange: React.FC<ExchangeProps> = ({ token }) => {
         <button
           onClick={() => setActiveTab(ExchangeSection.Sell)}
           className={`flex-1 px-2 sm:px-4 py-2 sm:py-3 text-center text-sm sm:text-base ${
-            activeTab === ExchangeSection.Sell
-              ? "border-b-2 border-color2 text-color2 font-medium"
-              : "text-color4"
+            activeTab === ExchangeSection.Sell ? 'border-b-2 border-color2 text-color2 font-medium' : 'text-color4'
           }`}
         >
           Sell

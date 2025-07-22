@@ -1,9 +1,10 @@
 import { Redis } from 'ioredis';
 
 // Logging de configuration Redis pour débogage
-console.log('Initializing Redis client with URL pattern:', process.env.REDIS_URL 
-  ? 'redis://username:***@' + process.env.REDIS_URL.split('@')[1]
-  : 'redis://localhost:6379');
+console.log(
+  'Initializing Redis client with URL pattern:',
+  process.env.REDIS_URL ? 'redis://username:***@' + process.env.REDIS_URL.split('@')[1] : 'redis://localhost:6379',
+);
 
 // Initialize Redis client
 const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
@@ -56,4 +57,4 @@ export async function setCache(key: string, data: any, expiration = DEFAULT_EXPI
   }
 }
 
-export { redisClient }; 
+export { redisClient };

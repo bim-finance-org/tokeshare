@@ -1,17 +1,17 @@
-import { useState, useEffect, useRef } from "react";
-import { Address } from "viem";
-import { useSwap } from "./useSwap";
-import { CONTRACTS } from "@/contracts/contracts";
-import { getTokenDecimals } from "@/utils/tokenUtils";
-import { SwapDirection } from "@/enums/Directions";
+import { useState, useEffect, useRef } from 'react';
+import { Address } from 'viem';
+import { useSwap } from './useSwap';
+import { CONTRACTS } from '@/contracts/contracts';
+import { getTokenDecimals } from '@/utils/tokenUtils';
+import { SwapDirection } from '@/enums/Directions';
 import {
   DECIMALS_18,
   NUMBER_TO_FIXE_4,
   NUMBER_TO_FIXE_6,
   ONCE_DIVISION,
   SLIPPAGE_TOLERANCE,
-} from "@/constants/constants";
-import { calculateTGGPrice } from "@/utils/priceUtils";
+} from '@/constants/constants';
+import { calculateTGGPrice } from '@/utils/priceUtils';
 interface SwapQuoteParams {
   inputToken: Address;
   outputToken: Address;
@@ -75,10 +75,7 @@ const useSmartDebounce = (value: string, delay: number) => {
  *   - error : message d'erreur
  *   - exchangeRate : taux de change calculé
  */
-export const useSwapQuote = (
-  params: SwapQuoteParams | null,
-  tokenSymbol: string
-): SwapQuoteResult => {
+export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string): SwapQuoteResult => {
   const DEBOUNCE_DELAY = 500;
   const MINIMUM_AMOUNT_TO_GET_QUOTE = 0.01;
 
@@ -90,11 +87,8 @@ export const useSwapQuote = (
 
   const { getSwapRoute, getConversion } = useSwap();
 
-  const inputAmount = params?.inputAmount || "";
-  const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(
-    inputAmount,
-    DEBOUNCE_DELAY
-  );
+  const inputAmount = params?.inputAmount || '';
+  const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, DEBOUNCE_DELAY);
 
   const fetchQuoteTGG = async (params: SwapQuoteParams) => {
     try {
@@ -105,7 +99,7 @@ export const useSwapQuote = (
         params.outputToken,
         amount.toFixed(NUMBER_TO_FIXE_6),
         params.direction,
-      ].join("-");
+      ].join('-');
 
       if (paramsKey === lastParamsKey) return;
 
@@ -113,10 +107,8 @@ export const useSwapQuote = (
       setError(null);
       if (params.direction === SwapDirection.StablecoinToToken) {
         const inputDecimals = getTokenDecimals(params.inputToken);
-        if (inputDecimals == null) throw new Error("Missing decimal");
-        const amountInBase = BigInt(
-          Math.floor(amount * 10 ** inputDecimals)
-        ).toString();
+        if (inputDecimals == null) throw new Error('Missing decimal');
+        const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
 
         const route = await getSwapRoute({
           tokenIn: params.inputToken,
@@ -134,9 +126,7 @@ export const useSwapQuote = (
         const paxgAmount = await getConversion({
           tggAmount: amount.toString(),
         });
-        const paxgAmountBase = BigInt(
-          Math.floor(paxgAmount * DECIMALS_18)
-        ).toString();
+        const paxgAmountBase = BigInt(Math.floor(paxgAmount * DECIMALS_18)).toString();
 
         const route = await getSwapRoute({
           tokenIn: CONTRACTS.PAXG as Address,
@@ -147,17 +137,14 @@ export const useSwapQuote = (
         });
 
         const outputDecimals = getTokenDecimals(params.outputToken);
-        if (outputDecimals == null) throw new Error("Missing decimal");
-        const stablecoinAmount =
-          parseFloat(route.amountOut) / 10 ** outputDecimals;
+        if (outputDecimals == null) throw new Error('Missing decimal');
+        const stablecoinAmount = parseFloat(route.amountOut) / 10 ** outputDecimals;
         setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
-        setExchangeRate(
-          `${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`
-        );
+        setExchangeRate(`${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
       }
       setLastParamsKey(paramsKey);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknow error");
+      setError(err instanceof Error ? err.message : 'Unknow error');
       setOutputAmount(null);
       setExchangeRate(null);
     } finally {
@@ -179,9 +166,9 @@ export const useSwapQuote = (
       return;
     }
 
-    if (tokenSymbol == "TGG") {
+    if (tokenSymbol == 'TGG') {
       fetchQuoteTGG(params);
-    } else if (tokenSymbol == "TFT_001") {
+    } else if (tokenSymbol == 'TFT_001') {
       if (params.direction === SwapDirection.StablecoinToToken) {
         setOutputAmount((parseFloat(params.inputAmount) / 31.25).toFixed(6));
         setExchangeRate((1 / 31.25).toFixed(4));

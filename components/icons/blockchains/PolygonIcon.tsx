@@ -1,12 +1,12 @@
-import React from "react";
-import Image from "next/image";
+import React from 'react';
+import Image from 'next/image';
 
 interface PolygonIconProps {
   size?: number;
   className?: string;
 }
 
-const PolygonIcon = ({ size = 24, className = "" }: PolygonIconProps) => {
+const PolygonIcon = ({ size = 24, className = '' }: PolygonIconProps) => {
   return (
     <Image
       src="/images/blockchains/polygon.png"

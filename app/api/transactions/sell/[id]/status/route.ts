@@ -1,7 +1,7 @@
-import { NextResponse, NextRequest } from "next/server";
-import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/authOptions";
+import { NextResponse, NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { requireAuth, validateId, validateStatus } from '@/lib/api-utils';
+import { ALLOWED_STATUS } from '@/constants/api';
 
 /**
  * PUT to update the status of a sell transaction
@@ -9,66 +9,40 @@ import { authOptions } from "@/lib/authOptions";
  * @param params - The parameters object
  * @returns The updated transaction
  */
-export async function PUT(request: NextRequest, { params }: { params: any }) {
-	try {
-		// Check if user is authenticated
-		const session = await getServerSession(authOptions);
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  try {
+    const session = await requireAuth();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized. Please log in.' }, { status: 401 });
+    }
 
-		// If no session, return 401 Unauthorized
-		if (!session) {
-			return NextResponse.json(
-				{ error: "Unauthorized. Please log in." },
-				{ status: 401 }
-			);
-		}
+    const { params } = context;
+    const { id: rawId } = await params;
+    const id = validateId(rawId);
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid transaction ID' }, { status: 400 });
+    }
 
-		const id = parseInt(params.id);
+    const { status } = await request.json();
+    if (!validateStatus(status)) {
+      return NextResponse.json(
+        { error: `Invalid status. Allowed values are: ${ALLOWED_STATUS.join(', ')}` },
+        { status: 400 },
+      );
+    }
 
-		if (isNaN(id)) {
-			return NextResponse.json(
-				{ error: "Invalid transaction ID" },
-				{ status: 400 }
-			);
-		}
+    const transaction = await prisma.sellTransaction.findUnique({ where: { id } });
+    if (!transaction) {
+      return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
+    }
 
-		const data = await request.json();
+    const updatedTransaction = await prisma.sellTransaction.update({
+      where: { id },
+      data: { status },
+    });
 
-		if (
-			!data.status ||
-			!["pending", "completed", "failed", "received"].includes(data.status)
-		) {
-			return NextResponse.json(
-				{
-					error:
-						"Invalid status. Allowed values are: pending, completed, failed, received",
-				},
-				{ status: 400 }
-			);
-		}
-
-		const transaction = await prisma.sellTransaction.findUnique({
-			where: { id },
-		});
-
-		if (!transaction) {
-			return NextResponse.json(
-				{ error: "Transaction not found" },
-				{ status: 404 }
-			);
-		}
-
-		const updatedTransaction = await prisma.sellTransaction.update({
-			where: { id },
-			data: {
-				status: data.status,
-			},
-		});
-
-		return NextResponse.json(updatedTransaction);
-	} catch (error) {
-		return NextResponse.json(
-			{ error: "Error updating transaction status" },
-			{ status: 500 }
-		);
-	}
+    return NextResponse.json(updatedTransaction);
+  } catch (error) {
+    return NextResponse.json({ error: 'Error updating transaction status' }, { status: 500 });
+  }
 }

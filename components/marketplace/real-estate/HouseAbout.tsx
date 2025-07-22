@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const HouseAbout: React.FC = () => {
   return (
@@ -8,9 +8,13 @@ const HouseAbout: React.FC = () => {
 
       {/* Paragraphe */}
       <div className=" leading-10">
-        Introducing our first property in the Dominican Republic: a luxury condo complex currently under construction. Featuring three blocks with three levels each, this project offers high-end amenities and a prime location.
+        Introducing our first property in the Dominican Republic: a luxury condo complex currently under construction.
+        Featuring three blocks with three levels each, this project offers high-end amenities and a prime location.
         <br />
-        Each unit includes private assigned parking, an elegant pool with a waterfall, and a relaxing lounge area. The apartments will be finished with high-quality materials, a European-style kitchen equipped with a cooktop, oven, extractor, and ambient lighting. Each unit also comes with one installed air conditioner and two ceiling fans for optimal comfort.
+        Each unit includes private assigned parking, an elegant pool with a waterfall, and a relaxing lounge area. The
+        apartments will be finished with high-quality materials, a European-style kitchen equipped with a cooktop, oven,
+        extractor, and ambient lighting. Each unit also comes with one installed air conditioner and two ceiling fans
+        for optimal comfort.
         <br />
         📍 Prime Location: Just 1 km from Playa Bonita, one of the most beautiful beaches in the country. <br />
         <ul>

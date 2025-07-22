@@ -1,9 +1,9 @@
-import Image from 'next/image'
-import React from 'react'
+import Image from 'next/image';
+import React from 'react';
 
 interface USDTIconProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
 const USDTIcon = ({ size = 24, className = '' }: USDTIconProps) => {
@@ -15,8 +15,7 @@ const USDTIcon = ({ size = 24, className = '' }: USDTIconProps) => {
       height={size}
       className={`rounded-full ${className}`}
     />
+  );
+};
 
-  )
-}
-
-export default USDTIcon
+export default USDTIcon;

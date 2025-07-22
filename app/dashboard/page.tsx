@@ -1,33 +1,33 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { signIn, signOut, useSession } from 'next-auth/react'
-import React from 'react'
-import ContextProvider from '../../context'
-import DashBoard from '@/components/dashboard/DashBoard'
+import { useState } from 'react';
+import { signIn, signOut, useSession } from 'next-auth/react';
+import React from 'react';
+import ContextProvider from '../../context';
+import DashBoard from '@/components/dashboard/DashBoard';
 
 const DashboardPage = () => {
-  const { data: session, status } = useSession()
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: session, status } = useSession();
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-    
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
     const result = await signIn('credentials', {
       password,
-      redirect: false
-    })
-    
-    setIsLoading(false)
-    
+      redirect: false,
+    });
+
+    setIsLoading(false);
+
     if (result?.error) {
-      setError('Mot de passe incorrect')
+      setError('Mot de passe incorrect');
     }
-  }
+  };
 
   // Afficher un chargement pendant la vérification de session
   if (status === 'loading') {
@@ -37,7 +37,7 @@ const DashboardPage = () => {
           <p className="text-gray-600">Chargement...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // Si l'utilisateur n'est pas authentifié, afficher le formulaire de connexion
@@ -46,9 +46,7 @@ const DashboardPage = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
           <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Connexion au Dashboard
-            </h2>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Connexion au Dashboard</h2>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleLogin}>
             <div className="rounded-md shadow-sm -space-y-px">
@@ -69,11 +67,7 @@ const DashboardPage = () => {
               </div>
             </div>
 
-            {error && (
-              <div className="text-red-500 text-sm text-center">
-                {error}
-              </div>
-            )}
+            {error && <div className="text-red-500 text-sm text-center">{error}</div>}
 
             <div>
               <button
@@ -87,7 +81,7 @@ const DashboardPage = () => {
           </form>
         </div>
       </div>
-    )
+    );
   }
 
   // Si l'utilisateur est authentifié, afficher le dashboard
@@ -103,7 +97,7 @@ const DashboardPage = () => {
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default DashboardPage
+export default DashboardPage;
