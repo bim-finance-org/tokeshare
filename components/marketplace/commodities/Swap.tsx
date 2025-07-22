@@ -178,7 +178,6 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         setIsPreparingSwap(true);
         const receipt = await buyTokenOnMarketplace(
           token.symbol,
-          stablecoinAmount,
           amount,
           stablecoin
         );

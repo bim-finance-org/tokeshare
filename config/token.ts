@@ -20,7 +20,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: "TFT_001",
     name: "Tokeshare French Tacos",
     addresses: {
-      Base: "0x0764fF270AaCEdA56d0940327C50f8A199573A9b",
+      Base: "0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26",
     },
     decimals: 18,
   },
@@ -73,5 +73,21 @@ export const TOKENS: Record<string, TokenInfo> = {
       Base: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
     },
     decimals: 6,
+  },
+  CRVUSD: {
+    symbol: "CRVUSD",
+    name: "Curve USD",
+    addresses: {
+      Base: "0x417Ac0e078398C154EdFadD9Ef675d30Be60Af93",
+    },
+    decimals: 18,
+  },
+  BOLD: {
+    symbol: "BOLD",
+    name: "Bold Stablecoin",
+    addresses: {
+      Base: "0x03569cc076654f82679c4ba2124d64774781b01d",
+    },
+    decimals: 18,
   },
 };

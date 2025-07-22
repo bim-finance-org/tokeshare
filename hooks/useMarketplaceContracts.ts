@@ -19,6 +19,9 @@ export function useMarketplaceContract() {
   const { address: userAddress } = useAccount();
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
+  const tokenAddress = getTokenAddress("TFT_001", Blockchain.Base) as Address;
+  const { data: tokenInfo } = getTokenInfo(tokenAddress);
+
   // Vérifie le solde du token
   const checkTokenBalance = async (
     tokenAddress: Address,
@@ -72,7 +75,6 @@ export function useMarketplaceContract() {
 
   const buyTokenOnMarketplace = async (
     tokenSymbol: string,
-    stablecoinAmount: string,
     tokenAmount: string,
     stableToPay: string
   ) => {
@@ -81,38 +83,36 @@ export function useMarketplaceContract() {
 
     const stableDecimals = getTokenDecimals(stableToPay);
     const tokenDecimals = getTokenDecimals(tokenSymbol);
+    console.log(stableDecimals);
+
     if (stableDecimals === undefined || tokenDecimals === undefined) {
       throw new Error("Impossible d’obtenir les décimales des tokens");
     }
 
-    const parsedStableAmount = parseFloat(stablecoinAmount);
-
     const parsedTokenAmount = parseFloat(tokenAmount);
-    if (isNaN(parsedStableAmount) || isNaN(parsedTokenAmount)) {
-      throw new Error("Montant invalide");
+    if (isNaN(parsedTokenAmount)) {
+      throw new Error("Montant token invalide");
     }
 
-    const amountStableParsed = BigInt(
-      Math.floor(parsedStableAmount * 10 ** stableDecimals)
-    );
-
-    const amountTokenParsed = BigInt(
-      Math.floor(parsedTokenAmount * 10 ** tokenDecimals)
-    );
-    console.log(amountTokenParsed);
-
     const stableCoinAddress = getTokenAddress(stableToPay, Blockchain.Base);
-    const tokenAddress = getTokenAddress(tokenSymbol, Blockchain.Base);
+
     if (!stableCoinAddress || !tokenAddress) {
       throw new Error("Adresse de token introuvable");
     }
 
-    const balance = await checkTokenBalance(stableCoinAddress, userAddress);
-    if (balance < amountStableParsed) {
-      throw new Error(
-        `Solde insuffisant. Requis: ${amountStableParsed}, Disponible: ${balance.toString()}`
-      );
-    }
+    const [pricePerToken, tokenDecimalsOnChain, isActive] = (tokenInfo ??
+      []) as [bigint, number, boolean];
+
+    const amountTokenParsed = BigInt(
+      Math.floor(parsedTokenAmount * 10 ** tokenDecimals)
+    );
+
+    const estimatedStableAmount =
+      (parsedTokenAmount * Number(pricePerToken)) / 1e18;
+
+    const approveAmount = BigInt(
+      Math.floor(estimatedStableAmount * 10 ** stableDecimals)
+    );
 
     const allowance = await checkAllowance(
       stableCoinAddress,
@@ -120,11 +120,11 @@ export function useMarketplaceContract() {
       CONTRACTS.MARKETPLACE as Address
     );
 
-    if (allowance < amountStableParsed) {
+    if (allowance < approveAmount) {
       await approveToken(
         stableCoinAddress,
         CONTRACTS.MARKETPLACE as Address,
-        amountStableParsed
+        approveAmount
       );
     }
 
@@ -136,7 +136,6 @@ export function useMarketplaceContract() {
     });
   };
 
-  // Récupérer les infos sur un token listé
   function getTokenInfo(token: Address) {
     return useReadContract({
       address: CONTRACTS.MARKETPLACE as Address,

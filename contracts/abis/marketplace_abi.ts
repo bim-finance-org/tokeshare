@@ -189,6 +189,19 @@ export const MARKETPLACE_ABI = [
     type: "event",
   },
   {
+    inputs: [],
+    name: "PAYMENT_RECEIVER",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "address",

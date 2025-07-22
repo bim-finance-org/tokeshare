@@ -28,7 +28,7 @@ export function useTokenPrice(symbol: string): {
     ];
 
     const bigInt_price = Number(pricePerToken);
-    const price = bigInt_price / 10 ** 6;
+    const price = bigInt_price / 10 ** 18;
 
     return { price, isLoading };
   }
