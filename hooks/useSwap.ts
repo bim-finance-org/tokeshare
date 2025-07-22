@@ -384,12 +384,12 @@ export const useSwap = () => {
         params.walletAddress
       );
       const tggAmountBigInt = BigInt(
-        (parseFloat(params.tggAmount) * Math.pow(10, 18)).toString()
+        (parseFloat(params.amount) * Math.pow(10, 18)).toString()
       );
 
       if (tggBalance < tggAmountBigInt) {
         throw new Error(
-          `Insufficient TGG balance. Required: ${params.tggAmount}, Available: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`
+          `Insufficient TGG balance. Required: ${params.amount}, Available: ${(Number(tggBalance) / Math.pow(10, 18)).toFixed(4)}`
         );
       }
 
