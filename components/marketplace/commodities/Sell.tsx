@@ -111,6 +111,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
           type="sell"
           amount={receiveAmount}
           currency={selectedCurrency}
+          crypto={token.symbol}
           tggAmount={amountToSell}
           tggPrice={tggPrice}
           setShowUserForm={(val: boolean) => handleSellClick(val)}
@@ -120,7 +121,13 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   }
 
   if (token.symbol === "TFT_001") {
-    return <div className="p-6 h-96 mx-48"></div>;
+    return (
+      <div className="p-6 h-96">
+        <p className="text-color4 text-2xl flex justify-center">
+          COMMING SOON !
+        </p>
+      </div>
+    );
   }
 
   return (

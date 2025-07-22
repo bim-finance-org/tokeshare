@@ -137,12 +137,6 @@ const FrenchTacosCarousel: React.FC = () => {
         <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">
           TOTAL INVESTMENT: $31,250
         </h2>
-
-        <Link href="/marketplace/other/french-tacos/trade">
-          <button className="text-sm sm:text-md md:text-lg lg:text-xl mt-4 px-10 sm:px-12 py-2 bg-color2 text-white rounded-full hover:bg-color4 transition">
-            BUY
-          </button>
-        </Link>
       </div>
     </section>
   );

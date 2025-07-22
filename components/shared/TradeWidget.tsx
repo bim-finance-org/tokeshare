@@ -35,7 +35,7 @@ const TradeWidget = ({
   const { address } = useAccount();
 
   // Vérifie si le token est TGG
-  const isTGG = selectedToken === "TGG";
+  const isTGG = selectedToken === "TGG" || selectedToken === "TFT_001";
 
   const handleTokenSelect = (token: string) => {
     console.log(token);

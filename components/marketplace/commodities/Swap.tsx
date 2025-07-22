@@ -182,11 +182,6 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           amount,
           stablecoin
         );
-
-        console.log(amount);
-
-        // Optionnel: tu peux notifier la réussite ici
-        // alert("Transaction envoyée !");
       } catch (err) {
         setErrorTransaction(err instanceof Error ? err.message : String(err));
       } finally {

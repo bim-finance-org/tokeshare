@@ -56,19 +56,26 @@ const Buy = ({ token }: { token: TokenInfo }) => {
 
   // Calcule le montant TGG à partir du montant fiat
   const calculateTggFromFiat = (fiatAmount: string) => {
-    if (tggPrice > 0) {
-      const numericAmount = parseFloat(fiatAmount) || 0;
-      const tggValue = convertFiatToTGG(
-        numericAmount,
-        selectedCurrency,
-        exchangeRates,
-        tggPrice
-      );
-      if (tggValue !== undefined) {
-        setTggAmount(tggValue.toFixed(4));
-      } else {
-        setTggAmount("0");
+    const numericAmount = parseFloat(fiatAmount) || 0;
+    let tggValue;
+    if (token.symbol === "TGG") {
+      if (tggPrice > 0) {
+        tggValue = convertFiatToTGG(
+          numericAmount,
+          selectedCurrency,
+          exchangeRates,
+          tggPrice
+        );
       }
+    } else if (token.symbol === "TFT_001") {
+      if (tggPrice > 0) {
+        tggValue = numericAmount / 31.25;
+      }
+    }
+    if (tggValue !== undefined) {
+      setTggAmount(tggValue.toFixed(4));
+    } else {
+      setTggAmount("0");
     }
   };
 
@@ -130,6 +137,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
         type="buy"
         amount={amountToSend}
         currency={selectedCurrency}
+        crypto={token.symbol}
         tggAmount={tggAmount}
         tggPrice={tggPrice}
         setShowUserForm={handleSellClick}
@@ -166,7 +174,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
       {/* Affichage du montant en TGG */}
       <TradeWidget
         label="YOU RECEIVE"
-        defaultToken="TGG"
+        defaultToken={token.symbol}
         value={tggAmount}
         onValueChange={handleTggAmountChange}
         onTokenChange={() => {}} // TGG ne peut pas être changé
@@ -187,11 +195,11 @@ const Buy = ({ token }: { token: TokenInfo }) => {
 
           <div className="flex items-center justify-between">
             <span className="text-color4 text-xs sm:text-sm font-medium">
-              TGG Price:
+              {token.symbol} Price:
             </span>
 
             <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">
-              ${tggPrice.toFixed(2)}
+              ${token.symbol === "TGG" ? tggPrice.toFixed(2) : "31.25"}
             </Badge>
           </div>
         </div>

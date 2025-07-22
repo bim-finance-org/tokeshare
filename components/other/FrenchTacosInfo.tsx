@@ -1,18 +1,16 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react'
-import FrenchTacosHighlights from './FrenchTacosHighlights';
-import FrenchTacosFinancials from './FrenchTacosFinancials';
-import FrenchTacosDetails from './FrenchTacosDetails';
-import FrenchTacosBlockchain from './FrenchTacosBlockchain';
-import FrenchTacosOffering from './FrenchTacosOffering';
-
+import React, { useState } from "react";
+import FrenchTacosHighlights from "./FrenchTacosHighlights";
+import FrenchTacosFinancials from "./FrenchTacosFinancials";
+import FrenchTacosDetails from "./FrenchTacosDetails";
+import FrenchTacosBlockchain from "./FrenchTacosBlockchain";
+import FrenchTacosOffering from "./FrenchTacosOffering";
 
 const FrenchTacosInfo = () => {
-
-    const TABS = ["HIGHLIGHTS", "FINANCIALS", "DETAILS", "BLOCKCHAIN", "OFFERING"];
-      // Onglet actif
-      const [activeTab, setActiveTab] = useState("HIGHLIGHTS");
+  const TABS = ["HIGHLIGHTS", "FINANCIALS", "BLOCKCHAIN", "OFFERING"];
+  // Onglet actif
+  const [activeTab, setActiveTab] = useState("HIGHLIGHTS");
 
   return (
     <section className="px-4 sm:px-8 lg:px-16 py-6 w-4/5 mx-auto flex flex-col items-center sm:items-start">
@@ -34,13 +32,12 @@ const FrenchTacosInfo = () => {
       </div>
 
       {/* Contenu conditionnel selon l’onglet actif */}
-      {activeTab === "HIGHLIGHTS" && <FrenchTacosHighlights/>}
-      {activeTab === "FINANCIALS" && <FrenchTacosFinancials/>}
-      {activeTab === "DETAILS" && <FrenchTacosDetails/>}
-      {activeTab === "BLOCKCHAIN" && <FrenchTacosBlockchain/>}
-      {activeTab === "OFFERING" && <FrenchTacosOffering/> }
+      {activeTab === "HIGHLIGHTS" && <FrenchTacosHighlights />}
+      {activeTab === "FINANCIALS" && <FrenchTacosFinancials />}
+      {activeTab === "BLOCKCHAIN" && <FrenchTacosBlockchain />}
+      {activeTab === "OFFERING" && <FrenchTacosOffering />}
     </section>
-  )
-}
+  );
+};
 
-export default FrenchTacosInfo
+export default FrenchTacosInfo;

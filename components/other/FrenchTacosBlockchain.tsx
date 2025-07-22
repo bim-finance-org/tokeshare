@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 const FrenchTacosBlockchain = () => {
   return (
@@ -23,7 +23,7 @@ const FrenchTacosBlockchain = () => {
           <div className=" border-color4 md:pr-6">
             {/* Exemple : Token Type */}
             <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
-              <h3 className="text-lg font-semibold text-color2">Polygon Chain</h3>
+              <h3 className="text-lg font-semibold text-color2">Base Chain</h3>
               <p className="text-base mt-2 md:mt-0"></p>
             </div>
 
@@ -31,32 +31,31 @@ const FrenchTacosBlockchain = () => {
             <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Contract Address</h3>
               <a
-    href="https://polygonscan.com/address/..."
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
-  >
-    ...
-  </a>
+                href="https://polygonscan.com/address/..."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
+              >
+                ...
+              </a>
             </div>
 
             <div className="py-4 flex flex-col md:flex-row justify-between ">
               <h3 className="text-lg font-semibold">Owner Wallet</h3>
               <a
-    href="https://polygonscan.com/address/..."
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
-  >
-    ...
-  </a>
+                href="https://polygonscan.com/address/..."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
+              >
+                ...
+              </a>
             </div>
           </div>
-
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FrenchTacosBlockchain
+export default FrenchTacosBlockchain;
