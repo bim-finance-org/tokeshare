@@ -1,24 +1,29 @@
 import React from 'react';
-import Image from "next/image";
+import Image from 'next/image';
 import LocationIcon from '../icons/card/LocationIcon';
-import { FaChartLine } from "react-icons/fa6";
-import Link from "next/link";
-import ArrowIcon from "@/components/icons/arrows/ArrowIcon";
+import { FaChartLine } from 'react-icons/fa6';
+import Link from 'next/link';
+import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
 
 const TacosCard = () => {
   return (
-    <div className='bg-color1 shadow-lg max-w-3xl w-[500px] rounded-3xl overflow-hidden text-color4'>
-      <div className='image-container'>
-        <Image src="/images/frenchTacos/image_3.jpg" alt="French Tacos Las Terrenas" width={1200} height={300} className="object-cover h-72 w-full" />
-       
+    <div className="bg-color1 shadow-lg max-w-3xl w-[500px] rounded-3xl overflow-hidden text-color4">
+      <div className="image-container">
+        <Image
+          src="/images/frenchTacos/image_3.jpg"
+          alt="French Tacos Las Terrenas"
+          width={1200}
+          height={300}
+          className="object-cover h-72 w-full"
+        />
       </div>
 
-      <div className='px-12 py-8'>
+      <div className="px-12 py-8">
         <div className="flex items-center mb-3">
           <div className="border-t-2 border-color4 w-10 mr-3 ml-1"></div>
-          <h1 className='text-color4 text-3xl font-bold'>French Tacos</h1>
+          <h1 className="text-color4 text-3xl font-bold">French Tacos</h1>
         </div>
-        <p className='flex items-center text-color4 text-xl mb-6'>
+        <p className="flex items-center text-color4 text-xl mb-6">
           <span className="mr-2">
             <LocationIcon />
           </span>
@@ -57,13 +62,13 @@ const TacosCard = () => {
           <Link href="/marketplace/other/french-tacos">
             <button className="flex items-center justify-between bg-color2 rounded-3xl px-8 mt-4 text-xl w-72 hover:bg-color4 hover:text-white transition-colors duration-300 shadow-md font-semibold">
               <span className="text-color1 hover:text-white">Learn More</span>
-              <ArrowIcon size={32} className='text-white'/>
+              <ArrowIcon size={32} className="text-white" />
             </button>
           </Link>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default TacosCard;

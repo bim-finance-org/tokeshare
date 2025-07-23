@@ -1,12 +1,12 @@
-import React from "react";
+import React from 'react';
 
-import { PieChart, Pie, Cell, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 
 const FrenchTacosFinancials = () => {
-  const chartData = [{ name: "Tokeshare Platform (2.00%)", value: 1 }];
+  const chartData = [{ name: 'Tokeshare Platform (2.00%)', value: 1 }];
 
   // Palette de couleurs (autant d’entrées que voulu)
-  const COLORS = ["#6366F1", "#3B82F6", "#000000", "#F97316", "#10B981"];
+  const COLORS = ['#6366F1', '#3B82F6', '#000000', '#F97316', '#10B981'];
 
   return (
     <div className="w-full rounded-lg shadow-lg overflow-hidden text-color4 border-2 border-color4 font-semibold">
@@ -42,19 +42,9 @@ const FrenchTacosFinancials = () => {
             <div>
               <PieChart width={300} height={200}>
                 <Tooltip />
-                <Pie
-                  data={chartData}
-                  dataKey="value"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  labelLine={false}
-                >
+                <Pie data={chartData} dataKey="value" cx="50%" cy="50%" outerRadius={80} labelLine={false}>
                   {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
               </PieChart>
@@ -64,10 +54,7 @@ const FrenchTacosFinancials = () => {
             <div className="mt-6 md:mt-0">
               {chartData.map((item, i) => (
                 <div key={i} className="flex items-center space-x-2 mb-2">
-                  <div
-                    className="w-4 h-4 rounded-sm"
-                    style={{ backgroundColor: COLORS[i % COLORS.length] }}
-                  />
+                  <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
                   <span className="text-gray-800 text-sm">{item.name}</span>
                 </div>
               ))}
@@ -101,9 +88,7 @@ const FrenchTacosFinancials = () => {
               <span className="text-color2 font-bold">
                 Expected Income <sup>©</sup>
               </span>
-              <p className="text-xs text-color2">
-                Not including capital appreciation
-              </p>
+              <p className="text-xs text-color2">Not including capital appreciation</p>
             </div>
             <p className="text-color2 font-semibold">11,76 %</p>
           </div>

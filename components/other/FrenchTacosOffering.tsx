@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const FrenchTacosOffering = () => {
   return (
@@ -17,9 +17,7 @@ const FrenchTacosOffering = () => {
           <p className="text-base">$ 31 250</p>
         </div>
         <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
-          <h3 className="text-lg font-semibold">
-            Offering Percent (of Total Tokens)
-          </h3>
+          <h3 className="text-lg font-semibold">Offering Percent (of Total Tokens)</h3>
           <p className="text-base">100 %</p>
         </div>
       </div>

@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import FrenchTacosHighlights from "./FrenchTacosHighlights";
-import FrenchTacosFinancials from "./FrenchTacosFinancials";
-import FrenchTacosDetails from "./FrenchTacosDetails";
-import FrenchTacosBlockchain from "./FrenchTacosBlockchain";
-import FrenchTacosOffering from "./FrenchTacosOffering";
+import React, { useState } from 'react';
+import FrenchTacosHighlights from './FrenchTacosHighlights';
+import FrenchTacosFinancials from './FrenchTacosFinancials';
+import FrenchTacosDetails from './FrenchTacosDetails';
+import FrenchTacosBlockchain from './FrenchTacosBlockchain';
+import FrenchTacosOffering from './FrenchTacosOffering';
 
 const FrenchTacosInfo = () => {
-  const TABS = ["HIGHLIGHTS", "FINANCIALS", "BLOCKCHAIN", "OFFERING"];
+  const TABS = ['HIGHLIGHTS', 'FINANCIALS', 'BLOCKCHAIN', 'OFFERING'];
   // Onglet actif
-  const [activeTab, setActiveTab] = useState("HIGHLIGHTS");
+  const [activeTab, setActiveTab] = useState('HIGHLIGHTS');
 
   return (
     <section className="px-4 sm:px-8 lg:px-16 py-6 w-4/5 mx-auto flex flex-col items-center sm:items-start">
@@ -22,7 +22,7 @@ const FrenchTacosInfo = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`relative w-full sm:w-1/4 p-2 rounded-full text-md md:text-lg lg:text-xl  font-medium transition-colors shadow-md
-              ${activeTab === tab ? "bg-gray-900 text-white " + "after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 " + "after:border-l-8 after:border-l-transparent after:border-r-8 after:border-r-transparent " + "after:border-t-8 after:border-t-gray-900" : "bg-gray-200 text-gray-800 hover:bg-gray-300"}
+              ${activeTab === tab ? 'bg-gray-900 text-white ' + "after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 " + 'after:border-l-8 after:border-l-transparent after:border-r-8 after:border-r-transparent ' + 'after:border-t-8 after:border-t-gray-900' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}
               `}
             >
               {tab}
@@ -32,10 +32,10 @@ const FrenchTacosInfo = () => {
       </div>
 
       {/* Contenu conditionnel selon l’onglet actif */}
-      {activeTab === "HIGHLIGHTS" && <FrenchTacosHighlights />}
-      {activeTab === "FINANCIALS" && <FrenchTacosFinancials />}
-      {activeTab === "BLOCKCHAIN" && <FrenchTacosBlockchain />}
-      {activeTab === "OFFERING" && <FrenchTacosOffering />}
+      {activeTab === 'HIGHLIGHTS' && <FrenchTacosHighlights />}
+      {activeTab === 'FINANCIALS' && <FrenchTacosFinancials />}
+      {activeTab === 'BLOCKCHAIN' && <FrenchTacosBlockchain />}
+      {activeTab === 'OFFERING' && <FrenchTacosOffering />}
     </section>
   );
 };

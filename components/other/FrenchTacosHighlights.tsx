@@ -1,5 +1,5 @@
-import Link from "next/link";
-import React from "react";
+import Link from 'next/link';
+import React from 'react';
 
 const FrenchTacosHighlights = () => {
   return (
@@ -14,9 +14,7 @@ const FrenchTacosHighlights = () => {
           <div className="md:border-r-2 md:border-color4 md:pr-6">
             <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
               <h3 className="text-lg text-color2 font-semibold">Token Type</h3>
-              <p className="text-lg text-color2 font-semibold">
-                Standard Equity
-              </p>
+              <p className="text-lg text-color2 font-semibold">Standard Equity</p>
             </div>
 
             <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
@@ -24,9 +22,7 @@ const FrenchTacosHighlights = () => {
                 <h3 className="text-lg text-color2 font-semibold">
                   Expected Income <sup>®</sup>
                 </h3>
-                <p className="text-xs mt-2">
-                  Not including capital appreciation
-                </p>
+                <p className="text-xs mt-2">Not including capital appreciation</p>
               </div>
               <p className="text-lg text-color2 font-semibold">11,76%</p>
             </div>
@@ -59,9 +55,7 @@ const FrenchTacosHighlights = () => {
           {/* Colonne de droite */}
           <div className="md:pl-6">
             <div className="py-4 flex flex-col md:flex-row md:justify-between md:items-center border-b-2 border-color5">
-              <h3 className="text-lg text-color2 font-semibold">
-                Property Type
-              </h3>
+              <h3 className="text-lg text-color2 font-semibold">Property Type</h3>
               <p className="text-lg text-color2 font-semibold">Restaurant</p>
             </div>
 

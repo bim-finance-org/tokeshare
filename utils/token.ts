@@ -1,11 +1,8 @@
-import { Blockchain } from "@/types/Blockchain";
-import { TOKENS, TokenInfo } from "@/config/token";
-import { Address } from "viem";
+import { Blockchain } from '@/types/Blockchain';
+import { TOKENS, TokenInfo } from '@/config/token';
+import { Address } from 'viem';
 
-export function getTokenAddress(
-  symbol: string,
-  blockchain: Blockchain
-): Address | undefined {
+export function getTokenAddress(symbol: string, blockchain: Blockchain): Address | undefined {
   return TOKENS[symbol]?.addresses[blockchain] as Address | undefined;
 }
 

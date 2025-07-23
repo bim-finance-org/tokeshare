@@ -25,10 +25,12 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 This project uses Redis for caching stablecoin prices. To set up Redis:
 
 1. Install Redis on your local machine or use a cloud service
+
    - For local installation: [Redis Installation Guide](https://redis.io/docs/getting-started/installation/)
    - For production: Consider using [Upstash](https://upstash.com/), [Redis Cloud](https://redis.com/redis-enterprise-cloud/overview/), or similar services
 
 2. Configure your environment variables:
+
    - Copy `.env.example` to `.env.local`
    - Set your `REDIS_URL` (format: `redis://username:password@host:port`)
 

@@ -1,4 +1,4 @@
 export enum Blockchain {
-  Polygon = "Polygon",
-  Base = "Base",
+  Polygon = 'Polygon',
+  Base = 'Base',
 }

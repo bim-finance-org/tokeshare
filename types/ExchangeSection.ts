@@ -1,5 +1,5 @@
 export enum ExchangeSection {
-  Swap = "Swap",
-  Sell = "Sell",
-  Buy = "Buy",
+  Swap = 'Swap',
+  Sell = 'Sell',
+  Buy = 'Buy',
 }

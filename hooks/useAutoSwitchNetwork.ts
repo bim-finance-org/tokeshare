@@ -1,7 +1,7 @@
-import { useEffect } from "react";
-import { useWalletClient } from "wagmi";
-import { WalletClient } from "viem";
-import { Blockchain } from "@/types/Blockchain";
+import { useEffect } from 'react';
+import { useWalletClient } from 'wagmi';
+import { WalletClient } from 'viem';
+import { Blockchain } from '@/types/Blockchain';
 
 // Mapping des chaînes à leurs IDs
 const CHAIN_IDS: Record<Blockchain, number> = {
@@ -28,8 +28,6 @@ export function useAutoSwitchNetwork(blockchain: Blockchain) {
       return;
     }
 
-    switchNetwork(walletClient, chainId).catch((err) =>
-      console.error("Erreur lors du changement de réseau :", err)
-    );
+    switchNetwork(walletClient, chainId).catch((err) => console.error('Erreur lors du changement de réseau :', err));
   }, [walletClient, blockchain]);
 }

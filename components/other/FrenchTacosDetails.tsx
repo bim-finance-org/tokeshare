@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 const FrenchTacosDetails = () => {
   return (
@@ -49,7 +49,7 @@ const FrenchTacosDetails = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FrenchTacosDetails
+export default FrenchTacosDetails;

@@ -1,14 +1,14 @@
-import { usePaxgPrice } from "@/hooks/usePaxgPrice";
-import { calculateTGGPrice } from "@/utils/priceUtils";
-import { useMarketplaceContract } from "./useMarketplaceContracts";
-import { TOKENS } from "@/config/token";
-import { Address } from "viem";
+import { usePaxgPrice } from '@/hooks/usePaxgPrice';
+import { calculateTGGPrice } from '@/utils/priceUtils';
+import { useMarketplaceContract } from './useMarketplaceContracts';
+import { TOKENS } from '@/config/token';
+import { Address } from 'viem';
 
 export function useTokenPrice(symbol: string): {
   price: number | null;
   isLoading: boolean;
 } {
-  if (symbol === "TGG") {
+  if (symbol === 'TGG') {
     const { data: paxgPrice, isLoading } = usePaxgPrice();
     return {
       price: paxgPrice !== undefined ? calculateTGGPrice(paxgPrice) : null,
@@ -16,16 +16,12 @@ export function useTokenPrice(symbol: string): {
     };
   }
 
-  if (symbol === "TFT_001") {
+  if (symbol === 'TFT_001') {
     const { getTokenInfo } = useMarketplaceContract();
-    const tokenAddress = TOKENS["TFT_001"].addresses.Base as Address;
+    const tokenAddress = TOKENS['TFT_001'].addresses.Base as Address;
     const { data, isLoading } = getTokenInfo(tokenAddress);
 
-    const [pricePerToken, tokenDecimals, isActive] = (data ?? []) as [
-      bigint,
-      number,
-      boolean,
-    ];
+    const [pricePerToken, tokenDecimals, isActive] = (data ?? []) as [bigint, number, boolean];
 
     const bigInt_price = Number(pricePerToken);
     const price = bigInt_price / 10 ** 18;
