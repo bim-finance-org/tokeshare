@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const FrenchTacosBlockchain = () => {
   return (
@@ -14,7 +14,7 @@ const FrenchTacosBlockchain = () => {
         <div className="flex flex-col md:flex-row justify-between items-center pb-4">
           <div className="flex flex-col md:flex-row justify-between w-full md:pr-9 mb-4 md:mb-0">
             <h3 className="text-lg font-semibold">Identifier</h3>
-            <p className="text-base mt-2 md:mt-0">TokeShare Gold Gram</p>
+            <p className="text-base mt-2 md:mt-0">TokeShare French Tacos</p>
           </div>
         </div>
 
@@ -31,24 +31,24 @@ const FrenchTacosBlockchain = () => {
             <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
               <h3 className="text-lg font-semibold">Contract Address</h3>
               <a
-                href="https://polygonscan.com/address/..."
+                href="https://basescan.org/address/0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
               >
-                ...
+                0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26
               </a>
             </div>
 
             <div className="py-4 flex flex-col md:flex-row justify-between ">
               <h3 className="text-lg font-semibold">Owner Wallet</h3>
               <a
-                href="https://polygonscan.com/address/..."
+                href="https://basescan.org/address/0xdF47d932064565f3C74581D914F8f81AE59cb7e7"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
               >
-                ...
+                0xdF47d932064565f3C74581D914F8f81AE59cb7e7
               </a>
             </div>
           </div>
