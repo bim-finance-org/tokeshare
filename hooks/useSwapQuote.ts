@@ -169,6 +169,7 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
     if (tokenSymbol == 'TGG') {
       fetchQuoteTGG(params);
     } else if (tokenSymbol == 'TFT_001') {
+      setIsLoading(true);
       if (params.direction === SwapDirection.StablecoinToToken) {
         setOutputAmount((parseFloat(params.inputAmount) / 31.25).toFixed(6));
         setExchangeRate((1 / 31.25).toFixed(4));
