@@ -32,15 +32,12 @@ const TradeWidget = ({
 }: TradeWidgetProps) => {
   const [selectedToken, setSelectedToken] = useState(defaultToken || 'USDC');
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
-  const { address } = useAccount();
 
   // Vérifie si le token est TGG
   const isTGG = selectedToken === 'TGG' || selectedToken === 'TFT_001';
 
   const handleTokenSelect = (token: string) => {
-    console.log(token);
     setSelectedToken(token);
-    console.log(selectedToken);
     onTokenChange(token);
     setIsSelectorOpen(false);
   };
@@ -66,7 +63,7 @@ const TradeWidget = ({
             value={value || ''}
             onChange={onValueChange}
             placeholder={isTGG ? '1' : '50'}
-            disabled={isTGG && type === 'stablecoin'}
+            disabled={readOnly}
           />
         </div>
 

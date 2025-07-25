@@ -83,7 +83,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         setStablecoinAmount(calculatedOutputAmount);
       } else {
         // Stablecoin → TGG
-        setAmount(calculatedOutputAmount);
+        const outputAsNumber = Number(calculatedOutputAmount);
+        if (isNaN(outputAsNumber)) {
+          setAmount('0');
+        } else {
+          setAmount(calculatedOutputAmount);
+        }
       }
     }
   }, [calculatedOutputAmount, isTggFirst, isLoadingQuote]);

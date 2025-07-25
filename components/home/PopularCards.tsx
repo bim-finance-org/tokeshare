@@ -9,6 +9,7 @@ import PopularCommoditiesCard from './PopularCommoditiesCard';
 import housesData from '../../data/housesData.json';
 import quadsData from '../../data/quadsData.json';
 import commoditiesData from '../../data/commoditiesData.json';
+import PopularTFTCard from './PopularTFTCard';
 
 const PopularHouses: React.FC = () => {
   return (
@@ -30,7 +31,7 @@ const PopularHouses: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-1 custom-r:grid-cols-3 gap-4 sm:gap-6">
-        <PopularQuadCard key={3} quad={quadsData[0]} />
+        <PopularTFTCard />
         <PopularCommoditiesCard key={2} commodity={commoditiesData[0]} />
         <PolularHouseCard key={1} house={housesData[0]} />
       </div>
