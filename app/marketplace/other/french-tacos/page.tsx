@@ -11,7 +11,7 @@ const page = () => {
       <FrenchTacosCarousel />
       <Exchange token={TOKENS['TFT_001']} />
       <FrenchTacosInfo />
-      <div className="p-8 rounded-xl mx-52 text-color4">
+      <div className="py-8 px-4 rounded-xl mx-auto w-full md:w-4/5 lg:pl-16 text-color4">
         <h2 className="text-2xl font-bold mb-4">🍔 ABOUT THE BUSINESS</h2>
         <p className="mb-4">
           Introducing our first food service tokenization project in the Dominican Republic:

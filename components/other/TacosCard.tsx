@@ -30,7 +30,7 @@ const TacosCard = () => {
   }, []);
 
   return (
-    <div className="bg-color1 shadow-lg max-w-3xl w-[500px] rounded-3xl overflow-hidden text-color4">
+    <div className="bg-color1 shadow-lg max-w-3xl md:w-full rounded-3xl overflow-hidden text-color4">
       <div className="image-container">
         <Image
           src="/images/frenchTacos/image_3.jpg"
@@ -41,7 +41,7 @@ const TacosCard = () => {
         />
       </div>
 
-      <div className="px-12 py-8">
+      <div className="px-2 md:px-12 py-8">
         <div className="flex items-center mb-3">
           <div className="border-t-2 border-color4 w-10 mr-3 ml-1"></div>
           <h1 className="text-color4 text-3xl font-bold">French Tacos</h1>

@@ -18,8 +18,8 @@ const TokenInput = ({ label, value, onChange, placeholder, disabled = false }: T
   };
 
   return (
-    <div className="w-32 sm:w-40">
-      <p className="text-color4 text-lg font-medium">{label}</p>
+    <div className="w-26 sm:w-40">
+      <p className="text-color4 text-sm sm:text-lg font-medium">{label}</p>
       <input
         type="text"
         value={value}
