@@ -63,7 +63,14 @@ const FrenchTacosCarousel: React.FC = () => {
           Tokeshare French Tacos
         </h1>
         <div className="flex space-x-3">
-          <span className="bg-color4 text-white px-4 py-1 rounded font-semibold">BASE</span>
+          <a
+            className="bg-color4 text-white px-4 py-1 rounded font-semibold"
+            href="https://basescan.org/address/0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            BASE
+          </a>
         </div>
       </div>
 
