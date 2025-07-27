@@ -122,7 +122,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   // Handle blockchain selection
   const handleBlockchainSelect = (blockchain: Blockchain) => {
     setSelectedBlockchain(blockchain);
-    setStablecoin(blockchain === Blockchain.Polygon ? 'USDT' : 'USDC');
+    setStablecoin('USDC');
   };
 
   // Handle swap button click
