@@ -71,10 +71,16 @@ const PopularTFTCard = () => {
               <span>Las Terrenas</span>
             </div>
 
-            <div className="flex items-center gap-2 border-l border-gray-400 pl-4">
-              <p className="text-color4">Available on marketplace:</p>
-              <span className="font-bold">{balance.toFixed(2)} TFT</span>
-            </div>
+            {balance === 0 ? (
+              <div className="flex items-center gap-2 border-l border-gray-400 pl-4">
+                <p className="text-color4 font-bold">SOLD OUT</p>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 border-l border-gray-400 pl-4">
+                <p className="text-color4">Available on marketplace:</p>
+                <span className="font-bold">{balance.toFixed(2)} TFT</span>
+              </div>
+            )}
           </div>
         </div>
 

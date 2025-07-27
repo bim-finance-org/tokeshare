@@ -139,11 +139,18 @@ const FrenchTacosCarousel: React.FC = () => {
       <div className="text-center w-full mt-6">
         <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">TOTAL INVESTMENT: $31,250</h2>
       </div>
-      <div className="text-center w-full mt-6">
-        <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">
-          Availaible on Marketplace {balance.toFixed(2)} TFT
-        </h2>
-      </div>
+
+      {balance === 0 ? (
+        <div className="text-center w-full mt-6">
+          <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">SOLD OUT</h2>
+        </div>
+      ) : (
+        <div className="text-center w-full mt-6">
+          <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">
+            Availaible on Marketplace {balance.toFixed(2)} TFT
+          </h2>
+        </div>
+      )}
     </section>
   );
 };

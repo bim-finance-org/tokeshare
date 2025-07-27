@@ -71,10 +71,16 @@ const TacosCard = () => {
             <span>2%/year (included)</span>
           </div>
         </div>
-        <div className="flex flex-col gap-1 items-center text-xl">
-          <span className="font-semibold mt-2">Available on Marketplace</span>
-          <span>{balance.toFixed(2)} TFT</span>
-        </div>
+        {balance === 0 ? (
+          <div className="flex flex-col gap-1 items-center text-xl">
+            <span className="font-semibold mt-2">SOLD OUT</span>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1 items-center text-xl">
+            <span className="font-semibold mt-2">Available on Marketplace</span>
+            <span>{balance.toFixed(2)} TFT</span>
+          </div>
+        )}
 
         <div className="bg-color2/20 rounded-xl p-6 mb-8">
           <div className="flex items-center gap-2 mb-2">
