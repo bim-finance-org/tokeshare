@@ -10,12 +10,14 @@ import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/types/Blockchain';
 import { Address } from 'viem';
+import { Skeleton } from '../ui/skeleton';
 
 const PopularTFTCard = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isColumn, setIsColumn] = useState(true);
 
-  const [balance, setBalance] = useState<number>(0);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [hasError, setHasError] = useState(false);
   const { getMarketplaceBalance } = useMarketplaceContract();
 
   useEffect(() => {
@@ -26,7 +28,9 @@ const PopularTFTCard = () => {
         const formattedBalance = Number(rawBalance) / 10 ** 18;
         setBalance(formattedBalance);
       } catch (err) {
-        throw err;
+        console.error('Erreur de fetch balance :', err);
+        setHasError(true);
+        setBalance(null); // pour éviter que 0 soit interprété comme SOLD OUT
       }
     };
 
@@ -71,7 +75,9 @@ const PopularTFTCard = () => {
               <span>Las Terrenas</span>
             </div>
 
-            {balance === 0 ? (
+            {hasError || balance === null ? (
+              <div className="flex items-center gap-2  pl-4"></div>
+            ) : balance === 0 ? (
               <div className="flex items-center gap-2 border-l border-gray-400 pl-4">
                 <p className="text-color4 font-bold">SOLD OUT</p>
               </div>

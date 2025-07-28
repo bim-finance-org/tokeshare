@@ -13,6 +13,9 @@ import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/types/Blockchain';
 import { Address } from 'viem';
+import { Skeleton } from '../ui/skeleton';
+import { fallbackPublicClient } from '@/lib/clients';
+import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 
 // Images du French Tacos (mets tes vraies images ici)
 const images = [
@@ -30,7 +33,8 @@ const FrenchTacosCarousel: React.FC = () => {
   // Responsive : mobile vs desktop
   const [isMobile, setIsMobile] = useState(false);
 
-  const [balance, setBalance] = useState<number>(0);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [hasError, setHasError] = useState(false);
   const { getMarketplaceBalance } = useMarketplaceContract();
 
   useEffect(() => {
@@ -41,7 +45,9 @@ const FrenchTacosCarousel: React.FC = () => {
         const formattedBalance = Number(rawBalance) / 10 ** 18;
         setBalance(formattedBalance);
       } catch (err) {
-        throw err;
+        console.error('Erreur de fetch balance :', err);
+        setHasError(true);
+        setBalance(null);
       }
     };
 
@@ -147,7 +153,9 @@ const FrenchTacosCarousel: React.FC = () => {
         <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">TOTAL INVESTMENT: $31,250</h2>
       </div>
 
-      {balance === 0 ? (
+      {hasError || balance === null ? (
+        <div className="flex items-center gap-2 pl-4"></div>
+      ) : balance === 0 ? (
         <div className="text-center w-full mt-6">
           <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">SOLD OUT</h2>
         </div>

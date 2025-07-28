@@ -9,9 +9,11 @@ import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/types/Blockchain';
 import { Address } from 'viem';
+import { Skeleton } from '../ui/skeleton';
 
 const TacosCard = () => {
-  const [balance, setBalance] = useState<number>(0);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [hasError, setHasError] = useState(false);
   const { getMarketplaceBalance } = useMarketplaceContract();
 
   useEffect(() => {
@@ -22,7 +24,9 @@ const TacosCard = () => {
         const formattedBalance = Number(rawBalance) / 10 ** 18;
         setBalance(formattedBalance);
       } catch (err) {
-        throw err;
+        console.error('Erreur de fetch balance :', err);
+        setHasError(true);
+        setBalance(null);
       }
     };
 
@@ -71,7 +75,9 @@ const TacosCard = () => {
             <span>2%/year (included)</span>
           </div>
         </div>
-        {balance === 0 ? (
+        {hasError || balance === null ? (
+          <div className="flex items-center gap-2  pl-4"></div>
+        ) : balance === 0 ? (
           <div className="flex flex-col gap-1 items-center text-xl">
             <span className="font-semibold mt-2">SOLD OUT</span>
           </div>
