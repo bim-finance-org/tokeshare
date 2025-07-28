@@ -9,6 +9,13 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
 import Link from 'next/link';
+import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
+import { getTokenAddress } from '@/utils/token';
+import { Blockchain } from '@/types/Blockchain';
+import { Address } from 'viem';
+import { Skeleton } from '../ui/skeleton';
+import { fallbackPublicClient } from '@/lib/clients';
+import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 
 // Images du French Tacos (mets tes vraies images ici)
 const images = [
@@ -26,6 +33,27 @@ const FrenchTacosCarousel: React.FC = () => {
   // Responsive : mobile vs desktop
   const [isMobile, setIsMobile] = useState(false);
 
+  const [balance, setBalance] = useState<number | null>(null);
+  const [hasError, setHasError] = useState(false);
+  const { getMarketplaceBalance } = useMarketplaceContract();
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      const tftTokenAddress = getTokenAddress('TFT_001', Blockchain.Base) as Address;
+      try {
+        const rawBalance = await getMarketplaceBalance(tftTokenAddress);
+        const formattedBalance = Number(rawBalance) / 10 ** 18;
+        setBalance(formattedBalance);
+      } catch (err) {
+        console.error('Erreur de fetch balance :', err);
+        setHasError(true);
+        setBalance(null);
+      }
+    };
+
+    fetchBalance();
+  }, []);
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -41,7 +69,14 @@ const FrenchTacosCarousel: React.FC = () => {
           Tokeshare French Tacos
         </h1>
         <div className="flex space-x-3">
-          <span className="bg-color4 text-white px-4 py-1 rounded font-semibold">BASE</span>
+          <a
+            className="bg-color4 text-white px-4 py-1 rounded font-semibold"
+            href="https://basescan.org/address/0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            BASE
+          </a>
         </div>
       </div>
 
@@ -117,6 +152,20 @@ const FrenchTacosCarousel: React.FC = () => {
       <div className="text-center w-full mt-6">
         <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">TOTAL INVESTMENT: $31,250</h2>
       </div>
+
+      {hasError || balance === null ? (
+        <div className="flex items-center gap-2 pl-4"></div>
+      ) : balance === 0 ? (
+        <div className="text-center w-full mt-6">
+          <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">SOLD OUT</h2>
+        </div>
+      ) : (
+        <div className="text-center w-full mt-6">
+          <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">
+            Availaible on Marketplace {balance.toFixed(2)} TFT
+          </h2>
+        </div>
+      )}
     </section>
   );
 };

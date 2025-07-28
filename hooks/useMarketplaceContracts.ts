@@ -6,9 +6,12 @@ import { usePublicClient, useWalletClient, useWriteContract, useReadContract, us
 import { getTokenAddress, getTokenDecimals } from '@/utils/token';
 import { Blockchain } from '@/types/Blockchain';
 import { TokenInfo } from '@/config/token';
+import { fallbackPublicClient } from '@/lib/clients';
 
 export function useMarketplaceContract() {
-  const publicClient = usePublicClient();
+  const wagmiClient = usePublicClient();
+  const publicClient = wagmiClient?.chain?.id === 8453 ? wagmiClient : fallbackPublicClient;
+
   const { data: walletClient } = useWalletClient();
   const { address: userAddress } = useAccount();
   const { writeContract, data: hash, isPending, error } = useWriteContract();
@@ -110,6 +113,17 @@ export function useMarketplaceContract() {
     });
   }
 
+  function getMarketplaceBalance(token: Address): Promise<bigint> {
+    if (!publicClient) throw new Error('Public client non disponible');
+
+    return publicClient.readContract({
+      address: token,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [CONTRACTS.MARKETPLACE as Address],
+    }) as Promise<bigint>;
+  }
+
   return {
     buyTokenOnMarketplace,
     getTokenInfo,
@@ -119,5 +133,6 @@ export function useMarketplaceContract() {
     checkTokenBalance,
     checkAllowance,
     approveToken,
+    getMarketplaceBalance,
   };
 }

@@ -21,7 +21,7 @@ export const TokenContexts = createContext({
 export const TokenProvider = ({ children }: { children: ReactNode }) => {
   // États séparés pour chaque page
   const [swapToken, setSwapToken] = useState(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('swapToken') || 'USDT' : 'USDT',
+    typeof window !== 'undefined' ? localStorage.getItem('swapToken') || 'USDC' : 'USDC',
   );
   const [swapBlockchain, setSwapBlockchain] = useState<Blockchain>(() =>
     typeof window !== 'undefined'

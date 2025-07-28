@@ -13,7 +13,7 @@ const FrenchTacosInfo = () => {
   const [activeTab, setActiveTab] = useState('HIGHLIGHTS');
 
   return (
-    <section className="px-4 sm:px-8 lg:px-16 py-6 w-4/5 mx-auto flex flex-col items-center sm:items-start">
+    <section className="px-4 sm:px-8 lg:px-16 py-6 w-full md:w-4/5 mx-auto flex flex-col items-center sm:items-start">
       {/* Navbar responsive */}
       <div className="w-full mb-6">
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 justify-center">

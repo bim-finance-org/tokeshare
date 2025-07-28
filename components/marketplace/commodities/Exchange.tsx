@@ -19,7 +19,7 @@ const Exchange: React.FC<ExchangeProps> = ({ token }) => {
   const { data: stablePrices, isLoading, error } = useAllStablePrices();
 
   return (
-    <div className="flex flex-col items-center bg-gray-100 rounded-xl overflow-hidden w-full mx-auto max-w-md sm:max-w-lg my-16">
+    <div className="flex flex-col items-center bg-gray-100 rounded-xl overflow-hidden w-11/12 mx-auto max-w-md sm:max-w-lg my-16">
       <div className="flex w-full border-b border-gray-200">
         <button
           onClick={() => setActiveTab(ExchangeSection.Swap)}

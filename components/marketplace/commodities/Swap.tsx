@@ -49,7 +49,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   const { isConnected, address } = useAccount();
   const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
-  const { buyTokenOnMarketplace } = useMarketplaceContract();
+  const { buyTokenOnMarketplace, isPending: isPendingTFT, error: errorTFT, hash: hashTFT } = useMarketplaceContract();
   const { price: tokenPrice, isLoading: isPriceLoading } = useTokenPrice(token.symbol);
 
   const [swapQuoteParams, setSwapQuoteParams] = useState<SwapQuoteParams | null>(null);
@@ -83,7 +83,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         setStablecoinAmount(calculatedOutputAmount);
       } else {
         // Stablecoin → TGG
-        setAmount(calculatedOutputAmount);
+        const outputAsNumber = Number(calculatedOutputAmount);
+        if (isNaN(outputAsNumber)) {
+          setAmount('0');
+        } else {
+          setAmount(calculatedOutputAmount);
+        }
       }
     }
   }, [calculatedOutputAmount, isTggFirst, isLoadingQuote]);
@@ -117,7 +122,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   // Handle blockchain selection
   const handleBlockchainSelect = (blockchain: Blockchain) => {
     setSelectedBlockchain(blockchain);
-    setStablecoin(blockchain === Blockchain.Polygon ? 'USDT' : 'USDC');
+    setStablecoin('USDC');
   };
 
   // Handle swap button click
@@ -216,7 +221,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     if (isPending) {
       setIsPreparingSwap(false);
     }
-  }, [isPending]);
+  }, [isPending, isPendingTFT]);
 
   // Déterminer quel widget est en entrée (modifiable) et lequel est en sortie (lecture seule)
   const topWidgetProps = {
@@ -275,7 +280,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           </Alert>
         )}
 
-        {isPending && (
+        {(isPending || isPendingTFT) && (
           <Alert className="bg-color1">
             <Loader2 className="h-4 w-4 animate-spin" />
             <AlertTitle>Transaction Processing</AlertTitle>
@@ -347,6 +352,22 @@ const Swap = ({ token }: { token: TokenInfo }) => {
               </div>
             </div>
           )}
+          {hashTFT && (
+            <div className="flex items-center justify-between pt-2 border-t">
+              <span className="text-color4 text-xs sm:text-sm font-medium">Transaction:</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-black bg-gray-100 font-mono px-2 py-1 rounded">
+                  {hashTFT.slice(0, 6)}...{hashTFT.slice(-4)}
+                </span>
+                <button
+                  onClick={() => window.open(`https://polygonscan.com/tx/${hashTFT}`, '_blank')}
+                  className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -355,18 +376,18 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           <button
             onClick={swaping}
             className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
-              arePricesAvailable && !isPending && !isPreparingSwap
+              arePricesAvailable && (!isPending || !isPendingTFT) && !isPreparingSwap
                 ? 'bg-color4 text-white hover:bg-opacity-90'
                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
             }`}
-            disabled={!arePricesAvailable || isPending || isPreparingSwap}
+            disabled={!arePricesAvailable || isPending || isPendingTFT || isPreparingSwap}
           >
             {isPreparingSwap ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Preparing swap...</span>
               </>
-            ) : isPending ? (
+            ) : isPending || isPendingTFT ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Processing transaction...</span>
