@@ -5,7 +5,7 @@ import TokenDisplay from '@/components/shared/TokenDisplay';
 import { useAccount } from 'wagmi';
 import CryptoBalance from './CryptoBalance';
 import MaxButton from './MaxButton';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 
 interface TradeWidgetProps {
   type: 'fiat' | 'crypto' | 'stablecoin';

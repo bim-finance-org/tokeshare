@@ -4,7 +4,7 @@ import React from 'react';
 import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Commodity } from '@/types/Commodity';
+import { Commodity } from '@/interfaces/Commodity';
 import { calculateTGGPrice } from '@/utils/priceUtils';
 import { useCommodityData } from '@/hooks/useCommodityData';
 interface CommoditiesCardProps {

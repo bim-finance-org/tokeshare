@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { House } from '@/types/House';
+import { House } from '@/interfaces/House';
 import HouseHighlights from './sections/Highlights';
 import HouseFinancials from './sections/Financials';
 import HouseDetails from './sections/Details';

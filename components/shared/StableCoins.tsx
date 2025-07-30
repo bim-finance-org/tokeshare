@@ -9,7 +9,7 @@ import EURCIcon from '../icons/currency/EURCIcon';
 import EURAIcon from '../icons/currency/EURAIcon';
 import { useAccount } from 'wagmi';
 import { useAllTokenBalances } from '@/utils/blockchainUtils';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 
 interface StableCoinsProps {
   onSelect: (currency: string) => void;

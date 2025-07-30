@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useWalletClient } from 'wagmi';
 import { WalletClient } from 'viem';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 
 // Mapping des chaînes à leurs IDs
 const CHAIN_IDS: Record<Blockchain, number> = {

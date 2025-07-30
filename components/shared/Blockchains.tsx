@@ -5,8 +5,8 @@ import PolygonIcon from '@/components/icons/blockchains/PolygonIcon';
 import BaseIcon from '@/components/icons/blockchains/BaseIcon';
 import ArrowDownIcon from '@/components/icons/arrows/ArrowDownIcon';
 import { TokenContexts } from '@/context/TokenContexts';
-import { Blockchain } from '@/types/Blockchain';
-import { ExchangeSection } from '@/types/ExchangeSection';
+import { Blockchain } from '@/enums/Blockchain';
+import { ExchangeSection } from '@/enums/ExchangeSection';
 import { getTokenBlockchains } from '@/utils/token';
 
 interface BlockchainsProps {

@@ -15,10 +15,10 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 import { SwapDirection } from '@/enums/Directions';
 import { TokenInfo } from '@/config/token';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 import { getTokenAddress } from '@/utils/token';
 import { useTokenPrice } from '@/hooks/useTokenPrice';
-import { ExchangeSection } from '@/types/ExchangeSection';
+import { ExchangeSection } from '@/enums/ExchangeSection';
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { useAutoSwitchNetwork } from '@/hooks/useAutoSwitchNetwork';
 

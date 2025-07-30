@@ -8,7 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 import { Address } from 'viem';
 import { Skeleton } from '../../ui/skeleton';
 

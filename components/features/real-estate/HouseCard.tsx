@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { House } from '@/types/House';
+import { House } from '@/interfaces/House';
 import BedIcon from '@/components/icons/card/BedIcon';
 import SurfaceIcon from '@/components/icons/card/SurfaceIcon';
 import LocationIcon from '@/components/icons/card/LocationIcon';

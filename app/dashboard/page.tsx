@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import React from 'react';
 import ContextProvider from '../../context';
-import DashBoard from '@/components/dashboard/DashBoard';
+import DashBoard from '@/components/features/dashboard/DashBoard';
 
 const DashboardPage = () => {
   const { data: session, status } = useSession();

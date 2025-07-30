@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useState, ReactNode } from 'react';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 
 export const TokenContexts = createContext({
   // États

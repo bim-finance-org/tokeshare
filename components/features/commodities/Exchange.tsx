@@ -7,7 +7,7 @@ import Swap from '@/components/features/commodities/Swap';
 import { useAllStablePrices } from '@/hooks/useStablePrice';
 
 import { TokenInfo } from '@/config/token';
-import { ExchangeSection } from '@/types/ExchangeSection';
+import { ExchangeSection } from '@/enums/ExchangeSection';
 
 interface ExchangeProps {
   token: TokenInfo;

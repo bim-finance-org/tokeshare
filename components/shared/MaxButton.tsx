@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAccount } from 'wagmi';
 import { useTokenBalance } from '@/utils/blockchainUtils';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 
 interface MaxButtonProps {
   currency: string;

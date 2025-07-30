@@ -1,7 +1,7 @@
 import React from 'react';
 import Currencies from './Currencies';
 import StableCoins from './StableCoins';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 
 interface TokenSelectorProps {
   type: 'fiat' | 'crypto' | 'stablecoin';

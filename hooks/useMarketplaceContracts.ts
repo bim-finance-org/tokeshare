@@ -4,7 +4,7 @@ import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { Address } from 'viem';
 import { usePublicClient, useWalletClient, useWriteContract, useReadContract, useAccount } from 'wagmi';
 import { getTokenAddress, getTokenDecimals } from '@/utils/token';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 import { TokenInfo } from '@/config/token';
 import { fallbackPublicClient } from '@/lib/clients';
 

@@ -1,4 +1,4 @@
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 
 export type TokenInfo = {
   symbol: string;

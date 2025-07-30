@@ -17,7 +17,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { INTERVAL_PRICE_UPDATE } from '@/constants/constants';
 import { Badge } from '@/components/ui/badge';
-import { ExchangeSection } from '@/types/ExchangeSection';
+import { ExchangeSection } from '@/enums/ExchangeSection';
 import { TokenInfo } from '@/config/token';
 
 const Sell = ({ token }: { token: TokenInfo }) => {

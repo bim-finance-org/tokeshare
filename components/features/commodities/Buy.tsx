@@ -11,7 +11,7 @@ import UserForm from './UserForm';
 import { TokenContexts } from '@/context/TokenContexts';
 import { ExchangeRates, useExchangeRates } from '@/hooks/useExchangeRates';
 import { Badge } from '@/components/ui/badge';
-import { ExchangeSection } from '@/types/ExchangeSection';
+import { ExchangeSection } from '@/enums/ExchangeSection';
 import { TokenInfo } from '@/config/token';
 
 const Buy = ({ token }: { token: TokenInfo }) => {

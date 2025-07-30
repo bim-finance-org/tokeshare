@@ -1,4 +1,4 @@
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 import { TOKENS, TokenInfo } from '@/config/token';
 import { Address } from 'viem';
 

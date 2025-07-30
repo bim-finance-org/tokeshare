@@ -5,7 +5,7 @@ import LocationIcon from '../../icons/card/LocationIcon';
 import ArrowIcon from '../../icons/arrows/ArrowIcon';
 import QuadIcon from '../../icons/card/QuadIcon';
 import Image from 'next/image';
-import { Quad } from '@/types/Quad';
+import { Quad } from '@/interfaces/Quad';
 
 interface PopularQuadCardProps {
   quad: Quad;
