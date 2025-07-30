@@ -1,15 +1,8 @@
 import React from 'react';
-import USDTIcon from '../icons/currency/USDTIcon';
-import USDCIcon from '../icons/currency/USDCIcon';
-import DAIIcon from '../icons/currency/DAIIcon';
-import EURSIcon from '../icons/currency/EURSIcon';
-import CRVIcon from '../icons/currency/CRVIcon';
-import BOLDIcon from '../icons/currency/BOLDIcon';
-import EURCIcon from '../icons/currency/EURCIcon';
-import EURAIcon from '../icons/currency/EURAIcon';
 import { useAccount } from 'wagmi';
 import { useAllTokenBalances } from '@/utils/blockchainUtils';
 import { Blockchain } from '@/enums/Blockchain';
+import { getTokenIcon } from '@/utils/token';
 
 interface StableCoinsProps {
   onSelect: (currency: string) => void;
@@ -34,18 +27,7 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
   const { balances, isLoading, error } = useAllTokenBalances(blockchain);
 
   const renderStablecoinButton = (symbol: string) => {
-    const icons = {
-      USDT: USDTIcon,
-      USDC: USDCIcon,
-      DAI: DAIIcon,
-      EURS: EURSIcon,
-      CRVUSD: CRVIcon,
-      EURC: EURCIcon,
-      BOLD: BOLDIcon,
-      EURA: EURAIcon,
-      USDCE: USDCIcon,
-    };
-    const Icon = icons[symbol as keyof typeof icons];
+    const Icon = getTokenIcon(symbol);
 
     // Récupérer la balance depuis le multicall
     const balance = balances[symbol]?.formatted || '0';
@@ -59,7 +41,7 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
         className="flex items-center justify-between w-full p-2 hover:bg-gray-200 rounded-lg transition-colors border-b border-gray-200"
       >
         <div className="flex items-center gap-3">
-          <Icon />
+          {Icon && <Icon />}
           <span className="text-color4 font-medium">{symbol === 'USDCE' ? 'USDC.e' : symbol}</span>
         </div>
 
