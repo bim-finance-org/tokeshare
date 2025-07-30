@@ -2,6 +2,7 @@ import { Blockchain } from '@/enums/Blockchain';
 import { TOKENS, TokenInfo } from '@/config/token';
 import { Address } from 'viem';
 import { IconComponent } from '@/types/Common';
+import { TokenType } from '@/enums/TokenType';
 
 export function getTokenAddress(symbol: string, blockchain: Blockchain): Address | undefined {
   return TOKENS[symbol]?.addresses[blockchain] as Address | undefined;
@@ -24,6 +25,10 @@ export function getBlockchainTokens(blockchain: Blockchain): TokenInfo[] {
 export function getTokenDecimals(symbol: string): number | undefined {
   const token = TOKENS[symbol];
   return token?.decimals;
+}
+
+export function getTokensByTypeAndByBlockchain(blockchain: Blockchain, type: TokenType): TokenInfo[] {
+  return Object.values(TOKENS).filter((token) => token.type === type && !!token.addresses[blockchain]);
 }
 
 /**

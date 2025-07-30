@@ -7,6 +7,7 @@ import TGGIcon from '@/components/icons/currency/TGGIcon';
 import USDCIcon from '@/components/icons/currency/USDCIcon';
 import USDTIcon from '@/components/icons/currency/USDTIcon';
 import { Blockchain } from '@/enums/Blockchain';
+import { TokenType } from '@/enums/TokenType';
 import { IconComponent } from '@/types/Common';
 
 export type TokenInfo = {
@@ -14,6 +15,7 @@ export type TokenInfo = {
   name: string;
   addresses: Partial<Record<Blockchain, string>>;
   decimals: number;
+  type: TokenType;
   icon?: IconComponent;
 };
 
@@ -25,6 +27,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Polygon: '0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71',
     },
     decimals: 18,
+    type: TokenType.Crypto,
     icon: TGGIcon,
   },
   TFT_001: {
@@ -34,6 +37,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Base: '0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26',
     },
     decimals: 18,
+    type: TokenType.Crypto,
   },
   USDC: {
     symbol: 'USDC',
@@ -43,6 +47,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Base: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
     },
     decimals: 6,
+    type: TokenType.Stablecoin,
     icon: USDCIcon,
   },
   USDT: {
@@ -52,6 +57,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Polygon: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
     },
     decimals: 6,
+    type: TokenType.Stablecoin,
     icon: USDTIcon,
   },
   DAI: {
@@ -62,6 +68,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Base: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
     },
     decimals: 18,
+    type: TokenType.Stablecoin,
     icon: DAIIcon,
   },
   EURS: {
@@ -71,6 +78,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Polygon: '0xE111178A87A3BFf0c8d18DECBa5798827539Ae99',
     },
     decimals: 2,
+    type: TokenType.Stablecoin,
     icon: EURSIcon,
   },
   USDCE: {
@@ -80,6 +88,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Polygon: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
     },
     decimals: 6,
+    type: TokenType.Stablecoin,
     icon: USDCIcon,
   },
   EURC: {
@@ -89,6 +98,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Base: '0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42',
     },
     decimals: 6,
+    type: TokenType.Stablecoin,
     icon: EURCIcon,
   },
   CRVUSD: {
@@ -98,6 +108,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Base: '0x417Ac0e078398C154EdFadD9Ef675d30Be60Af93',
     },
     decimals: 18,
+    type: TokenType.Stablecoin,
     icon: CRVIcon,
   },
   BOLD: {
@@ -107,6 +118,7 @@ export const TOKENS: Record<string, TokenInfo> = {
       Base: '0x03569cc076654f82679c4ba2124d64774781b01d',
     },
     decimals: 18,
+    type: TokenType.Stablecoin,
     icon: BOLDIcon,
   },
 };
