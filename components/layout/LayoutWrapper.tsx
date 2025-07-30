@@ -4,17 +4,15 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import NavBar from './NavBar';
 import Footer from './Footer';
-import { StablecoinPriceInitializer } from '../shared/StablecoinPriceInitializer';
+import { usePrefetchStablePrices } from '@/hooks/useStablePrice';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isDashboardRoute = pathname.startsWith('/dashboard');
+  usePrefetchStablePrices();
 
   return (
     <>
-      {/* Initialise le chargement des prix des stablecoins */}
-      <StablecoinPriceInitializer />
-
       {!isDashboardRoute && <NavBar />}
       {children}
       {!isDashboardRoute && <Footer />}
