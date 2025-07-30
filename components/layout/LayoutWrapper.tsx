@@ -4,7 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import NavBar from './NavBar';
 import Footer from './Footer';
-import { StablecoinPriceInitializer } from './StablecoinPriceInitializer';
+import { StablecoinPriceInitializer } from '../shared/StablecoinPriceInitializer';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

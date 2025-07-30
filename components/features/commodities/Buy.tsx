@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import BankIcon from '@/components/icons/BankIcon';
-import Blockchains from '@/components/Blockchains';
+import Blockchains from '@/components/shared/Blockchains';
 import { calculateTGGPrice, convertFiatToTGG, convertTGGToFiat } from '@/utils/priceUtils';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { useAccount } from 'wagmi';

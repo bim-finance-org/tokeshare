@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import LocationIcon from '../icons/card/LocationIcon';
-import SurfaceIcon from '../icons/card/SurfaceIcon';
-import BedIcon from '../icons/card/BedIcon';
-import ArrowIcon from '../icons/arrows/ArrowIcon';
+import LocationIcon from '../../icons/card/LocationIcon';
+import SurfaceIcon from '../../icons/card/SurfaceIcon';
+import BedIcon from '../../icons/card/BedIcon';
+import ArrowIcon from '../../icons/arrows/ArrowIcon';
 import Image from 'next/image';
 import { House } from '@/types/House';
 

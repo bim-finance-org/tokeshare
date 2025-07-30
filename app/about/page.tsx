@@ -1,5 +1,5 @@
 import React from 'react';
-import PersonalCard from '@/components/about/PersonalCard';
+import PersonalCard from '@/components/features/about/PersonalCard';
 import teamData from '@/data/teamData.json';
 
 const Page = () => {

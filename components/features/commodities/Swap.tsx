@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import Image from 'next/image';
-import Blockchains from '@/components/Blockchains';
+import Blockchains from '@/components/shared/Blockchains';
 import { useAccount } from 'wagmi';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { TokenContexts } from '@/context/TokenContexts';

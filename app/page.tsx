@@ -1,11 +1,11 @@
 'use client';
 import React, { useState } from 'react';
-import PopularCards from '../components/home/PopularCards';
+import PopularCards from '../components/features/home/PopularCards';
 import ArrowLineIcon from '../components/icons/arrows/ArrowLineIcon';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Input } from '../components/ui/input';
-import Schema from '../components/home/Schema';
+import Schema from '../components/features/home/Schema';
 import { z } from 'zod';
 import { usePaxgPrice } from '../hooks/usePaxgPrice';
 

@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Buy from '@/components/marketplace/commodities/Buy';
-import Sell from '@/components/marketplace/commodities/Sell';
-import Swap from '@/components/marketplace/commodities/Swap';
+import Buy from '@/components/features/commodities/Buy';
+import Sell from '@/components/features/commodities/Sell';
+import Swap from '@/components/features/commodities/Swap';
 import { useAllStablePrices } from '@/hooks/useStablePrice';
 
 import { TokenInfo } from '@/config/token';

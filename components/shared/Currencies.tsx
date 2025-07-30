@@ -1,9 +1,9 @@
 import React from 'react';
-import CADIcon from './icons/currency/CADIcon';
-import EURIcon from './icons/currency/EURIcon';
-import USDIcon from './icons/currency/USDIcon';
-import CHFIcon from './icons/currency/CHFIcon';
-import GBPIcon from './icons/currency/GBPIcon';
+import CADIcon from '../icons/currency/CADIcon';
+import EURIcon from '../icons/currency/EURIcon';
+import USDIcon from '../icons/currency/USDIcon';
+import CHFIcon from '../icons/currency/CHFIcon';
+import GBPIcon from '../icons/currency/GBPIcon';
 
 interface CurrenciesProps {
   onSelect: (currency: string) => void;

@@ -1,5 +1,5 @@
 import React from 'react';
-import LinkedinIcon from '../../components/icons/social/LinkedinIcon';
+import LinkedinIcon from '../../icons/social/LinkedinIcon';
 import Image from 'next/image';
 
 interface PersonalCardProps {

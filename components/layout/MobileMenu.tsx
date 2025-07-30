@@ -4,8 +4,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import CrossIcon from './icons/CrossIcon';
-import MenuIcon from './icons/MenuIcon';
+import CrossIcon from '@/components/icons/CrossIcon';
+import MenuIcon from '@/components/icons/MenuIcon';
 
 const MobileMenu: React.FC = () => {
   const pathname = usePathname();

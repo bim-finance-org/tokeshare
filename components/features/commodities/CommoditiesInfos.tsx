@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Blockchain from '@/components/marketplace/real-estate/sections/Blockchain';
+import Blockchain from '@/components/features/real-estate/sections/Blockchain';
 import NewTabIcon from '@/components/icons/NewTabIcon';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { calculateTGGPrice } from '@/utils/priceUtils';

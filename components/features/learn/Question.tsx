@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import ArrowIcon from '../../components/icons/arrows/ArrowIcon';
-import CrossIcon from '../../components/icons/CrossIcon';
+import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
+import CrossIcon from '@/components/icons/CrossIcon';
 
 interface QuestionProps {
   question: string;

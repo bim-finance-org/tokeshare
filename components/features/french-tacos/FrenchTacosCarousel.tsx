@@ -13,7 +13,7 @@ import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/types/Blockchain';
 import { Address } from 'viem';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '../../ui/skeleton';
 import { fallbackPublicClient } from '@/lib/clients';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 

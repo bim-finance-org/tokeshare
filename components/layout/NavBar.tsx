@@ -4,11 +4,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import MobileMenu from './MobileMenu';
-import ArrowDownIcon from './icons/arrows/ArrowDownIcon';
-import CrossIcon from './icons/CrossIcon';
+import MobileMenu from '@/components/layout/MobileMenu';
+import ArrowDownIcon from '@/components/icons/arrows/ArrowDownIcon';
+import CrossIcon from '@/components/icons/CrossIcon';
 import Head from 'next/head';
-import ConnectButton from './shared/ConnectButton';
+import ConnectButton from '@/components/shared/ConnectButton';
 import { useAccount } from 'wagmi';
 
 interface NavBarProps {

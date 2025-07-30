@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import Exchange from '@/components/marketplace/commodities/Exchange';
+import Exchange from '@/components/features/commodities/Exchange';
 import commoditiesData from '@/data/commoditiesData.json';
-import Contracts from '@/components/Contracts';
+import Contracts from '@/components/shared/Contracts';
 import Image from 'next/image';
-import CommoditiesInfos from '@/components/marketplace/commodities/CommoditiesInfos';
+import CommoditiesInfos from '@/components/features/commodities/CommoditiesInfos';
 import { use } from 'react';
 import { CONTRACTS } from '@/contracts/contracts';
 import { TOKENS } from '@/config/token';

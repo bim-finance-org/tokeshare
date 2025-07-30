@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import LinkedinIcon from './icons/social/LinkedinIcon';
-import XIcon from './icons/social/XIcon';
-import InstagramIcon from './icons/social/InstagramIcon';
+import LinkedinIcon from '@/components/icons/social/LinkedinIcon';
+import XIcon from '@/components/icons/social/XIcon';
+import InstagramIcon from '@/components/icons/social/InstagramIcon';
 import Image from 'next/image';
 
 const Footer = () => {

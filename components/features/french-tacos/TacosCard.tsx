@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import LocationIcon from '../icons/card/LocationIcon';
+import LocationIcon from '../../icons/card/LocationIcon';
 import { FaChartLine } from 'react-icons/fa6';
 import Link from 'next/link';
 import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
@@ -9,7 +9,7 @@ import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/types/Blockchain';
 import { Address } from 'viem';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '../../ui/skeleton';
 
 const TacosCard = () => {
   const [balance, setBalance] = useState<number | null>(null);
