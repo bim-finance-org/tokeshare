@@ -90,61 +90,6 @@ export const useAllStablePrices = (refetchInterval = CACHE_EXPIRATION) => {
 };
 
 /**
- * Hook qui permet de récupérer les prix de stablecoins spécifiques.
- * Utilise les données mises en cache par useAllStablePrices.
- */
-export const useStablePrices = (symbols: string[] = ACTIVE_STABLECOINS) => {
-  const queryClient = useQueryClient();
-
-  // Force le chargement des données si elles ne sont pas déjà dans le cache
-  useAllStablePrices();
-
-  return useQuery({
-    queryKey: [...STABLE_PRICES_QUERY_KEY, ...symbols],
-    queryFn: () => {
-      // Récupérer les données du cache
-      const cachedData = queryClient.getQueryData<StablecoinPrices>(STABLE_PRICES_QUERY_KEY);
-
-      if (!cachedData) {
-        // Si les données ne sont pas en cache, retourne undefined
-        return undefined;
-      }
-
-      // Filtrer pour n'inclure que les symboles demandés
-      const filteredData: StablecoinPrices = {};
-      symbols.forEach((symbol) => {
-        // Transférer la valeur exacte sans valeur par défaut
-        filteredData[symbol] = cachedData[symbol];
-      });
-
-      return filteredData;
-    },
-    // Cette requête dépend de la requête principale
-    enabled: Boolean(queryClient.getQueryData(STABLE_PRICES_QUERY_KEY)),
-    // Utilise le même staleTime que la requête principale
-    staleTime: CACHE_EXPIRATION,
-  });
-};
-
-// Hook spécifique pour un stablecoin
-export const useStablecoinPrice = ({ stablecoin }: { stablecoin: string }) => {
-  // Si nous recevons USDC.e mais que nous n'avons que USDCE dans notre dictionnaire
-  const normalizedStablecoin = stablecoin === 'USDC.e' ? 'USDCE' : stablecoin;
-
-  // Vérifier que le stablecoin est supporté
-  if (!STABLECOINS[normalizedStablecoin]) {
-    console.warn(`Stablecoin not supported: ${stablecoin} (normalized: ${normalizedStablecoin})`);
-    // Indiquer que le stablecoin n'est pas supporté plutôt que de donner une valeur par défaut
-    return { data: undefined, isLoading: false, error: new Error(`Stablecoin not supported: ${stablecoin}`) };
-  }
-
-  const { data, isLoading, error } = useStablePrices([normalizedStablecoin]);
-
-  // Retourner la valeur exacte, même si undefined
-  return { data: data?.[normalizedStablecoin], isLoading, error };
-};
-
-/**
  * Hook à appeler au chargement de l'application pour précharger tous les prix
  */
 export const usePrefetchStablePrices = () => {
