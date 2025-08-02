@@ -17,6 +17,7 @@ export type TokenInfo = {
   decimals: number;
   type: TokenType;
   icon?: IconComponent;
+  cmcId?: number;
 };
 
 export const TOKENS: Record<string, TokenInfo> = {
@@ -49,6 +50,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 6,
     type: TokenType.Stablecoin,
     icon: USDCIcon,
+    cmcId: 3408,
   },
   USDT: {
     symbol: 'USDT',
@@ -59,6 +61,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 6,
     type: TokenType.Stablecoin,
     icon: USDTIcon,
+    cmcId: 825,
   },
   DAI: {
     symbol: 'DAI',
@@ -70,6 +73,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 18,
     type: TokenType.Stablecoin,
     icon: DAIIcon,
+    cmcId: 4943,
   },
   EURS: {
     symbol: 'EURS',
@@ -80,6 +84,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 2,
     type: TokenType.Stablecoin,
     icon: EURSIcon,
+    cmcId: 2989,
   },
   USDCE: {
     symbol: 'USDCE',
@@ -90,6 +95,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 6,
     type: TokenType.Stablecoin,
     icon: USDCIcon,
+    cmcId: 18852,
   },
   EURC: {
     symbol: 'EURC',
@@ -100,6 +106,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 6,
     type: TokenType.Stablecoin,
     icon: EURCIcon,
+    cmcId: 20641,
   },
   CRVUSD: {
     symbol: 'CRVUSD',
@@ -110,6 +117,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 18,
     type: TokenType.Stablecoin,
     icon: CRVIcon,
+    cmcId: 24927,
   },
   BOLD: {
     symbol: 'BOLD',
