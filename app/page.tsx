@@ -67,9 +67,9 @@ export default function Home() {
             compliant and modern solution to rethink real estate investment.
           </p>
           <p className="text-white text-sm md:text-lg">The future of finance lies in tokenization.</p>
-          <Link href="/buildingInProgress">
+          <Link href="/marketplace/commodities">
             <button className="rounded-lg w-48 bg-color4 px-6 py-2 text-sm md:text-lg hover:scale-105 transition-transform duration-300">
-              Sign up
+              Marketplace
             </button>
           </Link>
         </div>
