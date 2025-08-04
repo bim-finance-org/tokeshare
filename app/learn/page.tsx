@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Question from '@/components/learn/Question';
+import Question from '@/components/features/learn/Question';
 
 const Page = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
