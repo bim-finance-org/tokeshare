@@ -1,4 +1,4 @@
-import TacosCard from '@/components/other/TacosCard';
+import TacosCard from '@/components/features/french-tacos/TacosCard';
 import React from 'react';
 
 const page = () => {

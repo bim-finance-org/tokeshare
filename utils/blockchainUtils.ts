@@ -3,7 +3,7 @@ import { Address } from 'viem';
 import { useReadContracts } from 'wagmi';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { getTokenDecimals } from '@/utils/tokenUtils';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 import { getBlockchainTokens, getTokenAddress } from './token';
 import { TOKENS } from '@/config/token';
 

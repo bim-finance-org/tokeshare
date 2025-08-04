@@ -6,10 +6,10 @@ import housesData from '@/data/housesData.json';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
-import Map from '@/components/marketplace/real-estate/HouseMap';
-import Head from '@/components/marketplace/real-estate/HouseHead';
-import Info from '@/components/marketplace/real-estate/HouseInfo';
-import About from '@/components/marketplace/real-estate/HouseAbout';
+import Map from '@/components/features/real-estate/HouseMap';
+import Head from '@/components/features/real-estate/HouseHead';
+import Info from '@/components/features/real-estate/HouseInfo';
+import About from '@/components/features/real-estate/HouseAbout';
 
 const HouseDetailPage = () => {
   const { id } = useParams();

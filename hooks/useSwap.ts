@@ -1,6 +1,6 @@
 import { CONTRACTS } from '@/contracts/contracts';
 import { useZAPContract } from './useContracts';
-import { Address } from 'viem';
+import { Address, parseUnits } from 'viem';
 import { usePublicClient, useWalletClient, useReadContract } from 'wagmi';
 import { RouteParams } from '@/interfaces/RouteParams';
 import { RouteSummary } from '@/interfaces/RouteSummary';
@@ -176,22 +176,6 @@ export const useSwap = () => {
       excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order',
     });
 
-    console.log({
-      tokenIn: params.tokenIn,
-      tokenOut: params.tokenOut,
-      amountIn: params.amountIn,
-      ...(params.saveGas && { saveGas: params.saveGas.toString() }),
-      ...(params.gasInclude && { gasInclude: params.gasInclude.toString() }),
-      ...(params.gasPrice && { gasPrice: params.gasPrice }),
-      ...(params.slippageTolerance && {
-        slippageTolerance: params.slippageTolerance.toString(),
-      }),
-      ...(params.chargeFeeBy && { chargeFeeBy: params.chargeFeeBy }),
-      ...(params.feeAmount && { feeAmount: params.feeAmount }),
-      ...(params.feeReceiver && { feeReceiver: params.feeReceiver }),
-      ...(params.isInBps && { isInBps: params.isInBps.toString() }),
-    });
-
     // FIXÉ : Utilisation du bon endpoint pour Polygon
     const url = `https://aggregator-api.kyberswap.com/polygon/api/v1/routes?${queryParams}`;
 
@@ -248,20 +232,6 @@ export const useSwap = () => {
         }),
       });
 
-      console.log('params', {
-        routeSummary: params.routeSummary,
-        sender: params.sender,
-        recipient: params.recipient,
-        slippageTolerance: params.slippageTolerance,
-        deadline: params.deadline || Math.floor(Date.now() / 1000) + 1200, // 20 minutes par défaut
-        source: params.source || 'tokeshare-dapp',
-        enableGasEstimation: false,
-        ...(params.permit && { permit: params.permit }),
-        ...(params.ignoreCappedSlippage && {
-          ignoreCappedSlippage: params.ignoreCappedSlippage,
-        }),
-      });
-
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP Error ${response.status}: ${errorText}`);
@@ -294,16 +264,12 @@ export const useSwap = () => {
         throw new Error(`Not available decimals for this token ${params.inputToken}`);
       }
 
-      const amountInBaseUnits = (parseFloat(params.inputAmount) * Math.pow(10, decimals)).toString();
-      if (isNaN(parseFloat(amountInBaseUnits))) {
-        throw new Error(`Invalid amount`);
-      }
+      const amountBigInt = parseUnits(params.inputAmount, decimals);
 
-      const amountBigInt = BigInt(amountInBaseUnits);
       const balance = await checkTokenBalance(params.inputToken, params.walletAddress);
       if (balance < amountBigInt) {
         throw new Error(
-          `Insufficient balance. Required: ${amountInBaseUnits}, Available: ${(Number(balance) / Math.pow(10, decimals)).toString()}`,
+          `Insufficient balance. Required: ${amountBigInt}, Available: ${(Number(balance) / Math.pow(10, decimals)).toString()}`,
         );
       }
 
@@ -318,7 +284,7 @@ export const useSwap = () => {
       const routeSummary = await getSwapRoute({
         tokenIn: params.inputToken,
         tokenOut: params.outputToken,
-        amountIn: amountInBaseUnits, // ✅ Utiliser les unités de base pour l'API
+        amountIn: amountBigInt.toString(), // ✅ Utiliser les unités de base pour l'API
         gasInclude: true,
         slippageTolerance: 200,
       });

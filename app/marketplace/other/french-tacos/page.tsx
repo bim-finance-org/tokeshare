@@ -1,9 +1,9 @@
-import Exchange from '@/components/marketplace/commodities/Exchange';
-import FrenchTacosCarousel from '@/components/other/FrenchTacosCarousel';
-import FrenchTacosInfo from '@/components/other/FrenchTacosInfo';
+import Exchange from '@/components/features/commodities/Exchange';
+import FrenchTacosCarousel from '@/components/features/french-tacos/FrenchTacosCarousel';
+import FrenchTacosInfo from '@/components/features/french-tacos/FrenchTacosInfo';
 import { TOKENS } from '@/config/token';
 import React from 'react';
-import Map from '@/components/marketplace/real-estate/HouseMap';
+import Map from '@/components/features/real-estate/HouseMap';
 
 const page = () => {
   return (

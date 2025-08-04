@@ -4,7 +4,7 @@ import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { Address } from 'viem';
 import { usePublicClient, useWalletClient, useWriteContract, useReadContract, useAccount } from 'wagmi';
 import { getTokenAddress, getTokenDecimals } from '@/utils/token';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 import { TokenInfo } from '@/config/token';
 import { fallbackPublicClient } from '@/lib/clients';
 
@@ -88,6 +88,8 @@ export function useMarketplaceContract() {
     const estimatedStableAmount = (parsedTokenAmount * Number(pricePerToken)) / 1e18;
 
     const approveAmount = BigInt(Math.floor(estimatedStableAmount * 10 ** stableDecimals));
+
+    console.log(estimatedStableAmount);
 
     const allowance = await checkAllowance(stableCoinAddress, userAddress, CONTRACTS.MARKETPLACE as Address);
 

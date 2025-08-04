@@ -3,7 +3,7 @@ import './globals.css';
 import { headers } from 'next/headers';
 import ContextProvider from '../context';
 import { TokenProvider } from '../context/TokenContexts';
-import LayoutWrapper from '../components/LayoutWrapper';
+import LayoutWrapper from '../components/layout/LayoutWrapper';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 

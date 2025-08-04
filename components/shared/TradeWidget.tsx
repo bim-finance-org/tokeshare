@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import TokenInput from './TokenInput';
 import TokenSelector from './TokenSelector';
-import TokenDisplay from '@/components/TokenDisplay';
+import TokenDisplay from '@/components/shared/TokenDisplay';
 import { useAccount } from 'wagmi';
 import CryptoBalance from './CryptoBalance';
 import MaxButton from './MaxButton';
-import { Blockchain } from '@/types/Blockchain';
+import { Blockchain } from '@/enums/Blockchain';
 
 interface TradeWidgetProps {
   type: 'fiat' | 'crypto' | 'stablecoin';
