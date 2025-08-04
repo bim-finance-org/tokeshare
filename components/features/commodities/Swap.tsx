@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, use } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import Image from 'next/image';
 import Blockchains from '@/components/shared/Blockchains';
@@ -92,11 +92,17 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   }, [calculatedOutputAmount, isTggFirst, isLoadingQuote]);
 
   useEffect(() => {
-    if (errorTransaction) {
-      const timeout = setTimeout(() => setErrorTransaction(''), 3000);
-      return () => clearTimeout(timeout);
-    }
+    if (!errorTransaction) return;
+    const timeout = setTimeout(() => setErrorTransaction(''), 3000);
+    return () => clearTimeout(timeout);
   }, [errorTransaction]);
+
+  useEffect(() => {
+    if (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setErrorTransaction(errorMessage);
+    }
+  }, [error]);
 
   // Handle stablecoin amount change
   const handleStablecoinAmountChange = (amount: string) => {
@@ -155,7 +161,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         await swapIn({
           tokenSymbol: token.symbol,
           stablecoin,
-          amount: stablecoinAmount,
+          amount,
           blockchain: selectedBlockchain,
           walletAddress: address as Address,
         });
@@ -247,11 +253,11 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           </Alert>
         )}
 
-        {errorTransaction || error ? (
+        {errorTransaction ? (
           <Alert className="bg-red-500">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{errorTransaction || error?.message}</AlertDescription>
+            <AlertDescription>{errorTransaction}</AlertDescription>
           </Alert>
         ) : null}
 

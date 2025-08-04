@@ -89,6 +89,8 @@ export function useMarketplaceContract() {
 
     const approveAmount = BigInt(Math.floor(estimatedStableAmount * 10 ** stableDecimals));
 
+    console.log(estimatedStableAmount);
+
     const allowance = await checkAllowance(stableCoinAddress, userAddress, CONTRACTS.MARKETPLACE as Address);
 
     if (allowance < approveAmount) {

@@ -1,13 +1,14 @@
 import { useSwap } from '@/hooks/useSwap';
 import { TokenSwapHandler } from '@/interfaces/TokenSwapHandler';
-import { Address } from 'viem';
+import { Address, parseUnits } from 'viem';
 import { CONTRACTS, TRUSTED_AGGREGATORS } from '@/contracts/contracts';
-import { getTokenAddress } from '@/utils/token';
+import { getTokenAddress, getTokenDecimals } from '@/utils/token';
 import { useMemo } from 'react';
+import { useTokenPrice } from '../useTokenPrice';
 
 export const useTggSwapHandler = (): TokenSwapHandler => {
   const { swapMint, swapWithdraw, isPending, error, hash } = useSwap();
-
+  const { price } = useTokenPrice('TGG');
   return useMemo(
     () => ({
       swapIn: async ({ stablecoin, amount, blockchain, walletAddress }) => {
@@ -16,10 +17,22 @@ export const useTggSwapHandler = (): TokenSwapHandler => {
         const router = TRUSTED_AGGREGATORS.kyberSwap as Address;
 
         if (!inputToken) throw new Error('Input token address not found');
+        if (!price) throw new Error('Token price unavailable');
+
+        const stableDecimals = getTokenDecimals(stablecoin);
+
+        if (stableDecimals === undefined) throw new Error('Stablecoin decimals unknown');
+
+        const parsedAmount = parseFloat(amount);
+        if (isNaN(parsedAmount)) throw new Error('Invalid amount');
+
+        const stableAmount = parsedAmount * price;
+        const parsedStableAmount = parseUnits(stableAmount.toString(), stableDecimals);
+        console.log(parsedStableAmount);
 
         await swapMint({
           inputToken,
-          inputAmount: amount,
+          inputAmount: stableAmount.toString(),
           outputToken,
           routerAddress: router,
           walletAddress,
