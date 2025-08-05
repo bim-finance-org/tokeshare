@@ -2,10 +2,10 @@ import { useAccount, useBalance } from 'wagmi';
 import { Address } from 'viem';
 import { useReadContracts } from 'wagmi';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
-import { getTokenDecimals } from '@/utils/tokenUtils';
 import { Blockchain } from '@/enums/Blockchain';
 import { getBlockchainTokens, getTokenAddress } from './token';
 import { TOKENS } from '@/config/token';
+import { getChainIdFromBlockchain } from './getChainIdFromBlockchain';
 
 // Hook pour récupérer toutes les balances d'une blockchain en une fois
 export const useAllTokenBalances = (blockchain: Blockchain) => {
@@ -58,9 +58,12 @@ export const useTokenBalance = (symbol: string, blockchain: Blockchain) => {
   const { address } = useAccount();
   const tokenAddress = getTokenAddress(symbol, blockchain);
 
+  const blockchainId = getChainIdFromBlockchain(blockchain);
+
   const { data: balance } = useBalance({
     address,
     token: tokenAddress,
+    chainId: blockchainId,
   });
 
   return balance?.formatted || '0';
