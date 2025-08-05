@@ -31,6 +31,20 @@ export function getTokensByTypeAndByBlockchain(blockchain: Blockchain, type: Tok
   return Object.values(TOKENS).filter((token) => token.type === type && !!token.addresses[blockchain]);
 }
 
+export function getCryptoTokensAcrossChains(): [TokenInfo, Blockchain][] {
+  const result: [TokenInfo, Blockchain][] = [];
+
+  Object.values(TOKENS).forEach((token) => {
+    if (token.type === TokenType.Crypto) {
+      for (const [chain, address] of Object.entries(token.addresses)) {
+        result.push([token, chain as Blockchain]);
+      }
+    }
+  });
+
+  return result;
+}
+
 /**
  * Returns the React component icon for a given token symbol.
  *

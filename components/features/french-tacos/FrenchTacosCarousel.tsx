@@ -8,14 +8,10 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
-import Link from 'next/link';
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { Address } from 'viem';
-import { Skeleton } from '../../ui/skeleton';
-import { fallbackPublicClient } from '@/lib/clients';
-import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 
 // Images du French Tacos (mets tes vraies images ici)
 const images = [

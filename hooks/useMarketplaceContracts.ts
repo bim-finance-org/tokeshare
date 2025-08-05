@@ -6,11 +6,11 @@ import { usePublicClient, useWalletClient, useWriteContract, useReadContract, us
 import { getTokenAddress, getTokenDecimals } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { TokenInfo } from '@/config/token';
-import { fallbackPublicClient } from '@/lib/clients';
+import { PUBLIC_CLIENTS } from '@/lib/clients';
 
 export function useMarketplaceContract() {
   const wagmiClient = usePublicClient();
-  const publicClient = wagmiClient?.chain?.id === 8453 ? wagmiClient : fallbackPublicClient;
+  const publicClient = wagmiClient?.chain?.id === 8453 ? wagmiClient : PUBLIC_CLIENTS.Base;
 
   const { data: walletClient } = useWalletClient();
   const { address: userAddress } = useAccount();

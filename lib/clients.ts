@@ -1,7 +1,14 @@
 import { createPublicClient, http } from 'viem';
-import { base } from 'viem/chains';
+import { base, polygon } from 'viem/chains';
+import { Blockchain } from '@/enums/Blockchain';
 
-export const fallbackPublicClient = createPublicClient({
-  chain: base,
-  transport: http('https://base.llamarpc.com'),
-});
+export const PUBLIC_CLIENTS = {
+  [Blockchain.Base]: createPublicClient({
+    chain: base,
+    transport: http('https://base.llamarpc.com'),
+  }),
+  [Blockchain.Polygon]: createPublicClient({
+    chain: polygon,
+    transport: http('https://polygon-rpc.com'),
+  }),
+};
