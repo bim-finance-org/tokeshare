@@ -51,7 +51,7 @@ const MobileMenu: React.FC = () => {
               { name: 'Real Estate', path: '/marketplace/real-estate' },
               { name: 'Commodities', path: '/marketplace/commodities' },
               { name: 'Stock & ETF', path: '/buildingInProgress' },
-              { name: 'Other', path: '/buildingInProgress' },
+              { name: 'Other', path: '/marketplace/other' },
               { name: 'About Us', path: '/about' },
               { name: 'Learn', path: '/learn' },
             ].map(({ name, path }, index) => (
