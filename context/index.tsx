@@ -34,6 +34,9 @@ createAppKit({
     swaps: false,
     onramp: false,
   },
+  themeVariables: {
+    "--w3m-z-index": 100
+  }
 });
 
 function ContextProvider({ children, cookies }: { children: ReactNode; cookies: string | null }) {
