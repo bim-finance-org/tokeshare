@@ -269,7 +269,7 @@ export const useSwap = () => {
       const balance = await checkTokenBalance(params.inputToken, params.walletAddress);
       if (balance < amountBigInt) {
         throw new Error(
-          `Insufficient balance. Required: ${amountBigInt}, Available: ${(Number(balance) / Math.pow(10, decimals)).toString()}`,
+          `Insufficient balance.\nRequired: ${(Number(amountBigInt) / Math.pow(10, decimals)).toString()},\nAvailable: ${(Number(balance) / Math.pow(10, decimals)).toString()}`,
         );
       }
 
