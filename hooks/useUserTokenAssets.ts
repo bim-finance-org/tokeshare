@@ -65,6 +65,7 @@ export function useUserTokenAssets(): {
               totalPrice: balance * unitPrice,
               blockchain: chain,
               imageUrl: token.symbol === 'TGG' ? '/images/currencies/tgg.png' : '/images/currencies/tft.png',
+              internalUrl: token.internalUrl,
             });
           } catch (e) {
             console.warn(`Failed to fetch ${token.symbol} on ${chain}`, e);

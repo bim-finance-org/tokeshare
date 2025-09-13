@@ -18,6 +18,7 @@ export type TokenInfo = {
   type: TokenType;
   icon?: IconComponent;
   cmcId?: number;
+  internalUrl?: string;
 };
 
 export const TOKENS: Record<string, TokenInfo> = {
@@ -30,6 +31,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 18,
     type: TokenType.Crypto,
     icon: TGGIcon,
+    internalUrl: '/marketplace/commodities/Gold',
   },
   TFT_001: {
     symbol: 'TFT_001',
@@ -39,6 +41,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     },
     decimals: 18,
     type: TokenType.Crypto,
+    internalUrl: '/marketplace/other/french-tacos',
   },
   USDC: {
     symbol: 'USDC',

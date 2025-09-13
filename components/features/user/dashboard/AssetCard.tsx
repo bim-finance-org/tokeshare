@@ -1,6 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { AssetData } from '@/interfaces/AssetData';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const AssetCard = ({ asset }: { asset: AssetData }) => {
   return (
@@ -16,7 +18,18 @@ const AssetCard = ({ asset }: { asset: AssetData }) => {
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <p className="font-bold text-lg md:text-2xl text-gray-900 truncate">{asset.name}</p>
+          <div className="flex items-center gap-4">
+            <p className="font-bold text-lg md:text-2xl text-gray-900 truncate">{asset.name}</p>
+            <Button
+              className="h-8 md:h-10 px-3 text-sm md:px-5 bg-indigo-100 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-200 font-semibold"
+              size="sm"
+              variant="outline"
+            >
+              <Link href={asset.internalUrl ?? '#'} rel="noopener noreferrer" className="text-sm md:text-lg">
+                View Asset
+              </Link>
+            </Button>
+          </div>
           <span className="bg-indigo-50 text-indigo-600 px-4 py-1 rounded-xl font-semibold text-sm md:text-lg shadow">
             {asset.blockchain}
           </span>

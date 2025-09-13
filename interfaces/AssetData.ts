@@ -5,4 +5,5 @@ export interface AssetData {
   amount: number;
   totalPrice: number;
   blockchain: string;
+  internalUrl?: string;
 }
