@@ -308,7 +308,14 @@ const Swap = ({ token }: { token: TokenInfo }) => {
                   {hash.slice(0, 6)}...{hash.slice(-4)}
                 </span>
                 <button
-                  onClick={() => window.open(`https://polygonscan.com/tx/${hash}`, '_blank')}
+                  onClick={() =>
+                    window.open(
+                      selectedBlockchain === Blockchain.Base
+                        ? `https://basescan.org/tx/${hash}`
+                        : `https://polygonscan.com/tx/${hash}`,
+                      '_blank',
+                    )
+                  }
                   className="inline-flex items-center text-blue-600 hover:text-blue-800"
                 >
                   <ExternalLink className="h-3 w-3" />
