@@ -23,6 +23,8 @@ const images = [
   '/images/frenchTacos/image_7.jpg',
   '/images/frenchTacos/image_4.jpg',
   '/images/frenchTacos/image_9.jpg',
+  '/images/frenchTacos/image_10.png',
+  '/images/frenchTacos/image_11.png',
 ];
 
 const FrenchTacosCarousel: React.FC = () => {
