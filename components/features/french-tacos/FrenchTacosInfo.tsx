@@ -6,9 +6,10 @@ import FrenchTacosFinancials from './FrenchTacosFinancials';
 import FrenchTacosDetails from './FrenchTacosDetails';
 import FrenchTacosBlockchain from './FrenchTacosBlockchain';
 import FrenchTacosOffering from './FrenchTacosOffering';
+import FrenchTacosRenovation from './FrenchTacosRenovation';
 
 const FrenchTacosInfo = () => {
-  const TABS = ['HIGHLIGHTS', 'FINANCIALS', 'BLOCKCHAIN', 'OFFERING'];
+  const TABS = ['HIGHLIGHTS', 'FINANCIALS', 'BLOCKCHAIN', 'OFFERING', 'RENOVATION'];
   // Onglet actif
   const [activeTab, setActiveTab] = useState('HIGHLIGHTS');
 
@@ -36,6 +37,7 @@ const FrenchTacosInfo = () => {
       {activeTab === 'FINANCIALS' && <FrenchTacosFinancials />}
       {activeTab === 'BLOCKCHAIN' && <FrenchTacosBlockchain />}
       {activeTab === 'OFFERING' && <FrenchTacosOffering />}
+      {activeTab === 'RENOVATION' && <FrenchTacosRenovation />}
     </section>
   );
 };
