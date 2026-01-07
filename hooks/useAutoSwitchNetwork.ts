@@ -1,33 +1,68 @@
-import { useEffect } from 'react';
-import { useWalletClient } from 'wagmi';
-import { WalletClient } from 'viem';
+import { useEffect, useState, useCallback } from 'react';
+import { useAccount, useSwitchChain } from 'wagmi';
 import { Blockchain } from '@/enums/Blockchain';
 
-// Mapping des chaînes à leurs IDs
 const CHAIN_IDS: Record<Blockchain, number> = {
   Base: 8453,
   Polygon: 137,
 };
 
-async function switchNetwork(walletClient: WalletClient, chainId: number) {
-  const currentChainId = await walletClient.getChainId();
-  if (currentChainId !== chainId) {
-    await walletClient.switchChain({ id: chainId });
-  }
-}
+type SwitchStatus = 'idle' | 'switching' | 'success' | 'wrong_network';
 
 export function useAutoSwitchNetwork(blockchain: Blockchain) {
-  const { data: walletClient } = useWalletClient();
+  const { isConnected, chainId: currentChainId } = useAccount();
+  const { switchChain, isPending } = useSwitchChain();
+  const [status, setStatus] = useState<SwitchStatus>('idle');
+
+  const targetChainId = CHAIN_IDS[blockchain];
+
+  const isOnCorrectChain = currentChainId === targetChainId;
+
+  const attemptSwitch = useCallback(() => {
+    if (!isConnected || !targetChainId || isOnCorrectChain) return;
+
+    setStatus('switching');
+
+    switchChain(
+      { chainId: targetChainId },
+      {
+        onSuccess: () => {
+          setStatus('success');
+        },
+        onError: (error) => {
+          console.error('Network switch failed:', error);
+          setStatus('wrong_network');
+        },
+      }
+    );
+  }, [isConnected, targetChainId, isOnCorrectChain, switchChain]);
 
   useEffect(() => {
-    if (!walletClient) return;
-    const chainId = CHAIN_IDS[blockchain];
-
-    if (!chainId) {
-      console.warn(`Aucun chainId défini pour la blockchain ${blockchain}`);
+    if (!isConnected) {
+      setStatus('idle');
       return;
     }
 
-    switchNetwork(walletClient, chainId).catch((err) => console.error('Erreur lors du changement de réseau :', err));
-  }, [walletClient, blockchain]);
+    if (isOnCorrectChain) {
+      setStatus('success');
+      return;
+    }
+
+    attemptSwitch();
+  }, [isConnected, isOnCorrectChain, attemptSwitch]);
+
+  useEffect(() => {
+    if (isOnCorrectChain && status === 'wrong_network') {
+      setStatus('success');
+    }
+  }, [currentChainId, isOnCorrectChain, status]);
+
+  return {
+    status,
+    isOnCorrectChain,
+    isPending,
+    currentChainId,
+    targetChainId,
+    retry: attemptSwitch,
+  };
 }

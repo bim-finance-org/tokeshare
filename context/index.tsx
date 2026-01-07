@@ -1,6 +1,6 @@
 'use client';
 
-import { wagmiAdapter, projectId } from '../config';
+import { wagmiAdapter, projectId, networks } from '../config';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createAppKit } from '@reown/appkit/react';
 import { polygon } from '@reown/appkit/networks';
@@ -23,9 +23,8 @@ const metadata = {
 createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: [polygon],
+  networks: networks,
   defaultNetwork: polygon,
-  enableNetworkSwitch: false,
   metadata: metadata,
   allowUnsupportedChain: true,
   themeMode: 'light',

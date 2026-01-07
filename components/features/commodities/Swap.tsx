@@ -38,7 +38,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     updateSwapBlockchain: setSelectedBlockchain,
   } = useContext(TokenContexts);
 
-  useAutoSwitchNetwork(selectedBlockchain);
+  const { isOnCorrectChain, isPending: isSwitchingNetwork, retry: retrySwitch } = useAutoSwitchNetwork(selectedBlockchain);
 
   const [stablecoinAmount, setStablecoinAmount] = useState('10');
   const [amount, setAmount] = useState('0');
@@ -261,6 +261,29 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           </Alert>
         ) : null}
 
+        {isConnected && !isOnCorrectChain && (
+          <Alert className="bg-amber-500">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Wrong Network</AlertTitle>
+            <AlertDescription className="flex flex-col gap-2">
+              <span>Please switch to {selectedBlockchain} network to continue.</span>
+              {isSwitchingNetwork ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Switching network...
+                </span>
+              ) : (
+                <button
+                  onClick={retrySwitch}
+                  className="text-sm underline hover:no-underline self-start"
+                >
+                  Click here to switch automatically
+                </button>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Informations sur les prix */}
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
@@ -324,11 +347,11 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           <button
             onClick={swaping}
             className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
-              arePricesAvailable && !isPending && !isPreparingSwap
+              arePricesAvailable && !isPending && !isPreparingSwap && isOnCorrectChain
                 ? 'bg-color4 text-white hover:bg-opacity-90'
                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
             }`}
-            disabled={!arePricesAvailable || isPending || isPreparingSwap}
+            disabled={!arePricesAvailable || isPending || isPreparingSwap || !isOnCorrectChain}
           >
             {isPreparingSwap ? (
               <>
