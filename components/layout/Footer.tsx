@@ -50,7 +50,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="bg-color3 text-xl text-center py-2">
-        <p>© 2025 Tokeshare™. All Rights Reserved.</p>
+        <p>© {new Date().getFullYear()} Tokeshare™. All Rights Reserved.</p>
       </div>
     </footer>
   );
