@@ -4,8 +4,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/shared/Blockchains';
-import { calculateTGGPrice, convertFiatToTGG, convertTGGToFiat } from '@/utils/priceUtils';
+import { calculateTGGPrice, calculateTMCPrice, convertFiatToTGG, convertTGGToFiat } from '@/utils/priceUtils';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
+import { useCmc20Price } from '@/hooks/useCmc20Price';
 import { useAccount } from 'wagmi';
 import UserForm from './UserForm';
 import { TokenContexts } from '@/context/TokenContexts';
@@ -30,18 +31,24 @@ const Buy = ({ token }: { token: TokenInfo }) => {
   const [isBelowMin, setBelownMin] = useState(false);
   const { isConnected } = useAccount();
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
+  const { data: cmc20Price, isLoading: isCmc20Loading } = useCmc20Price();
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
-  // Mise à jour du prix TGG
+  // Mise à jour du prix du token
   useEffect(() => {
-    const updatePrice = async () => {
-      const calculatedTggPrice = calculateTGGPrice(paxgPrice);
-      setTggPrice(calculatedTggPrice);
+    const updatePrice = () => {
+      if (token.symbol === 'TGG' && paxgPrice) {
+        const calculatedPrice = calculateTGGPrice(paxgPrice);
+        setTggPrice(calculatedPrice);
+      } else if (token.symbol === 'TMC' && cmc20Price) {
+        const calculatedPrice = calculateTMCPrice(cmc20Price);
+        setTggPrice(calculatedPrice);
+      }
     };
     updatePrice();
     const interval = setInterval(updatePrice, 30000);
     return () => clearInterval(interval);
-  }, [paxgPrice]);
+  }, [paxgPrice, cmc20Price, token.symbol]);
 
   // Calcul initial du montant TGG
   useEffect(() => {
@@ -50,28 +57,28 @@ const Buy = ({ token }: { token: TokenInfo }) => {
     }
   }, [tggPrice, exchangeRates, selectedCurrency]);
 
-  // Calcule le montant TGG à partir du montant fiat
+  // Calcule le montant token à partir du montant fiat
   const calculateTggFromFiat = (fiatAmount: string) => {
     const numericAmount = parseFloat(fiatAmount) || 0;
-    let tggValue;
-    if (token.symbol === 'TGG') {
+    let tokenValue;
+    if (token.symbol === 'TGG' || token.symbol === 'TMC') {
       if (tggPrice > 0) {
-        tggValue = convertFiatToTGG(numericAmount, selectedCurrency, exchangeRates, tggPrice);
+        tokenValue = convertFiatToTGG(numericAmount, selectedCurrency, exchangeRates, tggPrice);
       }
     } else if (token.symbol === 'TFT_001') {
       if (tggPrice > 0) {
         if (selectedCurrency === 'USD') {
-          tggValue = numericAmount / 31.25;
+          tokenValue = numericAmount / 31.25;
         } else {
           if (!exchangeRates) return;
           const fiatRate = exchangeRates[selectedCurrency as keyof ExchangeRates];
           const amountInUSD = numericAmount / fiatRate;
-          tggValue = amountInUSD / 31.25;
+          tokenValue = amountInUSD / 31.25;
         }
       }
     }
-    if (tggValue !== undefined) {
-      setTggAmount(tggValue.toFixed(4));
+    if (tokenValue !== undefined) {
+      setTggAmount(tokenValue.toFixed(4));
     } else {
       setTggAmount('0');
     }
@@ -182,7 +189,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
             <span className="text-color4 text-xs sm:text-sm font-medium">{token.symbol} Price:</span>
 
             <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">
-              ${token.symbol === 'TGG' ? tggPrice.toFixed(2) : '31.25'}
+              ${token.symbol === 'TFT_001' ? '31.25' : tggPrice.toFixed(2)}
             </Badge>
           </div>
         </div>

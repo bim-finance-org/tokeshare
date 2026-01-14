@@ -1,5 +1,6 @@
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
-import { calculateTGGPrice } from '@/utils/priceUtils';
+import { useCmc20Price } from '@/hooks/useCmc20Price';
+import { calculateTGGPrice, calculateTMCPrice } from '@/utils/priceUtils';
 import { useMarketplaceContract } from './useMarketplaceContracts';
 import { TOKENS } from '@/config/token';
 import { Address } from 'viem';
@@ -27,6 +28,14 @@ export function useTokenPrice(symbol: string): {
     const price = bigInt_price / 10 ** 18;
 
     return { price, isLoading };
+  }
+
+  if (symbol === 'TMC') {
+    const { data: cmc20Price, isLoading } = useCmc20Price();
+    return {
+      price: cmc20Price !== undefined ? calculateTMCPrice(cmc20Price) : null,
+      isLoading,
+    };
   }
 
   return { price: null, isLoading: false };

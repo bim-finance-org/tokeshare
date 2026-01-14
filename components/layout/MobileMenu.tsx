@@ -50,7 +50,7 @@ const MobileMenu: React.FC = () => {
               { name: 'Home', path: '/' },
               { name: 'Real Estate', path: '/marketplace/real-estate' },
               { name: 'Commodities', path: '/marketplace/commodities' },
-              { name: 'Stock & ETF', path: '/buildingInProgress' },
+              { name: 'Stock & ETF', path: '/marketplace/stock-etf/tmc' },
               { name: 'Other', path: '/marketplace/other' },
               { name: 'About Us', path: '/about' },
               { name: 'Learn', path: '/learn' },
