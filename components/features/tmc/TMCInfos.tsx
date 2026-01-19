@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTokenPrice } from '@/hooks/useTokenPrice';
+import CMC20PieChart from './CMC20PieChart';
 
 const TMCInfos = () => {
   const [activeTab, setActiveTab] = useState('TOKEN');
@@ -22,6 +23,16 @@ const TMCInfos = () => {
           TOKEN
         </button>
         <button
+          onClick={() => setActiveTab('COMPOSITION')}
+          className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
+            activeTab === 'COMPOSITION'
+              ? 'bg-color4 text-white shadow-lg'
+              : 'bg-gray-200 shadow-lg text-gray-500 border border-color4 hover:text-gray-700'
+          }`}
+        >
+          COMPOSITION
+        </button>
+        <button
           onClick={() => setActiveTab('BLOCKCHAIN')}
           className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
             activeTab === 'BLOCKCHAIN'
@@ -34,7 +45,7 @@ const TMCInfos = () => {
       </div>
 
       {/* Content */}
-      {activeTab === 'BLOCKCHAIN' ? (
+      {activeTab === 'BLOCKCHAIN' && (
         <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
           {/* Header */}
           <div className="bg-color4 text-white p-3 sm:p-4 pl-4 sm:pl-6">
@@ -80,7 +91,23 @@ const TMCInfos = () => {
             </div>
           </div>
         </div>
-      ) : (
+      )}
+
+      {activeTab === 'COMPOSITION' && (
+        <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
+          {/* Header */}
+          <div className="bg-color4 text-white p-3 sm:p-4 pl-4 sm:pl-6">
+            <h2 className="text-base sm:text-lg font-semibold">INDEX COMPOSITION</h2>
+          </div>
+
+          {/* Content */}
+          <div className="bg-color1 p-4 sm:p-6">
+            <CMC20PieChart />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'TOKEN' && (
         <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
           {/* Header */}
           <div className="bg-color4 text-white p-3 sm:p-4 pl-4 sm:pl-6">
