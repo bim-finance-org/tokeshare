@@ -1,22 +1,29 @@
 import { Redis } from 'ioredis';
 
-// Logging de configuration Redis pour débogage
-console.log(
-  'Initializing Redis client with URL pattern:',
-  process.env.REDIS_URL ? 'redis://username:***@' + process.env.REDIS_URL.split('@')[1] : 'redis://localhost:6379',
-);
+// Utilisation de globalThis pour éviter les connexions multiples en dev mode (HMR)
+const globalForRedis = globalThis as unknown as {
+  redis: Redis | undefined;
+};
 
-// Initialize Redis client
-const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+function createRedisClient(): Redis {
+  const client = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-// Logs de connexion Redis
-redisClient.on('connect', () => {
-  console.log('Redis client connected successfully');
-});
+  client.on('connect', () => {
+    console.log('Redis client connected successfully');
+  });
 
-redisClient.on('error', (err) => {
-  console.error('Redis connection error:', err);
-});
+  client.on('error', (err) => {
+    console.error('Redis connection error:', err);
+  });
+
+  return client;
+}
+
+// Réutilise l'instance existante en dev, ou en crée une nouvelle
+export const redisClient = globalForRedis.redis ?? createRedisClient();
+
+// Stocke l'instance dans globalThis pour éviter les connexions multiples
+globalForRedis.redis = redisClient;
 
 // Default expiration time in seconds (5 minutes)
 const DEFAULT_EXPIRATION = 5 * 60;
@@ -27,13 +34,10 @@ const DEFAULT_EXPIRATION = 5 * 60;
  */
 export async function getFromCache<T>(key: string): Promise<T | null> {
   try {
-    console.log(`Attempting to get data from Redis cache with key: ${key}`);
     const cachedData = await redisClient.get(key);
     if (cachedData) {
-      console.log(`Cache hit for key: ${key}`);
       return JSON.parse(cachedData) as T;
     }
-    console.log(`Cache miss for key: ${key}`);
     return null;
   } catch (error) {
     console.error(`Redis get error for key ${key}:`, error);
@@ -47,14 +51,10 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
  * @param data Data to cache
  * @param expiration Expiration time in seconds (default: 5 minutes)
  */
-export async function setCache(key: string, data: any, expiration = DEFAULT_EXPIRATION): Promise<void> {
+export async function setCache<T>(key: string, data: T, expiration = DEFAULT_EXPIRATION): Promise<void> {
   try {
-    console.log(`Setting data in Redis cache with key: ${key}, expiration: ${expiration}s`);
     await redisClient.set(key, JSON.stringify(data), 'EX', expiration);
-    console.log(`Successfully cached data with key: ${key}`);
   } catch (error) {
     console.error(`Redis set error for key ${key}:`, error);
   }
 }
-
-export { redisClient };
