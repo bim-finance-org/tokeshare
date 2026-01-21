@@ -9,6 +9,7 @@ import { BuildRouteResponse } from '@/interfaces/BuildRouteResponse';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { ZAP_TMC_ABI } from '@/contracts/abis/zap_tmc_abi';
 import { getTokenDecimals } from '@/utils/tokenUtils';
+import { useCallback, useMemo } from 'react';
 
 // TMC to CMC20 ratio: 1 TMC = 1/10 CMC20
 export const TMC_CMC20_RATIO = 10;
@@ -339,19 +340,22 @@ export const useTmcSwap = () => {
     return result;
   };
 
-  return {
-    swapMint: performSwapMint,
-    swapWithdraw: performSwapWithdraw,
-    isPending,
-    error,
-    hash,
-    getSwapRoute,
-    buildSwapData,
-    checkTokenBalance,
-    checkAllowance,
-    approveToken,
-    useZapTmcFees,
-    getZapFees,
-    getConversion,
-  };
+  return useMemo(
+    () => ({
+      swapMint: performSwapMint,
+      swapWithdraw: performSwapWithdraw,
+      isPending,
+      error,
+      hash,
+      getSwapRoute,
+      buildSwapData,
+      checkTokenBalance,
+      checkAllowance,
+      approveToken,
+      useZapTmcFees,
+      getZapFees,
+      getConversion,
+    }),
+    [isPending, error, hash],
+  );
 };

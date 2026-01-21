@@ -9,6 +9,7 @@ import { BuildRouteResponse } from '@/interfaces/BuildRouteResponse';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { ZAP_ABI } from '@/contracts/abis/zap_abi';
 import { getTokenDecimals } from '@/utils/tokenUtils';
+import { useMemo } from 'react';
 
 // Hook React pour lire les fees du contrat ZAP de manière réactive
 export const useZapFees = () => {
@@ -380,19 +381,22 @@ export const useSwap = () => {
     }
   };
 
-  return {
-    swapMint: performSwapMint,
-    swapWithdraw: performSwapWithdraw,
-    isPending,
-    error,
-    hash,
-    getSwapRoute,
-    buildSwapData,
-    checkTokenBalance,
-    checkAllowance,
-    approveToken,
-    useZapFees,
-    getZapFees,
-    getConversion,
-  };
+  return useMemo(
+    () => ({
+      swapMint: performSwapMint,
+      swapWithdraw: performSwapWithdraw,
+      isPending,
+      error,
+      hash,
+      getSwapRoute,
+      buildSwapData,
+      checkTokenBalance,
+      checkAllowance,
+      approveToken,
+      useZapFees,
+      getZapFees,
+      getConversion,
+    }),
+    [isPending, error, hash],
+  );
 };

@@ -59,6 +59,6 @@ export const useTmcSwapHandler = (): TokenSwapHandler => {
       error,
       hash,
     }),
-    [swapMint, swapWithdraw, isPending, error, hash, price],
+    [swapMint, swapWithdraw, isPending, error, hash],
   );
 };

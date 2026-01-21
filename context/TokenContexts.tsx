@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode, useMemo } from 'react';
 import { Blockchain } from '@/enums/Blockchain';
 
 export const TokenContexts = createContext({
@@ -82,21 +82,20 @@ export const TokenProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [sellBlockchain]);
 
-  return (
-    <TokenContexts.Provider
-      value={{
-        swap: { token: swapToken, blockchain: swapBlockchain },
-        buy: { token: buyToken, blockchain: buyBlockchain },
-        sell: { token: sellToken, blockchain: sellBlockchain },
-        updateSwapToken: setSwapToken,
-        updateSwapBlockchain: setSwapBlockchain,
-        updateBuyToken: setBuyToken,
-        updateBuyBlockchain: setBuyBlockchain,
-        updateSellToken: setSellToken,
-        updateSellBlockchain: setSellBlockchain,
-      }}
-    >
-      {children}
-    </TokenContexts.Provider>
+  const contextValue = useMemo(
+    () => ({
+      swap: { token: swapToken, blockchain: swapBlockchain },
+      buy: { token: buyToken, blockchain: buyBlockchain },
+      sell: { token: sellToken, blockchain: sellBlockchain },
+      updateSwapToken: setSwapToken,
+      updateSwapBlockchain: setSwapBlockchain,
+      updateBuyToken: setBuyToken,
+      updateBuyBlockchain: setBuyBlockchain,
+      updateSellToken: setSellToken,
+      updateSellBlockchain: setSellBlockchain,
+    }),
+    [swapToken, swapBlockchain, buyToken, buyBlockchain, sellToken, sellBlockchain],
   );
+
+  return <TokenContexts.Provider value={contextValue}>{children}</TokenContexts.Provider>;
 };

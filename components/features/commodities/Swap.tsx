@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, use } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import Image from 'next/image';
 import Blockchains from '@/components/shared/Blockchains';
@@ -52,11 +52,21 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   const { swapIn, swapOut, isPending, error, hash } = useSwapHandlerByToken(token.symbol);
   const [swapQuoteParams, setSwapQuoteParams] = useState<SwapQuoteParams | null>(null);
 
+  // Ref to track if we're updating from calculated output (to prevent loops)
+  const isUpdatingFromQuote = useRef(false);
+
+  // Compute input amount based on direction
+  const inputAmount = isTggFirst ? amount : stablecoinAmount;
+
   useEffect(() => {
+    // Skip if update came from quote calculation (prevents infinite loop)
+    if (isUpdatingFromQuote.current) {
+      isUpdatingFromQuote.current = false;
+      return;
+    }
+
     const inputToken = getTokenAddress(isTggFirst ? token.symbol : stablecoin, selectedBlockchain);
     const outputToken = getTokenAddress(isTggFirst ? stablecoin : token.symbol, selectedBlockchain);
-
-    const inputAmount = isTggFirst ? amount : stablecoinAmount;
     const direction = isTggFirst ? SwapDirection.TokenToStablecoin : SwapDirection.StablecoinToToken;
 
     if (inputToken && outputToken) {
@@ -64,7 +74,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     } else {
       setSwapQuoteParams(null);
     }
-  }, [isTggFirst, amount, stablecoinAmount, stablecoin, selectedBlockchain]);
+  }, [isTggFirst, inputAmount, stablecoin, selectedBlockchain, token.symbol]);
 
   const {
     outputAmount: calculatedOutputAmount,
@@ -73,14 +83,17 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     exchangeRate,
   } = useSwapQuote(swapQuoteParams, token.symbol);
 
-  // Mettre à jour automatiquement le montant de sortie basé sur les calculs KyberSwap
+  // Update output amount from quote calculation
   useEffect(() => {
     if (calculatedOutputAmount && !isLoadingQuote) {
+      // Mark that next state update is from quote, not user input
+      isUpdatingFromQuote.current = true;
+
       if (isTggFirst) {
-        // TGG → Stablecoin
+        // TGG → Stablecoin: update stablecoin output
         setStablecoinAmount(calculatedOutputAmount);
       } else {
-        // Stablecoin → TGG
+        // Stablecoin → TGG: update token output
         const outputAsNumber = Number(calculatedOutputAmount);
         if (isNaN(outputAsNumber)) {
           setAmount('0');
