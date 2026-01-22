@@ -8,7 +8,7 @@ interface TMCIconProps {
 
 const TMCIcon = ({ className = '' }: TMCIconProps) => {
   return (
-    <Image src="/images/currencies/tmc.png" alt="TMC" width={17} height={17} className={` ${className} rounded-full`} />
+    <Image src="/images/currencies/tmc.png" alt="TMC" width={26} height={26} className={` ${className} rounded-full`} />
   );
 };
 
