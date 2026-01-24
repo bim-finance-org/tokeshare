@@ -8,6 +8,14 @@ export const calculateTGGPrice = (paxgPrice: number): number => {
 };
 
 /**
+ * Calcule le prix du TMC basé sur le prix du CMC20
+ * 1 TMC = 1/10 CMC20
+ */
+export const calculateTMCPrice = (cmc20Price: number): number => {
+  return cmc20Price / 10;
+};
+
+/**
  * Convertit un montant en une autre devise en utilisant un taux de change
  */
 export const convertWithRate = (amount: number, rate: number): number => {

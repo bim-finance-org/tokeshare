@@ -7,6 +7,7 @@ import { getTokenAddress, getTokenDecimals } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { TokenInfo } from '@/config/token';
 import { PUBLIC_CLIENTS } from '@/lib/clients';
+import { useMemo } from 'react';
 
 export function useMarketplaceContract() {
   const wagmiClient = usePublicClient();
@@ -17,7 +18,17 @@ export function useMarketplaceContract() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
   const tokenAddress = getTokenAddress('TFT_001', Blockchain.Base) as Address;
-  const { data: tokenInfo } = getTokenInfo(tokenAddress);
+
+  // Call useReadContract directly at the top level (not inside a function)
+  const tftTokenInfoResult = useReadContract({
+    address: CONTRACTS.MARKETPLACE as Address,
+    abi: MARKETPLACE_ABI,
+    functionName: 'getTokenInfo',
+    args: [tokenAddress],
+    chainId: 8453,
+  });
+
+  const tokenInfo = tftTokenInfoResult.data;
 
   // Vérifie le solde du token
   const checkTokenBalance = async (tokenAddress: Address, owner: Address): Promise<bigint> => {
@@ -105,16 +116,6 @@ export function useMarketplaceContract() {
     });
   };
 
-  function getTokenInfo(token: Address) {
-    return useReadContract({
-      address: CONTRACTS.MARKETPLACE as Address,
-      abi: MARKETPLACE_ABI,
-      functionName: 'getTokenInfo',
-      args: [token],
-      chainId: 8453,
-    });
-  }
-
   function getMarketplaceBalance(token: Address): Promise<bigint> {
     if (!publicClient) throw new Error('Public client non disponible');
 
@@ -126,15 +127,20 @@ export function useMarketplaceContract() {
     }) as Promise<bigint>;
   }
 
-  return {
-    buyTokenOnMarketplace,
-    getTokenInfo,
-    isPending,
-    error,
-    hash,
-    checkTokenBalance,
-    checkAllowance,
-    approveToken,
-    getMarketplaceBalance,
-  };
+  return useMemo(
+    () => ({
+      buyTokenOnMarketplace,
+      // Return TFT token info data directly instead of a function that violates hooks rules
+      tftTokenInfo: tftTokenInfoResult.data,
+      tftTokenInfoLoading: tftTokenInfoResult.isLoading,
+      isPending,
+      error,
+      hash,
+      checkTokenBalance,
+      checkAllowance,
+      approveToken,
+      getMarketplaceBalance,
+    }),
+    [tftTokenInfoResult.data, tftTokenInfoResult.isLoading, isPending, error, hash],
+  );
 }

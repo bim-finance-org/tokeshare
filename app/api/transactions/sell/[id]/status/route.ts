@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { requireAuth, validateId, validateStatus } from '@/lib/api-utils';
 import { ALLOWED_STATUS } from '@/constants/api';
 

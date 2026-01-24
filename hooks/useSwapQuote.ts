@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Address } from 'viem';
 import { useSwap } from './useSwap';
-import { CONTRACTS } from '@/contracts/contracts';
+import { TMC_CMC20_RATIO } from './useTmcSwap';
+import { CONTRACTS, BASE_CONTRACTS } from '@/contracts/contracts';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { SwapDirection } from '@/enums/Directions';
 import {
@@ -12,6 +13,8 @@ import {
   SLIPPAGE_TOLERANCE,
 } from '@/constants/constants';
 import { calculateTGGPrice } from '@/utils/priceUtils';
+import { RouteParams } from '@/interfaces/RouteParams';
+import { RouteSummary } from '@/interfaces/RouteSummary';
 interface SwapQuoteParams {
   inputToken: Address;
   outputToken: Address;
@@ -87,6 +90,41 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
 
   const { getSwapRoute, getConversion } = useSwap();
 
+  // Standalone function for TMC quote on Base (no wagmi hooks needed)
+  const getTmcSwapRoute = async (params: RouteParams): Promise<RouteSummary> => {
+    const queryParams = new URLSearchParams({
+      tokenIn: params.tokenIn,
+      tokenOut: params.tokenOut,
+      amountIn: params.amountIn,
+      ...(params.gasInclude && { gasInclude: params.gasInclude.toString() }),
+      ...(params.slippageTolerance && { slippageTolerance: params.slippageTolerance.toString() }),
+      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order',
+    });
+
+    const url = `https://aggregator-api.kyberswap.com/base/api/v1/routes?${queryParams}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'X-Client-Id': 'tokeshare-dapp',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP Error ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.code !== 0 || !data.data?.routeSummary) {
+      throw new Error(`API Error: ${data.message}`);
+    }
+
+    return data.data.routeSummary;
+  };
+
   const inputAmount = params?.inputAmount || '';
   const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, DEBOUNCE_DELAY);
 
@@ -152,6 +190,66 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
     }
   };
 
+  const fetchQuoteTMC = async (params: SwapQuoteParams) => {
+    try {
+      const amount = parseFloat(debouncedAmount);
+
+      const paramsKey = [params.inputToken, params.outputToken, amount.toFixed(NUMBER_TO_FIXE_6), params.direction].join(
+        '-',
+      );
+
+      if (paramsKey === lastParamsKey) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      if (params.direction === SwapDirection.StablecoinToToken) {
+        const inputDecimals = getTokenDecimals(params.inputToken);
+        if (inputDecimals == null) throw new Error('Missing decimal');
+        const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
+
+        const route = await getTmcSwapRoute({
+          tokenIn: params.inputToken,
+          tokenOut: BASE_CONTRACTS.CMC20 as Address,
+          amountIn: amountInBase,
+          gasInclude: true,
+          slippageTolerance: SLIPPAGE_TOLERANCE,
+        });
+
+        // CMC20 amount to TMC: multiply by ratio (10)
+        const cmc20Amount = parseFloat(route.amountOut) / DECIMALS_18;
+        const tmcAmount = cmc20Amount * TMC_CMC20_RATIO;
+        setOutputAmount(tmcAmount.toFixed(NUMBER_TO_FIXE_6));
+        setExchangeRate(`${(tmcAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
+      } else {
+        // TMC to stablecoin: convert TMC to CMC20 using ratio (1 TMC = 1/10 CMC20)
+        const cmc20Amount = amount / TMC_CMC20_RATIO;
+        const cmc20AmountBase = BigInt(Math.floor(cmc20Amount * DECIMALS_18)).toString();
+
+        const route = await getTmcSwapRoute({
+          tokenIn: BASE_CONTRACTS.CMC20 as Address,
+          tokenOut: params.outputToken,
+          amountIn: cmc20AmountBase,
+          gasInclude: true,
+          slippageTolerance: SLIPPAGE_TOLERANCE,
+        });
+
+        const outputDecimals = getTokenDecimals(params.outputToken);
+        if (outputDecimals == null) throw new Error('Missing decimal');
+        const stablecoinAmount = parseFloat(route.amountOut) / 10 ** outputDecimals;
+        setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
+        setExchangeRate(`${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
+      }
+      setLastParamsKey(paramsKey);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      setOutputAmount(null);
+      setExchangeRate(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (
       !params ||
@@ -178,6 +276,8 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
         setExchangeRate((31.25).toFixed(4));
       }
       setIsLoading(false);
+    } else if (tokenSymbol == 'TMC') {
+      fetchQuoteTMC(params);
     }
   }, [params, debouncedAmount]);
 
