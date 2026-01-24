@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { sendTransactionEmail } from '@/utils/email/sendEmail';
 import { requireAuth } from '@/lib/api-utils';
 import { DECIMALS_FIXED_TO_TWO, FEES } from '@/constants/api';

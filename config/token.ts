@@ -4,6 +4,7 @@ import DAIIcon from '@/components/icons/currency/DAIIcon';
 import EURCIcon from '@/components/icons/currency/EURCIcon';
 import EURSIcon from '@/components/icons/currency/EURSIcon';
 import TGGIcon from '@/components/icons/currency/TGGIcon';
+import TMCIcon from '@/components/icons/currency/TMCIcon';
 import USDCIcon from '@/components/icons/currency/USDCIcon';
 import USDTIcon from '@/components/icons/currency/USDTIcon';
 import { Blockchain } from '@/enums/Blockchain';
@@ -32,6 +33,18 @@ export const TOKENS: Record<string, TokenInfo> = {
     type: TokenType.Crypto,
     icon: TGGIcon,
     internalUrl: '/marketplace/commodities/Gold',
+  },
+  TMC: {
+    symbol: 'TMC',
+    name: 'Tokeshare MarketCap 20 Index',
+    addresses: {
+      Base: '0xb9f78ce237e639C129BD6F26a32812361Ddf2584',
+    },
+    decimals: 18,
+    type: TokenType.Crypto,
+    icon: TMCIcon,
+    cmcId: 38442,
+    internalUrl: '/marketplace/stock-etf/tmc',
   },
   TFT_001: {
     symbol: 'TFT_001',

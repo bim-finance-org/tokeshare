@@ -3,12 +3,22 @@ import { useERC20 } from '@/hooks/useERC20';
 
 // Decimals connues pour les tokens les plus utilisés
 const KNOWN_DECIMALS: Record<string, number> = {
-  '0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71': 18,
-  '0xc2132d05d31c914a87c6611c10748aeb04b58e8f': 6,
-  '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359': 6,
-  '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063': 18,
-  '0xe111178a87a3bff0c8d18decba5798827539ae99': 2,
-  '0x2791bca1f2de4661ed88a30c99a7a9449aa84174': 6,
+  // Polygon
+  '0x3d4df7bd7ea3f305ac3a4065019b96d382834b71': 18, // TGG
+  '0xc2132d05d31c914a87c6611c10748aeb04b58e8f': 6, // USDT
+  '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359': 6, // USDC
+  '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063': 18, // DAI
+  '0xe111178a87a3bff0c8d18decba5798827539ae99': 2, // EURS
+  '0x2791bca1f2de4661ed88a30c99a7a9449aa84174': 6, // USDCE
+  '0x553d3d295e0f695b9228246232edf400ed3560b5': 18, // PAXG
+  // Base
+  '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': 6, // USDC
+  '0x50c5725949a6f0c72e6c4a641f24049a917db0cb': 18, // DAI
+  '0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42': 6, // EURC
+  '0x417ac0e078398c154edfadd9ef675d30be60af93': 18, // CRVUSD
+  '0x03569cc076654f82679c4ba2124d64774781b01d': 18, // BOLD
+  '0xa0a8481fc246cd12f75227abb96220ff5360fad3': 18, // CMC20
+  '0xb9f78ce237e639c129bd6f26a32812361ddf2584': 18, // TMC
 };
 
 /**
