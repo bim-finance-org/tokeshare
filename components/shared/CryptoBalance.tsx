@@ -15,14 +15,14 @@ const CryptoBalance = ({ currency, blockchain }: { currency: string; blockchain:
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1 sm:gap-2 whitespace-nowrap">
       {isConnected && (
         <>
-          <p className="text-color4 text-sm font-medium">Balance:</p>
-          <p className="text-color4 text-sm font-medium">{formatBalance(balance)}</p>
+          <p className="text-color4 text-xs sm:text-sm font-medium">Balance:</p>
+          <p className="text-color4 text-xs sm:text-sm font-medium">{formatBalance(balance)}</p>
         </>
       )}
-      {!isConnected && <p className="text-color4 text-sm font-medium">Balance: 0</p>}
+      {!isConnected && <p className="text-color4 text-xs sm:text-sm font-medium">Balance: 0</p>}
     </div>
   );
 };
