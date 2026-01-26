@@ -55,8 +55,8 @@ const TradeWidget = ({
   }, [defaultToken]);
 
   return (
-    <div className="bg-color1 p-4 rounded-xl shadow-md">
-      <div className="flex justify-between items-center gap-4">
+    <div className="bg-color1 p-3 sm:p-4 rounded-xl shadow-md">
+      <div className="flex justify-between items-center gap-2 sm:gap-4">
         <div>
           <TokenInput
             label={label}
@@ -84,7 +84,7 @@ const TradeWidget = ({
           </div>
         )}
 
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex flex-col items-end gap-1 sm:gap-2 flex-shrink-0">
           <TokenDisplay
             token={selectedToken}
             isOpenable={!isTGG}

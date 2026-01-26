@@ -26,7 +26,7 @@ const TokenDisplay = ({
   onTokenClick: () => void;
 }) => {
   return (
-    <div className="flex items-center gap-2 border border-color4 rounded-lg p-2 cursor-pointer" onClick={onTokenClick}>
+    <div className="flex items-center gap-1 sm:gap-2 border border-color4 rounded-lg p-1.5 sm:p-2 cursor-pointer" onClick={onTokenClick}>
       {token === 'EUR' && <EURIcon />}
       {token === 'TGG' && <TGGIcon />}
       {token === 'CHF' && <CHFIcon />}
@@ -43,7 +43,7 @@ const TokenDisplay = ({
       {token === 'EURA' && <EURAIcon />}
       {token === 'USDCE' && <USDCEIcon />}
       {token === 'TMC' && <TMCIcon />}
-      <span className="font-medium text-color4">{token}</span>
+      <span className="font-medium text-color4 text-sm sm:text-base">{token}</span>
       {isOpenable && <ArrowDownIcon strokeColor="#4F5B76" className="w-10 h-4" />}
     </div>
   );
