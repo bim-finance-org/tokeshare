@@ -11,6 +11,7 @@ interface CachedPrice {
   price: number;
   percent_change_24h: number | null;
   percent_change_30d: number | null;
+  percent_change_90d: number | null;
   timestamp: number;
 }
 
@@ -67,6 +68,7 @@ async function fetchCmc20Price(): Promise<CachedPrice> {
     price,
     percent_change_24h: quote?.percent_change_24h ?? null,
     percent_change_30d: quote?.percent_change_30d ?? null,
+    percent_change_90d: quote?.percent_change_90d ?? null,
     timestamp: Date.now(),
   };
 }
@@ -82,6 +84,7 @@ export async function GET() {
       price: data.price,
       percent_change_24h: data.percent_change_24h,
       percent_change_30d: data.percent_change_30d,
+      percent_change_90d: data.percent_change_90d,
       source,
       cachedAt,
       age,

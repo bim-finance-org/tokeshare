@@ -5,6 +5,7 @@ interface CMC20PriceResponse {
   price: number;
   percent_change_24h: number | null;
   percent_change_30d: number | null;
+  percent_change_90d: number | null;
 }
 
 export function useTMCData() {
@@ -27,6 +28,7 @@ export function useTMCData() {
     price: data?.price ? calculateTMCPrice(data.price) : null,
     perf1d: data?.percent_change_24h ?? null,
     perf30d: data?.percent_change_30d ?? null,
+    perf90d: data?.percent_change_90d ?? null,
     isLoading,
     error: error?.message ?? null,
   };
