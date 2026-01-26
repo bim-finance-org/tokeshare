@@ -236,8 +236,8 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         <TradeWidget {...topWidgetProps} />
 
         <div className="z-10 pt-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <button onClick={handleSwap} className="hover:scale-110 active:scale-95 transition-transform duration-200">
-            <Image src="/images/switch.png" alt="Swap" width={60} height={60} />
+          <button onClick={handleSwap} className="relative w-10 h-10 sm:w-[60px] sm:h-[60px] hover:scale-110 active:scale-95 transition-transform duration-200">
+            <Image src="/images/switch.png" alt="Swap" fill className="object-contain" />
           </button>
         </div>
 
