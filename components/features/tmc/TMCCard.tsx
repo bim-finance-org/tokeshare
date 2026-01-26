@@ -18,7 +18,7 @@ const TMCCard = () => {
   return (
     <div className="text-color4 min-w-[280px] max-w-[400px] w-full mx-auto">
       <div className="relative">
-        <Image src="/images/img-cmc20.webp" alt="TMC" width={500} height={400} className="object-contain" />
+        <Image src="/images/tmc/tmc.png" alt="TMC" width={500} height={400} className="object-cover" />
       </div>
       <div className="bg-color1 rounded-b-3xl p-4 shadow-lg">
         <div className="flex justify-between items-center">
