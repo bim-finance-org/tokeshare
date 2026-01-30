@@ -397,6 +397,6 @@ export const useSwap = () => {
       getZapFees,
       getConversion,
     }),
-    [isPending, error, hash],
+    [isPending, error, hash, walletClient, publicClient, zapMint, zapWithdraw],
   );
 };

@@ -356,6 +356,6 @@ export const useTmcSwap = () => {
       getZapFees,
       getConversion,
     }),
-    [isPending, error, hash],
+    [isPending, error, hash, walletClient, publicClient, zapMint, zapWithdraw],
   );
 };
