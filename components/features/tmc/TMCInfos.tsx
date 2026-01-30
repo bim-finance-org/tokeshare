@@ -76,24 +76,24 @@ const TMCInfos = () => {
                 <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
                   <h3 className="text-lg font-semibold">Contract Address</h3>
                   <a
-                    href="https://basescan.org/address/0xb9f78ce237e639C129BD6F26a32812361Ddf2584"
+                    href="https://basescan.org/address/0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
                   >
-                    0xb9f78ce237e639C129BD6F26a32812361Ddf2584
+                    0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4
                   </a>
                 </div>
 
                 <div className="py-4 flex flex-col md:flex-row justify-between">
                   <h3 className="text-lg font-semibold">Owner Wallet</h3>
                   <a
-                    href="https://basescan.org/address/0xb9f78ce237e639C129BD6F26a32812361Ddf2584"
+                    href="https://basescan.org/address/0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
                   >
-                    0xb9f78ce237e639C129BD6F26a32812361Ddf2584
+                    0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4
                   </a>
                 </div>
               </div>
@@ -156,12 +156,12 @@ const TMCInfos = () => {
               <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
                 <h3 className="text-base sm:text-lg font-semibold">Proof of Reserve</h3>
                 <a
-                  href="https://basescan.org/address/0xb9f78ce237e639C129BD6F26a32812361Ddf2584"
+                  href="https://basescan.org/address/0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
                 >
-                  0xb9f78ce237e639C129BD6F26a32812361Ddf2584
+                  0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4
                 </a>
               </div>
 

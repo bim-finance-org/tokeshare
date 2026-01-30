@@ -38,7 +38,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'TMC',
     name: 'Tokeshare MarketCap 20 Index',
     addresses: {
-      Base: '0xb9f78ce237e639C129BD6F26a32812361Ddf2584',
+      Base: '0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4',
     },
     decimals: 18,
     type: TokenType.Crypto,
