@@ -6,6 +6,7 @@ import EURSIcon from '@/components/icons/currency/EURSIcon';
 import TGGIcon from '@/components/icons/currency/TGGIcon';
 import TMCIcon from '@/components/icons/currency/TMCIcon';
 import USDCIcon from '@/components/icons/currency/USDCIcon';
+import USDSIcon from '@/components/icons/currency/USDSIcon';
 import USDTIcon from '@/components/icons/currency/USDTIcon';
 import { Blockchain } from '@/enums/Blockchain';
 import { TokenType } from '@/enums/TokenType';
@@ -144,5 +145,15 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 18,
     type: TokenType.Stablecoin,
     icon: BOLDIcon,
+  },
+  USDS: {
+    symbol: 'USDS',
+    name: 'Usds',
+    addresses: {
+      Base: '0x820c137fa70c8691f0e44dc420a5e53c168921dc',
+    },
+    decimals: 18,
+    type: TokenType.Stablecoin,
+    icon: USDSIcon,
   },
 };

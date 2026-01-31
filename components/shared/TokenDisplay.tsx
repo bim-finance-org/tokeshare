@@ -15,6 +15,7 @@ import BOLDIcon from '@/components/icons/currency/BOLDIcon';
 import EURCIcon from '@/components/icons/currency/EURCIcon';
 import EURAIcon from '@/components/icons/currency/EURAIcon';
 import USDCEIcon from '@/components/icons/currency/USDCIcon';
+import USDSIcon from '@/components/icons/currency/USDSIcon';
 import TMCIcon from '@/components/icons/currency/TMCIcon';
 const TokenDisplay = ({
   token,
@@ -42,6 +43,7 @@ const TokenDisplay = ({
       {token === 'EURC' && <EURCIcon />}
       {token === 'EURA' && <EURAIcon />}
       {token === 'USDCE' && <USDCEIcon />}
+      {token === 'USDS' && <USDSIcon />}
       {token === 'TMC' && <TMCIcon />}
       <span className="font-medium text-color4 text-sm sm:text-base">{token}</span>
       {isOpenable && <ArrowDownIcon strokeColor="#4F5B76" className="w-10 h-4" />}
