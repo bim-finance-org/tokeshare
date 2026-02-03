@@ -12,7 +12,6 @@ import {
   ONCE_DIVISION,
   SLIPPAGE_TOLERANCE,
 } from '@/constants/constants';
-import { calculateTGGPrice } from '@/utils/priceUtils';
 import { RouteParams } from '@/interfaces/RouteParams';
 import { RouteSummary } from '@/interfaces/RouteSummary';
 interface SwapQuoteParams {
@@ -70,7 +69,7 @@ const useSmartDebounce = (value: string, delay: number) => {
 };
 
 /**
- * Vas récupérer la valeur de l'ouput amount en fonction de l'input amount, uniquement si l'utilisateur a arrêté d'écrire et si la valeur de 'paramsKey' a changé.
+ * Vas récupérer la valeur de l'ouput amount en fonction de l'input amount, uniquement si l'utilisateur a arrêté d'écrire.
  * @param params Objet contenant les paramètres du swap (tokens, montant, direction).
  * @returns Un objet avec :
  *   - outputAmount : le montant obtenu après le swap
@@ -86,7 +85,6 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exchangeRate, setExchangeRate] = useState<string | null>(null);
-  const [lastParamsKey, setLastParamsKey] = useState<string | null>(null);
 
   const { getSwapRoute, getConversion } = useSwap();
 
@@ -132,15 +130,6 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
     try {
       const amount = parseFloat(debouncedAmount);
 
-      const paramsKey = [
-        params.inputToken,
-        params.outputToken,
-        amount.toFixed(NUMBER_TO_FIXE_6),
-        params.direction,
-      ].join('-');
-
-      if (paramsKey === lastParamsKey) return;
-
       setIsLoading(true);
       setError(null);
       if (params.direction === SwapDirection.StablecoinToToken) {
@@ -180,7 +169,6 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
         setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
         setExchangeRate(`${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
       }
-      setLastParamsKey(paramsKey);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknow error');
       setOutputAmount(null);
@@ -193,12 +181,6 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
   const fetchQuoteTMC = async (params: SwapQuoteParams) => {
     try {
       const amount = parseFloat(debouncedAmount);
-
-      const paramsKey = [params.inputToken, params.outputToken, amount.toFixed(NUMBER_TO_FIXE_6), params.direction].join(
-        '-',
-      );
-
-      if (paramsKey === lastParamsKey) return;
 
       setIsLoading(true);
       setError(null);
@@ -240,7 +222,6 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
         setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
         setExchangeRate(`${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
       }
-      setLastParamsKey(paramsKey);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
       setOutputAmount(null);

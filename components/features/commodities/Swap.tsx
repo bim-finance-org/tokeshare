@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import Image from 'next/image';
 import Blockchains from '@/components/shared/Blockchains';
@@ -52,19 +52,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   const { swapIn, swapOut, isPending, error, hash } = useSwapHandlerByToken(token.symbol);
   const [swapQuoteParams, setSwapQuoteParams] = useState<SwapQuoteParams | null>(null);
 
-  // Ref to track if we're updating from calculated output (to prevent loops)
-  const isUpdatingFromQuote = useRef(false);
-
   // Compute input amount based on direction
   const inputAmount = isTggFirst ? amount : stablecoinAmount;
 
   useEffect(() => {
-    // Skip if update came from quote calculation (prevents infinite loop)
-    if (isUpdatingFromQuote.current) {
-      isUpdatingFromQuote.current = false;
-      return;
-    }
-
     const inputToken = getTokenAddress(isTggFirst ? token.symbol : stablecoin, selectedBlockchain);
     const outputToken = getTokenAddress(isTggFirst ? stablecoin : token.symbol, selectedBlockchain);
     const direction = isTggFirst ? SwapDirection.TokenToStablecoin : SwapDirection.StablecoinToToken;
@@ -86,9 +77,6 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   // Update output amount from quote calculation
   useEffect(() => {
     if (calculatedOutputAmount && !isLoadingQuote) {
-      // Mark that next state update is from quote, not user input
-      isUpdatingFromQuote.current = true;
-
       if (isTggFirst) {
         // TGG → Stablecoin: update stablecoin output
         setStablecoinAmount(calculatedOutputAmount);
