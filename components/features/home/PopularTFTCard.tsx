@@ -59,7 +59,7 @@ const PopularTFTCard = () => {
                     max-w-[90%] sm:max-w-full mx-auto"
     >
       <Image
-        src="/images/frenchTacos/image_3.jpg"
+        src="/images/frenchTacos/TFT_principal.png"
         alt="House"
         width={800}
         height={800}

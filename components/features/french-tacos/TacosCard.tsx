@@ -37,7 +37,7 @@ const TacosCard = () => {
     <div className="bg-color1 shadow-lg max-w-3xl md:w-full rounded-3xl overflow-hidden text-color4">
       <div className="image-container">
         <Image
-          src="/images/frenchTacos/image_3.jpg"
+          src="/images/frenchTacos/TFT_principal.png"
           alt="French Tacos Las Terrenas"
           width={1200}
           height={300}
