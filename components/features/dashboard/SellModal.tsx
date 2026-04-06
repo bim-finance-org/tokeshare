@@ -7,8 +7,8 @@ import { CheckCircle } from 'lucide-react';
 
 interface SellTransaction {
   id: number;
-  status: 'completed' | 'pending' | 'failed' | 'received';
-  iban: string;
+  status: 'completed' | 'pending' | 'failed' | 'received' | 'usdc_pending';
+  iban: string | null;
   blockchain: string;
   fiat: string;
   fiatAmount: number;
@@ -20,6 +20,10 @@ interface SellTransaction {
   fullName: string;
   crypto: string;
   cryptoAmount: number;
+  paymentMethod?: string | null;
+  walletAddress?: string | null;
+  txHash?: string | null;
+  usdcTxHash?: string | null;
 }
 
 const SellModal = () => {
@@ -309,7 +313,8 @@ const SellModal = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IBAN</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IBAN/Wallet</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Blockchain
                 </th>
@@ -345,7 +350,9 @@ const SellModal = () => {
                               ? 'bg-blue-100 text-blue-800'
                               : transaction.status === 'failed'
                                 ? 'bg-red-100 text-red-800'
-                                : 'bg-gray-100 text-gray-800'
+                                : transaction.status === 'usdc_pending'
+                                  ? 'bg-orange-100 text-orange-800'
+                                  : 'bg-gray-100 text-gray-800'
                       }`}
                     >
                       {transaction.status}
@@ -353,12 +360,35 @@ const SellModal = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <span
-                      className="cursor-pointer hover:text-blue-500 hover:underline"
-                      onClick={() => handleCopyToClipboard(transaction.iban)}
-                      title="Click to copy IBAN"
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        transaction.paymentMethod === 'usdc_transfer'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}
                     >
-                      {transaction.iban?.replace(/\s+/g, '')}
+                      {transaction.paymentMethod === 'usdc_transfer' ? 'USDC' : 'Bank'}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {transaction.paymentMethod === 'usdc_transfer' ? (
+                      <span
+                        className="cursor-pointer hover:text-blue-500 hover:underline"
+                        onClick={() => handleCopyToClipboard(transaction.walletAddress || '')}
+                        title="Click to copy wallet address"
+                      >
+                        {transaction.walletAddress
+                          ? `${transaction.walletAddress.slice(0, 6)}...${transaction.walletAddress.slice(-4)}`
+                          : '-'}
+                      </span>
+                    ) : (
+                      <span
+                        className="cursor-pointer hover:text-blue-500 hover:underline"
+                        onClick={() => handleCopyToClipboard(transaction.iban || '')}
+                        title="Click to copy IBAN"
+                      >
+                        {transaction.iban?.replace(/\s+/g, '') || '-'}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.blockchain}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

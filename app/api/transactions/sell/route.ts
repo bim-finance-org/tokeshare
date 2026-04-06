@@ -4,20 +4,16 @@ import { sendTransactionEmail } from '@/utils/email/sendEmail';
 import { requireAuth } from '@/lib/api-utils';
 import { DECIMALS_FIXED_TO_TWO, FEES } from '@/constants/api';
 
-const REQUIRED_FIELDS = [
-  'iban',
-  'blockchain',
-  'crypto',
-  'cryptoAmount',
-  'fiat',
-  'fiatAmount',
-  'email',
-  'fullName',
-  'ref',
-];
+const BASE_REQUIRED_FIELDS = ['blockchain', 'crypto', 'cryptoAmount', 'fiat', 'fiatAmount', 'email', 'fullName', 'ref'];
 
 function hasRequiredFields(data: any) {
-  return REQUIRED_FIELDS.every((field) => data[field]);
+  const baseValid = BASE_REQUIRED_FIELDS.every((field) => data[field]);
+  if (!baseValid) return false;
+
+  if (data.paymentMethod === 'usdc_transfer') {
+    return !!data.walletAddress && !!data.txHash;
+  }
+  return !!data.iban;
 }
 
 /**
@@ -67,7 +63,7 @@ export async function POST(request: NextRequest) {
         date: new Date(),
         email: data.email,
         fullName: data.fullName,
-        iban: data.iban,
+        iban: data.iban || null,
         status: data.status || 'pending',
         blockchain: data.blockchain,
         fiat: data.fiat,
@@ -75,6 +71,9 @@ export async function POST(request: NextRequest) {
         crypto: data.crypto,
         cryptoAmount: data.cryptoAmount,
         fees: fees,
+        paymentMethod: data.paymentMethod || 'bank_transfer',
+        walletAddress: data.walletAddress || null,
+        txHash: data.txHash || null,
       },
     });
 

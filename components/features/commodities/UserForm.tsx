@@ -6,8 +6,10 @@ import { TokenContexts } from '@/context/TokenContexts';
 import { generatePayReference } from '@/utils/RandomRefs';
 import { useTGGBalance } from '@/hooks/useTGGBalance';
 import { useTGGTransfer } from '@/hooks/useTGGTransfer';
-import { FEES_COEF, NUMBER_TO_FIXE_2 } from '@/constants/constants';
+import { useTFTTransfer } from '@/hooks/useTFTTransfer';
+import { FEES_COEF, NUMBER_TO_FIXE_2, TFT_001_SELL_FEES_COEF } from '@/constants/constants';
 import { Action } from '@/enums/Actions';
+import { PaymentMethod } from '@/enums/PaymentMethod';
 
 interface UserFormProps {
   type: 'buy' | 'sell';
@@ -17,6 +19,7 @@ interface UserFormProps {
   tggAmount: string;
   tggPrice: number;
   setShowUserForm: Function;
+  paymentMethod?: PaymentMethod;
 }
 
 interface FormData {
@@ -31,7 +34,7 @@ const IBAN = 'FR76 1695 8000 0103 0490 4861 482';
 const ALIAS = 'Tokeshare';
 const BANK = 'Qonto';
 
-const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShowUserForm }: UserFormProps) => {
+const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShowUserForm, paymentMethod }: UserFormProps) => {
   const {
     buy: { blockchain: buyBlockchain },
     sell: { blockchain: sellBlockchain },
@@ -41,6 +44,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usdcTxHash, setUsdcTxHash] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('userFormData');
@@ -56,8 +60,18 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
 
   const [ref, setRef] = useState<string>(() => generatePayReference());
 
+  const isTFT = crypto === 'TFT_001';
+  const isUsdcPayment = paymentMethod === PaymentMethod.UsdcTransfer;
+  const needsIban = type === Action.Sell && !isUsdcPayment;
+
   const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address);
-  const { transferTGGToTokeShare, isPending: transferPending, error: transferError, hash } = useTGGTransfer();
+  const tggTransfer = useTGGTransfer();
+  const tftTransfer = useTFTTransfer();
+
+  const activeTransfer = isTFT ? tftTransfer : tggTransfer;
+  const transferPending = activeTransfer.isPending;
+  const transferError = activeTransfer.error;
+  const hash = activeTransfer.hash;
 
   const {
     data: receipt,
@@ -84,23 +98,65 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
 
   useEffect(() => {
     if (receiptSuccess && hash) {
-      handleApiSubmission();
+      if (isUsdcPayment) {
+        handleUsdcApiSubmission(hash);
+      } else {
+        handleApiSubmission();
+      }
     } else if (receiptError) {
-      setError('La transaction TGG a échoué. Veuillez contacter le support pour assistance.');
+      setError('Transaction failed. Please contact support for assistance.');
     }
   }, [receiptSuccess, receiptError, hash]);
 
   useEffect(() => {
     if (transferError) {
       if (transferError.message?.includes('User rejected') || transferError.message?.includes('rejected')) {
-        setError("Transaction annulée par l'utilisateur.");
+        setError('Transaction cancelled by user.');
       } else if (transferError.message?.includes('insufficient funds')) {
-        setError('Solde insuffisant pour effectuer la transaction.');
+        setError('Insufficient balance to complete the transaction.');
       } else {
-        setError('Erreur lors du transfert. Veuillez réessayer.');
+        setError('Transfer error. Please try again.');
       }
     }
   }, [transferError]);
+
+  const handleUsdcApiSubmission = async (txHash: string) => {
+    try {
+      setIsLoading(true);
+      const fiatAmount = parseFloat(amount);
+
+      const apiData = {
+        ref: ref,
+        email: formData.email,
+        fullName: `${formData.firstName} ${formData.lastName}`,
+        walletAddress: address || '',
+        blockchain: sellBlockchain,
+        cryptoAmount: parseFloat(tggAmount),
+        fiatAmount: fiatAmount,
+        txHash: txHash,
+      };
+
+      const response = await fetch('/api/transactions/sell/usdc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'An error occurred during the transaction');
+      }
+
+      setUsdcTxHash(data.usdcTxHash);
+      setShowConfirmation(true);
+    } catch (err) {
+      console.error('Error during USDC submission:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleApiSubmission = async () => {
     try {
@@ -126,10 +182,10 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
           fees: feesValue,
         };
       } else {
-        // Calculer le mont ant et les frais pour la vente
         const cryptoAmount = parseFloat(tggAmount);
         const fiatAmount = parseFloat(amount);
-        const feesValue = parseFloat((fiatAmount * FEES_COEF).toFixed(NUMBER_TO_FIXE_2));
+        const feesCoef = isTFT ? TFT_001_SELL_FEES_COEF : FEES_COEF;
+        const feesValue = parseFloat((fiatAmount * feesCoef).toFixed(NUMBER_TO_FIXE_2));
 
         apiData = {
           ref: ref,
@@ -143,8 +199,9 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
           crypto: crypto,
           cryptoAmount: cryptoAmount,
           fees: feesValue,
+          paymentMethod: 'bank_transfer',
+          txHash: hash || null,
         };
-        console.log(apiData);
       }
 
       const endpoint = type === 'buy' ? '/api/transactions/buy' : '/api/transactions/sell';
@@ -160,17 +217,17 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
 
       if (!response.ok) {
         console.log(data);
-        throw new Error(data.error || 'Une erreur est survenue lors de la transaction');
+        throw new Error(data.error || 'An error occurred during the transaction');
       }
 
       setShowConfirmation(true);
     } catch (err) {
-      console.error('Erreur lors de la soumission:', err);
+      console.error('Error during submission:', err);
 
       if (err instanceof SyntaxError && err.message.includes('JSON')) {
-        setError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
+        setError('Server connection error. Please try again later.');
       } else {
-        setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+        setError(err instanceof Error ? err.message : 'An error occurred');
       }
     } finally {
       setIsLoading(false);
@@ -190,11 +247,15 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
         setIsLoading(true);
         await handleApiSubmission();
       } else {
-        transferTGGToTokeShare(tggAmount);
+        if (isTFT) {
+          tftTransfer.transferTFTToTokeShare(tggAmount);
+        } else {
+          tggTransfer.transferTGGToTokeShare(tggAmount);
+        }
       }
     } catch (err) {
-      console.error('Erreur lors de la soumission:', err);
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      console.error('Error during submission:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setIsLoading(false);
     }
   };
@@ -260,8 +321,8 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
               />
             </div>
 
-            {/* IBAN Section - Only for Sell */}
-            {type === Action.Sell && (
+            {/* IBAN Section - Only for Sell with bank transfer */}
+            {needsIban && (
               <div className="bg-gray-200 p-4 rounded-xl">
                 <label className="block text-sm mb-2">IBAN</label>
                 <input
@@ -279,7 +340,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
             {/* Wallet Connection - For both Buy and Sell */}
             <div className="bg-gray-200 p-4 rounded-xl">
               <label className="block text-sm mb-2">
-                {type === Action.Buy ? 'Reception address' : 'Your wallet address'}
+                {type === Action.Buy ? 'Reception address' : isUsdcPayment ? 'Your wallet (USDC reception)' : 'Your wallet address'}
               </label>
               <ConnectButton />
             </div>
@@ -289,9 +350,18 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
               <div className="bg-yellow-50 p-4 rounded-xl">
                 <p className="text-yellow-800">
                   {transferPending
-                    ? 'Please confirm the TGG transfer in your wallet...'
-                    : 'Waiting for transaction confirmation...'}
+                    ? `Please confirm the ${crypto} transfer in your wallet...`
+                    : isUsdcPayment
+                      ? 'Waiting for confirmation and USDC transfer...'
+                      : 'Waiting for transaction confirmation...'}
                 </p>
+              </div>
+            )}
+
+            {/* USDC processing */}
+            {isUsdcPayment && isLoading && !transferPending && !receiptLoading && (
+              <div className="bg-blue-50 p-4 rounded-xl">
+                <p className="text-blue-800">Processing USDC transfer to your wallet...</p>
               </div>
             )}
 
@@ -327,7 +397,37 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
             </div>
           )}
 
-          {type === Action.Sell && (
+          {type === Action.Sell && isUsdcPayment && (
+            <div className="bg-gray-200 p-6 rounded-xl">
+              <h2 className="text-xl font-bold mb-4 text-center">USDC Transfer Completed</h2>
+              <p>
+                Your sale operation number <span className="font-bold">{ref}</span> has been successfully processed.
+              </p>
+              <p className="my-3">
+                <span className="font-semibold">{amount} USDC</span> has been sent to your wallet.
+              </p>
+              {usdcTxHash && (
+                <p className="my-3">
+                  Transaction:{' '}
+                  <a
+                    href={`https://basescan.org/tx/${usdcTxHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline break-all"
+                  >
+                    {usdcTxHash.slice(0, 10)}...{usdcTxHash.slice(-8)}
+                  </a>
+                </p>
+              )}
+              <p className="my-3">Thank you for your trust.</p>
+              <p className="my-3">See you soon on TokeShare.</p>
+              <div className="mt-6 text-center text-sm text-gray-600">
+                <p>A confirmation email has been sent to {formData.email}</p>
+              </div>
+            </div>
+          )}
+
+          {type === Action.Sell && !isUsdcPayment && (
             <div className="bg-gray-200 p-6 rounded-xl">
               <h2 className="text-xl font-bold mb-4 text-center">Demand of sale confirmed</h2>
               <p>
