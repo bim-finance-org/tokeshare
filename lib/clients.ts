@@ -1,5 +1,5 @@
 import { createPublicClient, http } from 'viem';
-import { base, polygon } from 'viem/chains';
+import { base, polygon, mainnet } from 'viem/chains';
 import { Blockchain } from '@/enums/Blockchain';
 
 export const PUBLIC_CLIENTS = {
@@ -10,5 +10,9 @@ export const PUBLIC_CLIENTS = {
   [Blockchain.Polygon]: createPublicClient({
     chain: polygon,
     transport: http('https://polygon-rpc.com'),
+  }),
+  [Blockchain.Ethereum]: createPublicClient({
+    chain: mainnet,
+    transport: http('https://eth.llamarpc.com'),
   }),
 };

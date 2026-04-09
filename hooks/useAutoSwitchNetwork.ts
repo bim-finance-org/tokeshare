@@ -5,6 +5,7 @@ import { Blockchain } from '@/enums/Blockchain';
 const CHAIN_IDS: Record<Blockchain, number> = {
   Base: 8453,
   Polygon: 137,
+  Ethereum: 1,
 };
 
 type SwitchStatus = 'idle' | 'switching' | 'success' | 'wrong_network';
