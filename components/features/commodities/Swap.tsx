@@ -72,7 +72,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     isLoading: isLoadingQuote,
     error: quoteError,
     exchangeRate,
-  } = useSwapQuote(swapQuoteParams, token.symbol);
+  } = useSwapQuote(swapQuoteParams, token.symbol, selectedBlockchain);
 
   // Update output amount from quote calculation
   useEffect(() => {

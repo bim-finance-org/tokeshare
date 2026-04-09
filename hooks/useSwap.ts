@@ -1,4 +1,4 @@
-import { CONTRACTS } from '@/contracts/contracts';
+import { CONTRACTS, getContractsForBlockchain } from '@/contracts/contracts';
 import { useZAPContract } from './useContracts';
 import { Address, parseUnits } from 'viem';
 import { usePublicClient, useWalletClient, useReadContract } from 'wagmi';
@@ -10,6 +10,13 @@ import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { ZAP_ABI } from '@/contracts/abis/zap_abi';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { useMemo } from 'react';
+import { Blockchain } from '@/enums/Blockchain';
+
+const KYBERSWAP_CHAIN_SLUGS: Record<Blockchain, string> = {
+  [Blockchain.Polygon]: 'polygon',
+  [Blockchain.Base]: 'base',
+  [Blockchain.Ethereum]: 'ethereum',
+};
 
 // Hook React pour lire les fees du contrat ZAP de manière réactive
 export const useZapFees = () => {
@@ -159,7 +166,7 @@ export const useSwap = () => {
   };
 
   // FIXÉ : Endpoint correct pour l'API V1 de KyberSwap
-  const getSwapRoute = async (params: RouteParams): Promise<RouteSummary> => {
+  const getSwapRoute = async (params: RouteParams, blockchain: Blockchain = Blockchain.Polygon): Promise<RouteSummary> => {
     const queryParams = new URLSearchParams({
       tokenIn: params.tokenIn,
       tokenOut: params.tokenOut,
@@ -177,8 +184,8 @@ export const useSwap = () => {
       excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order',
     });
 
-    // FIXÉ : Utilisation du bon endpoint pour Polygon
-    const url = `https://aggregator-api.kyberswap.com/polygon/api/v1/routes?${queryParams}`;
+    const chainSlug = KYBERSWAP_CHAIN_SLUGS[blockchain];
+    const url = `https://aggregator-api.kyberswap.com/${chainSlug}/api/v1/routes?${queryParams}`;
 
     try {
       const response = await fetch(url, {
@@ -207,8 +214,9 @@ export const useSwap = () => {
   };
 
   // FIXÉ : Fonction pour construire les données de swap avec l'API V1 POST
-  const buildSwapData = async (params: BuildRouteParams): Promise<string> => {
-    const url = 'https://aggregator-api.kyberswap.com/polygon/api/v1/route/build';
+  const buildSwapData = async (params: BuildRouteParams, blockchain: Blockchain = Blockchain.Polygon): Promise<string> => {
+    const chainSlug = KYBERSWAP_CHAIN_SLUGS[blockchain];
+    const url = `https://aggregator-api.kyberswap.com/${chainSlug}/api/v1/route/build`;
 
     try {
       const response = await fetch(url, {
@@ -257,8 +265,12 @@ export const useSwap = () => {
     outputToken: Address;
     routerAddress: Address;
     walletAddress: Address;
+    blockchain?: Blockchain;
   }) => {
     try {
+      const blockchain = params.blockchain ?? Blockchain.Polygon;
+      const contracts = getContractsForBlockchain(blockchain);
+
       // Utiliser getTokenDecimals pour obtenir les bonnes décimales
       const decimals = getTokenDecimals(params.inputToken);
       if (decimals === undefined) {
@@ -274,29 +286,35 @@ export const useSwap = () => {
         );
       }
 
-      const currentAllowance = await checkAllowance(params.inputToken, params.walletAddress, CONTRACTS.ZAP as Address);
+      const currentAllowance = await checkAllowance(params.inputToken, params.walletAddress, contracts.ZAP as Address);
 
       // 3. Approuver si nécessaire
       if (currentAllowance < amountBigInt) {
         const approvalAmount = amountBigInt;
-        await approveToken(params.inputToken, CONTRACTS.ZAP as Address, approvalAmount);
+        await approveToken(params.inputToken, contracts.ZAP as Address, approvalAmount);
       }
 
-      const routeSummary = await getSwapRoute({
-        tokenIn: params.inputToken,
-        tokenOut: params.outputToken,
-        amountIn: amountBigInt.toString(), // ✅ Utiliser les unités de base pour l'API
-        gasInclude: true,
-        slippageTolerance: 200,
-      });
+      const routeSummary = await getSwapRoute(
+        {
+          tokenIn: params.inputToken,
+          tokenOut: params.outputToken,
+          amountIn: amountBigInt.toString(),
+          gasInclude: true,
+          slippageTolerance: 200,
+        },
+        blockchain,
+      );
 
-      const swapData = await buildSwapData({
-        routeSummary,
-        sender: CONTRACTS.ZAP as Address,
-        recipient: CONTRACTS.ZAP as Address,
-        slippageTolerance: 200,
-        source: 'tokeshare-dapp',
-      });
+      const swapData = await buildSwapData(
+        {
+          routeSummary,
+          sender: contracts.ZAP as Address,
+          recipient: contracts.ZAP as Address,
+          slippageTolerance: 200,
+          source: 'tokeshare-dapp',
+        },
+        blockchain,
+      );
 
       const result = await zapMint(
         params.inputToken,
@@ -317,10 +335,14 @@ export const useSwap = () => {
     outputToken: Address;
     routerAddress: Address;
     walletAddress: Address;
+    blockchain?: Blockchain;
   }) => {
     try {
+      const blockchain = params.blockchain ?? Blockchain.Polygon;
+      const contracts = getContractsForBlockchain(blockchain);
+
       // 1. Vérifier les soldes TGG
-      const tggBalance = await checkTokenBalance(CONTRACTS.TGG as Address, params.walletAddress);
+      const tggBalance = await checkTokenBalance(contracts.TGG as Address, params.walletAddress);
       const tggAmountBigInt = BigInt((parseFloat(params.amount) * Math.pow(10, 18)).toString());
 
       if (tggBalance < tggAmountBigInt) {
@@ -331,13 +353,13 @@ export const useSwap = () => {
 
       // 2. Vérifier l'allowance TGG pour le contrat ZAP
       const currentAllowance = await checkAllowance(
-        CONTRACTS.TGG as Address,
+        contracts.TGG as Address,
         params.walletAddress,
-        CONTRACTS.ZAP as Address,
+        contracts.ZAP as Address,
       );
 
       if (currentAllowance < tggAmountBigInt) {
-        await approveToken(CONTRACTS.TGG as Address, CONTRACTS.ZAP as Address, tggAmountBigInt);
+        await approveToken(contracts.TGG as Address, contracts.ZAP as Address, tggAmountBigInt);
       }
 
       // 3. Obtenir la route de swap PAXG → outputToken
@@ -349,22 +371,28 @@ export const useSwap = () => {
       const conversionBigInt = BigInt(conversionInteger);
       const paxgAmountInBaseUnits = conversionBigInt.toString();
 
-      const routeSummary = await getSwapRoute({
-        tokenIn: CONTRACTS.PAXG as Address,
-        tokenOut: params.outputToken,
-        amountIn: paxgAmountInBaseUnits,
-        gasInclude: true,
-        slippageTolerance: 200,
-      });
+      const routeSummary = await getSwapRoute(
+        {
+          tokenIn: contracts.PAXG as Address,
+          tokenOut: params.outputToken,
+          amountIn: paxgAmountInBaseUnits,
+          gasInclude: true,
+          slippageTolerance: 200,
+        },
+        blockchain,
+      );
 
       // 4. Construire les données de swap automatiquement
-      const swapData = await buildSwapData({
-        routeSummary,
-        sender: CONTRACTS.ZAP as Address,
-        recipient: CONTRACTS.ZAP as Address,
-        slippageTolerance: 200,
-        source: 'tokeshare-dapp',
-      });
+      const swapData = await buildSwapData(
+        {
+          routeSummary,
+          sender: contracts.ZAP as Address,
+          recipient: contracts.ZAP as Address,
+          slippageTolerance: 200,
+          source: 'tokeshare-dapp',
+        },
+        blockchain,
+      );
 
       // 5. Exécuter le zapWithdraw avec le swapData construit
       const result = await zapWithdraw(
