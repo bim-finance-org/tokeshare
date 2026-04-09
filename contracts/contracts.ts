@@ -1,3 +1,5 @@
+import { Blockchain } from '@/enums/Blockchain';
+
 // Adresses des contrats sur Polygon Mainnet
 export const CONTRACTS = {
   TGG: '0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71',
@@ -12,6 +14,23 @@ export const BASE_CONTRACTS = {
   TMC: '0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4',
   ZAP_TMC: '0x17b4CA0f1A49dB2c42596B3152c39C8aA7B7a0D9',
   CMC20: '0xa0A8481fc246Cd12f75227aBB96220fF5360fad3',
+};
+
+// Adresses des contrats sur Ethereum Mainnet
+export const ETH_CONTRACTS = {
+  TGG: '0x0000000000000000000000000000000000000000', // TODO: replace with deployed address
+  ZAP: '0x0000000000000000000000000000000000000000', // TODO: replace with deployed address
+  PAXG: '0x45804880De22913dAFE09f4980848ECE6EcbAf78',
+};
+
+export const getContractsForBlockchain = (blockchain: Blockchain) => {
+  switch (blockchain) {
+    case Blockchain.Ethereum:
+      return ETH_CONTRACTS;
+    case Blockchain.Polygon:
+    default:
+      return CONTRACTS;
+  }
 };
 
 export const BASE_TRUSTED_AGGREGATORS = {
