@@ -7,7 +7,7 @@ import Contracts from '@/components/shared/Contracts';
 import Image from 'next/image';
 import CommoditiesInfos from '@/components/features/commodities/CommoditiesInfos';
 import { use } from 'react';
-import { CONTRACTS } from '@/contracts/contracts';
+import { CONTRACTS, ETH_CONTRACTS } from '@/contracts/contracts';
 import { TOKENS } from '@/config/token';
 
 interface PageProps {
@@ -33,7 +33,7 @@ const CommodityPage = ({ params }: PageProps) => {
             <h1 className="text-2xl sm:text-3xl text-color4 font-semibold text-center md:text-left">
               Tokeshare Gold Gram (TGG)
             </h1>
-            <Contracts polygonContract={CONTRACTS.TGG} />
+            <Contracts polygonContract={CONTRACTS.TGG} ethereumContract={ETH_CONTRACTS.TGG} />
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 p-4 sm:p-6">

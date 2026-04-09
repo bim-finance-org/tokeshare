@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import PolygonIcon from '@/components/icons/blockchains/PolygonIcon';
 import BaseIcon from '@/components/icons/blockchains/BaseIcon';
+import EthereumIcon from '@/components/icons/blockchains/EthereumIcon';
 import ArrowDownIcon from '@/components/icons/arrows/ArrowDownIcon';
 import { TokenContexts } from '@/context/TokenContexts';
 import { Blockchain } from '@/enums/Blockchain';
@@ -75,7 +76,16 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
   };
 
   // Icone dynamique
-  const renderIcon = (chain: Blockchain) => (chain === Blockchain.Polygon ? <PolygonIcon /> : <BaseIcon />);
+  const renderIcon = (chain: Blockchain) => {
+    switch (chain) {
+      case Blockchain.Polygon:
+        return <PolygonIcon />;
+      case Blockchain.Ethereum:
+        return <EthereumIcon />;
+      default:
+        return <BaseIcon />;
+    }
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
