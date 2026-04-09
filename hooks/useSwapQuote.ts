@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Address } from 'viem';
 import { useSwap } from './useSwap';
 import { TMC_CMC20_RATIO } from './useTmcSwap';
-import { CONTRACTS, BASE_CONTRACTS, getContractsForBlockchain } from '@/contracts/contracts';
+import { CONTRACTS, BASE_CONTRACTS, getTGGContracts } from '@/contracts/contracts';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { SwapDirection } from '@/enums/Directions';
 import { Blockchain } from '@/enums/Blockchain';
@@ -134,7 +134,7 @@ export const useSwapQuote = (
   const fetchQuoteTGG = async (params: SwapQuoteParams) => {
     try {
       const amount = parseFloat(debouncedAmount);
-      const contracts = getContractsForBlockchain(blockchain);
+      const contracts = getTGGContracts(blockchain);
 
       setIsLoading(true);
       setError(null);

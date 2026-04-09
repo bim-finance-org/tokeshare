@@ -1,4 +1,4 @@
-import { CONTRACTS, getContractsForBlockchain } from '@/contracts/contracts';
+import { CONTRACTS, getTGGContracts } from '@/contracts/contracts';
 import { useZAPContract } from './useContracts';
 import { Address, parseUnits } from 'viem';
 import { usePublicClient, useWalletClient, useReadContract } from 'wagmi';
@@ -269,7 +269,7 @@ export const useSwap = () => {
   }) => {
     try {
       const blockchain = params.blockchain ?? Blockchain.Polygon;
-      const contracts = getContractsForBlockchain(blockchain);
+      const contracts = getTGGContracts(blockchain);
 
       // Utiliser getTokenDecimals pour obtenir les bonnes décimales
       const decimals = getTokenDecimals(params.inputToken);
@@ -339,7 +339,7 @@ export const useSwap = () => {
   }) => {
     try {
       const blockchain = params.blockchain ?? Blockchain.Polygon;
-      const contracts = getContractsForBlockchain(blockchain);
+      const contracts = getTGGContracts(blockchain);
 
       // 1. Vérifier les soldes TGG
       const tggBalance = await checkTokenBalance(contracts.TGG as Address, params.walletAddress);

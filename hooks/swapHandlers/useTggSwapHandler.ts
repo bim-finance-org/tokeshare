@@ -1,7 +1,7 @@
 import { useSwap } from '@/hooks/useSwap';
 import { TokenSwapHandler } from '@/interfaces/TokenSwapHandler';
 import { Address, parseUnits } from 'viem';
-import { getContractsForBlockchain, TRUSTED_AGGREGATORS } from '@/contracts/contracts';
+import { getTGGContracts, TRUSTED_AGGREGATORS } from '@/contracts/contracts';
 import { getTokenAddress, getTokenDecimals } from '@/utils/token';
 import { useMemo } from 'react';
 import { useTokenPrice } from '../useTokenPrice';
@@ -12,7 +12,7 @@ export const useTggSwapHandler = (): TokenSwapHandler => {
   return useMemo(
     () => ({
       swapIn: async ({ stablecoin, amount, blockchain, walletAddress }) => {
-        const contracts = getContractsForBlockchain(blockchain);
+        const contracts = getTGGContracts(blockchain);
         const inputToken = getTokenAddress(stablecoin, blockchain);
         const outputToken = contracts.PAXG as Address;
         const router = TRUSTED_AGGREGATORS.kyberSwap as Address;

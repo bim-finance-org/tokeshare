@@ -23,14 +23,15 @@ export const ETH_CONTRACTS = {
   PAXG: '0x45804880De22913dAFE09f4980848ECE6EcbAf78',
 };
 
-export const getContractsForBlockchain = (blockchain: Blockchain) => {
-  switch (blockchain) {
-    case Blockchain.Ethereum:
-      return ETH_CONTRACTS;
-    case Blockchain.Polygon:
-    default:
-      return CONTRACTS;
-  }
+type TGGContracts = { TGG: string; ZAP: string; PAXG: string };
+
+const TGG_CONTRACTS_BY_CHAIN: Record<string, TGGContracts> = {
+  [Blockchain.Polygon]: { TGG: CONTRACTS.TGG, ZAP: CONTRACTS.ZAP, PAXG: CONTRACTS.PAXG },
+  [Blockchain.Ethereum]: ETH_CONTRACTS,
+};
+
+export const getTGGContracts = (blockchain: Blockchain): TGGContracts => {
+  return TGG_CONTRACTS_BY_CHAIN[blockchain] ?? TGG_CONTRACTS_BY_CHAIN[Blockchain.Polygon];
 };
 
 export const BASE_TRUSTED_AGGREGATORS = {
