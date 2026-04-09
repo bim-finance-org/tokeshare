@@ -47,7 +47,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   const isTFT = token.symbol === 'TFT_001';
 
   const { formattedBalance: tggFormattedBalance, checkSufficientBalance: tggCheckBalance, isLoading: isLoadingTGGBalance } =
-    useTGGBalance(address as Address);
+    useTGGBalance(address as Address, selectedBlockchain);
   const { formattedBalance: tftFormattedBalance, checkSufficientBalance: tftCheckBalance, isLoading: isLoadingTFTBalance } =
     useTFTBalance(address as Address);
 

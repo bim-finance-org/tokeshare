@@ -64,7 +64,8 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   const isUsdcPayment = paymentMethod === PaymentMethod.UsdcTransfer;
   const needsIban = type === Action.Sell && !isUsdcPayment;
 
-  const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address);
+  const blockchain = type === Action.Sell ? sellBlockchain : buyBlockchain;
+  const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address, blockchain);
   const tggTransfer = useTGGTransfer();
   const tftTransfer = useTFTTransfer();
 
@@ -250,7 +251,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
         if (isTFT) {
           tftTransfer.transferTFTToTokeShare(tggAmount);
         } else {
-          tggTransfer.transferTGGToTokeShare(tggAmount);
+          tggTransfer.transferTGGToTokeShare(tggAmount, blockchain);
         }
       }
     } catch (err) {
