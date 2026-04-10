@@ -8,14 +8,12 @@ export function getTokenAddress(symbol: string, blockchain: Blockchain): Address
   return TOKENS[symbol]?.addresses[blockchain] as Address | undefined;
 }
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-
 export function getTokenBlockchains(symbol: string): Blockchain[] {
   const token = TOKENS[symbol];
   if (!token) return [];
 
   return Object.entries(token.addresses)
-    .filter(([_, address]) => !!address && address !== ZERO_ADDRESS)
+    .filter(([_, address]) => !!address)
     .map(([blockchain, _]) => blockchain as Blockchain);
 }
 
