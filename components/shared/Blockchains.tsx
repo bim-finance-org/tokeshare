@@ -68,9 +68,7 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
     setIsOpen(false);
   };
 
-  // Toggle le dropdown (inactif en mode SWAP)
   const toggleDropdown = (e: React.MouseEvent) => {
-    if (section === ExchangeSection.Swap) return;
     e.stopPropagation();
     setIsOpen(!isOpen);
   };
@@ -95,15 +93,13 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
       >
         <div className="w-6 h-6 flex items-center justify-center">{renderIcon(blockchain)}</div>
         <span className="text-color4 font-medium">{blockchain}</span>
-        {section !== ExchangeSection.Swap && (
-          <ArrowDownIcon
-            strokeColor="#4F5B76"
-            className={`w-6 h-6 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-          />
-        )}
+        <ArrowDownIcon
+          strokeColor="#4F5B76"
+          className={`w-6 h-6 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
-      {isOpen && section !== ExchangeSection.Swap && (
+      {isOpen && (
         <div className="absolute z-50 top-full left-0 mt-2 rounded-xl shadow-xl border overflow-hidden transform transition-all duration-200 bg-white">
           {availableBlockchains.map((chain) => (
             <button
