@@ -5,14 +5,15 @@ import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { CheckCircle } from 'lucide-react';
 
+type SellStatus = 'completed' | 'pending' | 'failed' | 'received' | 'usdc_pending';
+
 interface SellTransaction {
   id: number;
-  status: 'completed' | 'pending' | 'failed' | 'received' | 'usdc_pending';
+  status: SellStatus;
   iban: string | null;
   blockchain: string;
   fiat: string;
   fiatAmount: number;
-  amount: number;
   fees: number;
   ref: string;
   date: Date;
@@ -26,13 +27,14 @@ interface SellTransaction {
   usdcTxHash?: string | null;
 }
 
+type AdminStatus = Exclude<SellStatus, 'usdc_pending'>;
+
 const SellModal = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [searchRef, setSearchRef] = useState<string>('');
   const [transactions, setTransactions] = useState<SellTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedTransactionId, setExpandedTransactionId] = useState<number | null>(null);
   const [validationStep, setValidationStep] = useState<number | null>(null);
   const [newCryptoAmount, setNewCryptoAmount] = useState<number>(0);
   const [showCopiedNotification, setShowCopiedNotification] = useState(false);
@@ -74,76 +76,37 @@ const SellModal = () => {
     return statusMatch && refMatch;
   });
 
-  const handleChangeStatus = async (
+  const patchTransaction = async (
     transactionId: number,
-    newStatus: 'pending' | 'completed' | 'failed' | 'received',
+    payload: { status?: AdminStatus; cryptoAmount?: number },
   ) => {
-    try {
-      setError(null);
-      const response = await fetch(`/api/transactions/sell/${transactionId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+    const response = await fetch(`/api/transactions/sell/${transactionId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-      if (response.status === 401) {
-        // User is not authenticated
-        signOut({ callbackUrl: '/dashboard' });
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Error updating status');
-      }
-
-      // Update local state
-      setTransactions((prevTransactions) =>
-        prevTransactions.map((transaction) =>
-          transaction.id === transactionId ? { ...transaction, status: newStatus } : transaction,
-        ),
-      );
-
-      // Close expanded menu
-      setExpandedTransactionId(null);
-    } catch (error) {
-      console.error('Error updating status:', error);
-      setError('Unable to update status. Please try again.');
+    if (response.status === 401) {
+      signOut({ callbackUrl: '/dashboard' });
+      return null;
     }
+
+    if (!response.ok) {
+      throw new Error('Error updating transaction');
+    }
+
+    return (await response.json()) as SellTransaction;
   };
 
-  const handleReceived = async (transactionId: number) => {
+  const handleChangeStatus = async (transactionId: number, newStatus: AdminStatus) => {
     try {
       setError(null);
-      // Call API to change status to received
-      const response = await fetch(`/api/transactions/sell/${transactionId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'received' }),
-      });
+      const updated = await patchTransaction(transactionId, { status: newStatus });
+      if (!updated) return;
 
-      if (response.status === 401) {
-        // User is not authenticated
-        signOut({ callbackUrl: '/dashboard' });
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Error updating status');
-      }
-
-      // Update local data
-      setTransactions((prevTransactions) =>
-        prevTransactions.map((transaction) =>
-          transaction.id === transactionId ? { ...transaction, status: 'received' } : transaction,
-        ),
+      setTransactions((prev) =>
+        prev.map((transaction) => (transaction.id === transactionId ? updated : transaction)),
       );
-
-      // Open interface with three buttons
-      setExpandedTransactionId(transactionId);
     } catch (error) {
       console.error('Error updating status:', error);
       setError('Unable to update status. Please try again.');
@@ -159,60 +122,24 @@ const SellModal = () => {
     try {
       setError(null);
 
-      // Validate input
       const cryptoAmount = newCryptoAmount;
       if (isNaN(cryptoAmount) || cryptoAmount <= 0) {
         setError('Please enter a valid amount');
         return;
       }
 
-      // First update the status to completed
-      const statusResponse = await fetch(`/api/transactions/sell/${transactionId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'completed' }),
+      const updated = await patchTransaction(transactionId, {
+        status: 'completed',
+        cryptoAmount,
       });
+      if (!updated) return;
 
-      if (statusResponse.status === 401) {
-        signOut({ callbackUrl: '/dashboard' });
-        return;
-      }
-
-      if (!statusResponse.ok) {
-        throw new Error('Error updating status');
-      }
-
-      // Then update the amount (fees will be calculated in the API)
-      const amountResponse = await fetch(`/api/transactions/sell/${transactionId}/cryptoAmount`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ cryptoAmount }),
-      });
-
-      if (amountResponse.status === 401) {
-        signOut({ callbackUrl: '/dashboard' });
-        return;
-      }
-
-      if (!amountResponse.ok) {
-        throw new Error('Error updating amount');
-      }
-
-      const updatedTransaction = await amountResponse.json();
-
-      // Update local state with response from API
-      setTransactions((prevTransactions) =>
-        prevTransactions.map((transaction) => (transaction.id === transactionId ? updatedTransaction : transaction)),
+      setTransactions((prev) =>
+        prev.map((transaction) => (transaction.id === transactionId ? updated : transaction)),
       );
 
-      // Reset validation step and amount
       setValidationStep(null);
       setNewCryptoAmount(0);
-      setExpandedTransactionId(null);
     } catch (error) {
       console.error('Error updating transaction:', error);
       setError('Unable to update transaction. Please try again.');
@@ -425,26 +352,16 @@ const SellModal = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.fullName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {transaction.status === 'completed' || transaction.status === 'failed' ? (
+                    {validationStep === transaction.id ? (
                       <div className="flex flex-col gap-2">
-                        <button
-                          onClick={() => handleChangeStatus(transaction.id, 'pending')}
-                          className="bg-gray-500 text-white px-4 py-2 rounded-md"
-                        >
-                          Reset
-                        </button>
-                      </div>
-                    ) : validationStep === transaction.id ? (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            value={newCryptoAmount}
-                            onChange={(e) => setNewCryptoAmount(parseFloat(e.target.value))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Enter amount"
-                          />
-                        </div>
+                        <input
+                          type="number"
+                          step="any"
+                          value={newCryptoAmount}
+                          onChange={(e) => setNewCryptoAmount(parseFloat(e.target.value))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Enter crypto amount received"
+                        />
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleConfirmValidation(transaction.id)}
@@ -460,31 +377,10 @@ const SellModal = () => {
                           </button>
                         </div>
                       </div>
-                    ) : expandedTransactionId === transaction.id ? (
-                      <div className="flex flex-col gap-2">
-                        <button
-                          onClick={() => handleChangeStatus(transaction.id, 'pending')}
-                          className="bg-yellow-500 text-white px-4 py-2 rounded-md"
-                        >
-                          Pending
-                        </button>
-                        <button
-                          onClick={() => handleStartValidation(transaction.id, transaction.amount)}
-                          className="bg-green-500 text-white px-4 py-2 rounded-md"
-                        >
-                          Validate
-                        </button>
-                        <button
-                          onClick={() => handleChangeStatus(transaction.id, 'failed')}
-                          className="bg-red-500 text-white px-4 py-2 rounded-md"
-                        >
-                          Cancel
-                        </button>
-                      </div>
                     ) : transaction.status === 'pending' ? (
                       <div className="flex flex-col gap-2">
                         <button
-                          onClick={() => handleReceived(transaction.id)}
+                          onClick={() => handleChangeStatus(transaction.id, 'received')}
                           className="bg-blue-500 text-white px-4 py-2 rounded-md"
                         >
                           Received
@@ -496,8 +392,20 @@ const SellModal = () => {
                           Cancel
                         </button>
                       </div>
-                    ) : (
+                    ) : transaction.status === 'received' ? (
                       <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => handleStartValidation(transaction.id, transaction.cryptoAmount)}
+                          className="bg-green-500 text-white px-4 py-2 rounded-md"
+                        >
+                          Validate
+                        </button>
+                        <button
+                          onClick={() => handleChangeStatus(transaction.id, 'pending')}
+                          className="bg-yellow-500 text-white px-4 py-2 rounded-md"
+                        >
+                          Back to pending
+                        </button>
                         <button
                           onClick={() => handleChangeStatus(transaction.id, 'failed')}
                           className="bg-red-500 text-white px-4 py-2 rounded-md"
@@ -505,6 +413,17 @@ const SellModal = () => {
                           Cancel
                         </button>
                       </div>
+                    ) : transaction.status === 'completed' || transaction.status === 'failed' ? (
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => handleChangeStatus(transaction.id, 'pending')}
+                          className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs italic text-gray-400">Automated flow</span>
                     )}
                   </td>
                 </tr>
