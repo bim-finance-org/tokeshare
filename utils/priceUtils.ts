@@ -16,6 +16,14 @@ export const calculateTMCPrice = (cmc20Price: number): number => {
 };
 
 /**
+ * Calcule le prix du TSP500 basé sur le prix du deSPXA
+ * 1 TSP500 = 1/10 deSPXA
+ */
+export const calculateTSP500Price = (deSPXAPrice: number): number => {
+  return deSPXAPrice / 10;
+};
+
+/**
  * Convertit un montant en une autre devise en utilisant un taux de change
  */
 export const convertWithRate = (amount: number, rate: number): number => {

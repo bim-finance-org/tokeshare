@@ -5,6 +5,7 @@ import EURCIcon from '@/components/icons/currency/EURCIcon';
 import EURSIcon from '@/components/icons/currency/EURSIcon';
 import TGGIcon from '@/components/icons/currency/TGGIcon';
 import TMCIcon from '@/components/icons/currency/TMCIcon';
+import TSP500Icon from '@/components/icons/currency/TSP500Icon';
 import USDCIcon from '@/components/icons/currency/USDCIcon';
 import USDSIcon from '@/components/icons/currency/USDSIcon';
 import USDTIcon from '@/components/icons/currency/USDTIcon';
@@ -47,6 +48,17 @@ export const TOKENS: Record<string, TokenInfo> = {
     icon: TMCIcon,
     cmcId: 38442,
     internalUrl: '/marketplace/stock-etf/tmc',
+  },
+  TSP500: {
+    symbol: 'TSP500',
+    name: 'Tokeshare S&P500',
+    addresses: {
+      Base: '0x0000000000000000000000000000000000000000', // TODO: replace with deployed address
+    },
+    decimals: 18,
+    type: TokenType.Crypto,
+    icon: TSP500Icon,
+    internalUrl: '/marketplace/stock-etf/tsp500',
   },
   TFT_001: {
     symbol: 'TFT_001',
