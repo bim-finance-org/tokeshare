@@ -2,7 +2,7 @@
 
 import { wagmiAdapter, projectId } from '../config';
 import { createAppKit } from '@reown/appkit/react';
-import { polygon, base } from '@reown/appkit/networks';
+import { polygon, base, mainnet } from '@reown/appkit/networks';
 import React, { type ReactNode } from 'react';
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi';
 
@@ -20,7 +20,7 @@ const metadata = {
 createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: [polygon, base],
+  networks: [polygon, base, mainnet],
   defaultNetwork: polygon,
   enableNetworkSwitch: true,
   metadata: metadata,

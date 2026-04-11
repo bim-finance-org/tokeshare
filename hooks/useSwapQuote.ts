@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { Address } from 'viem';
 import { useSwap } from './useSwap';
 import { TMC_CMC20_RATIO } from './useTmcSwap';
-import { CONTRACTS, BASE_CONTRACTS } from '@/contracts/contracts';
+import { CONTRACTS, BASE_CONTRACTS, getTGGContracts } from '@/contracts/contracts';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { SwapDirection } from '@/enums/Directions';
+import { Blockchain } from '@/enums/Blockchain';
 import {
   DECIMALS_18,
   NUMBER_TO_FIXE_4,
@@ -77,7 +78,11 @@ const useSmartDebounce = (value: string, delay: number) => {
  *   - error : message d'erreur
  *   - exchangeRate : taux de change calculé
  */
-export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string): SwapQuoteResult => {
+export const useSwapQuote = (
+  params: SwapQuoteParams | null,
+  tokenSymbol: string,
+  blockchain: Blockchain = Blockchain.Polygon,
+): SwapQuoteResult => {
   const DEBOUNCE_DELAY = 500;
   const MINIMUM_AMOUNT_TO_GET_QUOTE = 0.01;
 
@@ -129,6 +134,7 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
   const fetchQuoteTGG = async (params: SwapQuoteParams) => {
     try {
       const amount = parseFloat(debouncedAmount);
+      const contracts = getTGGContracts(blockchain);
 
       setIsLoading(true);
       setError(null);
@@ -137,13 +143,16 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
         if (inputDecimals == null) throw new Error('Missing decimal');
         const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
 
-        const route = await getSwapRoute({
-          tokenIn: params.inputToken,
-          tokenOut: CONTRACTS.PAXG as Address,
-          amountIn: amountInBase,
-          gasInclude: true,
-          slippageTolerance: SLIPPAGE_TOLERANCE,
-        });
+        const route = await getSwapRoute(
+          {
+            tokenIn: params.inputToken,
+            tokenOut: contracts.PAXG as Address,
+            amountIn: amountInBase,
+            gasInclude: true,
+            slippageTolerance: SLIPPAGE_TOLERANCE,
+          },
+          blockchain,
+        );
 
         const paxgAmount = parseFloat(route.amountOut) / DECIMALS_18;
         const tggAmount = paxgAmount * ONCE_DIVISION;
@@ -155,13 +164,16 @@ export const useSwapQuote = (params: SwapQuoteParams | null, tokenSymbol: string
         });
         const paxgAmountBase = BigInt(Math.floor(paxgAmount * DECIMALS_18)).toString();
 
-        const route = await getSwapRoute({
-          tokenIn: CONTRACTS.PAXG as Address,
-          tokenOut: params.outputToken,
-          amountIn: paxgAmountBase,
-          gasInclude: true,
-          slippageTolerance: SLIPPAGE_TOLERANCE,
-        });
+        const route = await getSwapRoute(
+          {
+            tokenIn: contracts.PAXG as Address,
+            tokenOut: params.outputToken,
+            amountIn: paxgAmountBase,
+            gasInclude: true,
+            slippageTolerance: SLIPPAGE_TOLERANCE,
+          },
+          blockchain,
+        );
 
         const outputDecimals = getTokenDecimals(params.outputToken);
         if (outputDecimals == null) throw new Error('Missing decimal');

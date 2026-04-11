@@ -12,7 +12,6 @@ export function getTokenBlockchains(symbol: string): Blockchain[] {
   const token = TOKENS[symbol];
   if (!token) return [];
 
-  // On filtre les blockchains où il y a une address définie
   return Object.entries(token.addresses)
     .filter(([_, address]) => !!address)
     .map(([blockchain, _]) => blockchain as Blockchain);

@@ -1,18 +1,20 @@
 import { useReadContract } from 'wagmi';
 import { parseUnits, Address } from 'viem';
-import { CONTRACTS } from '@/contracts/contracts';
+import { getTGGContracts } from '@/contracts/contracts';
 import { TGG_ABI } from '@/contracts/abis/tgg_abi';
 import { NUMBER_TO_FIXE_6 } from '@/constants/constants';
+import { Blockchain } from '@/enums/Blockchain';
 
-export function useTGGBalance(userAddress?: Address) {
+export function useTGGBalance(userAddress?: Address, blockchain: Blockchain = Blockchain.Polygon) {
   const TGG_DECIMALS = 18;
+  const contracts = getTGGContracts(blockchain);
 
   const {
     data: balance,
     isLoading,
     error,
   } = useReadContract({
-    address: CONTRACTS.TGG as Address,
+    address: contracts.TGG as Address,
     abi: TGG_ABI,
     functionName: 'balanceOf',
     args: userAddress ? [userAddress] : undefined,

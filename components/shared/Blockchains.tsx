@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import PolygonIcon from '@/components/icons/blockchains/PolygonIcon';
 import BaseIcon from '@/components/icons/blockchains/BaseIcon';
+import EthereumIcon from '@/components/icons/blockchains/EthereumIcon';
 import ArrowDownIcon from '@/components/icons/arrows/ArrowDownIcon';
 import { TokenContexts } from '@/context/TokenContexts';
 import { Blockchain } from '@/enums/Blockchain';
@@ -67,15 +68,22 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
     setIsOpen(false);
   };
 
-  // Toggle le dropdown (inactif en mode SWAP)
   const toggleDropdown = (e: React.MouseEvent) => {
-    if (section === ExchangeSection.Swap) return;
     e.stopPropagation();
     setIsOpen(!isOpen);
   };
 
   // Icone dynamique
-  const renderIcon = (chain: Blockchain) => (chain === Blockchain.Polygon ? <PolygonIcon /> : <BaseIcon />);
+  const renderIcon = (chain: Blockchain) => {
+    switch (chain) {
+      case Blockchain.Polygon:
+        return <PolygonIcon />;
+      case Blockchain.Ethereum:
+        return <EthereumIcon />;
+      default:
+        return <BaseIcon />;
+    }
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -85,15 +93,13 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
       >
         <div className="w-6 h-6 flex items-center justify-center">{renderIcon(blockchain)}</div>
         <span className="text-color4 font-medium">{blockchain}</span>
-        {section !== ExchangeSection.Swap && (
-          <ArrowDownIcon
-            strokeColor="#4F5B76"
-            className={`w-6 h-6 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-          />
-        )}
+        <ArrowDownIcon
+          strokeColor="#4F5B76"
+          className={`w-6 h-6 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
-      {isOpen && section !== ExchangeSection.Swap && (
+      {isOpen && (
         <div className="absolute z-50 top-full left-0 mt-2 rounded-xl shadow-xl border overflow-hidden transform transition-all duration-200 bg-white">
           {availableBlockchains.map((chain) => (
             <button
