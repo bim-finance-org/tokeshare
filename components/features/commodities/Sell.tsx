@@ -43,7 +43,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   const { isConnected, address } = useAccount();
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
   const { data: cmc20Price, isLoading: isCmc20Loading } = useCmc20Price();
-  const { data: despxaPrice, isLoading: isDespxaLoading } = useDeSPXAPrice();
+  const { data: despxaPrice } = useDeSPXAPrice();
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
   const isTFT = token.symbol === 'TFT_001';

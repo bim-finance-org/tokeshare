@@ -9,7 +9,7 @@ import { BuildRouteResponse } from '@/interfaces/BuildRouteResponse';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { ZAP_TSP500_ABI } from '@/contracts/abis/zap_tsp500_abi';
 import { getTokenDecimals } from '@/utils/tokenUtils';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 // TSP500 to deSPXA ratio: 1 TSP500 = 1/10 deSPXA
 export const TSP500_DESPXA_RATIO = 10;

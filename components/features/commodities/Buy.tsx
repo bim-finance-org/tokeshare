@@ -39,7 +39,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
   const { isConnected } = useAccount();
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
   const { data: cmc20Price, isLoading: isCmc20Loading } = useCmc20Price();
-  const { data: despxaPrice, isLoading: isDespxaLoading } = useDeSPXAPrice();
+  const { data: despxaPrice } = useDeSPXAPrice();
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
   // Mise à jour du prix du token
