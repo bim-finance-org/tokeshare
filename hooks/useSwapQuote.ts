@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Address } from 'viem';
 import { useSwap } from './useSwap';
 import { TMC_CMC20_RATIO } from './useTmcSwap';
+import { TSP500_DESPXA_RATIO } from './useTsp500Swap';
 import { CONTRACTS, BASE_CONTRACTS, getTGGContracts } from '@/contracts/contracts';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { SwapDirection } from '@/enums/Directions';
@@ -190,6 +191,59 @@ export const useSwapQuote = (
     }
   };
 
+  const fetchQuoteTSP500 = async (params: SwapQuoteParams) => {
+    try {
+      const amount = parseFloat(debouncedAmount);
+
+      setIsLoading(true);
+      setError(null);
+
+      if (params.direction === SwapDirection.StablecoinToToken) {
+        const inputDecimals = getTokenDecimals(params.inputToken);
+        if (inputDecimals == null) throw new Error('Missing decimal');
+        const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
+
+        const route = await getTmcSwapRoute({
+          tokenIn: params.inputToken,
+          tokenOut: BASE_CONTRACTS.DESPXA as Address,
+          amountIn: amountInBase,
+          gasInclude: true,
+          slippageTolerance: SLIPPAGE_TOLERANCE,
+        });
+
+        // deSPXA amount to TSP500: multiply by ratio (10)
+        const despxaAmount = parseFloat(route.amountOut) / DECIMALS_18;
+        const tsp500Amount = despxaAmount * TSP500_DESPXA_RATIO;
+        setOutputAmount(tsp500Amount.toFixed(NUMBER_TO_FIXE_6));
+        setExchangeRate(`${(tsp500Amount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
+      } else {
+        // TSP500 to stablecoin: convert TSP500 to deSPXA using ratio (1 TSP500 = 1/10 deSPXA)
+        const despxaAmount = amount / TSP500_DESPXA_RATIO;
+        const despxaAmountBase = BigInt(Math.floor(despxaAmount * DECIMALS_18)).toString();
+
+        const route = await getTmcSwapRoute({
+          tokenIn: BASE_CONTRACTS.DESPXA as Address,
+          tokenOut: params.outputToken,
+          amountIn: despxaAmountBase,
+          gasInclude: true,
+          slippageTolerance: SLIPPAGE_TOLERANCE,
+        });
+
+        const outputDecimals = getTokenDecimals(params.outputToken);
+        if (outputDecimals == null) throw new Error('Missing decimal');
+        const stablecoinAmount = parseFloat(route.amountOut) / 10 ** outputDecimals;
+        setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
+        setExchangeRate(`${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      setOutputAmount(null);
+      setExchangeRate(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const fetchQuoteTMC = async (params: SwapQuoteParams) => {
     try {
       const amount = parseFloat(debouncedAmount);
@@ -271,6 +325,8 @@ export const useSwapQuote = (
       setIsLoading(false);
     } else if (tokenSymbol == 'TMC') {
       fetchQuoteTMC(params);
+    } else if (tokenSymbol == 'TSP500') {
+      fetchQuoteTSP500(params);
     }
   }, [params, debouncedAmount]);
 
