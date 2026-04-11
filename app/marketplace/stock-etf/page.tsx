@@ -1,4 +1,5 @@
 import TMCCard from '@/components/features/tmc/TMCCard';
+import TSP500Card from '@/components/features/tsp500/TSP500Card';
 import React from 'react';
 
 const page = () => {
@@ -20,6 +21,9 @@ const page = () => {
       <div className="flex flex-wrap justify-center gap-x-10 gap-y-10 max-w-7xl mx-auto px-4 mb-24 transform -translate-y-10 sm:-translate-y-20">
         <div className="w-full max-w-lg flex justify-center">
           <TMCCard />
+        </div>
+        <div className="w-full max-w-lg flex justify-center">
+          <TSP500Card />
         </div>
       </div>
     </div>
