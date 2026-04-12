@@ -53,7 +53,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'TSP500',
     name: 'Tokeshare S&P500',
     addresses: {
-      Base: '0x0000000000000000000000000000000000000000', // TODO: replace with deployed address
+      Base: '0x9476d702Dc72242A7cEfBf802da8F09ddb305e51', // TODO: replace with deployed address
     },
     decimals: 18,
     type: TokenType.Crypto,
