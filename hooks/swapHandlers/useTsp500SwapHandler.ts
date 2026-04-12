@@ -1,6 +1,6 @@
 import { useTsp500Swap } from '@/hooks/useTsp500Swap';
 import { TokenSwapHandler } from '@/interfaces/TokenSwapHandler';
-import { Address, parseUnits } from 'viem';
+import { Address } from 'viem';
 import { BASE_CONTRACTS, BASE_TRUSTED_AGGREGATORS } from '@/contracts/contracts';
 import { getTokenAddress, getTokenDecimals } from '@/utils/token';
 import { useMemo } from 'react';
@@ -29,8 +29,6 @@ export const useTsp500SwapHandler = (): TokenSwapHandler => {
 
         // Calculate stablecoin amount needed: TSP500 amount * TSP500 price
         const stableAmount = parsedAmount * price;
-        const parsedStableAmount = parseUnits(stableAmount.toString(), stableDecimals);
-        console.log('TSP500 swap - stableAmount:', parsedStableAmount);
 
         await swapMint({
           inputToken,
