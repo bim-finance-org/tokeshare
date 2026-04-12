@@ -7,7 +7,7 @@ import NewTabIcon from '@/components/icons/NewTabIcon';
 
 const TSP500Infos = () => {
   const [activeTab, setActiveTab] = useState('DETAILS');
-  const { price: tsp500Price, perf90d, isLoading } = useTSP500Data();
+  const { price: tsp500Price, perf30d, isLoading } = useTSP500Data();
 
   const handleOnesheetClick = () => {
     // TODO: replace with real TSP500 onesheet PDF
@@ -120,14 +120,14 @@ const TSP500Infos = () => {
               </div>
 
               <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
-                <h3 className="text-base sm:text-lg font-semibold text-color2">Performance over 90 days</h3>
-                {typeof perf90d === 'number' ? (
+                <h3 className="text-base sm:text-lg font-semibold text-color2">Performance over 30 days</h3>
+                {typeof perf30d === 'number' ? (
                   <h6
                     className={
-                      'font-medium ' + (perf90d > 0 ? 'text-green-500' : perf90d < 0 ? 'text-red-500' : 'text-gray-500')
+                      'font-medium ' + (perf30d > 0 ? 'text-green-500' : perf30d < 0 ? 'text-red-500' : 'text-gray-500')
                     }
                   >
-                    {(perf90d > 0 ? '+' : '') + perf90d.toFixed(2) + ' %'}
+                    {(perf30d > 0 ? '+' : '') + perf30d.toFixed(2) + ' %'}
                   </h6>
                 ) : (
                   <h6 className="font-medium text-gray-500">N/A</h6>
