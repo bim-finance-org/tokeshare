@@ -150,7 +150,7 @@ export const useTsp500Swap = () => {
       ...(params.feeAmount && { feeAmount: params.feeAmount }),
       ...(params.feeReceiver && { feeReceiver: params.feeReceiver }),
       ...(params.isInBps && { isInBps: params.isInBps.toString() }),
-      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order,kyber-pmm,hashflow-v3,bebop,clipper',
+      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order,kyberswap-pmm,kyber-pmm,hashflow-v3,bebop,clipper,native-v1,native-v2',
     });
 
     const url = `https://aggregator-api.kyberswap.com/base/api/v1/routes?${queryParams}`;
