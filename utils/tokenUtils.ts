@@ -13,6 +13,10 @@ const KNOWN_DECIMALS: Record<string, number> = {
   '0x553d3d295e0f695b9228246232edf400ed3560b5': 18, // PAXG (Polygon)
   // Ethereum
   '0x45804880de22913dafe09f4980848ece6ecbaf78': 18, // PAXG (Ethereum)
+  '0x0764ff270aaceda56d0940327c50f8a199573a9b': 18, // TGG (Ethereum)
+  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': 6, // USDC (Ethereum)
+  '0xdac17f958d2ee523a2206206994597c13d831ec7': 6, // USDT (Ethereum)
+  '0x6b175474e89094c44da98b954eedeac495271d0f': 18, // DAI (Ethereum)
   // Base
   '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': 6, // USDC
   '0x50c5725949a6f0c72e6c4a641f24049a917db0cb': 18, // DAI
@@ -21,9 +25,9 @@ const KNOWN_DECIMALS: Record<string, number> = {
   '0x03569cc076654f82679c4ba2124d64774781b01d': 18, // BOLD
   '0x820c137fa70c8691f0e44dc420a5e53c168921dc': 18, // USDS
   '0xa0a8481fc246cd12f75227abb96220ff5360fad3': 18, // CMC20
-  '0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4': 18, // TMC
+  '0xf47c9e511d215e286d3ca1b956e7c3dd6f6195d4': 18, // TMC
   '0x9c5c365e764829876243d0b289733b9d2b729685': 18, // deSPXA
-  '0x9476d702Dc72242A7cEfBf802da8F09ddb305e51': 18, // TSP500
+  '0x9476d702dc72242a7cefbf802da8f09ddb305e51': 18, // TSP500
 };
 
 /**
