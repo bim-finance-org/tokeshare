@@ -1,10 +1,11 @@
 import { useWriteContract } from 'wagmi';
 import { parseUnits, Address } from 'viem';
-import { CONTRACTS, BASE_CONTRACTS } from '@/contracts/contracts';
+import { BASE_CONTRACTS, getTGGContracts } from '@/contracts/contracts';
 import { ZAP_ABI } from '@/contracts/abis/zap_abi';
 import { ZAP_TMC_ABI } from '@/contracts/abis/zap_tmc_abi';
 import { ZAP_TSP500_ABI } from '@/contracts/abis/zap_tsp500_abi';
 import { getTokenDecimals } from '@/utils/tokenUtils';
+import { Blockchain } from '@/enums/Blockchain';
 
 export function useZAPContract() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
@@ -15,13 +16,15 @@ export function useZAPContract() {
     swapData: string,
     swapTarget: Address,
     receiver: Address,
+    blockchain: Blockchain,
     ethValue?: string,
   ) => {
     const decimals = getTokenDecimals(inputToken);
     const amount = parseUnits(inputAmount, decimals);
     const value = ethValue ? parseUnits(ethValue, 18) : undefined;
+    const zapAddress = getTGGContracts(blockchain).ZAP as Address;
     return writeContract({
-      address: CONTRACTS.ZAP as Address,
+      address: zapAddress,
       abi: ZAP_ABI,
       functionName: 'zapMint',
       args: [inputToken, amount, swapData, swapTarget, receiver],
@@ -35,10 +38,12 @@ export function useZAPContract() {
     swapData: string,
     swapTarget: Address,
     receiver: Address,
+    blockchain: Blockchain,
   ) => {
     const amount = parseUnits(tggAmount, 18);
+    const zapAddress = getTGGContracts(blockchain).ZAP as Address;
     return writeContract({
-      address: CONTRACTS.ZAP as Address,
+      address: zapAddress,
       abi: ZAP_ABI,
       functionName: 'zapWithdraw',
       args: [amount, outputToken, swapData, swapTarget, receiver],

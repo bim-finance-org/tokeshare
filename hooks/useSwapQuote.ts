@@ -162,6 +162,7 @@ export const useSwapQuote = (
       } else {
         const paxgAmount = await getConversion({
           tggAmount: amount.toString(),
+          blockchain,
         });
         const paxgAmountBase = BigInt(Math.floor(paxgAmount * DECIMALS_18)).toString();
 

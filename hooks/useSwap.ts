@@ -1,7 +1,7 @@
-import { CONTRACTS, getTGGContracts } from '@/contracts/contracts';
+import { getTGGContracts } from '@/contracts/contracts';
 import { useZAPContract } from './useContracts';
 import { Address, parseUnits } from 'viem';
-import { usePublicClient, useWalletClient, useReadContract } from 'wagmi';
+import { usePublicClient, useWalletClient } from 'wagmi';
 import { RouteParams } from '@/interfaces/RouteParams';
 import { RouteSummary } from '@/interfaces/RouteSummary';
 import { BuildRouteParams } from '@/interfaces/BuildRouteParams';
@@ -16,43 +16,6 @@ const KYBERSWAP_CHAIN_SLUGS: Record<Blockchain, string> = {
   [Blockchain.Polygon]: 'polygon',
   [Blockchain.Base]: 'base',
   [Blockchain.Ethereum]: 'ethereum',
-};
-
-// Hook React pour lire les fees du contrat ZAP de manière réactive
-export const useZapFees = () => {
-  const {
-    data: zapMintFeeRaw,
-    isLoading: isLoadingMintFee,
-    error: mintFeeError,
-  } = useReadContract({
-    address: CONTRACTS.ZAP as Address,
-    abi: ZAP_ABI,
-    functionName: 'zapMintFee',
-  });
-
-  const {
-    data: zapWithdrawFeeRaw,
-    isLoading: isLoadingWithdrawFee,
-    error: withdrawFeeError,
-  } = useReadContract({
-    address: CONTRACTS.ZAP as Address,
-    abi: ZAP_ABI,
-    functionName: 'zapWithdrawFee',
-  });
-
-  const zapMintFee = zapMintFeeRaw ? Number(zapMintFeeRaw) / 100 : 0; // Convertir en pourcentage
-  const zapWithdrawFee = zapWithdrawFeeRaw ? Number(zapWithdrawFeeRaw) / 100 : 0; // Convertir en pourcentage
-
-  return {
-    zapMintFee,
-    zapWithdrawFee,
-    isLoading: isLoadingMintFee || isLoadingWithdrawFee,
-    error: mintFeeError || withdrawFeeError,
-    raw: {
-      zapMintFeeRaw,
-      zapWithdrawFeeRaw,
-    },
-  };
 };
 
 export const useSwap = () => {
@@ -120,21 +83,24 @@ export const useSwap = () => {
   };
 
   // Fonction pour lire les fees du contrat ZAP (pour usage dans les fonctions async)
-  const getZapFees = async (): Promise<{
+  const getZapFees = async (
+    blockchain: Blockchain,
+  ): Promise<{
     zapMintFee: number;
     zapWithdrawFee: number;
   }> => {
     if (!publicClient) throw new Error('Public client not available');
 
+    const zapAddress = getTGGContracts(blockchain).ZAP as Address;
     try {
       const [zapMintFeeRaw, zapWithdrawFeeRaw] = await Promise.all([
         publicClient.readContract({
-          address: CONTRACTS.ZAP as Address,
+          address: zapAddress,
           abi: ZAP_ABI,
           functionName: 'zapMintFee',
         }) as Promise<bigint>,
         publicClient.readContract({
-          address: CONTRACTS.ZAP as Address,
+          address: zapAddress,
           abi: ZAP_ABI,
           functionName: 'zapWithdrawFee',
         }) as Promise<bigint>,
@@ -151,9 +117,9 @@ export const useSwap = () => {
     }
   };
 
-  const getConversion = async (params: { tggAmount: string }) => {
+  const getConversion = async (params: { tggAmount: string; blockchain: Blockchain }) => {
     try {
-      const { zapWithdrawFee } = await getZapFees();
+      const { zapWithdrawFee } = await getZapFees(params.blockchain);
 
       let conversion = (parseFloat(params.tggAmount) * 10 ** 9) / 31_103_476_800;
 
@@ -290,8 +256,12 @@ export const useSwap = () => {
 
       // 3. Approuver si nécessaire
       if (currentAllowance < amountBigInt) {
-        const approvalAmount = amountBigInt;
-        await approveToken(params.inputToken, contracts.ZAP as Address, approvalAmount);
+        // USDT on Ethereum reverts if approve() is called with a non-zero amount
+        // while an existing allowance is non-zero — reset to 0 first.
+        if (currentAllowance > 0n) {
+          await approveToken(params.inputToken, contracts.ZAP as Address, 0n);
+        }
+        await approveToken(params.inputToken, contracts.ZAP as Address, amountBigInt);
       }
 
       const routeSummary = await getSwapRoute(
@@ -322,6 +292,7 @@ export const useSwap = () => {
         swapData,
         params.routerAddress,
         params.walletAddress,
+        blockchain,
       );
 
       return result;
@@ -364,7 +335,7 @@ export const useSwap = () => {
 
       // 3. Obtenir la route de swap PAXG → outputToken
 
-      const conversion = await getConversion({ tggAmount: params.amount });
+      const conversion = await getConversion({ tggAmount: params.amount, blockchain });
 
       // Convertir en entier avant BigInt (Math.floor pour éviter les décimales)
       const conversionInteger = Math.floor(conversion * Math.pow(10, 18));
@@ -401,6 +372,7 @@ export const useSwap = () => {
         swapData,
         params.routerAddress,
         params.walletAddress,
+        blockchain,
       );
 
       return result;
@@ -421,7 +393,6 @@ export const useSwap = () => {
       checkTokenBalance,
       checkAllowance,
       approveToken,
-      useZapFees,
       getZapFees,
       getConversion,
     }),
