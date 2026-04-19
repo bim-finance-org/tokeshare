@@ -21,8 +21,8 @@ export const BASE_CONTRACTS = {
 
 // Adresses des contrats sur Ethereum Mainnet
 export const ETH_CONTRACTS = {
-  TGG: '0x0000000000000000000000000000000000000000', // TODO: replace with deployed address
-  ZAP: '0x0000000000000000000000000000000000000000', // TODO: replace with deployed address
+  TGG: '0x0764fF270AaCEdA56d0940327C50f8A199573A9b',
+  ZAP: '0x21d476591aeac8b05d51b74478644e3099f62b7a',
   PAXG: '0x45804880De22913dAFE09f4980848ECE6EcbAf78',
 };
 

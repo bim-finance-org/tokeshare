@@ -30,7 +30,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     name: 'Tokeshare Gold Gram',
     addresses: {
       Polygon: '0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71',
-      Ethereum: '0x0000000000000000000000000000000000000000', // TODO: replace with deployed address
+      Ethereum: '0x0764fF270AaCEdA56d0940327C50f8A199573A9b',
     },
     decimals: 18,
     type: TokenType.Crypto,
