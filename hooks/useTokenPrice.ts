@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { useCmc20Price } from '@/hooks/useCmc20Price';
-import { calculateTGGPrice, calculateTMCPrice } from '@/utils/priceUtils';
+import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
+import { calculateTGGPrice, calculateTMCPrice, calculateTSP500Price } from '@/utils/priceUtils';
 import { useMarketplaceContract } from './useMarketplaceContracts';
 
 export function useTokenPrice(symbol: string): {
@@ -11,6 +12,7 @@ export function useTokenPrice(symbol: string): {
   // Call ALL hooks unconditionally to respect React hooks rules
   const { data: paxgPrice, isLoading: paxgLoading } = usePaxgPrice();
   const { data: cmc20Price, isLoading: cmc20Loading } = useCmc20Price();
+  const { data: despxaPrice, isLoading: despxaLoading } = useDeSPXAPrice();
   const { tftTokenInfo, tftTokenInfoLoading } = useMarketplaceContract();
 
   // Calculate prices for each token type
@@ -36,6 +38,23 @@ export function useTokenPrice(symbol: string): {
       };
     }
 
+    if (symbol === 'TSP500') {
+      return {
+        price: despxaPrice !== undefined ? calculateTSP500Price(despxaPrice) : null,
+        isLoading: despxaLoading,
+      };
+    }
+
     return { price: null, isLoading: false };
-  }, [symbol, paxgPrice, paxgLoading, cmc20Price, cmc20Loading, tftTokenInfo, tftTokenInfoLoading]);
+  }, [
+    symbol,
+    paxgPrice,
+    paxgLoading,
+    cmc20Price,
+    cmc20Loading,
+    despxaPrice,
+    despxaLoading,
+    tftTokenInfo,
+    tftTokenInfoLoading,
+  ]);
 }

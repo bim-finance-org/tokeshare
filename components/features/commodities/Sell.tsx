@@ -4,13 +4,14 @@ import React, { useState, useEffect, useContext } from 'react';
 import TradeWidget from '../../../components/shared/TradeWidget';
 import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/shared/Blockchains';
-import { calculateTGGPrice, calculateTMCPrice, convertTGGToFiat } from '@/utils/priceUtils';
+import { calculateTGGPrice, calculateTMCPrice, calculateTSP500Price, convertTGGToFiat } from '@/utils/priceUtils';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { useAccount } from 'wagmi';
 import UserForm from './UserForm';
 import { TokenContexts } from '@/context/TokenContexts';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { useCmc20Price } from '@/hooks/useCmc20Price';
+import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { useTGGBalance } from '@/hooks/useTGGBalance';
 import { useTFTBalance } from '@/hooks/useTFTBalance';
@@ -42,6 +43,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   const { isConnected, address } = useAccount();
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
   const { data: cmc20Price, isLoading: isCmc20Loading } = useCmc20Price();
+  const { data: despxaPrice } = useDeSPXAPrice();
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
   const isTFT = token.symbol === 'TFT_001';
@@ -67,12 +69,15 @@ const Sell = ({ token }: { token: TokenInfo }) => {
       } else if (token.symbol === 'TMC' && cmc20Price) {
         const calculatedPrice = calculateTMCPrice(cmc20Price);
         setTggPrice(calculatedPrice);
+      } else if (token.symbol === 'TSP500' && despxaPrice) {
+        const calculatedPrice = calculateTSP500Price(despxaPrice);
+        setTggPrice(calculatedPrice);
       }
     };
     updatePrice();
     const interval = setInterval(updatePrice, INTERVAL_PRICE_UPDATE);
     return () => clearInterval(interval);
-  }, [paxgPrice, cmc20Price, token.symbol, isTFT]);
+  }, [paxgPrice, cmc20Price, despxaPrice, token.symbol, isTFT]);
 
   useEffect(() => {
     if (tggPrice > 0 && (isTFT || !isRatesLoading)) {

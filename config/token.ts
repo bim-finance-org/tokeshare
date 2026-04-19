@@ -5,6 +5,7 @@ import EURCIcon from '@/components/icons/currency/EURCIcon';
 import EURSIcon from '@/components/icons/currency/EURSIcon';
 import TGGIcon from '@/components/icons/currency/TGGIcon';
 import TMCIcon from '@/components/icons/currency/TMCIcon';
+import TSP500Icon from '@/components/icons/currency/TSP500Icon';
 import USDCIcon from '@/components/icons/currency/USDCIcon';
 import USDSIcon from '@/components/icons/currency/USDSIcon';
 import USDTIcon from '@/components/icons/currency/USDTIcon';
@@ -29,7 +30,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     name: 'Tokeshare Gold Gram',
     addresses: {
       Polygon: '0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71',
-      Ethereum: '0x0000000000000000000000000000000000000000', // TODO: replace with deployed address
+      Ethereum: '0x0764fF270AaCEdA56d0940327C50f8A199573A9b',
     },
     decimals: 18,
     type: TokenType.Crypto,
@@ -48,6 +49,17 @@ export const TOKENS: Record<string, TokenInfo> = {
     cmcId: 38442,
     internalUrl: '/marketplace/stock-etf/tmc',
   },
+  TSP500: {
+    symbol: 'TSP500',
+    name: 'Tokeshare S&P500',
+    addresses: {
+      Base: '0x9476d702Dc72242A7cEfBf802da8F09ddb305e51', // TODO: replace with deployed address
+    },
+    decimals: 18,
+    type: TokenType.Crypto,
+    icon: TSP500Icon,
+    internalUrl: '/marketplace/stock-etf/tsp500',
+  },
   TFT_001: {
     symbol: 'TFT_001',
     name: 'Tokeshare French Tacos',
@@ -64,6 +76,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     addresses: {
       Polygon: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
       Base: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+      Ethereum: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     },
     decimals: 6,
     type: TokenType.Stablecoin,
@@ -75,6 +88,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     name: 'Tether USD',
     addresses: {
       Polygon: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+      Ethereum: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     },
     decimals: 6,
     type: TokenType.Stablecoin,
@@ -87,6 +101,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     addresses: {
       Polygon: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
       Base: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+      Ethereum: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
     },
     decimals: 18,
     type: TokenType.Stablecoin,

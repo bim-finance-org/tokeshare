@@ -4,9 +4,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/shared/Blockchains';
-import { calculateTGGPrice, calculateTMCPrice, convertFiatToTGG, convertTGGToFiat } from '@/utils/priceUtils';
+import {
+  calculateTGGPrice,
+  calculateTMCPrice,
+  calculateTSP500Price,
+  convertFiatToTGG,
+  convertTGGToFiat,
+} from '@/utils/priceUtils';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { useCmc20Price } from '@/hooks/useCmc20Price';
+import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
 import { useAccount } from 'wagmi';
 import UserForm from './UserForm';
 import { TokenContexts } from '@/context/TokenContexts';
@@ -32,6 +39,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
   const { isConnected } = useAccount();
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
   const { data: cmc20Price, isLoading: isCmc20Loading } = useCmc20Price();
+  const { data: despxaPrice } = useDeSPXAPrice();
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
   // Mise à jour du prix du token
@@ -43,12 +51,15 @@ const Buy = ({ token }: { token: TokenInfo }) => {
       } else if (token.symbol === 'TMC' && cmc20Price) {
         const calculatedPrice = calculateTMCPrice(cmc20Price);
         setTggPrice(calculatedPrice);
+      } else if (token.symbol === 'TSP500' && despxaPrice) {
+        const calculatedPrice = calculateTSP500Price(despxaPrice);
+        setTggPrice(calculatedPrice);
       }
     };
     updatePrice();
     const interval = setInterval(updatePrice, 30000);
     return () => clearInterval(interval);
-  }, [paxgPrice, cmc20Price, token.symbol]);
+  }, [paxgPrice, cmc20Price, despxaPrice, token.symbol]);
 
   // Calcul initial du montant TGG
   useEffect(() => {
@@ -61,7 +72,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
   const calculateTggFromFiat = (fiatAmount: string) => {
     const numericAmount = parseFloat(fiatAmount) || 0;
     let tokenValue;
-    if (token.symbol === 'TGG' || token.symbol === 'TMC') {
+    if (token.symbol === 'TGG' || token.symbol === 'TMC' || token.symbol === 'TSP500') {
       if (tggPrice > 0) {
         tokenValue = convertFiatToTGG(numericAmount, selectedCurrency, exchangeRates, tggPrice);
       }
