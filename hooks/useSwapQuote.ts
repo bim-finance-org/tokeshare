@@ -102,7 +102,7 @@ export const useSwapQuote = (
       amountIn: params.amountIn,
       ...(params.gasInclude && { gasInclude: params.gasInclude.toString() }),
       ...(params.slippageTolerance && { slippageTolerance: params.slippageTolerance.toString() }),
-      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order',
+      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order,kyber-pmm,hashflow-v3,bebop,clipper',
     });
 
     const url = `https://aggregator-api.kyberswap.com/base/api/v1/routes?${queryParams}`;

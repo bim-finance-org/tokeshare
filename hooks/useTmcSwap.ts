@@ -151,7 +151,7 @@ export const useTmcSwap = () => {
       ...(params.feeAmount && { feeAmount: params.feeAmount }),
       ...(params.feeReceiver && { feeReceiver: params.feeReceiver }),
       ...(params.isInBps && { isInBps: params.isInBps.toString() }),
-      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order',
+      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order,kyber-pmm,hashflow-v3,bebop,clipper',
     });
 
     // Base network endpoint
