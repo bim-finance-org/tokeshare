@@ -316,12 +316,16 @@ export const useSwapQuote = (
       fetchQuoteTGG(params);
     } else if (tokenSymbol == 'TFT_001') {
       setIsLoading(true);
+      const TFT_PRICE = 31.25;
+      const TFT_SELL_FEE = 0.05;
       if (params.direction === SwapDirection.StablecoinToToken) {
-        setOutputAmount((parseFloat(params.inputAmount) / 31.25).toFixed(6));
-        setExchangeRate((1 / 31.25).toFixed(4));
+        setOutputAmount((parseFloat(params.inputAmount) / TFT_PRICE).toFixed(6));
+        setExchangeRate((1 / TFT_PRICE).toFixed(4));
       } else {
-        setOutputAmount((parseFloat(params.inputAmount) * 31.25).toFixed(2));
-        setExchangeRate((31.25).toFixed(4));
+        const gross = parseFloat(params.inputAmount) * TFT_PRICE;
+        const net = gross * (1 - TFT_SELL_FEE);
+        setOutputAmount(net.toFixed(2));
+        setExchangeRate((TFT_PRICE * (1 - TFT_SELL_FEE)).toFixed(4));
       }
       setIsLoading(false);
     } else if (tokenSymbol == 'TMC') {
