@@ -23,8 +23,9 @@ const TFT_001: Address = '0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26';
 const FROM_BLOCK: bigint = 33201495n;
 const SNAPSHOT_BLOCK: bigint | null = null; // null => latest
 
-const MARKETPLACE: Address = '0x93A696619723a0269BDC2F1532cc1ec7D3a5c854';
-const EXCLUDE = new Set<Address>([MARKETPLACE]);
+const MARKETPLACE_OLD: Address = '0x93A696619723a0269BDC2F1532cc1ec7D3a5c854';
+const MARKETPLACE_NEW: Address = '0xe0F632423a6bf824d7E4463470549b73048C3f4e';
+const EXCLUDE = new Set<Address>([MARKETPLACE_OLD, MARKETPLACE_NEW]);
 
 const PERCENT_DECIMALS = 4;
 const OUTPUT_JSON_PATH = path.join(process.cwd(), 'public/snapshots/holders_snapshot.json');
