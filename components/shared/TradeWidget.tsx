@@ -17,6 +17,7 @@ interface TradeWidgetProps {
   onTokenChange: (token: string) => void;
   showBalance?: boolean;
   readOnly?: boolean;
+  lockedToken?: boolean;
 }
 
 const TradeWidget = ({
@@ -29,6 +30,7 @@ const TradeWidget = ({
   onTokenChange,
   showBalance = false,
   readOnly = false,
+  lockedToken = false,
 }: TradeWidgetProps) => {
   const [selectedToken, setSelectedToken] = useState(defaultToken || 'USDC');
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
@@ -87,8 +89,8 @@ const TradeWidget = ({
         <div className="flex flex-col items-end gap-1 sm:gap-2 flex-shrink-0">
           <TokenDisplay
             token={selectedToken}
-            isOpenable={!isTGG}
-            onTokenClick={() => !isTGG && setIsSelectorOpen(true)}
+            isOpenable={!isTGG && !lockedToken}
+            onTokenClick={() => !isTGG && !lockedToken && setIsSelectorOpen(true)}
           />
           {showBalance && <CryptoBalance currency={selectedToken} blockchain={blockchain} />}
         </div>
