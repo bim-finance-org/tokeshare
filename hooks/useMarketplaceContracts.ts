@@ -70,6 +70,34 @@ export function useMarketplaceContract() {
     }
   };
 
+  const sellTokenOnMarketplace = async (tokenSymbol: string, tokenAmount: string, stableToReceive: string) => {
+    if (!publicClient) throw new Error('Public client non disponible');
+    if (!userAddress) throw new Error('Utilisateur non connecté');
+
+    const tokenDecimals = getTokenDecimals(tokenSymbol);
+    if (tokenDecimals === undefined) throw new Error('Token decimals not found');
+
+    const parsedTokenAmount = parseFloat(tokenAmount);
+    if (isNaN(parsedTokenAmount)) throw new Error('Montant token invalide');
+
+    const stablecoinAddress = getTokenAddress(stableToReceive, Blockchain.Base);
+    if (!stablecoinAddress || !tokenAddress) throw new Error('Adresse de token introuvable');
+
+    const amountTokenParsed = BigInt(Math.floor(parsedTokenAmount * 10 ** tokenDecimals));
+
+    const allowance = await checkAllowance(tokenAddress, userAddress, CONTRACTS.MARKETPLACE as Address);
+    if (allowance < amountTokenParsed) {
+      await approveToken(tokenAddress, CONTRACTS.MARKETPLACE as Address, amountTokenParsed);
+    }
+
+    await writeContract({
+      address: CONTRACTS.MARKETPLACE as Address,
+      abi: MARKETPLACE_ABI,
+      functionName: 'sellTokens',
+      args: [tokenAddress, amountTokenParsed, stablecoinAddress],
+    });
+  };
+
   const buyTokenOnMarketplace = async (tokenSymbol: string, tokenAmount: string, stableToPay: string) => {
     if (!publicClient) throw new Error('Public client non disponible');
     if (!userAddress) throw new Error('Utilisateur non connecté');
@@ -130,7 +158,7 @@ export function useMarketplaceContract() {
   return useMemo(
     () => ({
       buyTokenOnMarketplace,
-      // Return TFT token info data directly instead of a function that violates hooks rules
+      sellTokenOnMarketplace,
       tftTokenInfo: tftTokenInfoResult.data,
       tftTokenInfoLoading: tftTokenInfoResult.isLoading,
       isPending,
