@@ -6,11 +6,10 @@ interface TSP500IconProps {
   className?: string;
 }
 
-// TODO: replace /images/currencies/tmc.png placeholder with real TSP500 asset
 const TSP500Icon = ({ className = '' }: TSP500IconProps) => {
   return (
     <Image
-      src="/images/currencies/tmc.png"
+      src="/images/image_TSP500.png"
       alt="TSP500"
       width={26}
       height={26}
