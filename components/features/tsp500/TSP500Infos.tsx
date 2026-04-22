@@ -10,8 +10,7 @@ const TSP500Infos = () => {
   const { price: tsp500Price, perf30d, isLoading } = useTSP500Data();
 
   const handleOnesheetClick = () => {
-    // TODO: replace with real TSP500 onesheet PDF
-    window.open('/TSP500_Onesheet.pdf', '_blank');
+    window.open('/Onesheet_TSP500.pdf', '_blank');
   };
 
   const tsp500Address = BASE_CONTRACTS.TSP500;
