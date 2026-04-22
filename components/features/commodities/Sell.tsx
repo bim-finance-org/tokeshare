@@ -22,8 +22,6 @@ import { INTERVAL_PRICE_UPDATE, TFT_001_PRICE_USD, TFT_001_SELL_FEES_COEF, FEES_
 import { Badge } from '@/components/ui/badge';
 import { ExchangeSection } from '@/enums/ExchangeSection';
 import { TokenInfo } from '@/config/token';
-import { PaymentMethod } from '@/enums/PaymentMethod';
-import USDCIcon from '@/components/icons/currency/USDCIcon';
 
 const Sell = ({ token }: { token: TokenInfo }) => {
   const {
@@ -39,7 +37,6 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   const [showUserForm, setShowUserForm] = useState(false);
   const [showBalanceError, setShowBalanceError] = useState(false);
   const [isBelowMin, setBelownMin] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.BankTransfer);
   const { isConnected, address } = useAccount();
   const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
   const { data: cmc20Price, isLoading: isCmc20Loading } = useCmc20Price();
@@ -83,30 +80,29 @@ const Sell = ({ token }: { token: TokenInfo }) => {
     if (tggPrice > 0 && (isTFT || !isRatesLoading)) {
       calculateReceiveAmount();
     }
-  }, [tggPrice, exchangeRates, selectedCurrency, amountToSell, paymentMethod]);
+  }, [tggPrice, exchangeRates, selectedCurrency, amountToSell]);
 
   useEffect(() => {
     setShowBalanceError(false);
   }, [amountToSell]);
+
+  const isLoadingBalance = isTFT ? isLoadingTFTBalance : isLoadingTGGBalance;
+  const hasInsufficientBalance =
+    isConnected && !isLoadingBalance && !!amountToSell && parseFloat(amountToSell) > 0
+      ? !checkSufficientBalance(amountToSell).hasSufficient
+      : false;
 
   const calculateReceiveAmount = () => {
     const tokenAmount = parseFloat(amountToSell) || 0;
 
     if (isTFT) {
       const grossValue = tokenAmount * TFT_001_PRICE_USD;
-      const feesCoef = TFT_001_SELL_FEES_COEF;
-      const netValue = grossValue * (1 - feesCoef);
-
-      if (paymentMethod === PaymentMethod.UsdcTransfer) {
+      const netValue = grossValue * (1 - TFT_001_SELL_FEES_COEF);
+      if (selectedCurrency === 'USD') {
         setReceiveAmount(netValue.toFixed(2));
-      } else {
-        // For bank transfer, convert to selected currency
-        if (selectedCurrency === 'USD') {
-          setReceiveAmount(netValue.toFixed(2));
-        } else if (exchangeRates) {
-          const fiatRate = exchangeRates[selectedCurrency as keyof typeof exchangeRates];
-          setReceiveAmount((netValue * fiatRate).toFixed(2));
-        }
+      } else if (exchangeRates) {
+        const fiatRate = exchangeRates[selectedCurrency as keyof typeof exchangeRates];
+        setReceiveAmount((netValue * fiatRate).toFixed(2));
       }
       return;
     }
@@ -136,10 +132,11 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   };
 
   const handleSellClick = (val: boolean) => {
-    if (!isConnected) {
+    if (!isConnected) return;
+    if (hasInsufficientBalance) {
+      setShowBalanceError(true);
       return;
     }
-
     setShowUserForm(val);
   };
 
@@ -149,12 +146,11 @@ const Sell = ({ token }: { token: TokenInfo }) => {
         <UserForm
           type="sell"
           amount={receiveAmount}
-          currency={isTFT && paymentMethod === PaymentMethod.UsdcTransfer ? 'USDC' : selectedCurrency}
+          currency={selectedCurrency}
           crypto={token.symbol}
           tggAmount={amountToSell}
           tggPrice={tggPrice}
           setShowUserForm={(val: boolean) => handleSellClick(val)}
-          paymentMethod={paymentMethod}
         />
       </div>
     );
@@ -162,38 +158,10 @@ const Sell = ({ token }: { token: TokenInfo }) => {
 
   return (
     <div className="p-6 w-full">
-      {/* Payment method selector for TFT_001 */}
-      {isTFT ? (
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setPaymentMethod(PaymentMethod.BankTransfer)}
-            className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 font-medium shadow-md transition-all duration-200 ${
-              paymentMethod === PaymentMethod.BankTransfer
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-color4'
-            }`}
-          >
-            <BankIcon />
-            <span>Bank transfer</span>
-          </button>
-          <button
-            onClick={() => setPaymentMethod(PaymentMethod.UsdcTransfer)}
-            className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 font-medium shadow-md transition-all duration-200 ${
-              paymentMethod === PaymentMethod.UsdcTransfer
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-color4'
-            }`}
-          >
-            <USDCIcon />
-            <span>USDC</span>
-          </button>
-        </div>
-      ) : (
-        <div className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-3 shadow-md">
-          <BankIcon />
-          <span className="font-medium">Bank transfer</span>
-        </div>
-      )}
+      <div className="w-full bg-blue-600 text-white py-3 rounded-xl mb-6 flex items-center justify-center gap-3 shadow-md">
+        <BankIcon />
+        <span className="font-medium">Bank transfer</span>
+      </div>
 
       <TradeWidget
         label="YOU SEND"
@@ -207,15 +175,16 @@ const Sell = ({ token }: { token: TokenInfo }) => {
       />
 
       {isBelowMin && <div className="text-red-500 text-xs mt-2">Minimum amount is 0.5 {token.symbol}</div>}
+      {showBalanceError && <div className="text-red-500 text-xs mt-2">Insufficient balance</div>}
 
       <div className="my-4" />
 
       <TradeWidget
         label="YOU RECEIVE"
-        defaultToken={isTFT && paymentMethod === PaymentMethod.UsdcTransfer ? 'USDC' : selectedCurrency}
+        defaultToken={selectedCurrency}
         onValueChange={() => {}}
-        onTokenChange={isTFT && paymentMethod === PaymentMethod.UsdcTransfer ? () => {} : handleCurrencyChange}
-        type={isTFT && paymentMethod === PaymentMethod.UsdcTransfer ? 'crypto' : 'fiat'}
+        onTokenChange={handleCurrencyChange}
+        type="fiat"
         value={receiveAmount}
         blockchain={selectedBlockchain}
       />
@@ -225,9 +194,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
             <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
-            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">
-              {isTFT && paymentMethod === PaymentMethod.UsdcTransfer ? 'Instant' : '2-4 Days'}
-            </Badge>
+            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">2-4 Days</Badge>
           </div>
 
           <div className="flex items-center justify-between">
@@ -251,8 +218,8 @@ const Sell = ({ token }: { token: TokenInfo }) => {
           <button
             onClick={() => handleSellClick(true)}
             className={`w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200
-    ${isBelowMin ? 'bg-color4 text-white opacity-50 cursor-not-allowed' : 'bg-color4 text-white hover:bg-opacity-90'}`}
-            disabled={isBelowMin}
+    ${isBelowMin || hasInsufficientBalance ? 'bg-color4 text-white opacity-50 cursor-not-allowed' : 'bg-color4 text-white hover:bg-opacity-90'}`}
+            disabled={isBelowMin || hasInsufficientBalance}
           >
             Sell
           </button>

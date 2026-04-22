@@ -9,7 +9,6 @@ import { useTGGTransfer } from '@/hooks/useTGGTransfer';
 import { useTFTTransfer } from '@/hooks/useTFTTransfer';
 import { FEES_COEF, NUMBER_TO_FIXE_2, TFT_001_SELL_FEES_COEF } from '@/constants/constants';
 import { Action } from '@/enums/Actions';
-import { PaymentMethod } from '@/enums/PaymentMethod';
 
 interface UserFormProps {
   type: 'buy' | 'sell';
@@ -19,7 +18,6 @@ interface UserFormProps {
   tggAmount: string;
   tggPrice: number;
   setShowUserForm: Function;
-  paymentMethod?: PaymentMethod;
 }
 
 interface FormData {
@@ -34,7 +32,7 @@ const IBAN = 'FR76 1695 8000 0103 0490 4861 482';
 const ALIAS = 'Tokeshare';
 const BANK = 'Qonto';
 
-const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShowUserForm, paymentMethod }: UserFormProps) => {
+const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShowUserForm }: UserFormProps) => {
   const {
     buy: { blockchain: buyBlockchain },
     sell: { blockchain: sellBlockchain },
@@ -44,7 +42,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [usdcTxHash, setUsdcTxHash] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('userFormData');
@@ -61,8 +58,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   const [ref, setRef] = useState<string>(() => generatePayReference());
 
   const isTFT = crypto === 'TFT_001';
-  const isUsdcPayment = paymentMethod === PaymentMethod.UsdcTransfer;
-  const needsIban = type === Action.Sell && !isUsdcPayment;
 
   const blockchain = type === Action.Sell ? sellBlockchain : buyBlockchain;
   const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address, blockchain);
@@ -99,11 +94,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
 
   useEffect(() => {
     if (receiptSuccess && hash) {
-      if (isUsdcPayment) {
-        handleUsdcApiSubmission(hash);
-      } else {
-        handleApiSubmission();
-      }
+      handleApiSubmission();
     } else if (receiptError) {
       setError('Transaction failed. Please contact support for assistance.');
     }
@@ -120,44 +111,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
       }
     }
   }, [transferError]);
-
-  const handleUsdcApiSubmission = async (txHash: string) => {
-    try {
-      setIsLoading(true);
-      const fiatAmount = parseFloat(amount);
-
-      const apiData = {
-        ref: ref,
-        email: formData.email,
-        fullName: `${formData.firstName} ${formData.lastName}`,
-        walletAddress: address || '',
-        blockchain: sellBlockchain,
-        cryptoAmount: parseFloat(tggAmount),
-        fiatAmount: fiatAmount,
-        txHash: txHash,
-      };
-
-      const response = await fetch('/api/transactions/sell/usdc', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(apiData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'An error occurred during the transaction');
-      }
-
-      setUsdcTxHash(data.usdcTxHash);
-      setShowConfirmation(true);
-    } catch (err) {
-      console.error('Error during USDC submission:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleApiSubmission = async () => {
     try {
@@ -208,9 +161,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
       const endpoint = type === 'buy' ? '/api/transactions/buy' : '/api/transactions/sell';
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(apiData),
       });
 
@@ -269,8 +220,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
     }));
   };
 
-  const balanceCheck = type === Action.Sell && address ? checkSufficientBalance(tggAmount) : null;
-
   return (
     <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4 ">
       {!showConfirmation ? (
@@ -279,7 +228,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
             Go back
           </button>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name Section */}
             <div className="bg-gray-200 p-4 rounded-xl">
               <label className="block text-sm mb-2">Name</label>
               <div className="flex gap-4">
@@ -308,7 +256,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
               </div>
             </div>
 
-            {/* Mail Section */}
             <div className="bg-gray-200 p-4 rounded-xl">
               <label className="block text-sm mb-2">Email</label>
               <input
@@ -322,8 +269,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
               />
             </div>
 
-            {/* IBAN Section - Only for Sell with bank transfer */}
-            {needsIban && (
+            {type === Action.Sell && (
               <div className="bg-gray-200 p-4 rounded-xl">
                 <label className="block text-sm mb-2">IBAN</label>
                 <input
@@ -338,38 +284,25 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
               </div>
             )}
 
-            {/* Wallet Connection - For both Buy and Sell */}
             <div className="bg-gray-200 p-4 rounded-xl">
               <label className="block text-sm mb-2">
-                {type === Action.Buy ? 'Reception address' : isUsdcPayment ? 'Your wallet (USDC reception)' : 'Your wallet address'}
+                {type === Action.Buy ? 'Reception address' : 'Your wallet address'}
               </label>
               <ConnectButton />
             </div>
 
-            {/* Transaction Status - For Sell */}
             {type === Action.Sell && (transferPending || receiptLoading) && (
               <div className="bg-yellow-50 p-4 rounded-xl">
                 <p className="text-yellow-800">
                   {transferPending
                     ? `Please confirm the ${crypto} transfer in your wallet...`
-                    : isUsdcPayment
-                      ? 'Waiting for confirmation and USDC transfer...'
-                      : 'Waiting for transaction confirmation...'}
+                    : 'Waiting for transaction confirmation...'}
                 </p>
               </div>
             )}
 
-            {/* USDC processing */}
-            {isUsdcPayment && isLoading && !transferPending && !receiptLoading && (
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <p className="text-blue-800">Processing USDC transfer to your wallet...</p>
-              </div>
-            )}
-
-            {/* Error message */}
             {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">{error}</div>}
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={!isConnected || isLoading || transferPending || receiptLoading}
@@ -398,37 +331,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
             </div>
           )}
 
-          {type === Action.Sell && isUsdcPayment && (
-            <div className="bg-gray-200 p-6 rounded-xl">
-              <h2 className="text-xl font-bold mb-4 text-center">USDC Transfer Completed</h2>
-              <p>
-                Your sale operation number <span className="font-bold">{ref}</span> has been successfully processed.
-              </p>
-              <p className="my-3">
-                <span className="font-semibold">{amount} USDC</span> has been sent to your wallet.
-              </p>
-              {usdcTxHash && (
-                <p className="my-3">
-                  Transaction:{' '}
-                  <a
-                    href={`https://basescan.org/tx/${usdcTxHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline break-all"
-                  >
-                    {usdcTxHash.slice(0, 10)}...{usdcTxHash.slice(-8)}
-                  </a>
-                </p>
-              )}
-              <p className="my-3">Thank you for your trust.</p>
-              <p className="my-3">See you soon on TokeShare.</p>
-              <div className="mt-6 text-center text-sm text-gray-600">
-                <p>A confirmation email has been sent to {formData.email}</p>
-              </div>
-            </div>
-          )}
-
-          {type === Action.Sell && !isUsdcPayment && (
+          {type === Action.Sell && (
             <div className="bg-gray-200 p-6 rounded-xl">
               <h2 className="text-xl font-bold mb-4 text-center">Demand of sale confirmed</h2>
               <p>
