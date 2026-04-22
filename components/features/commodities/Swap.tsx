@@ -130,12 +130,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     setStablecoin('USDC');
   };
 
-  // Handle swap button click
   const handleSwap = () => {
-    if (token.symbol === 'TFT_001') {
-      return;
+    const newIsTggFirst = !isTggFirst;
+    if (newIsTggFirst && token.symbol === 'TFT_001') {
+      setStablecoin('USDC');
     }
-    setIsTggFirst(!isTggFirst);
+    setIsTggFirst(newIsTggFirst);
   };
 
   // Préparation des informations d'échange
@@ -202,16 +202,19 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     readOnly: false, // Toujours modifiable (input du haut)
   };
 
+  const isTftSellMode = isTggFirst && token.symbol === 'TFT_001';
+
   const bottomWidgetProps = {
     type: (isTggFirst ? TokenType.Stablecoin : TokenType.Crypto) as TokenType,
     label: 'YOU RECEIVE',
-    defaultToken: isTggFirst ? stablecoin : token.symbol,
+    defaultToken: isTggFirst ? (isTftSellMode ? 'USDC' : stablecoin) : token.symbol,
     value: isTggFirst ? stablecoinAmount : amount,
-    onValueChange: () => {}, // Fonction vide car en lecture seule
+    onValueChange: () => {},
     onTokenChange: handleTokenChange,
     blockchain: selectedBlockchain,
     showBalance: true,
-    readOnly: true, // Toujours en lecture seule (input du bas)
+    readOnly: true,
+    lockedToken: isTftSellMode,
   };
 
   // Vérifier si les prix sont disponibles pour permettre l'affichage
