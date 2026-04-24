@@ -143,12 +143,12 @@ const TSP500Infos = () => {
               <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
                 <h3 className="text-base sm:text-lg font-semibold">Proof of Reserve</h3>
                 <a
-                  href={`https://basescan.org/address/${despxaAddress}`}
+                  href={`https://basescan.org/address/${tsp500Address}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
                 >
-                  {despxaAddress}
+                  {tsp500Address}
                 </a>
               </div>
 
