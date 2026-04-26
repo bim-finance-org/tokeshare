@@ -54,6 +54,8 @@ const Buy = ({ token }: { token: TokenInfo }) => {
       } else if (token.symbol === 'TSP500' && despxaPrice) {
         const calculatedPrice = calculateTSP500Price(despxaPrice);
         setTggPrice(calculatedPrice);
+      } else if (token.symbol === 'TFT_001') {
+        setTggPrice(31.25);
       }
     };
     updatePrice();
