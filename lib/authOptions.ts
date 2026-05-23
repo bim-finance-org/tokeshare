@@ -1,9 +1,16 @@
 // lib/authOptions.ts
-import { TokeshareUser } from '@/types/User';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || 'default-password';
+const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD;
+const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
+
+if (!DASHBOARD_PASSWORD) {
+  throw new Error('DASHBOARD_PASSWORD env variable is required');
+}
+if (!NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET env variable is required');
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -40,5 +47,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || 'tokeshare-dashboard-secret',
+  secret: NEXTAUTH_SECRET,
 };
