@@ -11,6 +11,9 @@ import { Blockchain } from '@/enums/Blockchain';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { AssetData } from '@/interfaces/AssetData';
 import { useTGGPrice, useTFTPrice } from '@/hooks/useTokenPrice';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('user-assets');
 
 async function fetchUserTokenAssets(
   address: Address,
@@ -48,7 +51,7 @@ async function fetchUserTokenAssets(
           internalUrl: token.internalUrl,
         });
       } catch (e) {
-        console.warn(`Failed to fetch ${token.symbol} on ${chain}`, e);
+        log.warn(`failed to fetch ${token.symbol} on ${chain}`, e);
       }
     }
   }

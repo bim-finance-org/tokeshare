@@ -1,4 +1,7 @@
 import { Redis } from 'ioredis';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('redis');
 
 // In-memory cache with LRU eviction and size limit
 const MAX_CACHE_SIZE = 50; // Maximum entries in memory cache
@@ -36,7 +39,7 @@ function isRedisUrlUsable(): boolean {
     const url = new URL(redisUrl);
     // Skip if hostname looks like an internal container network name
     if (/^[a-z0-9]{20,}$/i.test(url.hostname)) {
-      console.log('Redis: Skipping connection (internal hostname detected), using in-memory cache');
+      log.info('skipping connection (internal hostname detected), using in-memory cache');
       return false;
     }
     return true;
@@ -60,7 +63,7 @@ function createRedisClient(): Redis | null {
     maxRetriesPerRequest: 3,
     retryStrategy(times) {
       if (times > 3) {
-        console.log('Redis: Max retries reached, falling back to in-memory cache');
+        log.warn('max retries reached, falling back to in-memory cache');
         globalForRedis.redisAvailable = false;
         return null;
       }
@@ -70,13 +73,13 @@ function createRedisClient(): Redis | null {
   });
 
   client.on('connect', () => {
-    console.log('Redis: Connected successfully');
+    log.info('connected');
     globalForRedis.redisAvailable = true;
   });
 
   client.on('error', () => {
     if (globalForRedis.redisAvailable !== false) {
-      console.error('Redis: Connection failed, using in-memory cache instead');
+      log.error('connection failed, using in-memory cache instead');
       globalForRedis.redisAvailable = false;
     }
   });

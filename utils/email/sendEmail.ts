@@ -3,6 +3,9 @@ import { renderAsync } from '@react-email/render';
 import SellTransactionEmail from './SellTransactionEmail.jsx';
 import BuyTransactionEmail from './BuyTransactionEmail.jsx';
 import React from 'react';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('email');
 
 // Vérification des variables d'environnement
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
@@ -40,8 +43,6 @@ export async function sendTransactionEmail(
   data: BaseEmailData & { transactionType: 'buy' | 'sell' } & Partial<BuyEmailData>,
 ) {
   if (data.transactionType === 'buy') {
-    // Validation des données spécifiques à l'achat
-    console.log(data);
     if (!data.blockchain || !data.fiatAmount || !data.tokenSymbol || !data.tokenAmount || !data.walletAddress) {
       throw new Error("Données manquantes pour l'email d'achat");
     }
@@ -73,8 +74,6 @@ export async function sendTransactionEmail(
 async function sendBuyTransactionEmail(data: BuyEmailData) {
   validateEmailConfig();
 
-  // Validation des données requises
-  console.log(data);
   if (!data.email || !data.fullName || !data.transactionRef) {
     throw new Error("Données manquantes pour l'envoi de l'email");
   }
@@ -162,33 +161,27 @@ async function sendEmail({
   });
 
   if (emailError) {
-    console.error('Error sending confirmation email:', emailError);
+    log.error('send failed', emailError);
     throw new Error(emailError.message);
   }
 
-  console.log(`Email de confirmation ${transactionType} envoyé avec succès:`, emailData);
+  log.info(`${transactionType} confirmation sent`, { id: emailData?.id });
   return { success: true, message: 'Email sent successfully' };
 }
 
-/**
- * Valide la configuration d'email
- */
 function validateEmailConfig() {
   if (!resend) {
-    console.error('Error: RESEND_API_KEY is not configured');
+    log.error('RESEND_API_KEY is not configured');
     throw new Error('Configuration email manquante');
   }
 
   if (!RESEND_FROM_EMAIL) {
-    console.error('Error: RESEND_FROM_EMAIL is not configured');
+    log.error('RESEND_FROM_EMAIL is not configured');
     throw new Error('Configuration email manquante');
   }
 }
 
-/**
- * Gère les erreurs d'envoi d'email
- */
 function handleEmailError(error: unknown) {
-  console.error('Error in sendTransactionEmail:', error);
+  log.error('sendTransactionEmail failed', error);
   throw new Error(error instanceof Error ? error.message : "Erreur lors de l'envoi de l'email");
 }
