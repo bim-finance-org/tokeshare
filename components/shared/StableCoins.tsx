@@ -27,7 +27,7 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
     const balance = balances[symbol]?.formatted || '0';
 
     return (
-      <button
+      <button type="button"
         key={symbol}
         onClick={() => {
           onSelect(symbol);

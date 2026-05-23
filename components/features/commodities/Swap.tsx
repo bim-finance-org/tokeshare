@@ -192,7 +192,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         <TradeWidget {...topWidgetProps} />
 
         <div className="z-10 pt-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <button onClick={handleSwap} className="relative w-10 h-10 sm:w-[60px] sm:h-[60px] hover:scale-110 active:scale-95 transition-transform duration-200">
+          <button type="button" onClick={handleSwap} className="relative w-10 h-10 sm:w-[60px] sm:h-[60px] hover:scale-110 active:scale-95 transition-transform duration-200">
             <Image src="/images/switch.png" alt="Swap" fill className="object-contain" />
           </button>
         </div>
@@ -234,7 +234,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
                   Switching network...
                 </span>
               ) : (
-                <button
+                <button type="button"
                   onClick={retrySwitch}
                   className="text-sm underline hover:no-underline self-start"
                 >
@@ -291,7 +291,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
                 <span className="text-xs text-black bg-gray-100 font-mono px-2 py-1 rounded">
                   {hash.slice(0, 6)}...{hash.slice(-4)}
                 </span>
-                <button
+                <button type="button"
                   onClick={() => {
                     const explorers: Record<Blockchain, string> = {
                       [Blockchain.Polygon]: 'https://polygonscan.com',
@@ -312,7 +312,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
       <div className="mt-4 sm:mt-6 space-y-3">
         {isConnected ? (
-          <button
+          <button type="button"
             onClick={swaping}
             className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
               arePricesAvailable && !isPending && !isPreparingSwap && isOnCorrectChain

@@ -28,7 +28,7 @@ export default function Home() {
           </p>
           <p className="text-white text-sm md:text-lg">The future of finance lies in tokenization.</p>
           <Link href="/marketplace/commodities">
-            <button className="rounded-lg w-48 bg-color4 px-6 py-2 text-sm md:text-lg hover:scale-105 transition-transform duration-300">
+            <button type="button" className="rounded-lg w-48 bg-color4 px-6 py-2 text-sm md:text-lg hover:scale-105 transition-transform duration-300">
               Marketplace
             </button>
           </Link>

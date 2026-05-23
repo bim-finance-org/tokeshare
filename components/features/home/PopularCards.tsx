@@ -19,7 +19,7 @@ const PopularHouses: React.FC = () => {
         <h4 className=" text-xl sm:text-2xl text-color4">Our Popular Assets</h4>
         <div className="flex items-center space-x-2 mt-3 sm:mt-0">
           {/* <a href="/explore-all" className="flex items-center hover:scale-105 transition-transform duration-300"> */}
-          <button className="text-lg sm:text-2xl text-color4">Explore All</button>
+          <button type="button" className="text-lg sm:text-2xl text-color4">Explore All</button>
           <div className="relative pr-4">
             <ArrowLongLineIcon size={96} className="px-2" />
           </div>

@@ -23,7 +23,7 @@ const Currencies = ({ onSelect }: CurrenciesProps) => {
     const Icon = icons[currency];
 
     return (
-      <button
+      <button type="button"
         key={currency}
         onClick={() => onSelect(currency)}
         className="flex items-center w-full p-2 hover:bg-gray-200 rounded-lg transition-colors border-b border-gray-200"

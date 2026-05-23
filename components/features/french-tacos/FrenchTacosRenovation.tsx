@@ -59,13 +59,13 @@ const FrenchTacosRenovation = () => {
           <div className="relative w-full">
             {isMobile ? (
               <>
-                <button className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 prev-button-renovation">
+                <button type="button" className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 prev-button-renovation">
                   <ArrowIcon
                     size={24}
                     className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180"
                   />
                 </button>
-                <button className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 next-button-renovation">
+                <button type="button" className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 next-button-renovation">
                   <ArrowIcon size={24} className="text-color5 hover:scale-110 hover:text-color2 transition" />
                 </button>
                 <Swiper
@@ -97,13 +97,13 @@ const FrenchTacosRenovation = () => {
               </>
             ) : (
               <>
-                <button className="absolute left-0 sm:-left-6 top-1/2 transform -translate-y-1/2 z-10 prev-button-renovation">
+                <button type="button" className="absolute left-0 sm:-left-6 top-1/2 transform -translate-y-1/2 z-10 prev-button-renovation">
                   <ArrowIcon
                     size={28}
                     className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180"
                   />
                 </button>
-                <button className="absolute right-0 sm:-right-6 top-1/2 transform -translate-y-1/2 z-10 next-button-renovation">
+                <button type="button" className="absolute right-0 sm:-right-6 top-1/2 transform -translate-y-1/2 z-10 next-button-renovation">
                   <ArrowIcon size={28} className="text-color5 hover:scale-110 hover:text-color2 transition" />
                 </button>
                 <Swiper

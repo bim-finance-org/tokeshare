@@ -25,7 +25,7 @@ const HouseInfo: React.FC<HouseInfoProps> = ({ house }) => {
       <div className="w-full mb-6">
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 justify-center">
           {TABS.map((tab) => (
-            <button
+            <button type="button"
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`relative w-full sm:w-1/4 p-2 rounded-full text-md md:text-lg lg:text-xl  font-medium transition-colors shadow-md

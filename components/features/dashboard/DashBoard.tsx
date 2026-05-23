@@ -33,19 +33,19 @@ const DashBoard = () => {
       <div className="flex flex-col items-center justify-center gap-4">
         <h1 className="text-2xl text-black font-bold pt-4">Dashboard</h1>
         <div className="flex gap-4 pb-4">
-          <button
+          <button type="button"
             onClick={handleBuy}
             className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 ${isBuyOpen ? 'bg-blue-700' : ''}`}
           >
             Buy
           </button>
-          <button
+          <button type="button"
             onClick={handleSell}
             className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 ${isSellOpen ? 'bg-blue-700' : ''}`}
           >
             Sell
           </button>
-          <button
+          <button type="button"
             onClick={handleSnapshot}
             className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 ${isSellOpen ? 'bg-blue-700' : ''}`}
           >

@@ -181,7 +181,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
 
       <div className="mt-6">
         {isConnected ? (
-          <button
+          <button type="button"
             onClick={() => handleSellClick(true)}
             className={`w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200
     ${isBelowMin || hasInsufficientBalance ? 'bg-color4 text-white opacity-50 cursor-not-allowed' : 'bg-color4 text-white hover:bg-opacity-90'}`}

@@ -29,7 +29,7 @@ const MobileMenu: React.FC = () => {
 
   return (
     <div className="custom-r:hidden text-color7 z-50" ref={menuRef}>
-      <button
+      <button type="button"
         onClick={toggleMenu}
         className="text-color7 text-2xl focus:outline-none hover:scale-110"
         aria-label="Toggle Menu"

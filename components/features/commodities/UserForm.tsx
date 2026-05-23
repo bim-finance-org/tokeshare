@@ -228,7 +228,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
     <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4 ">
       {!showConfirmation ? (
         <>
-          <button onClick={() => setShowUserForm(false)} className="bg-color4 text-white p-2 rounded-sm">
+          <button type="button" onClick={() => setShowUserForm(false)} className="bg-color4 text-white p-2 rounded-sm">
             Go back
           </button>
           <form onSubmit={handleSubmit} className="space-y-4">

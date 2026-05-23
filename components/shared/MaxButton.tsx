@@ -28,7 +28,7 @@ const MaxButton = ({ currency, blockchain, onMaxClick, className = '' }: MaxButt
   const isDisabled = !isConnected || !balance || balance === '0' || parseFloat(balance) === 0;
 
   return (
-    <button
+    <button type="button"
       onClick={handleMaxClick}
       disabled={isDisabled}
       className={`px-2 py-1 text-xs font-medium rounded transition-all duration-200 ${

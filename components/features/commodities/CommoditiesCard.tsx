@@ -73,7 +73,7 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
         <div className="flex justify-center mt-4 w-full">
           {name === 'Gold' ? (
             <Link href={`/marketplace/commodities/${name}`} rel="noopener noreferrer">
-              <button className="bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition">
+              <button type="button" className="bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition">
                 <div className="flex w-full justify-between items-center px-8">
                   <h6 className="whitespace-nowrap pr-10">Buy Gold (TGG)</h6>
                   <ArrowIcon size={24} />
@@ -81,7 +81,7 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
               </button>
             </Link>
           ) : (
-            <button className="bg-gray-400 text-white rounded-full text-sm font-bold cursor-not-allowed opacity-80">
+            <button type="button" className="bg-gray-400 text-white rounded-full text-sm font-bold cursor-not-allowed opacity-80">
               <div className="flex w-full justify-between items-center px-8">
                 <h6 className="whitespace-nowrap pr-10">Available Soon</h6>
                 <ArrowIcon size={24} />

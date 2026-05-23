@@ -182,7 +182,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
 
       <div className="mt-6">
         {isConnected ? (
-          <button
+          <button type="button"
             onClick={() => handleSellClick(true)}
             className={`w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200 
     ${isBelowMin ? 'bg-color4 text-white opacity-50 cursor-not-allowed' : 'bg-color4 text-white hover:bg-opacity-90'}`}
@@ -191,7 +191,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
             Buy
           </button>
         ) : (
-          <button
+          <button type="button"
             onClick={() => setShowBuyNext(true)}
             className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition-all duration-200"
           >
