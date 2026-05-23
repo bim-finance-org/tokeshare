@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/shared/Blockchains';
@@ -22,6 +22,8 @@ import { Badge } from '@/components/ui/badge';
 import { ExchangeSection } from '@/enums/ExchangeSection';
 import { TokenInfo } from '@/config/token';
 
+const TFT_001_PRICE_USD = 31.25;
+
 const Buy = ({ token }: { token: TokenInfo }) => {
   // Get values from context
   const {
@@ -30,9 +32,9 @@ const Buy = ({ token }: { token: TokenInfo }) => {
     updateBuyBlockchain: setSelectedBlockchain,
   } = useContext(TokenContexts);
 
-  // Local state
+  // Local state — fiat amount is the single source of truth.
+  // The crypto amount is derived during render below.
   const [amountToSend, setAmountToSend] = useState('50');
-  const [tggAmount, setTggAmount] = useState('0');
   const [tggPrice, setTggPrice] = useState<number>(0);
   const [showBuyNext, setShowBuyNext] = useState(false);
   const [isBelowMin, setBelownMin] = useState(false);
@@ -55,7 +57,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
         const calculatedPrice = calculateTSP500Price(despxaPrice);
         setTggPrice(calculatedPrice);
       } else if (token.symbol === 'TFT_001') {
-        setTggPrice(31.25);
+        setTggPrice(TFT_001_PRICE_USD);
       }
     };
     updatePrice();
@@ -63,83 +65,51 @@ const Buy = ({ token }: { token: TokenInfo }) => {
     return () => clearInterval(interval);
   }, [paxgPrice, cmc20Price, despxaPrice, token.symbol]);
 
-  // Calcule le montant token à partir du montant fiat
-  const calculateTggFromFiat = (fiatAmount: string) => {
-    const numericAmount = parseFloat(fiatAmount) || 0;
-    let tokenValue;
+  // Derived: crypto amount computed during render from the fiat input.
+  const tggAmount = useMemo(() => {
+    if (tggPrice <= 0 || isRatesLoading) return '0';
+    const numericAmount = parseFloat(amountToSend) || 0;
+
     if (token.symbol === 'TGG' || token.symbol === 'TMC' || token.symbol === 'TSP500') {
-      if (tggPrice > 0) {
-        tokenValue = convertFiatToTGG(numericAmount, selectedCurrency, exchangeRates, tggPrice);
-      }
-    } else if (token.symbol === 'TFT_001') {
-      if (tggPrice > 0) {
-        if (selectedCurrency === 'USD') {
-          tokenValue = numericAmount / 31.25;
-        } else {
-          if (!exchangeRates) return;
-          const fiatRate = exchangeRates[selectedCurrency as keyof ExchangeRates];
-          const amountInUSD = numericAmount / fiatRate;
-          tokenValue = amountInUSD / 31.25;
-        }
-      }
+      const value = convertFiatToTGG(numericAmount, selectedCurrency, exchangeRates, tggPrice);
+      return value !== undefined ? value.toFixed(4) : '0';
     }
-    if (tokenValue !== undefined) {
-      setTggAmount(tokenValue.toFixed(4));
-    } else {
-      setTggAmount('0');
-    }
-  };
 
-  // Calcul initial du montant TGG (déclaré après calculateTggFromFiat pour
-  // éviter la TDZ si on l'ajoute aux dépendances).
-  useEffect(() => {
-    if (tggPrice > 0 && !isRatesLoading) {
-      calculateTggFromFiat(amountToSend);
+    if (token.symbol === 'TFT_001') {
+      if (selectedCurrency === 'USD') return (numericAmount / TFT_001_PRICE_USD).toFixed(4);
+      if (!exchangeRates) return '0';
+      const fiatRate = exchangeRates[selectedCurrency as keyof ExchangeRates];
+      return (numericAmount / fiatRate / TFT_001_PRICE_USD).toFixed(4);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tggPrice, exchangeRates, selectedCurrency]);
 
-  // Calcule le montant fiat à partir du montant TGG
-  const calculateFiatFromTgg = (tggValue: string) => {
-    if (tggPrice > 0) {
-      const numericAmount = parseFloat(tggValue) || 0;
-      const fiatValue = convertTGGToFiat(numericAmount, selectedCurrency, exchangeRates, tggPrice);
-      if (fiatValue !== undefined) {
-        setAmountToSend(fiatValue.toFixed(2));
-      } else {
-        setAmountToSend('0');
-      }
-    }
-  };
+    return '0';
+  }, [amountToSend, tggPrice, exchangeRates, selectedCurrency, token.symbol, isRatesLoading]);
 
   // Gestion du changement de montant en devise fiat
   const handleFiatAmountChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setAmountToSend(amount);
-      calculateTggFromFiat(amount);
-      if (parseFloat(amount) < 50) {
-        setBelownMin(true);
-      } else {
-        setBelownMin(false);
-      }
+      setBelownMin(parseFloat(amount) < 50);
     }
   };
 
-  // Gestion du changement de montant en TGG
+  // Gestion du changement de montant en TGG : on convertit en fiat (source de
+  // vérité) ; la valeur affichée du champ crypto sera re-dérivée au prochain
+  // render.
   const handleTggAmountChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
-      setTggAmount(amount);
-      calculateFiatFromTgg(amount);
+      if (tggPrice <= 0) return;
+      const numericAmount = parseFloat(amount) || 0;
+      const fiatValue = convertTGGToFiat(numericAmount, selectedCurrency, exchangeRates, tggPrice);
+      const newFiat = fiatValue !== undefined ? fiatValue.toFixed(2) : '0';
+      setAmountToSend(newFiat);
+      setBelownMin(parseFloat(newFiat) < 50);
     }
   };
 
   // Gestion du changement de devise
   const handleCurrencyChange = (currency: string) => {
     setSelectedCurrency(currency);
-    // Recalculer le montant TGG avec la nouvelle devise
-    if (amountToSend) {
-      calculateTggFromFiat(amountToSend);
-    }
   };
 
   const handleSellClick = (val: boolean) => {
