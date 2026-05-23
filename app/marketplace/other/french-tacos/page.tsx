@@ -1,4 +1,4 @@
-import Exchange from '@/components/features/commodities/Exchange';
+import Exchange from '@/components/features/commodities/ExchangeLazy';
 import FrenchTacosCarousel from '@/components/features/french-tacos/FrenchTacosCarousel';
 import FrenchTacosInfo from '@/components/features/french-tacos/FrenchTacosInfo';
 import { TOKENS } from '@/config/token';

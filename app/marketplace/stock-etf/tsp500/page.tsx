@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Exchange from '@/components/features/commodities/Exchange';
+import Exchange from '@/components/features/commodities/ExchangeLazy';
 import Contracts from '@/components/shared/Contracts';
 import TSP500Infos from '@/components/features/tsp500/TSP500Infos';
 import { BASE_CONTRACTS } from '@/contracts/contracts';

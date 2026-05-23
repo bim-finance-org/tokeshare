@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 
 import commoditiesData from '@/data/commoditiesData.json';
-import Exchange from '@/components/features/commodities/Exchange';
+import Exchange from '@/components/features/commodities/ExchangeLazy';
 import Contracts from '@/components/shared/Contracts';
 import CommoditiesInfos from '@/components/features/commodities/CommoditiesInfos';
 import { CONTRACTS, ETH_CONTRACTS } from '@/contracts/contracts';
