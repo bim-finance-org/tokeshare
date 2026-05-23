@@ -1,54 +1,56 @@
-import React from 'react';
-import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
-import Link from 'next/link';
+'use client';
+
+import React, { useState } from 'react';
+import { useAccount } from 'wagmi';
+import EthereumIcon from '@/components/icons/blockchains/EthereumIcon';
+import StellarIcon from '@/components/icons/blockchains/StellarIcon';
+import { useStellarAccount } from '@/context/StellarContext';
+import WalletConnectModal from '@/components/shared/WalletConnectModal';
 
 type ConnectWalletButtonProps = {
   isTransparent?: boolean;
   navbarButton?: boolean;
 };
 
-const ConnectWalletButton = ({ isTransparent = false, navbarButton = false }: ConnectWalletButtonProps) => {
-  const { open } = useAppKit();
-  const { address, isConnected } = useAppKitAccount();
+const ConnectWalletButton = ({ isTransparent = false }: ConnectWalletButtonProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { isConnected: isEvmConnected } = useAccount();
+  const { isConnected: isStellarConnected } = useStellarAccount();
 
-  // Optionnel : formater l’adresse
-  const formatAddress = (addr: string) => {
-    if (!addr) return '';
-    return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
-  };
+  const connectedCount = (isEvmConnected ? 1 : 0) + (isStellarConnected ? 1 : 0);
+  const baseClasses = `${isTransparent ? 'bg-transparent' : 'bg-color4'} border-2 border-white text-white rounded-xl font-medium shadow-sm`;
 
-  const handleConnect = () => open({ view: isConnected ? 'Account' : 'Connect' });
-
-  if (!isConnected) {
+  if (connectedCount === 0) {
     return (
-      <button
-        type="button"
-        onClick={handleConnect}
-        className={`${isTransparent ? 'bg-transparent' : 'bg-color4'} w-full border-2 border-white px-4 text-white py-3 rounded-xl font-medium shadow-sm`}
-      >
-        Connect
-      </button>
+      <>
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className={`${baseClasses} w-full px-4 py-3`}
+        >
+          Connect
+        </button>
+        <WalletConnectModal open={isOpen} onOpenChange={setIsOpen} />
+      </>
     );
   }
 
   return (
-    <div className="flex flex-col items-center w-full">
-      <Link href="/user/dashboard" className="w-full">
-        <button
-          type="button"
-          className={`${isTransparent ? 'bg-transparent' : 'bg-color4'} w-full border-2 border-white px-4 text-white py-3 rounded-xl font-medium shadow-sm`}
-        >
-          Dashboard
-        </button>
-      </Link>
+    <>
       <button
-        onClick={handleConnect}
-        className="mt-1 text-xs hover:text-black transition underline"
-        style={{ fontSize: '0.75rem' }}
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className={`${baseClasses} flex items-center justify-center gap-2 px-4 py-2`}
+        aria-label={`${connectedCount} wallet${connectedCount > 1 ? 's' : ''} connected`}
       >
-        Disconnect
+        <span className="flex items-center -space-x-2">
+          {isEvmConnected && <EthereumIcon size={28} className="ring-2 ring-white" />}
+          {isStellarConnected && <StellarIcon size={28} className="ring-2 ring-white" />}
+        </span>
+        <span className="text-sm">Connected</span>
       </button>
-    </div>
+      <WalletConnectModal open={isOpen} onOpenChange={setIsOpen} />
+    </>
   );
 };
 

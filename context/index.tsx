@@ -5,6 +5,7 @@ import { createAppKit } from '@reown/appkit/react';
 import { polygon, base, mainnet } from '@reown/appkit/networks';
 import React, { type ReactNode } from 'react';
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi';
+import { StellarProvider } from './StellarContext';
 
 if (!projectId) {
   throw new Error('Project ID is not defined');
@@ -41,7 +42,7 @@ function ContextProvider({ children, cookies }: { children: ReactNode; cookies: 
 
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState}>
-      {children}
+      <StellarProvider>{children}</StellarProvider>
     </WagmiProvider>
   );
 }
