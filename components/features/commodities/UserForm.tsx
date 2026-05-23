@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 import { useMutation } from '@tanstack/react-query';
 import ConnectButton from '@/components/shared/ConnectButton';
@@ -43,18 +43,43 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   const { isConnected, address } = useAccount();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('userFormData');
-      if (saved) return JSON.parse(saved);
-    }
-    return {
-      firstName: '',
-      lastName: '',
-      email: '',
-      iban: type === 'sell' ? '' : undefined,
-    };
+  // Stable SSR-safe initial: server and client first render produce the same
+  // tree. localStorage is read after mount in the effect below.
+  const [formData, setFormDataState] = useState<FormData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    iban: type === 'sell' ? '' : undefined,
   });
+
+  // Write-through setter: every change is persisted immediately, no separate
+  // useEffect needed (and no setState-in-effect lint trip on persist).
+  const setFormData = useCallback((next: FormData | ((prev: FormData) => FormData)) => {
+    setFormDataState((prev) => {
+      const value = typeof next === 'function' ? (next as (p: FormData) => FormData)(prev) : next;
+      try {
+        localStorage.setItem('userFormData', JSON.stringify(value));
+      } catch {
+        // quota exceeded or private mode — best effort
+      }
+      return value;
+    });
+  }, []);
+
+  // One-shot hydration from localStorage after mount. Necessary for browser-only
+  // state; useSyncExternalStore isn't a fit because formData is mutated by user
+  // inputs, not just read from storage.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('userFormData');
+      if (saved) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot hydration from external storage
+        setFormDataState(JSON.parse(saved));
+      }
+    } catch {
+      // ignore malformed entries
+    }
+  }, []);
 
   const [ref, setRef] = useState<string>(() => generatePayReference());
 
@@ -86,12 +111,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
     alias: ALIAS,
     bank: BANK,
   };
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('userFormData', JSON.stringify(formData));
-    }
-  }, [formData]);
 
   useEffect(() => {
     if (transferError) notify.error(transferError);
