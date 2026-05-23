@@ -185,7 +185,7 @@ La quasi-totalité des `<button>` n'ont pas `type="button"` explicite (BuyModal,
 | 9 | `useUserTokenAssets` → multicall ; déplacer `usePrefetchStablePrices` aux pages concernées | 🟡 | ✅ | `PUBLIC_CLIENTS` en `batch: { multicall: true }` ; `usePrefetchStablePrices` retiré (Exchange déclenche déjà la query sur les pages concernées) |
 | 10 | `useSwap` : `useCallback` + supprimer try/throw bruyants | 🟡 | ✅ | Appliqué aussi à `useTmcSwap`, `useTsp500Swap`, `useMarketplaceContract` (mêmes warnings exhaustive-deps) |
 | 11 | LCP : `priority`/`sizes`/`blurDataURL` sur la hero ; AVIF dans `next.config.ts` | 🟡 | ✅ | `priority` + `sizes` + `blurDataURL` (sharp 10px blur inline) ; AVIF + WebP configurés |
-| 12 | `<Suspense>` autour des blocs Wagmi | 🟡 | ⏳ | UX streaming |
+| 12 | `<Suspense>` autour des blocs Wagmi | 🟡 | ✅ | `Exchange` chargé via `next/dynamic({ ssr:false, loading: ExchangeSkeleton })` sur les 4 pages marketplace |
 | 13 | Aligner ESLint 16 ; retirer `fs`, dédup `redis`/`ioredis`, choisir un set d'icônes | 🟢 | ✅ | `redis` retiré ; `react-icons` retiré (lucide-react choisi) ; `fs` déjà retiré |
 | 14 | `next.config.ts` : `typedRoutes`, `optimizePackageImports`, `remotePatterns`, `output: 'standalone'` si Docker | 🟢 | 🟡 | `typedRoutes`, `optimizePackageImports`, `formats` ajoutés ; `remotePatterns` à compléter quand on connaît les hosts |
 | 15 | Nettoyage : code mort, doublons `.d.ts`, POC, `ToDo.md`, logs `console.*` | 🟢 | ✅ | HouseCard nettoyé ; 32 `console.*` migrés sur logger ; `ToDo.md` supprimé ; POC sortis des index SEO (noindex + robots disallow) |
