@@ -12,7 +12,7 @@ const Footer = () => {
         </div>
 
         <div className="mb-6 md:mb-0">
-          <h1 className="text-xl font-bold text-color2 mb-4">SERVICES</h1>
+          <h1 className="text-xl font-bold text-color2 mb-4">MARKETPLACE</h1>
           <ul className="space-y-2">
             <li className="hover:underline cursor-pointer">
               <Link href="/marketplace/real-estate">Real Estate</Link>
