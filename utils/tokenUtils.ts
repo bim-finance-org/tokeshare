@@ -1,5 +1,4 @@
 import { Address } from 'viem';
-import { useERC20 } from '@/hooks/useERC20';
 
 // Decimals connues pour les tokens les plus utilisés
 const KNOWN_DECIMALS: Record<string, number> = {
@@ -28,34 +27,6 @@ const KNOWN_DECIMALS: Record<string, number> = {
   '0xf47c9e511d215e286d3ca1b956e7c3dd6f6195d4': 18, // TMC
   '0x9c5c365e764829876243d0b289733b9d2b729685': 18, // deSPXA
   '0x9476d702dc72242a7cefbf802da8f09ddb305e51': 18, // TSP500
-};
-
-/**
- * Hook pour récupérer les decimals d'un token
- * Si l'adresse est connue → retourne directement
- * Si l'adresse n'est pas connue → va chercher avec le contrat
- */
-export const useTokenDecimals = (tokenAddress: Address) => {
-  const normalizedAddress = tokenAddress.toLowerCase();
-
-  // Vérifier si on connaît déjà les decimals
-  if (normalizedAddress in KNOWN_DECIMALS) {
-    return {
-      data: KNOWN_DECIMALS[normalizedAddress],
-      isLoading: false,
-      error: null,
-    };
-  }
-
-  // Si on ne connaît pas, aller chercher via le contrat
-  const { useDecimals } = useERC20(tokenAddress);
-  const contractResult = useDecimals();
-
-  return {
-    data: contractResult.data ? Number(contractResult.data) : undefined,
-    isLoading: contractResult.isLoading,
-    error: contractResult.error,
-  };
 };
 
 /**
