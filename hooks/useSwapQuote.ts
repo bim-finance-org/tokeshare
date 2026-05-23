@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Address } from 'viem';
 import { useSwap } from './useSwap';
 import { TMC_CMC20_RATIO } from './useTmcSwap';
 import { TSP500_DESPXA_RATIO } from './useTsp500Swap';
-import { CONTRACTS, BASE_CONTRACTS, getTGGContracts } from '@/contracts/contracts';
+import { BASE_CONTRACTS, getTGGContracts } from '@/contracts/contracts';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { SwapDirection } from '@/enums/Directions';
 import { Blockchain } from '@/enums/Blockchain';
@@ -16,6 +17,7 @@ import {
 } from '@/constants/constants';
 import { RouteParams } from '@/interfaces/RouteParams';
 import { RouteSummary } from '@/interfaces/RouteSummary';
+
 interface SwapQuoteParams {
   inputToken: Address;
   outputToken: Address;
@@ -30,140 +32,126 @@ interface SwapQuoteResult {
   exchangeRate: string | null;
 }
 
+type QuoteResult = { outputAmount: string; exchangeRate: string };
+
+const DEBOUNCE_DELAY_MS = 500;
+const MINIMUM_AMOUNT_TO_GET_QUOTE = 0.01;
+const TFT_PRICE_USD = 31.25;
+const TFT_SELL_FEE = 0.05;
+
 /**
- * Attends que l'utilisateur ait fini de taper avant de mettre à jour la valeur.
- * Retourne un indicateur d'activité de saisie.
- *
- * @param value La valeur à surveiller qui est l'input amount.
- * @param delay Le délai d'attente (en millisecondes) avant de considérer la saisie comme "terminée".
- * @returns Un objet contenant :
- *   - debouncedValue : la version retardée de value (change seulement après un délai sans modification)
- *   - isTyping : booléen indiquant si l'utilisateur est en train d'écrire
+ * Debounces a string value. `isTyping` is derived during render as
+ * "the current value hasn't settled into the debounced value yet",
+ * avoiding a setState-in-effect cascade.
  */
 const useSmartDebounce = (value: string, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
-  const [isTyping, setIsTyping] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const clear = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-  };
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setIsTyping(true);
-    clear();
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      setDebouncedValue((prev) => {
-        if (prev !== value) return value;
-        return prev;
-      });
-      setIsTyping(false);
+      setDebouncedValue(value);
     }, delay);
 
     return () => {
-      clear();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [value, delay]);
 
-  return { debouncedValue, isTyping };
+  return { debouncedValue, isTyping: value !== debouncedValue };
 };
 
-/**
- * Vas récupérer la valeur de l'ouput amount en fonction de l'input amount, uniquement si l'utilisateur a arrêté d'écrire.
- * @param params Objet contenant les paramètres du swap (tokens, montant, direction).
- * @returns Un objet avec :
- *   - outputAmount : le montant obtenu après le swap
- *   - isLoading : booléen, true si le fetch est en cours ou si l'utilisateur tape
- *   - error : message d'erreur
- *   - exchangeRate : taux de change calculé
- */
+// Plain async fetcher for non-TGG (Base-only) tokens — no wagmi hooks needed.
+async function getBaseSwapRoute(params: RouteParams): Promise<RouteSummary> {
+  const queryParams = new URLSearchParams({
+    tokenIn: params.tokenIn,
+    tokenOut: params.tokenOut,
+    amountIn: params.amountIn,
+    ...(params.gasInclude && { gasInclude: params.gasInclude.toString() }),
+    ...(params.slippageTolerance && { slippageTolerance: params.slippageTolerance.toString() }),
+    excludedSources:
+      'kyberswap-limit-order-v2,kyberswap-limit-order,kyberswap-pmm,kyber-pmm,hashflow-v3,bebop,clipper,native-v1,native-v2',
+  });
+
+  const url = `https://aggregator-api.kyberswap.com/base/api/v1/routes?${queryParams}`;
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json', 'X-Client-Id': 'tokeshare-dapp' },
+  });
+
+  if (!response.ok) throw new Error(`HTTP Error ${response.status}: ${await response.text()}`);
+
+  const data = await response.json();
+  if (data.code !== 0 || !data.data?.routeSummary) throw new Error(`API Error: ${data.message}`);
+
+  return data.data.routeSummary;
+}
+
+function computeTftQuote(params: SwapQuoteParams): QuoteResult {
+  if (params.direction === SwapDirection.StablecoinToToken) {
+    return {
+      outputAmount: (parseFloat(params.inputAmount) / TFT_PRICE_USD).toFixed(6),
+      exchangeRate: (1 / TFT_PRICE_USD).toFixed(4),
+    };
+  }
+  const gross = parseFloat(params.inputAmount) * TFT_PRICE_USD;
+  const net = gross * (1 - TFT_SELL_FEE);
+  return {
+    outputAmount: net.toFixed(2),
+    exchangeRate: (TFT_PRICE_USD * (1 - TFT_SELL_FEE)).toFixed(4),
+  };
+}
+
 export const useSwapQuote = (
   params: SwapQuoteParams | null,
   tokenSymbol: string,
   blockchain: Blockchain = Blockchain.Polygon,
 ): SwapQuoteResult => {
-  const DEBOUNCE_DELAY = 500;
-  const MINIMUM_AMOUNT_TO_GET_QUOTE = 0.01;
-
-  const [outputAmount, setOutputAmount] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [exchangeRate, setExchangeRate] = useState<string | null>(null);
-
   const { getSwapRoute, getConversion } = useSwap();
 
-  // Standalone function for TMC quote on Base (no wagmi hooks needed)
-  const getTmcSwapRoute = async (params: RouteParams): Promise<RouteSummary> => {
-    const queryParams = new URLSearchParams({
-      tokenIn: params.tokenIn,
-      tokenOut: params.tokenOut,
-      amountIn: params.amountIn,
-      ...(params.gasInclude && { gasInclude: params.gasInclude.toString() }),
-      ...(params.slippageTolerance && { slippageTolerance: params.slippageTolerance.toString() }),
-      excludedSources: 'kyberswap-limit-order-v2,kyberswap-limit-order,kyberswap-pmm,kyber-pmm,hashflow-v3,bebop,clipper,native-v1,native-v2',
-    });
-
-    const url = `https://aggregator-api.kyberswap.com/base/api/v1/routes?${queryParams}`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'X-Client-Id': 'tokeshare-dapp',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP Error ${response.status}: ${errorText}`);
-    }
-
-    const data = await response.json();
-
-    if (data.code !== 0 || !data.data?.routeSummary) {
-      throw new Error(`API Error: ${data.message}`);
-    }
-
-    return data.data.routeSummary;
-  };
-
   const inputAmount = params?.inputAmount || '';
-  const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, DEBOUNCE_DELAY);
+  const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, DEBOUNCE_DELAY_MS);
 
-  const fetchQuoteTGG = async (params: SwapQuoteParams) => {
-    try {
+  const enabled =
+    !!params &&
+    !!debouncedAmount &&
+    !isNaN(Number(debouncedAmount)) &&
+    parseFloat(debouncedAmount) >= MINIMUM_AMOUNT_TO_GET_QUOTE;
+
+  const { data, isFetching, error } = useQuery<QuoteResult>({
+    queryKey: ['swap-quote', tokenSymbol, blockchain, params?.inputToken, params?.outputToken, params?.direction, debouncedAmount],
+    enabled,
+    queryFn: async () => {
+      if (!params) throw new Error('Missing swap params');
       const amount = parseFloat(debouncedAmount);
-      const contracts = getTGGContracts(blockchain);
 
-      setIsLoading(true);
-      setError(null);
-      if (params.direction === SwapDirection.StablecoinToToken) {
-        const inputDecimals = getTokenDecimals(params.inputToken);
-        if (inputDecimals == null) throw new Error('Missing decimal');
-        const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
+      if (tokenSymbol === 'TGG') {
+        const contracts = getTGGContracts(blockchain);
+        if (params.direction === SwapDirection.StablecoinToToken) {
+          const inputDecimals = getTokenDecimals(params.inputToken);
+          if (inputDecimals == null) throw new Error('Missing decimal');
+          const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
 
-        const route = await getSwapRoute(
-          {
-            tokenIn: params.inputToken,
-            tokenOut: contracts.PAXG as Address,
-            amountIn: amountInBase,
-            gasInclude: true,
-            slippageTolerance: SLIPPAGE_TOLERANCE,
-          },
-          blockchain,
-        );
+          const route = await getSwapRoute(
+            {
+              tokenIn: params.inputToken,
+              tokenOut: contracts.PAXG as Address,
+              amountIn: amountInBase,
+              gasInclude: true,
+              slippageTolerance: SLIPPAGE_TOLERANCE,
+            },
+            blockchain,
+          );
 
-        const paxgAmount = parseFloat(route.amountOut) / DECIMALS_18;
-        const tggAmount = paxgAmount * ONCE_DIVISION;
-        setOutputAmount(tggAmount.toFixed(NUMBER_TO_FIXE_6));
-        setExchangeRate(`${(tggAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
-      } else {
-        const paxgAmount = await getConversion({
-          tggAmount: amount.toString(),
-          blockchain,
-        });
+          const paxgAmount = parseFloat(route.amountOut) / DECIMALS_18;
+          const tggAmount = paxgAmount * ONCE_DIVISION;
+          return {
+            outputAmount: tggAmount.toFixed(NUMBER_TO_FIXE_6),
+            exchangeRate: (tggAmount / amount).toFixed(NUMBER_TO_FIXE_6),
+          };
+        }
+
+        const paxgAmount = await getConversion({ tggAmount: amount.toString(), blockchain });
         const paxgAmountBase = BigInt(Math.floor(paxgAmount * DECIMALS_18)).toString();
 
         const route = await getSwapRoute(
@@ -180,52 +168,48 @@ export const useSwapQuote = (
         const outputDecimals = getTokenDecimals(params.outputToken);
         if (outputDecimals == null) throw new Error('Missing decimal');
         const stablecoinAmount = parseFloat(route.amountOut) / 10 ** outputDecimals;
-        setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
-        setExchangeRate(`${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
+        return {
+          outputAmount: stablecoinAmount.toFixed(NUMBER_TO_FIXE_4),
+          exchangeRate: (stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6),
+        };
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknow error');
-      setOutputAmount(null);
-      setExchangeRate(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const fetchQuoteTSP500 = async (params: SwapQuoteParams) => {
-    try {
-      const amount = parseFloat(debouncedAmount);
+      if (tokenSymbol === 'TFT_001') {
+        return computeTftQuote(params);
+      }
 
-      setIsLoading(true);
-      setError(null);
+      if (tokenSymbol === 'TMC' || tokenSymbol === 'TSP500') {
+        const ratio = tokenSymbol === 'TMC' ? TMC_CMC20_RATIO : TSP500_DESPXA_RATIO;
+        const underlying = tokenSymbol === 'TMC' ? BASE_CONTRACTS.CMC20 : BASE_CONTRACTS.DESPXA;
 
-      if (params.direction === SwapDirection.StablecoinToToken) {
-        const inputDecimals = getTokenDecimals(params.inputToken);
-        if (inputDecimals == null) throw new Error('Missing decimal');
-        const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
+        if (params.direction === SwapDirection.StablecoinToToken) {
+          const inputDecimals = getTokenDecimals(params.inputToken);
+          if (inputDecimals == null) throw new Error('Missing decimal');
+          const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
 
-        const route = await getTmcSwapRoute({
-          tokenIn: params.inputToken,
-          tokenOut: BASE_CONTRACTS.DESPXA as Address,
-          amountIn: amountInBase,
-          gasInclude: true,
-          slippageTolerance: SLIPPAGE_TOLERANCE,
-        });
+          const route = await getBaseSwapRoute({
+            tokenIn: params.inputToken,
+            tokenOut: underlying as Address,
+            amountIn: amountInBase,
+            gasInclude: true,
+            slippageTolerance: SLIPPAGE_TOLERANCE,
+          });
 
-        // deSPXA amount to TSP500: multiply by ratio (10)
-        const despxaAmount = parseFloat(route.amountOut) / DECIMALS_18;
-        const tsp500Amount = despxaAmount * TSP500_DESPXA_RATIO;
-        setOutputAmount(tsp500Amount.toFixed(NUMBER_TO_FIXE_6));
-        setExchangeRate(`${(tsp500Amount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
-      } else {
-        // TSP500 to stablecoin: convert TSP500 to deSPXA using ratio (1 TSP500 = 1/10 deSPXA)
-        const despxaAmount = amount / TSP500_DESPXA_RATIO;
-        const despxaAmountBase = BigInt(Math.floor(despxaAmount * DECIMALS_18)).toString();
+          const underlyingAmount = parseFloat(route.amountOut) / DECIMALS_18;
+          const tokenAmount = underlyingAmount * ratio;
+          return {
+            outputAmount: tokenAmount.toFixed(NUMBER_TO_FIXE_6),
+            exchangeRate: (tokenAmount / amount).toFixed(NUMBER_TO_FIXE_6),
+          };
+        }
 
-        const route = await getTmcSwapRoute({
-          tokenIn: BASE_CONTRACTS.DESPXA as Address,
+        const underlyingAmount = amount / ratio;
+        const underlyingBase = BigInt(Math.floor(underlyingAmount * DECIMALS_18)).toString();
+
+        const route = await getBaseSwapRoute({
+          tokenIn: underlying as Address,
           tokenOut: params.outputToken,
-          amountIn: despxaAmountBase,
+          amountIn: underlyingBase,
           gasInclude: true,
           slippageTolerance: SLIPPAGE_TOLERANCE,
         });
@@ -233,112 +217,20 @@ export const useSwapQuote = (
         const outputDecimals = getTokenDecimals(params.outputToken);
         if (outputDecimals == null) throw new Error('Missing decimal');
         const stablecoinAmount = parseFloat(route.amountOut) / 10 ** outputDecimals;
-        setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
-        setExchangeRate(`${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
+        return {
+          outputAmount: stablecoinAmount.toFixed(NUMBER_TO_FIXE_4),
+          exchangeRate: (stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6),
+        };
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      setOutputAmount(null);
-      setExchangeRate(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const fetchQuoteTMC = async (params: SwapQuoteParams) => {
-    try {
-      const amount = parseFloat(debouncedAmount);
-
-      setIsLoading(true);
-      setError(null);
-
-      if (params.direction === SwapDirection.StablecoinToToken) {
-        const inputDecimals = getTokenDecimals(params.inputToken);
-        if (inputDecimals == null) throw new Error('Missing decimal');
-        const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
-
-        const route = await getTmcSwapRoute({
-          tokenIn: params.inputToken,
-          tokenOut: BASE_CONTRACTS.CMC20 as Address,
-          amountIn: amountInBase,
-          gasInclude: true,
-          slippageTolerance: SLIPPAGE_TOLERANCE,
-        });
-
-        // CMC20 amount to TMC: multiply by ratio (10)
-        const cmc20Amount = parseFloat(route.amountOut) / DECIMALS_18;
-        const tmcAmount = cmc20Amount * TMC_CMC20_RATIO;
-        setOutputAmount(tmcAmount.toFixed(NUMBER_TO_FIXE_6));
-        setExchangeRate(`${(tmcAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
-      } else {
-        // TMC to stablecoin: convert TMC to CMC20 using ratio (1 TMC = 1/10 CMC20)
-        const cmc20Amount = amount / TMC_CMC20_RATIO;
-        const cmc20AmountBase = BigInt(Math.floor(cmc20Amount * DECIMALS_18)).toString();
-
-        const route = await getTmcSwapRoute({
-          tokenIn: BASE_CONTRACTS.CMC20 as Address,
-          tokenOut: params.outputToken,
-          amountIn: cmc20AmountBase,
-          gasInclude: true,
-          slippageTolerance: SLIPPAGE_TOLERANCE,
-        });
-
-        const outputDecimals = getTokenDecimals(params.outputToken);
-        if (outputDecimals == null) throw new Error('Missing decimal');
-        const stablecoinAmount = parseFloat(route.amountOut) / 10 ** outputDecimals;
-        setOutputAmount(stablecoinAmount.toFixed(NUMBER_TO_FIXE_4));
-        setExchangeRate(`${(stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6)}`);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      setOutputAmount(null);
-      setExchangeRate(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (
-      !params ||
-      !debouncedAmount ||
-      isNaN(Number(debouncedAmount)) ||
-      parseFloat(debouncedAmount) < MINIMUM_AMOUNT_TO_GET_QUOTE
-    ) {
-      setOutputAmount(null);
-      setExchangeRate(null);
-      setError(null);
-      setIsLoading(false);
-      return;
-    }
-
-    if (tokenSymbol == 'TGG') {
-      fetchQuoteTGG(params);
-    } else if (tokenSymbol == 'TFT_001') {
-      setIsLoading(true);
-      const TFT_PRICE = 31.25;
-      const TFT_SELL_FEE = 0.05;
-      if (params.direction === SwapDirection.StablecoinToToken) {
-        setOutputAmount((parseFloat(params.inputAmount) / TFT_PRICE).toFixed(6));
-        setExchangeRate((1 / TFT_PRICE).toFixed(4));
-      } else {
-        const gross = parseFloat(params.inputAmount) * TFT_PRICE;
-        const net = gross * (1 - TFT_SELL_FEE);
-        setOutputAmount(net.toFixed(2));
-        setExchangeRate((TFT_PRICE * (1 - TFT_SELL_FEE)).toFixed(4));
-      }
-      setIsLoading(false);
-    } else if (tokenSymbol == 'TMC') {
-      fetchQuoteTMC(params);
-    } else if (tokenSymbol == 'TSP500') {
-      fetchQuoteTSP500(params);
-    }
-  }, [params, debouncedAmount]);
+      throw new Error(`Unsupported token symbol: ${tokenSymbol}`);
+    },
+  });
 
   return {
-    outputAmount,
-    isLoading: isLoading || isTyping,
-    error,
-    exchangeRate,
+    outputAmount: data?.outputAmount ?? null,
+    exchangeRate: data?.exchangeRate ?? null,
+    isLoading: isFetching || isTyping,
+    error: error ? (error as Error).message : null,
   };
 };
