@@ -1,4 +1,3 @@
-'use client';
 import PopularCards from '../components/features/home/PopularCards';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,7 +8,14 @@ export default function Home() {
     <>
       <div className="relative h-screen bg-color1">
         <div className="relative h-screen">
-          <Image src="/images/bg-image-1.webp" alt="House" fill className="object-cover" />
+          <Image
+            src="/images/bg-image-1.webp"
+            alt="House"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
         </div>
         <div className="absolute inset-0 flex flex-col items-start justify-center px-6 md:px-36 space-y-4">
           <h1 className="text-white text-4xl md:text-6xl pt-48 md:pt-4 w-full md:w-2/3 lg:w-1/2">
