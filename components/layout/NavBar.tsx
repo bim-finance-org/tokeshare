@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { name: 'Stock & ETF', path: '/marketplace/stock-etf' },
   { name: 'Other', path: '/marketplace/other' },
   { name: 'Partners', path: '/partners' },
+  { name: 'Dashboard', path: '/user/dashboard' },
 ];
 
 const NavBar: React.FC<NavBarProps> = () => {
