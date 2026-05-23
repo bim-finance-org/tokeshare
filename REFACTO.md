@@ -182,7 +182,7 @@ La quasi-totalité des `<button>` n'ont pas `type="button"` explicite (BuyModal,
 | 6 | Ajouter `loading.tsx`, `error.tsx`, `global-error.tsx`, `not-found.tsx`, `sitemap.ts`, `robots.ts`, `opengraph-image` | 🟠 | ✅ | `opengraph-image` ajouté via next/og (edge) |
 | 7 | `generateMetadata` dynamique sur pages détail | 🟠 | ✅ | Posé sur real-estate/[id] et commodities/[name] |
 | 8 | Factoriser `useZAP*Contract`, swap handlers, `useTokenPrice`, `useSwap` (TGG/TMC/TSP500) | 🟡 | ✅ | `useZapHook`, `useZapSwapHandler`, `useZapSwap` ; `useTokenPrice` splitté en 4 hooks dédiés (1033→567 lignes côté swap) |
-| 9 | `useUserTokenAssets` → multicall ; déplacer `usePrefetchStablePrices` aux pages concernées | 🟡 | 🟡 | `PUBLIC_CLIENTS` configurés en `batch: { multicall: true }` ; reste à déplacer `usePrefetchStablePrices` |
+| 9 | `useUserTokenAssets` → multicall ; déplacer `usePrefetchStablePrices` aux pages concernées | 🟡 | ✅ | `PUBLIC_CLIENTS` en `batch: { multicall: true }` ; `usePrefetchStablePrices` retiré (Exchange déclenche déjà la query sur les pages concernées) |
 | 10 | `useSwap` : `useCallback` + supprimer try/throw bruyants | 🟡 | ✅ | Appliqué aussi à `useTmcSwap`, `useTsp500Swap`, `useMarketplaceContract` (mêmes warnings exhaustive-deps) |
 | 11 | LCP : `priority`/`sizes`/`blurDataURL` sur la hero ; AVIF dans `next.config.ts` | 🟡 | 🟡 | `priority` + `sizes` posés ; AVIF + WebP configurés ; `blurDataURL` à faire |
 | 12 | `<Suspense>` autour des blocs Wagmi | 🟡 | ⏳ | UX streaming |
@@ -190,6 +190,6 @@ La quasi-totalité des `<button>` n'ont pas `type="button"` explicite (BuyModal,
 | 14 | `next.config.ts` : `typedRoutes`, `optimizePackageImports`, `remotePatterns`, `output: 'standalone'` si Docker | 🟢 | 🟡 | `typedRoutes`, `optimizePackageImports`, `formats` ajoutés ; `remotePatterns` à compléter quand on connaît les hosts |
 | 15 | Nettoyage : code mort, doublons `.d.ts`, POC, `ToDo.md`, logs `console.*` | 🟢 | 🟡 | HouseCard nettoyé ; 32 `console.*` migrés sur le logger central ; poc-stellar, buildingInProgress et ToDo.md restants |
 | 16 | Refacto `TokenContexts` (1 effet, `createContext<T \| null>`, hook guard) + mismatch hydration | 🟢 | ✅ | Reconstruit sur `useSyncExternalStore` ; même fix appliqué à `UserForm` (anti-pattern jumeau) |
-| 17 | `type="button"` partout, `@wagmi/cli`, logger central | 🟢 | 🟡 | `lib/logger.ts` (leveled, scoped, env-aware) ; reste `type="button"` sweep et `@wagmi/cli` |
+| 17 | `type="button"` partout, `@wagmi/cli`, logger central | 🟢 | 🟡 | `lib/logger.ts` (leveled, scoped, env-aware) ; `type="button"` sweep (79 boutons) ; reste `@wagmi/cli` |
 
 Légende : ✅ done · 🟡 partiel · ⏳ à faire
