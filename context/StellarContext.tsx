@@ -1,9 +1,12 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { StellarWalletsKit } from '@creit.tech/stellar-wallets-kit/sdk';
-import { defaultModules } from '@creit.tech/stellar-wallets-kit/modules/utils';
-import { KitEventType, SwkAppLightTheme } from '@creit.tech/stellar-wallets-kit/types';
+import {
+  StellarWalletsKit,
+  WalletNetwork,
+  allowAllModules,
+  type ISupportedWallet,
+} from '@creit.tech/stellar-wallets-kit';
 
 type StellarContextValue = {
   address: string | undefined;
@@ -14,52 +17,68 @@ type StellarContextValue = {
 };
 
 const StellarContext = createContext<StellarContextValue | undefined>(undefined);
+const STORAGE_KEY = 'tokeshare:stellar-wallet-id';
 
 export function StellarProvider({ children }: { children: React.ReactNode }) {
   const [address, setAddress] = useState<string | undefined>();
   const [walletId, setWalletId] = useState<string | undefined>();
-  const initialized = useRef(false);
+  const kitRef = useRef<StellarWalletsKit | null>(null);
 
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
+    if (kitRef.current) return;
 
-    StellarWalletsKit.init({
-      theme: SwkAppLightTheme,
-      modules: defaultModules(),
-    });
+    const storedWalletId = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) ?? undefined : undefined;
 
-    const unsubState = StellarWalletsKit.on(KitEventType.STATE_UPDATED, (event) => {
-      setAddress(event.payload.address);
+    const kit = new StellarWalletsKit({
+      network: WalletNetwork.PUBLIC,
+      selectedWalletId: storedWalletId,
+      modules: allowAllModules(),
     });
-    const unsubWallet = StellarWalletsKit.on(KitEventType.WALLET_SELECTED, (event) => {
-      setWalletId(event.payload.id);
-    });
-    const unsubDisconnect = StellarWalletsKit.on(KitEventType.DISCONNECT, () => {
-      setAddress(undefined);
-      setWalletId(undefined);
-    });
+    kitRef.current = kit;
 
-    return () => {
-      unsubState();
-      unsubWallet();
-      unsubDisconnect();
-    };
+    if (storedWalletId) {
+      setWalletId(storedWalletId);
+      kit
+        .getAddress({ skipRequestAccess: true })
+        .then(({ address }) => {
+          if (address) setAddress(address);
+        })
+        .catch(() => {
+          localStorage.removeItem(STORAGE_KEY);
+          setWalletId(undefined);
+        });
+    }
   }, []);
 
   const connect = useCallback(async () => {
+    const kit = kitRef.current;
+    if (!kit) return;
     try {
-      await StellarWalletsKit.authModal();
+      await kit.openModal({
+        onWalletSelected: async (option: ISupportedWallet) => {
+          try {
+            kit.setWallet(option.id);
+            const { address } = await kit.getAddress();
+            setWalletId(option.id);
+            setAddress(address);
+            localStorage.setItem(STORAGE_KEY, option.id);
+          } catch (error) {
+            console.error('Stellar wallet connection failed:', error);
+          }
+        },
+      });
     } catch (error) {
-      const code = (error as { code?: number } | undefined)?.code;
-      if (code !== -1) {
-        console.error('Stellar wallet connection failed:', error);
-      }
+      console.error('Stellar modal error:', error);
     }
   }, []);
 
   const disconnect = useCallback(async () => {
-    await StellarWalletsKit.disconnect();
+    const kit = kitRef.current;
+    if (!kit) return;
+    await kit.disconnect();
+    localStorage.removeItem(STORAGE_KEY);
+    setAddress(undefined);
+    setWalletId(undefined);
   }, []);
 
   const value = useMemo<StellarContextValue>(
