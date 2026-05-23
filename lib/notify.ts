@@ -3,8 +3,8 @@ import { parseError } from '@/lib/errors';
 
 export const notify = {
   error(err: unknown, opts?: { title?: string; fallback?: string }) {
-    const description = parseError(err) || opts?.fallback || 'An unexpected error occurred.';
-    if (process.env.NODE_ENV !== 'production') {
+    const description = typeof err === 'string' ? err : parseError(err) || opts?.fallback || 'An unexpected error occurred.';
+    if (process.env.NODE_ENV !== 'production' && typeof err !== 'string') {
       console.error(opts?.title ?? 'Error', err);
     }
     return toast({

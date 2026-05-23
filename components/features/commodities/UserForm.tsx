@@ -9,6 +9,7 @@ import { useTGGTransfer } from '@/hooks/useTGGTransfer';
 import { useTFTTransfer } from '@/hooks/useTFTTransfer';
 import { FEES_COEF, NUMBER_TO_FIXE_2, TFT_001_SELL_FEES_COEF } from '@/constants/constants';
 import { Action } from '@/enums/Actions';
+import { notify } from '@/lib/notify';
 
 interface UserFormProps {
   type: 'buy' | 'sell';
@@ -41,7 +42,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   const { isConnected, address } = useAccount();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('userFormData');
@@ -96,20 +96,12 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
     if (receiptSuccess && hash) {
       handleApiSubmission();
     } else if (receiptError) {
-      setError('Transaction failed. Please contact support for assistance.');
+      notify.error(receiptError, { fallback: 'Transaction failed. Please contact support for assistance.' });
     }
   }, [receiptSuccess, receiptError, hash]);
 
   useEffect(() => {
-    if (transferError) {
-      if (transferError.message?.includes('User rejected') || transferError.message?.includes('rejected')) {
-        setError('Transaction cancelled by user.');
-      } else if (transferError.message?.includes('insufficient funds')) {
-        setError('Insufficient balance to complete the transaction.');
-      } else {
-        setError('Transfer error. Please try again.');
-      }
-    }
+    if (transferError) notify.error(transferError);
   }, [transferError]);
 
   const handleApiSubmission = async () => {
@@ -174,12 +166,10 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
 
       setShowConfirmation(true);
     } catch (err) {
-      console.error('Error during submission:', err);
-
       if (err instanceof SyntaxError && err.message.includes('JSON')) {
-        setError('Server connection error. Please try again later.');
+        notify.error('Server connection error. Please try again later.');
       } else {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        notify.error(err);
       }
     } finally {
       setIsLoading(false);
@@ -188,7 +178,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     if (!isConnected) {
       return;
@@ -206,8 +195,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
         }
       }
     } catch (err) {
-      console.error('Error during submission:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      notify.error(err);
       setIsLoading(false);
     }
   };
@@ -300,8 +288,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
                 </p>
               </div>
             )}
-
-            {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">{error}</div>}
 
             <button
               type="submit"
