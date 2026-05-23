@@ -151,7 +151,7 @@ export const useSwapQuote = (
           };
         }
 
-        const paxgAmount = await getConversion({ tggAmount: amount.toString(), blockchain });
+        const paxgAmount = await getConversion({ amount: amount.toString(), blockchain });
         const paxgAmountBase = BigInt(Math.floor(paxgAmount * DECIMALS_18)).toString();
 
         const route = await getSwapRoute(
