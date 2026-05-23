@@ -39,7 +39,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "types/next-auth.d.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
