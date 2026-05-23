@@ -4,8 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import Script from 'next/script';
 import MobileMenu from '@/components/layout/MobileMenu';
-import Head from 'next/head';
 import ConnectButton from '@/components/shared/ConnectButton';
 
 interface NavBarProps {
@@ -32,16 +32,19 @@ const NavBar: React.FC<NavBarProps> = () => {
 
   return (
     <>
-      <Head>
-        <script type="application/ld+json">
-          {JSON.stringify({
+      <Script
+        id="navbar-jsonld"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'SiteNavigationElement',
             name: NAV_ITEMS.map((i) => i.name),
             url: NAV_ITEMS.map((i) => i.path),
-          })}
-        </script>
-      </Head>
+          }),
+        }}
+      />
 
       <nav role="navigation" aria-label="Main Navigation" className={classNav}>
         {/* Logo */}
