@@ -65,8 +65,8 @@ const NavBar: React.FC<NavBarProps> = () => {
           {JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'SiteNavigationElement',
-            name: ['Home', 'Market place', 'About Us', 'Learn'],
-            url: ['/', '/marketplace', '/about', '/learn'],
+            name: ['Home', 'Market place', 'About Us'],
+            url: ['/', '/marketplace', '/about'],
           })}
         </script>
       </Head>
@@ -95,7 +95,6 @@ const NavBar: React.FC<NavBarProps> = () => {
               { name: 'Home', path: '/' },
               { name: 'Market place', path: '' },
               { name: 'About Us', path: '/about' },
-              { name: 'Learn', path: '/learn' },
             ].map(({ name, path }, index) => (
               <li key={index} className="relative flex items-center">
                 {name === 'Market place' ? (

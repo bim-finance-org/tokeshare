@@ -53,7 +53,6 @@ const MobileMenu: React.FC = () => {
               { name: 'Stock & ETF', path: '/marketplace/stock-etf' },
               { name: 'Other', path: '/marketplace/other' },
               { name: 'About Us', path: '/about' },
-              { name: 'Learn', path: '/learn' },
             ].map(({ name, path }, index) => (
               <li key={index} className="relative w-full">
                 <Link

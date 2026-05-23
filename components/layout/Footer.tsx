@@ -15,9 +15,6 @@ const Footer = () => {
           <h1 className="text-xl font-bold text-color2 mb-4">INFORMATION</h1>
           <ul className="space-y-2">
             <li className="hover:underline cursor-pointer">
-              <Link href="/learn">FAQ</Link>
-            </li>
-            <li className="hover:underline cursor-pointer">
               <Link href="/blog">Blog</Link>
             </li>
             <li className="hover:underline cursor-pointer">
