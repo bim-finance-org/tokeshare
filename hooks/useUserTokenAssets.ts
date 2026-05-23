@@ -10,7 +10,7 @@ import { TokenType } from '@/enums/TokenType';
 import { Blockchain } from '@/enums/Blockchain';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { AssetData } from '@/interfaces/AssetData';
-import { useTokenPrice } from '@/hooks/useTokenPrice';
+import { useTGGPrice, useTFTPrice } from '@/hooks/useTokenPrice';
 
 async function fetchUserTokenAssets(
   address: Address,
@@ -61,8 +61,8 @@ export function useUserTokenAssets(): {
   isLoading: boolean;
 } {
   const { address } = useAccount();
-  const { price: tggPrice, isLoading: tggLoading } = useTokenPrice('TGG');
-  const { price: tftPrice, isLoading: tftLoading } = useTokenPrice('TFT_001');
+  const { price: tggPrice, isLoading: tggLoading } = useTGGPrice();
+  const { price: tftPrice, isLoading: tftLoading } = useTFTPrice();
 
   const pricesReady = !tggLoading && !tftLoading;
 

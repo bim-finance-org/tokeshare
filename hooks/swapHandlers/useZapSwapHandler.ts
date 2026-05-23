@@ -3,7 +3,6 @@ import type { Address } from 'viem';
 import type { Blockchain } from '@/enums/Blockchain';
 import type { TokenSwapHandler } from '@/interfaces/TokenSwapHandler';
 import { getTokenAddress, getTokenDecimals } from '@/utils/token';
-import { useTokenPrice } from '../useTokenPrice';
 import { TRUSTED_AGGREGATORS } from '@/contracts/contracts';
 
 type ZapMintParams = {
@@ -32,8 +31,8 @@ type ZapSwapHookResult = {
 };
 
 interface ZapSwapHandlerConfig {
-  /** Token symbol used to fetch the unit price (TGG, TMC, TSP500…). */
-  tokenSymbol: string;
+  /** Unit price of the base token (TGG/TMC/TSP500) in stablecoin units. */
+  price: number | null;
   /** Aggregator the Zap contract is allowed to call. Defaults to KyberSwap. */
   router?: Address;
   /** Output token of the swap (PAXG for TGG, CMC20 for TMC…). May depend on the chain. */
@@ -45,12 +44,11 @@ interface ZapSwapHandlerConfig {
 const DEFAULT_ROUTER = TRUSTED_AGGREGATORS.kyberSwap as Address;
 
 export function useZapSwapHandler({
-  tokenSymbol,
+  price,
   router = DEFAULT_ROUTER,
   resolveOutputToken,
   swap,
 }: ZapSwapHandlerConfig): TokenSwapHandler {
-  const { price } = useTokenPrice(tokenSymbol);
   const { swapMint, swapWithdraw, isPending, error, hash } = swap;
 
   return useMemo<TokenSwapHandler>(

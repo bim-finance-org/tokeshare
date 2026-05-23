@@ -5,56 +5,66 @@ import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
 import { calculateTGGPrice, calculateTMCPrice, calculateTSP500Price } from '@/utils/priceUtils';
 import { useMarketplaceContract } from './useMarketplaceContracts';
 
-export function useTokenPrice(symbol: string): {
+export type TokenPriceResult = {
   price: number | null;
   isLoading: boolean;
-} {
-  // Call ALL hooks unconditionally to respect React hooks rules
-  const { data: paxgPrice, isLoading: paxgLoading } = usePaxgPrice();
-  const { data: cmc20Price, isLoading: cmc20Loading } = useCmc20Price();
-  const { data: despxaPrice, isLoading: despxaLoading } = useDeSPXAPrice();
+};
+
+export function useTGGPrice(): TokenPriceResult {
+  const { data: paxgPrice, isLoading } = usePaxgPrice();
+  return {
+    price: paxgPrice !== undefined ? calculateTGGPrice(paxgPrice) : null,
+    isLoading,
+  };
+}
+
+export function useTMCPrice(): TokenPriceResult {
+  const { data: cmc20Price, isLoading } = useCmc20Price();
+  return {
+    price: cmc20Price !== undefined ? calculateTMCPrice(cmc20Price) : null,
+    isLoading,
+  };
+}
+
+export function useTSP500Price(): TokenPriceResult {
+  const { data: despxaPrice, isLoading } = useDeSPXAPrice();
+  return {
+    price: despxaPrice !== undefined ? calculateTSP500Price(despxaPrice) : null,
+    isLoading,
+  };
+}
+
+export function useTFTPrice(): TokenPriceResult {
   const { tftTokenInfo, tftTokenInfoLoading } = useMarketplaceContract();
+  const [pricePerToken] = (tftTokenInfo ?? []) as [bigint];
+  const price = Number(pricePerToken) / 10 ** 18;
+  return { price: price || null, isLoading: tftTokenInfoLoading };
+}
 
-  // Calculate prices for each token type
+/**
+ * Generic dispatcher kept for components that don't know the symbol at compile time
+ * (e.g. the shared commodities Swap component that handles TGG/TMC/TSP500 via a prop).
+ * For known symbols, prefer the dedicated hooks — they only fire the underlying
+ * price query that is actually needed.
+ */
+export function useTokenPrice(symbol: string): TokenPriceResult {
+  const tgg = useTGGPrice();
+  const tmc = useTMCPrice();
+  const tsp500 = useTSP500Price();
+  const tft = useTFTPrice();
+
   return useMemo(() => {
-    if (symbol === 'TGG') {
-      return {
-        price: paxgPrice !== undefined ? calculateTGGPrice(paxgPrice) : null,
-        isLoading: paxgLoading,
-      };
+    switch (symbol) {
+      case 'TGG':
+        return tgg;
+      case 'TMC':
+        return tmc;
+      case 'TSP500':
+        return tsp500;
+      case 'TFT_001':
+        return tft;
+      default:
+        return { price: null, isLoading: false };
     }
-
-    if (symbol === 'TFT_001') {
-      const [pricePerToken] = (tftTokenInfo ?? []) as [bigint, number, boolean];
-      const bigInt_price = Number(pricePerToken);
-      const price = bigInt_price / 10 ** 18;
-      return { price: price || null, isLoading: tftTokenInfoLoading };
-    }
-
-    if (symbol === 'TMC') {
-      return {
-        price: cmc20Price !== undefined ? calculateTMCPrice(cmc20Price) : null,
-        isLoading: cmc20Loading,
-      };
-    }
-
-    if (symbol === 'TSP500') {
-      return {
-        price: despxaPrice !== undefined ? calculateTSP500Price(despxaPrice) : null,
-        isLoading: despxaLoading,
-      };
-    }
-
-    return { price: null, isLoading: false };
-  }, [
-    symbol,
-    paxgPrice,
-    paxgLoading,
-    cmc20Price,
-    cmc20Loading,
-    despxaPrice,
-    despxaLoading,
-    tftTokenInfo,
-    tftTokenInfoLoading,
-  ]);
+  }, [symbol, tgg, tmc, tsp500, tft]);
 }
