@@ -3,8 +3,6 @@
 import React from 'react';
 import { useParams } from 'next/navigation';
 import housesData from '@/data/housesData.json';
-import Image from 'next/image';
-import { notFound } from 'next/navigation';
 
 import Map from '@/components/features/real-estate/HouseMap';
 import Head from '@/components/features/real-estate/HouseHead';

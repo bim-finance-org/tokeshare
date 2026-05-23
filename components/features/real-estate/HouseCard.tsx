@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -20,10 +19,8 @@ const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
 
   const { name, images, number, surface, city, price, tokenPrice, expectedIncome, dateIncome, tokenIncome } = general;
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
   return (
-    <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-3xl">
+    <div className="bg-color1 shadow-lg max-w-xl rounded-3xl">
       <div className="image-container">
         <Image
           src={images[0]}
