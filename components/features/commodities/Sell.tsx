@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useContext, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import TradeWidget from '../../../components/shared/TradeWidget';
 import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/shared/Blockchains';
@@ -8,7 +8,7 @@ import { calculateTGGPrice, calculateTMCPrice, calculateTSP500Price, convertTGGT
 import ConnectButton from '@/components/shared/ConnectButton';
 import { useAccount } from 'wagmi';
 import UserForm from './UserForm';
-import { TokenContexts } from '@/context/TokenContexts';
+import { useTokenContext } from '@/context/TokenContexts';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { useCmc20Price } from '@/hooks/useCmc20Price';
 import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
@@ -26,7 +26,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
     sell: { token: selectedCurrency, blockchain: selectedBlockchain },
     updateSellToken: setSelectedCurrency,
     updateSellBlockchain: setSelectedBlockchain,
-  } = useContext(TokenContexts);
+  } = useTokenContext();
 
   const [amountToSell, setAmountToSell] = useState('1');
   const [showUserForm, setShowUserForm] = useState(false);

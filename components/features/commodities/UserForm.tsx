@@ -1,9 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 import { useMutation } from '@tanstack/react-query';
 import ConnectButton from '@/components/shared/ConnectButton';
 import BuyInfo from './BuyInfo';
-import { TokenContexts } from '@/context/TokenContexts';
+import { useTokenContext } from '@/context/TokenContexts';
 import { generatePayReference } from '@/utils/RandomRefs';
 import { useTGGBalance } from '@/hooks/useTGGBalance';
 import { useTGGTransfer } from '@/hooks/useTGGTransfer';
@@ -38,7 +38,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   const {
     buy: { blockchain: buyBlockchain },
     sell: { blockchain: sellBlockchain },
-  } = useContext(TokenContexts);
+  } = useTokenContext();
 
   const { isConnected, address } = useAccount();
   const [showConfirmation, setShowConfirmation] = useState(false);

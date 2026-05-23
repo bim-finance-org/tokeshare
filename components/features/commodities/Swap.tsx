@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import Image from 'next/image';
 import Blockchains from '@/components/shared/Blockchains';
 import { useAccount } from 'wagmi';
 import ConnectButton from '@/components/shared/ConnectButton';
-import { TokenContexts } from '@/context/TokenContexts';
+import { useTokenContext } from '@/context/TokenContexts';
 import { useSwapQuote } from '@/hooks/useSwapQuote';
 import { Address } from 'viem';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -34,7 +34,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     swap: { token: stablecoin, blockchain: selectedBlockchain },
     updateSwapToken: setStablecoin,
     updateSwapBlockchain: setSelectedBlockchain,
-  } = useContext(TokenContexts);
+  } = useTokenContext();
 
   const { isOnCorrectChain, isPending: isSwitchingNetwork, retry: retrySwitch } = useAutoSwitchNetwork(selectedBlockchain);
 

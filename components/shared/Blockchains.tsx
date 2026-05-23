@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PolygonIcon from '@/components/icons/blockchains/PolygonIcon';
 import BaseIcon from '@/components/icons/blockchains/BaseIcon';
 import EthereumIcon from '@/components/icons/blockchains/EthereumIcon';
 import ArrowDownIcon from '@/components/icons/arrows/ArrowDownIcon';
-import { TokenContexts } from '@/context/TokenContexts';
+import { useTokenContext } from '@/context/TokenContexts';
 import { Blockchain } from '@/enums/Blockchain';
 import { ExchangeSection } from '@/enums/ExchangeSection';
 import { getTokenBlockchains } from '@/utils/token';
@@ -19,8 +19,7 @@ interface BlockchainsProps {
 const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
   const availableBlockchains = getTokenBlockchains(tokenSymbol);
 
-  // Context
-  const tokenContext = useContext(TokenContexts);
+  const tokenContext = useTokenContext();
 
   // Sélection actuelle depuis le context
   let blockchain: Blockchain = Blockchain.Polygon;

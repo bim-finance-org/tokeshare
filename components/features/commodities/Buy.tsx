@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/shared/Blockchains';
@@ -16,7 +16,7 @@ import { useCmc20Price } from '@/hooks/useCmc20Price';
 import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
 import { useAccount } from 'wagmi';
 import UserForm from './UserForm';
-import { TokenContexts } from '@/context/TokenContexts';
+import { useTokenContext } from '@/context/TokenContexts';
 import { ExchangeRates, useExchangeRates } from '@/hooks/useExchangeRates';
 import { Badge } from '@/components/ui/badge';
 import { ExchangeSection } from '@/enums/ExchangeSection';
@@ -30,7 +30,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
     buy: { token: selectedCurrency, blockchain: selectedBlockchain },
     updateBuyToken: setSelectedCurrency,
     updateBuyBlockchain: setSelectedBlockchain,
-  } = useContext(TokenContexts);
+  } = useTokenContext();
 
   // Local state — fiat amount is the single source of truth.
   // The crypto amount is derived during render below.
