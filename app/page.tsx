@@ -1,55 +1,12 @@
 'use client';
-import React, { useState } from 'react';
 import PopularCards from '../components/features/home/PopularCards';
-import ArrowLineIcon from '../components/icons/arrows/ArrowLineIcon';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Input } from '../components/ui/input';
 import Schema from '../components/features/home/Schema';
-import { z } from 'zod';
 import { usePaxgPrice } from '../hooks/usePaxgPrice';
 
 export default function Home() {
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Précharger le prix du PAXG
   usePaxgPrice();
-
-  const handleSubscribe = async () => {
-    if (!email.trim()) {
-      setError('Please enter your email.');
-      return;
-    }
-    if (!z.string().email().safeParse(email).success) {
-      setError('Invalid email address. Please enter a valid one.');
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const body = { email };
-      const response = await fetch('/api/emails', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (response.status < 200 || response.status >= 400) {
-        throw new Error();
-      }
-      setSubmitted(true);
-      setEmail(''); // Réinitialisation du champ après soumission
-      setError(''); // Supprimer les erreurs après succès
-      setIsSubmitting(false);
-    } catch (error) {
-      setIsSubmitting(false);
-      console.error("Erreur d'inscription:", error);
-      setError('An error occurred. Please try again later.');
-    }
-  };
 
   return (
     <>
@@ -78,56 +35,6 @@ export default function Home() {
       <Schema />
 
       <PopularCards />
-
-      <div className="mt-16 bg-color4 p-8">
-        <div className="h-72"></div>
-        <h4 className="font-bold text-5xl text-center mb-6">Interested in Updates?</h4>
-
-        {submitted ? (
-          <p className="text-green-400 font-semibold text-center">
-            ✅ Thank you! We&apos;ll keep you updated. Stay tuned! 🎉
-          </p>
-        ) : (
-          <>
-            <div className="relative w-full my-8">
-              <div className="border-t-2 border-color1 w-full"></div>
-              <div className="absolute left-1/3 transform -translate-x-1/2 -top-3 bg-color4 px-4">
-                <span>Email Address </span>
-                <span className="text-color3">*</span>
-              </div>
-            </div>
-            <form className="flex flex-col items-center space-y-6">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setError(''); // Supprime l'erreur en cas de modification
-                }}
-                className={`w-3/5 p-3 bg-transparent border ${error ? 'border-red-500' : 'border-color1'}`}
-                disabled={isSubmitting}
-              />
-              <div className="relative w-full my-8">
-                <div className="border-t-2 border-color1 w-full"></div>
-                <div className="absolute left-2/3 transform -translate-x-1/2 -top-3 bg-color4 px-2">
-                  <span className="text-color3">* </span>
-                  <span>Required</span>
-                </div>
-              </div>
-              {error && <p className="text-red-500">{error}</p>}
-              <button
-                type="button"
-                onClick={handleSubscribe}
-                disabled={isSubmitting}
-                className="bg-color1 text-white px-6 py-2 rounded-lg hover:scale-105 transition-transform duration-300 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Subscribing...' : 'Subscribe'}
-              </button>
-            </form>
-          </>
-        )}
-      </div>
     </>
   );
 }

@@ -10,7 +10,7 @@ import commoditiesData from '../../../data/commoditiesData.json';
 
 const PopularHouses: React.FC = () => {
   return (
-    <div className="px-4 sm:px-10 lg:px-24 mb-[-22rem] relative py-8 sm:py-10">
+    <div className="px-4 sm:px-10 lg:px-24 relative py-8 sm:py-10">
       <div className="flex items-center mb-4">
         <div className="w-10 sm:w-12 h-1 bg-color4 mr-2"></div>
         <h3 className=" text-2xl sm:text-3xl text-color4">POPULAR</h3>
