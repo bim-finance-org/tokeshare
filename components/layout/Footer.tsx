@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import LinkedinIcon from '@/components/icons/social/LinkedinIcon';
 import XIcon from '@/components/icons/social/XIcon';
-import InstagramIcon from '@/components/icons/social/InstagramIcon';
 import Image from 'next/image';
 
 const Footer = () => {
@@ -37,9 +36,6 @@ const Footer = () => {
           <h1 className="text-xl font-bold text-color2 mb-4">CONTACT US</h1>
           <p className="mb-8 text-lg">contact@tokeshare.co</p>
           <div className="flex space-x-4 text-2xl text-color2 mt-4">
-            <Link href="https://www.linkedin.com/company/tokeshare/" target="_blank">
-              <InstagramIcon size={56} className="hover:scale-105" />
-            </Link>
             <Link href="https://x.com/Tokeshare" target="_blank">
               <XIcon size={56} className="hover:scale-105" />
             </Link>
