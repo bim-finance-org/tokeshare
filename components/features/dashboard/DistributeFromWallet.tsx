@@ -122,8 +122,9 @@ export default function DistributeFromWallet() {
       }
 
       setMsg(`✅ Distribution OK — ${recipients.length} destinataires, ${txHashes.length} tx.`);
-    } catch (e: any) {
-      setMsg(`❌ ${e?.message ?? 'Erreur distribution'}`);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Erreur distribution';
+      setMsg(`❌ ${message}`);
     } finally {
       setBusy(false);
     }

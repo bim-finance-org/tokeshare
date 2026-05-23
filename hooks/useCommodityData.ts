@@ -2,13 +2,13 @@ import useSWR from 'swr';
 
 export interface CommodityPrice {
   price: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CommodityPerformance {
   perf1d?: number | null;
   perf1y?: number | null;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
