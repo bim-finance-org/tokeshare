@@ -63,13 +63,6 @@ const Buy = ({ token }: { token: TokenInfo }) => {
     return () => clearInterval(interval);
   }, [paxgPrice, cmc20Price, despxaPrice, token.symbol]);
 
-  // Calcul initial du montant TGG
-  useEffect(() => {
-    if (tggPrice > 0 && !isRatesLoading) {
-      calculateTggFromFiat(amountToSend);
-    }
-  }, [tggPrice, exchangeRates, selectedCurrency]);
-
   // Calcule le montant token à partir du montant fiat
   const calculateTggFromFiat = (fiatAmount: string) => {
     const numericAmount = parseFloat(fiatAmount) || 0;
@@ -96,6 +89,15 @@ const Buy = ({ token }: { token: TokenInfo }) => {
       setTggAmount('0');
     }
   };
+
+  // Calcul initial du montant TGG (déclaré après calculateTggFromFiat pour
+  // éviter la TDZ si on l'ajoute aux dépendances).
+  useEffect(() => {
+    if (tggPrice > 0 && !isRatesLoading) {
+      calculateTggFromFiat(amountToSend);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tggPrice, exchangeRates, selectedCurrency]);
 
   // Calcule le montant fiat à partir du montant TGG
   const calculateFiatFromTgg = (tggValue: string) => {

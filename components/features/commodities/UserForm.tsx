@@ -93,14 +93,6 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   }, [formData]);
 
   useEffect(() => {
-    if (receiptSuccess && hash) {
-      handleApiSubmission();
-    } else if (receiptError) {
-      notify.error(receiptError, { fallback: 'Transaction failed. Please contact support for assistance.' });
-    }
-  }, [receiptSuccess, receiptError, hash]);
-
-  useEffect(() => {
     if (transferError) notify.error(transferError);
   }, [transferError]);
 
@@ -175,6 +167,16 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
       setIsLoading(false);
     }
   };
+
+  // Déclaré après handleApiSubmission pour éviter la TDZ.
+  useEffect(() => {
+    if (receiptSuccess && hash) {
+      handleApiSubmission();
+    } else if (receiptError) {
+      notify.error(receiptError, { fallback: 'Transaction failed. Please contact support for assistance.' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receiptSuccess, receiptError, hash]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

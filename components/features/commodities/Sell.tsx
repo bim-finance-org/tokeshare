@@ -77,12 +77,6 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   }, [paxgPrice, cmc20Price, despxaPrice, token.symbol, isTFT]);
 
   useEffect(() => {
-    if (tggPrice > 0 && (isTFT || !isRatesLoading)) {
-      calculateReceiveAmount();
-    }
-  }, [tggPrice, exchangeRates, selectedCurrency, amountToSell]);
-
-  useEffect(() => {
     setShowBalanceError(false);
   }, [amountToSell]);
 
@@ -114,6 +108,14 @@ const Sell = ({ token }: { token: TokenInfo }) => {
       setReceiveAmount('0');
     }
   };
+
+  // Déclaré après calculateReceiveAmount pour éviter la TDZ.
+  useEffect(() => {
+    if (tggPrice > 0 && (isTFT || !isRatesLoading)) {
+      calculateReceiveAmount();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tggPrice, exchangeRates, selectedCurrency, amountToSell]);
 
   const handleCurrencyChange = (currency: string) => {
     setSelectedCurrency(currency);
