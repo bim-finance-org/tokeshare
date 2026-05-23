@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import LocationIcon from '../../icons/card/LocationIcon';
-import { FaChartLine } from 'react-icons/fa6';
+import { LineChart } from 'lucide-react';
 import Link from 'next/link';
 import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
@@ -90,7 +90,7 @@ const TacosCard = () => {
 
         <div className="bg-color2/20 rounded-xl p-6 mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <FaChartLine size={32} />
+            <LineChart size={32} />
             <span className="font-bold text-xl">Net yield:</span>
             <span className="ml-auto font-semibold text-green-600 text-xl">11.76%/year</span>
           </div>
