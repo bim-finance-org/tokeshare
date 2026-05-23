@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import Image from 'next/image';
 import Blockchains from '@/components/shared/Blockchains';
 import { useAccount } from 'wagmi';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { TokenContexts } from '@/context/TokenContexts';
-import { useSwap } from '@/hooks/useSwap';
 import { useSwapQuote } from '@/hooks/useSwapQuote';
-import { CONTRACTS, TRUSTED_AGGREGATORS } from '@/contracts/contracts';
 import { Address } from 'viem';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,7 +17,6 @@ import { Blockchain } from '@/enums/Blockchain';
 import { getTokenAddress } from '@/utils/token';
 import { useTokenPrice } from '@/hooks/useTokenPrice';
 import { ExchangeSection } from '@/enums/ExchangeSection';
-import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { useAutoSwitchNetwork } from '@/hooks/useAutoSwitchNetwork';
 import { TokenType } from '@/enums/TokenType';
 import { useSwapHandlerByToken } from '@/hooks/swapHandlers/useSwapHandlerByToken';
@@ -41,8 +38,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   const { isOnCorrectChain, isPending: isSwitchingNetwork, retry: retrySwitch } = useAutoSwitchNetwork(selectedBlockchain);
 
-  const [stablecoinAmount, setStablecoinAmount] = useState('10');
-  const [amount, setAmount] = useState('0');
+  // Single source of truth: the value the user just typed into the editable
+  // (top) widget. Direction (`isTggFirst`) decides which token it represents.
+  // The output amount is derived purely from the quote API.
+  const [inputAmount, setInputAmount] = useState('10');
   const [isTggFirst, setIsTggFirst] = useState(false);
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
 
@@ -50,21 +49,13 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   const { price: tokenPrice, isLoading: isPriceLoading } = useTokenPrice(token.symbol);
   const { swapIn, swapOut, isPending, error, hash } = useSwapHandlerByToken(token.symbol);
-  const [swapQuoteParams, setSwapQuoteParams] = useState<SwapQuoteParams | null>(null);
 
-  // Compute input amount based on direction
-  const inputAmount = isTggFirst ? amount : stablecoinAmount;
-
-  useEffect(() => {
+  const swapQuoteParams = useMemo<SwapQuoteParams | null>(() => {
     const inputToken = getTokenAddress(isTggFirst ? token.symbol : stablecoin, selectedBlockchain);
     const outputToken = getTokenAddress(isTggFirst ? stablecoin : token.symbol, selectedBlockchain);
+    if (!inputToken || !outputToken) return null;
     const direction = isTggFirst ? SwapDirection.TokenToStablecoin : SwapDirection.StablecoinToToken;
-
-    if (inputToken && outputToken) {
-      setSwapQuoteParams({ inputToken, outputToken, inputAmount, direction });
-    } else {
-      setSwapQuoteParams(null);
-    }
+    return { inputToken, outputToken, inputAmount, direction };
   }, [isTggFirst, inputAmount, stablecoin, selectedBlockchain, token.symbol]);
 
   const {
@@ -74,39 +65,16 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     exchangeRate,
   } = useSwapQuote(swapQuoteParams, token.symbol, selectedBlockchain);
 
-  // Update output amount from quote calculation
-  useEffect(() => {
-    if (calculatedOutputAmount && !isLoadingQuote) {
-      if (isTggFirst) {
-        // TGG → Stablecoin: update stablecoin output
-        setStablecoinAmount(calculatedOutputAmount);
-      } else {
-        // Stablecoin → TGG: update token output
-        const outputAsNumber = Number(calculatedOutputAmount);
-        if (isNaN(outputAsNumber)) {
-          setAmount('0');
-        } else {
-          setAmount(calculatedOutputAmount);
-        }
-      }
-    }
-  }, [calculatedOutputAmount, isTggFirst, isLoadingQuote]);
+  // Output displayed in the read-only widget — derived from the quote.
+  const outputAmount = calculatedOutputAmount ?? '0';
 
   useEffect(() => {
     if (error) notify.error(error);
   }, [error]);
 
-  // Handle stablecoin amount change
-  const handleStablecoinAmountChange = (amount: string) => {
+  const handleInputChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
-      setStablecoinAmount(amount);
-    }
-  };
-
-  // Handle TGG amount change
-  const handleTggAmountChange = (amount: string) => {
-    if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
-      setAmount(amount);
+      setInputAmount(amount);
     }
   };
 
@@ -126,6 +94,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     if (newIsTggFirst && token.symbol === 'TFT_001') {
       setStablecoin('USDC');
     }
+    // Carry over the calculated output as the new input so the visible amount
+    // doesn't reset when the user flips direction.
+    if (calculatedOutputAmount) setInputAmount(calculatedOutputAmount);
     setIsTggFirst(newIsTggFirst);
   };
 
@@ -148,12 +119,17 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   const swaping = async () => {
     setIsPreparingSwap(true);
 
+    // swapIn / swapOut both expect the token (crypto) amount:
+    // - Stablecoin → Token: token amount is the OUTPUT (from the quote)
+    // - Token → Stablecoin: token amount is the INPUT (user typed it)
+    const tokenAmount = isTggFirst ? inputAmount : outputAmount;
+
     try {
       if (!isTggFirst) {
         await swapIn({
           tokenSymbol: token.symbol,
           stablecoin,
-          amount,
+          amount: tokenAmount,
           blockchain: selectedBlockchain,
           walletAddress: address as Address,
         });
@@ -161,7 +137,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         await swapOut({
           tokenSymbol: token.symbol,
           stablecoin,
-          amount,
+          amount: tokenAmount,
           blockchain: selectedBlockchain,
           walletAddress: address as Address,
         });
@@ -173,23 +149,22 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     }
   };
 
-  useEffect(() => {
-    if (isPending) {
-      setIsPreparingSwap(false);
-    }
-  }, [isPending]);
+  // While the wagmi tx is pending we display the 'Transaction Processing'
+  // alert instead of 'Preparing swap'. Deriving this in render lets us drop
+  // the effect that used to flip isPreparingSwap on isPending.
+  const showPreparingAlert = isPreparingSwap && !isPending;
 
   // Déterminer quel widget est en entrée (modifiable) et lequel est en sortie (lecture seule)
   const topWidgetProps = {
     type: (isTggFirst ? TokenType.Crypto : TokenType.Stablecoin) as TokenType,
     label: 'YOU SEND',
     defaultToken: isTggFirst ? token.symbol : stablecoin,
-    value: isTggFirst ? amount : stablecoinAmount,
-    onValueChange: isTggFirst ? handleTggAmountChange : handleStablecoinAmountChange,
+    value: inputAmount,
+    onValueChange: handleInputChange,
     onTokenChange: handleTokenChange,
     blockchain: selectedBlockchain,
     showBalance: true,
-    readOnly: false, // Toujours modifiable (input du haut)
+    readOnly: false,
   };
 
   const isTftSellMode = isTggFirst && token.symbol === 'TFT_001';
@@ -198,7 +173,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     type: (isTggFirst ? TokenType.Stablecoin : TokenType.Crypto) as TokenType,
     label: 'YOU RECEIVE',
     defaultToken: isTggFirst ? (isTftSellMode ? 'USDC' : stablecoin) : token.symbol,
-    value: isTggFirst ? stablecoinAmount : amount,
+    value: outputAmount,
     onValueChange: () => {},
     onTokenChange: handleTokenChange,
     blockchain: selectedBlockchain,
@@ -229,7 +204,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         <Blockchains section={ExchangeSection.Swap} onSelect={handleBlockchainSelect} tokenSymbol={token.symbol} />
 
         {/* État de la transaction */}
-        {isPreparingSwap && (
+        {showPreparingAlert && (
           <Alert className="bg-color1">
             <Loader2 className="h-4 w-4 animate-spin" />
             <AlertTitle>Preparing Swap</AlertTitle>
