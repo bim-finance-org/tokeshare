@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input'; // si tu n'as pas ce composant, remplace par <input ... />
 import DistributeFromWallet from './DistributeFromWallet';
+import { notify } from '@/lib/notify';
 
 type FrontRowBase = {
   address: string;
@@ -18,12 +19,10 @@ type FrontRow = FrontRowBase | FrontRowWithUsdc;
 const SnapshotPanel = () => {
   const [running, setRunning] = useState(false);
   const [rows, setRows] = useState<FrontRow[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [totalUsdc, setTotalUsdc] = useState<string>('');
 
   const handleSnapshot = async () => {
     setRunning(true);
-    setError(null);
     try {
       const res = await fetch('/api/snapshot', {
         method: 'POST',
@@ -34,16 +33,16 @@ const SnapshotPanel = () => {
       });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
-        throw new Error(j.error || 'Erreur API snapshot');
+        throw new Error(j.error || 'Snapshot API error');
       }
 
       const file = `/snapshots/holders_snapshot.json?ts=${Date.now()}`;
       const jsonRes = await fetch(file, { cache: 'no-store' });
-      if (!jsonRes.ok) throw new Error('Lecture du fichier snapshot impossible');
+      if (!jsonRes.ok) throw new Error('Unable to read snapshot file');
       const data = (await jsonRes.json()) as FrontRow[];
       setRows(data);
-    } catch (e: any) {
-      setError(e?.message ?? 'Erreur inconnue');
+    } catch (err) {
+      notify.error(err);
     } finally {
       setRunning(false);
     }
@@ -72,8 +71,7 @@ const SnapshotPanel = () => {
             {running ? 'Generation…' : 'Snapshot'}
           </Button>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {!error && rows.length === 0 && <p className="text-sm text-gray-800">Run snapshot to get holders.</p>}
+          {rows.length === 0 && <p className="text-sm text-gray-800">Run snapshot to get holders.</p>}
 
           {rows.length > 0 && (
             <div className="pt-4">

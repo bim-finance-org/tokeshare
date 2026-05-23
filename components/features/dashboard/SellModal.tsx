@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { CheckCircle } from 'lucide-react';
+import { notify } from '@/lib/notify';
 
 type SellStatus = 'completed' | 'pending' | 'failed' | 'received' | 'usdc_pending';
 
@@ -34,7 +35,7 @@ const SellModal = () => {
   const [searchRef, setSearchRef] = useState<string>('');
   const [transactions, setTransactions] = useState<SellTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [validationStep, setValidationStep] = useState<number | null>(null);
   const [newCryptoAmount, setNewCryptoAmount] = useState<number>(0);
   const [showCopiedNotification, setShowCopiedNotification] = useState(false);
@@ -44,11 +45,10 @@ const SellModal = () => {
     async function fetchTransactions() {
       try {
         setIsLoading(true);
-        setError(null);
+        setLoadFailed(false);
         const response = await fetch('/api/transactions/sell');
 
         if (response.status === 401) {
-          // User is not authenticated
           signOut({ callbackUrl: '/dashboard' });
           return;
         }
@@ -59,9 +59,9 @@ const SellModal = () => {
 
         const data = await response.json();
         setTransactions(data);
-      } catch (error) {
-        console.error('Error fetching transactions:', error);
-        setError('Unable to load transactions. Please try again.');
+      } catch (err) {
+        notify.error(err, { fallback: 'Unable to load transactions. Please try again.' });
+        setLoadFailed(true);
       } finally {
         setIsLoading(false);
       }
@@ -100,16 +100,14 @@ const SellModal = () => {
 
   const handleChangeStatus = async (transactionId: number, newStatus: AdminStatus) => {
     try {
-      setError(null);
       const updated = await patchTransaction(transactionId, { status: newStatus });
       if (!updated) return;
 
       setTransactions((prev) =>
         prev.map((transaction) => (transaction.id === transactionId ? updated : transaction)),
       );
-    } catch (error) {
-      console.error('Error updating status:', error);
-      setError('Unable to update status. Please try again.');
+    } catch (err) {
+      notify.error(err, { fallback: 'Unable to update status. Please try again.' });
     }
   };
 
@@ -120,11 +118,9 @@ const SellModal = () => {
 
   const handleConfirmValidation = async (transactionId: number) => {
     try {
-      setError(null);
-
       const cryptoAmount = newCryptoAmount;
       if (isNaN(cryptoAmount) || cryptoAmount <= 0) {
-        setError('Please enter a valid amount');
+        notify.error('Please enter a valid amount');
         return;
       }
 
@@ -140,9 +136,8 @@ const SellModal = () => {
 
       setValidationStep(null);
       setNewCryptoAmount(0);
-    } catch (error) {
-      console.error('Error updating transaction:', error);
-      setError('Unable to update transaction. Please try again.');
+    } catch (err) {
+      notify.error(err, { fallback: 'Unable to update transaction. Please try again.' });
     }
   };
 
@@ -224,9 +219,9 @@ const SellModal = () => {
         <div className="flex justify-center items-center h-40">
           <p className="text-gray-500">Loading transactions...</p>
         </div>
-      ) : error ? (
+      ) : loadFailed ? (
         <div className="flex justify-center items-center h-40">
-          <p className="text-red-500">{error}</p>
+          <p className="text-red-500">Failed to load transactions.</p>
         </div>
       ) : filteredData.length === 0 ? (
         <div className="flex justify-center items-center h-40">
