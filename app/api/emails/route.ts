@@ -1,21 +1,10 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
-
 import { prisma } from '@/lib/prisma';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { EmailSubscriptionSchema } from '@/lib/schemas/transactions';
 
 const EMAIL_ALREADY_EXISTS_CODE = 'P2002';
-
-const emailSchema = z.object({
-  email: z.string().email(),
-});
-
-async function parseAndValidateEmail(request: Request) {
-  const rawEmail = await request.json();
-  const result = emailSchema.safeParse(rawEmail);
-  if (!result.success || !result.data) return null;
-  return result.data.email;
-}
 
 async function saveEmail(email: string) {
   try {
@@ -25,19 +14,35 @@ async function saveEmail(email: string) {
     if (e instanceof PrismaClientKnownRequestError && e.code === EMAIL_ALREADY_EXISTS_CODE) {
       return { success: true };
     }
-    return { success: false, status: 500 };
+    console.error('[emails] persist failed', e);
+    return { success: false };
   }
 }
 
-/**
- * POST to create a new email
- * @param request - The request object
- * @returns The success of the operation
- */
 export async function POST(request: Request) {
-  const email = await parseAndValidateEmail(request);
-  if (!email) return NextResponse.json({ success: false }, { status: 422 });
+  const limit = await rateLimit(request, { key: 'emails:subscribe', limit: 10, windowSec: 60 });
+  if (!limit.success) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests' },
+      { status: 429, headers: rateLimitHeaders(limit) },
+    );
+  }
 
-  const result = await saveEmail(email);
-  return NextResponse.json({ success: result.success }, result.status ? { status: result.status } : {});
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const parsed = EmailSubscriptionSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: 'Invalid email' }, { status: 422 });
+  }
+
+  const result = await saveEmail(parsed.data.email);
+  return NextResponse.json(
+    { success: result.success },
+    { status: result.success ? 200 : 500, headers: rateLimitHeaders(limit) },
+  );
 }
