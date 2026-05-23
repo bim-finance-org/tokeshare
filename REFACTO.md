@@ -183,7 +183,7 @@ La quasi-totalité des `<button>` n'ont pas `type="button"` explicite (BuyModal,
 | 7 | `generateMetadata` dynamique sur pages détail | 🟠 | ✅ | Posé sur real-estate/[id] et commodities/[name] |
 | 8 | Factoriser `useZAP*Contract`, swap handlers, `useTokenPrice`, `useSwap` (TGG/TMC/TSP500) | 🟡 | ⏳ | Dette, lisibilité |
 | 9 | `useUserTokenAssets` → multicall ; déplacer `usePrefetchStablePrices` aux pages concernées | 🟡 | 🟡 | `PUBLIC_CLIENTS` configurés en `batch: { multicall: true }` ; reste à déplacer `usePrefetchStablePrices` |
-| 10 | `useSwap` : `useCallback` + supprimer try/throw bruyants | 🟡 | ⏳ | Re-renders |
+| 10 | `useSwap` : `useCallback` + supprimer try/throw bruyants | 🟡 | ✅ | Appliqué aussi à `useTmcSwap`, `useTsp500Swap`, `useMarketplaceContract` (mêmes warnings exhaustive-deps) |
 | 11 | LCP : `priority`/`sizes`/`blurDataURL` sur la hero ; AVIF dans `next.config.ts` | 🟡 | 🟡 | `priority` + `sizes` posés ; AVIF + WebP configurés ; `blurDataURL` à faire |
 | 12 | `<Suspense>` autour des blocs Wagmi | 🟡 | ⏳ | UX streaming |
 | 13 | Aligner ESLint 16 ; retirer `fs`, dédup `redis`/`ioredis`, choisir un set d'icônes | 🟢 | ✅ | `redis` retiré ; `react-icons` retiré (lucide-react choisi) ; `fs` déjà retiré |
