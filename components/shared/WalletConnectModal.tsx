@@ -42,12 +42,12 @@ const WalletConnectModal = ({ open, onOpenChange }: WalletConnectModalProps) => 
 
         <div className="space-y-3">
           {/* EVM */}
-          <div className="flex items-center justify-between rounded-xl border border-color4/20 bg-white p-4">
+          <div className="flex items-center justify-between rounded-xl border border-color1 bg-white p-4">
             <div className="flex items-center gap-3">
               <EthereumIcon size={36} />
               <div>
                 <p className="font-semibold">EVM Wallet</p>
-                <p className="text-xs text-color4/70">
+                <p className="text-xs text-color6">
                   {isEvmConnected && evmAddress ? formatAddress(evmAddress) : 'Polygon, Base, Ethereum'}
                 </p>
               </div>
@@ -72,12 +72,12 @@ const WalletConnectModal = ({ open, onOpenChange }: WalletConnectModalProps) => 
           </div>
 
           {/* Stellar */}
-          <div className="flex items-center justify-between rounded-xl border border-color4/20 bg-white p-4">
+          <div className="flex items-center justify-between rounded-xl border border-color1 bg-white p-4">
             <div className="flex items-center gap-3">
               <StellarIcon size={36} />
               <div>
                 <p className="font-semibold">Stellar Wallet</p>
-                <p className="text-xs text-color4/70">
+                <p className="text-xs text-color6">
                   {isStellarConnected && stellarAddress ? formatAddress(stellarAddress) : 'Freighter, Lobstr, xBull…'}
                 </p>
               </div>
