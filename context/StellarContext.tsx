@@ -36,18 +36,19 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
     });
     kitRef.current = kit;
 
-    if (storedWalletId) {
-      setWalletId(storedWalletId);
-      kit
-        .getAddress({ skipRequestAccess: true })
-        .then(({ address }) => {
-          if (address) setAddress(address);
-        })
-        .catch(() => {
-          localStorage.removeItem(STORAGE_KEY);
-          setWalletId(undefined);
-        });
-    }
+    if (!storedWalletId) return;
+
+    // All state updates happen inside the promise callbacks (never
+    // synchronously in the effect body) so this doesn't cascade renders.
+    kit
+      .getAddress({ skipRequestAccess: true })
+      .then(({ address }) => {
+        setWalletId(storedWalletId);
+        if (address) setAddress(address);
+      })
+      .catch(() => {
+        localStorage.removeItem(STORAGE_KEY);
+      });
   }, []);
 
   const connect = useCallback(async () => {
