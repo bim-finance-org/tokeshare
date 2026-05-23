@@ -8,6 +8,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('home:popular-tft');
 import { Blockchain } from '@/enums/Blockchain';
 import { Address } from 'viem';
 import { Skeleton } from '../../ui/skeleton';
@@ -28,7 +31,7 @@ const PopularTFTCard = () => {
         const formattedBalance = Number(rawBalance) / 10 ** 18;
         setBalance(formattedBalance);
       } catch (err) {
-        console.error('Erreur de fetch balance :', err);
+        log.error('balance fetch failed', err);
         setHasError(true);
         setBalance(null); // pour éviter que 0 soit interprété comme SOLD OUT
       }

@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { CheckCircle } from 'lucide-react';
 import { notify } from '@/lib/notify';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('dashboard:sell-modal');
 
 type SellStatus = 'completed' | 'pending' | 'failed' | 'received' | 'usdc_pending';
 
@@ -158,7 +161,7 @@ const SellModal = () => {
         }, 1000);
       })
       .catch((err) => {
-        console.error('Failed to copy text: ', err);
+        log.error('clipboard copy failed', err);
       });
   };
 

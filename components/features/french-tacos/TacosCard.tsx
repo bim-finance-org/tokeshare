@@ -6,6 +6,9 @@ import { LineChart } from 'lucide-react';
 import Link from 'next/link';
 import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('french-tacos:card');
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { Address } from 'viem';
@@ -24,7 +27,7 @@ const TacosCard = () => {
         const formattedBalance = Number(rawBalance) / 10 ** 18;
         setBalance(formattedBalance);
       } catch (err) {
-        console.error('Erreur de fetch balance :', err);
+        log.error('balance fetch failed', err);
         setHasError(true);
         setBalance(null);
       }

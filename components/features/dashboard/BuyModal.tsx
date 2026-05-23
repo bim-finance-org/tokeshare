@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { CheckCircle } from 'lucide-react';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('dashboard:buy-modal');
 
 interface BuyTransaction {
   id: number;
@@ -54,7 +57,7 @@ const BuyModal = () => {
         const data = await response.json();
         setTransactions(data);
       } catch (error) {
-        console.error('Error fetching transactions:', error);
+        log.error('fetch failed', error);
         setError('Unable to load transactions. Please try again.');
       } finally {
         setIsLoading(false);
@@ -104,7 +107,7 @@ const BuyModal = () => {
       // Close expanded menu
       setExpandedTransactionId(null);
     } catch (error) {
-      console.error('Error updating status:', error);
+      log.error('status update failed', error);
       setError('Unable to update status. Please try again.');
     }
   };
@@ -141,7 +144,7 @@ const BuyModal = () => {
       // Open interface with three buttons
       setExpandedTransactionId(transactionId);
     } catch (error) {
-      console.error('Error updating status:', error);
+      log.error('status update failed', error);
       setError('Unable to update status. Please try again.');
     }
   };
@@ -214,7 +217,7 @@ const BuyModal = () => {
       setNewCryptoAmount(0);
       setExpandedTransactionId(null);
     } catch (error) {
-      console.error('Error updating transaction:', error);
+      log.error('tx update failed', error);
       setError('Unable to update transaction. Please try again.');
     }
   };
@@ -236,7 +239,7 @@ const BuyModal = () => {
         }, 1000);
       })
       .catch((err) => {
-        console.error('Failed to copy text: ', err);
+        log.error('clipboard copy failed', err);
       });
   };
 

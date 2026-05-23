@@ -8,6 +8,9 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('french-tacos:carousel');
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
@@ -43,7 +46,7 @@ const FrenchTacosCarousel: React.FC = () => {
         const formattedBalance = Number(rawBalance) / 10 ** 18;
         setBalance(formattedBalance);
       } catch (err) {
-        console.error('Erreur de fetch balance :', err);
+        log.error('balance fetch failed', err);
         setHasError(true);
         setBalance(null);
       }
