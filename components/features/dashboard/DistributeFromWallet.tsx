@@ -58,9 +58,10 @@ export default function DistributeFromWallet() {
         throw new Error(`Change de réseau : ${CHAIN.name}.`);
       }
 
-      const res = await fetch(`/snapshots/holders_snapshot.json?ts=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch('/api/snapshot', { cache: 'no-store' });
       if (!res.ok) throw new Error('No Snapshot');
-      const rows = (await res.json()) as FrontRow[];
+      const payload = (await res.json()) as { rows: FrontRow[] };
+      const rows = payload.rows;
       const withUsdc = rows.filter((r): r is FrontRowWithUsdc => 'usdc_raw' in r && BigInt(r.usdc_raw) > 0n);
       if (withUsdc.length === 0) throw new Error('Aucune ligne à distribuer (usdc_raw = 0).');
 
