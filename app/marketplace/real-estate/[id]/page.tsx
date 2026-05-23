@@ -1,7 +1,5 @@
-'use client';
-
-import React from 'react';
-import { useParams } from 'next/navigation';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import housesData from '@/data/housesData.json';
 
 import Map from '@/components/features/real-estate/HouseMap';
@@ -9,13 +7,36 @@ import Head from '@/components/features/real-estate/HouseHead';
 import Info from '@/components/features/real-estate/HouseInfo';
 import About from '@/components/features/real-estate/HouseAbout';
 
-const HouseDetailPage = () => {
-  const { id } = useParams();
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-  const house = housesData.find((house) => house.id === id);
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const house = housesData.find((h) => h.id === id);
+  if (!house) {
+    return { title: 'House not found · Tokeshare' };
+  }
+  const { name, city, images, price } = house.general;
+  const title = `${name} · ${city} · Tokeshare`;
+  const description = `Invest in ${name} (${city}) — total price ${price}. Tokenized real estate on Tokeshare.`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: images?.[0] ? [{ url: images[0] }] : undefined,
+    },
+  };
+}
+
+const HouseDetailPage = async ({ params }: PageProps) => {
+  const { id } = await params;
+  const house = housesData.find((h) => h.id === id);
 
   if (!house) {
-    return <div>House not found</div>;
+    notFound();
   }
 
   return (
