@@ -53,6 +53,9 @@
     "wagmi": "^2.14.12",
     "zod": "^3.24.1"
   },
+  "overrides": {
+    "usb": "npm:noop2@^2.0.0"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
