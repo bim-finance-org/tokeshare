@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
+import { useMutation } from '@tanstack/react-query';
 import ConnectButton from '@/components/shared/ConnectButton';
 import BuyInfo from './BuyInfo';
 import { TokenContexts } from '@/context/TokenContexts';
@@ -96,53 +97,50 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
     if (transferError) notify.error(transferError);
   }, [transferError]);
 
-  const handleApiSubmission = async () => {
-    try {
-      let apiData;
+  // Posting the transaction to /api/transactions/* is wrapped in a mutation
+  // so the success / error / settled state transitions live in the mutation
+  // callbacks instead of inside the receipt-success effect — that keeps the
+  // effect body free of synchronous setState.
+  const submitTransactionMutation = useMutation({
+    mutationFn: async () => {
+      const cryptoAmount = parseFloat(tggAmount);
+      const fiatAmount = parseFloat(amount);
+      const isBuy = type === 'buy';
+      const feesCoef = isBuy ? FEES_COEF : isTFT ? TFT_001_SELL_FEES_COEF : FEES_COEF;
+      const feesValue = parseFloat((fiatAmount * feesCoef).toFixed(NUMBER_TO_FIXE_2));
 
-      if (type === 'buy') {
-        const cryptoAmount = parseFloat(tggAmount);
-        const fiatAmount = parseFloat(amount);
-        const feesValue = parseFloat((fiatAmount * FEES_COEF).toFixed(NUMBER_TO_FIXE_2));
+      const apiData = isBuy
+        ? {
+            ref,
+            email: formData.email,
+            fullName: `${formData.firstName} ${formData.lastName}`,
+            cvu: '',
+            walletAddress: address || '',
+            status: 'pending',
+            blockchain: buyBlockchain,
+            fiat: currency,
+            fiatAmount,
+            crypto,
+            cryptoAmount,
+            fees: feesValue,
+          }
+        : {
+            ref,
+            email: formData.email,
+            fullName: `${formData.firstName} ${formData.lastName}`,
+            iban: formData.iban || '',
+            status: 'pending',
+            blockchain: sellBlockchain,
+            fiat: currency,
+            fiatAmount,
+            crypto,
+            cryptoAmount,
+            fees: feesValue,
+            paymentMethod: 'bank_transfer',
+            txHash: hash || null,
+          };
 
-        apiData = {
-          ref: ref,
-          email: formData.email,
-          fullName: `${formData.firstName} ${formData.lastName}`,
-          cvu: '',
-          walletAddress: address || '',
-          status: 'pending',
-          blockchain: buyBlockchain,
-          fiat: currency,
-          fiatAmount: fiatAmount,
-          crypto: crypto,
-          cryptoAmount: cryptoAmount,
-          fees: feesValue,
-        };
-      } else {
-        const cryptoAmount = parseFloat(tggAmount);
-        const fiatAmount = parseFloat(amount);
-        const feesCoef = isTFT ? TFT_001_SELL_FEES_COEF : FEES_COEF;
-        const feesValue = parseFloat((fiatAmount * feesCoef).toFixed(NUMBER_TO_FIXE_2));
-
-        apiData = {
-          ref: ref,
-          email: formData.email,
-          fullName: `${formData.firstName} ${formData.lastName}`,
-          iban: formData.iban || '',
-          status: 'pending',
-          blockchain: sellBlockchain,
-          fiat: currency,
-          fiatAmount: fiatAmount,
-          crypto: crypto,
-          cryptoAmount: cryptoAmount,
-          fees: feesValue,
-          paymentMethod: 'bank_transfer',
-          txHash: hash || null,
-        };
-      }
-
-      const endpoint = type === 'buy' ? '/api/transactions/buy' : '/api/transactions/sell';
+      const endpoint = isBuy ? '/api/transactions/buy' : '/api/transactions/sell';
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -150,28 +148,25 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
       });
 
       const data = await response.json();
-
       if (!response.ok) {
-        console.log(data);
         throw new Error(data.error || 'An error occurred during the transaction');
       }
-
-      setShowConfirmation(true);
-    } catch (err) {
+      return data;
+    },
+    onSuccess: () => setShowConfirmation(true),
+    onError: (err) => {
       if (err instanceof SyntaxError && err.message.includes('JSON')) {
         notify.error('Server connection error. Please try again later.');
       } else {
         notify.error(err);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onSettled: () => setIsLoading(false),
+  });
 
-  // Déclaré après handleApiSubmission pour éviter la TDZ.
   useEffect(() => {
     if (receiptSuccess && hash) {
-      handleApiSubmission();
+      submitTransactionMutation.mutate();
     } else if (receiptError) {
       notify.error(receiptError, { fallback: 'Transaction failed. Please contact support for assistance.' });
     }
@@ -188,7 +183,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
     try {
       if (type === Action.Buy) {
         setIsLoading(true);
-        await handleApiSubmission();
+        await submitTransactionMutation.mutateAsync();
       } else {
         if (isTFT) {
           tftTransfer.transferTFTToTokeShare(tggAmount);
