@@ -3,11 +3,8 @@ import PopularCards from '../components/features/home/PopularCards';
 import Link from 'next/link';
 import Image from 'next/image';
 import Schema from '../components/features/home/Schema';
-import { usePaxgPrice } from '../hooks/usePaxgPrice';
 
 export default function Home() {
-  usePaxgPrice();
-
   return (
     <>
       <div className="relative h-screen bg-color1">
