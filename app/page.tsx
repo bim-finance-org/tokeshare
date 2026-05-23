@@ -3,6 +3,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Schema from '../components/features/home/Schema';
 
+// 10px-wide blurred WebP of the hero, generated once via
+// `sharp('public/images/bg-image-1.webp').resize(10).blur().toFormat('webp').toBuffer()`.
+const HERO_BLUR_DATA_URL =
+  'data:image/webp;base64,UklGRjQAAABXRUJQVlA4ICgAAADQAQCdASoKAAYABABoJZQCdAD0klwzAAD8HY3B+dzrG0b5Z2c6sgAA';
+
 export default function Home() {
   return (
     <>
@@ -14,6 +19,8 @@ export default function Home() {
             fill
             priority
             sizes="100vw"
+            placeholder="blur"
+            blurDataURL={HERO_BLUR_DATA_URL}
             className="object-cover"
           />
         </div>
