@@ -188,8 +188,8 @@ La quasi-totalité des `<button>` n'ont pas `type="button"` explicite (BuyModal,
 | 12 | `<Suspense>` autour des blocs Wagmi | 🟡 | ⏳ | UX streaming |
 | 13 | Aligner ESLint 16 ; retirer `fs`, dédup `redis`/`ioredis`, choisir un set d'icônes | 🟢 | ✅ | `redis` retiré ; `react-icons` retiré (lucide-react choisi) ; `fs` déjà retiré |
 | 14 | `next.config.ts` : `typedRoutes`, `optimizePackageImports`, `remotePatterns`, `output: 'standalone'` si Docker | 🟢 | 🟡 | `typedRoutes`, `optimizePackageImports`, `formats` ajoutés ; `remotePatterns` à compléter quand on connaît les hosts |
-| 15 | Nettoyage : code mort, doublons `.d.ts`, POC, `ToDo.md`, logs `console.*` | 🟢 | 🟡 | HouseCard nettoyé ; poc-stellar, buildingInProgress, ToDo.md et logs restants |
+| 15 | Nettoyage : code mort, doublons `.d.ts`, POC, `ToDo.md`, logs `console.*` | 🟢 | 🟡 | HouseCard nettoyé ; 32 `console.*` migrés sur le logger central ; poc-stellar, buildingInProgress et ToDo.md restants |
 | 16 | Refacto `TokenContexts` (1 effet, `createContext<T \| null>`, hook guard) + mismatch hydration | 🟢 | ✅ | Reconstruit sur `useSyncExternalStore` ; même fix appliqué à `UserForm` (anti-pattern jumeau) |
-| 17 | `type="button"` partout, `@wagmi/cli`, logger central | 🟢 | ⏳ | Qualité (HouseCard fait) |
+| 17 | `type="button"` partout, `@wagmi/cli`, logger central | 🟢 | 🟡 | `lib/logger.ts` (leveled, scoped, env-aware) ; reste `type="button"` sweep et `@wagmi/cli` |
 
 Légende : ✅ done · 🟡 partiel · ⏳ à faire
