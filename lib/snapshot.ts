@@ -80,9 +80,8 @@ async function getLogsRangeWithRetry(
   event: any,
   maxRetries = 4
 ): Promise<TransferLog[]> {
-  let step = range.toBlock - range.fromBlock + 1n;
-  let from = range.fromBlock;
-  let to = range.toBlock;
+  const from = range.fromBlock;
+  const to = range.toBlock;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
