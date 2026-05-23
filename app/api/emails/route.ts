@@ -3,7 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
 import { EmailSubscriptionSchema } from '@/lib/schemas/transactions';
+import { getLogger } from '@/lib/logger';
 
+const log = getLogger('api:emails');
 const EMAIL_ALREADY_EXISTS_CODE = 'P2002';
 
 async function saveEmail(email: string) {
@@ -14,7 +16,7 @@ async function saveEmail(email: string) {
     if (e instanceof PrismaClientKnownRequestError && e.code === EMAIL_ALREADY_EXISTS_CODE) {
       return { success: true };
     }
-    console.error('[emails] persist failed', e);
+    log.error('persist failed', e);
     return { success: false };
   }
 }

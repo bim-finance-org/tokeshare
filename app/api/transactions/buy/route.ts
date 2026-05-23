@@ -4,7 +4,10 @@ import { sendTransactionEmail } from '@/utils/email/sendEmail';
 import { requireAuth } from '@/lib/api-utils';
 import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
 import { BuyTxSchema } from '@/lib/schemas/transactions';
+import { getLogger } from '@/lib/logger';
 import { FEES, DECIMALS_FIXED_TO_FOUR } from '@/constants/api';
+
+const log = getLogger('api:tx:buy');
 
 export async function GET(_request: NextRequest) {
   try {
@@ -86,13 +89,13 @@ export async function POST(request: NextRequest) {
           walletAddress: data.walletAddress,
         });
       } catch (emailError) {
-        console.error('[buy] confirmation email failed', { ref: newTransaction.ref, emailError });
+        log.error('confirmation email failed', { ref: newTransaction.ref, emailError });
       }
     });
 
     return NextResponse.json(newTransaction, { status: 201, headers: rateLimitHeaders(limit) });
   } catch (error) {
-    console.error('[buy] create transaction failed', error);
+    log.error('create transaction failed', error);
     return NextResponse.json({ error: 'Error creating buy transaction' }, { status: 500 });
   }
 }

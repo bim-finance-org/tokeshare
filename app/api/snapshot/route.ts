@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { generateSnapshot, type FrontRow } from '@/lib/snapshot';
 import { requireAuth } from '@/lib/api-utils';
 import { getFromCache, setCache } from '@/lib/redis';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('api:snapshot');
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -26,7 +29,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, count: rows.length, rows });
   } catch (e) {
-    console.error(e);
+    log.error('generation failed', e);
     return NextResponse.json({ error: 'Snapshot failed' }, { status: 500 });
   }
 }
