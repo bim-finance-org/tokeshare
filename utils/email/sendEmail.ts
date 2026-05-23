@@ -29,10 +29,9 @@ interface BuyEmailData extends BaseEmailData {
   walletAddress: string;
 }
 
-// Interface spécifique pour les emails de vente
-interface SellEmailData extends BaseEmailData {
-  // Ajoutez ici des propriétés spécifiques à la vente si nécessaire
-}
+// Type spécifique pour les emails de vente (placeholder, à étendre quand
+// des champs propres à la vente seront ajoutés).
+type SellEmailData = BaseEmailData;
 
 /**
  * Envoie un email de confirmation de transaction en fonction du type de transaction
