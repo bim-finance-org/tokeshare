@@ -1,5 +1,5 @@
 // scripts/snapshot.ts
-import { createPublicClient, http, formatUnits, parseUnits, parseAbiItem, Address } from 'viem';
+import { createPublicClient, http, formatUnits, parseUnits, parseAbiItem, type AbiEvent, type Address } from 'viem';
 import { base } from 'viem/chains';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -77,7 +77,7 @@ function makeRanges(fromBlock: bigint, toBlock: bigint, step: bigint): Range[] {
 async function getLogsRangeWithRetry(
   address: Address,
   range: Range,
-  event: any,
+  event: AbiEvent,
   maxRetries = 4
 ): Promise<TransferLog[]> {
   const from = range.fromBlock;
