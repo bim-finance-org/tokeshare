@@ -178,9 +178,9 @@ La quasi-totalité des `<button>` n'ont pas `type="button"` explicite (BuyModal,
 | 2 | Retirer `next/head` du NavBar, déplacer JSON-LD vers `next/script` ou Metadata | 🔴 | ✅ | Migré vers `next/script` (id + strategy=afterInteractive) |
 | 3 | `app/api/snapshot/route.ts` : passer de `fs.writeFileSync` à Redis ou Blob | 🔴 | ✅ | Cache Redis `snapshot:holders:latest` + GET; readers via `/api/snapshot` |
 | 4 | Throw au boot si `NEXTAUTH_SECRET` ou `DASHBOARD_PASSWORD` absents | 🔴 | ✅ | Throw au load de `lib/authOptions.ts` |
-| 5 | Repasser pages en RSC (home, real-estate/[id], commodities/[name], dashboard) | 🟠 | 🟡 | `app/page.tsx` + `real-estate/[id]` faits ; commodities/[name] + dashboard restants |
-| 6 | Ajouter `loading.tsx`, `error.tsx`, `global-error.tsx`, `not-found.tsx`, `sitemap.ts`, `robots.ts`, `opengraph-image` | 🟠 | 🟡 | Tous ajoutés sauf `opengraph-image` |
-| 7 | `generateMetadata` dynamique sur pages détail | 🟠 | ⏳ | À faire pour real-estate/[id] et commodities/[name] |
+| 5 | Repasser pages en RSC (home, real-estate/[id], commodities/[name], dashboard) | 🟠 | ✅ | Toutes les pages ciblées sont RSC ; dashboard splittée en shell RSC + îlots client |
+| 6 | Ajouter `loading.tsx`, `error.tsx`, `global-error.tsx`, `not-found.tsx`, `sitemap.ts`, `robots.ts`, `opengraph-image` | 🟠 | ✅ | `opengraph-image` ajouté via next/og (edge) |
+| 7 | `generateMetadata` dynamique sur pages détail | 🟠 | ✅ | Posé sur real-estate/[id] et commodities/[name] |
 | 8 | Factoriser `useZAP*Contract`, swap handlers, `useTokenPrice`, `useSwap` (TGG/TMC/TSP500) | 🟡 | ⏳ | Dette, lisibilité |
 | 9 | `useUserTokenAssets` → multicall ; déplacer `usePrefetchStablePrices` aux pages concernées | 🟡 | 🟡 | `PUBLIC_CLIENTS` configurés en `batch: { multicall: true }` ; reste à déplacer `usePrefetchStablePrices` |
 | 10 | `useSwap` : `useCallback` + supprimer try/throw bruyants | 🟡 | ⏳ | Re-renders |
