@@ -1,20 +1,11 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse, NextRequest, after } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendTransactionEmail } from '@/utils/email/sendEmail';
 import { requireAuth } from '@/lib/api-utils';
+import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { BuyTxSchema } from '@/lib/schemas/transactions';
 import { FEES, DECIMALS_FIXED_TO_FOUR } from '@/constants/api';
 
-const REQUIRED_FIELDS = ['walletAddress', 'blockchain', 'crypto', 'cryptoAmount', 'email', 'fiat', 'fiatAmount', 'ref'];
-
-function hasRequiredFields(data: Record<string, unknown>) {
-  return REQUIRED_FIELDS.every((field) => Boolean(data[field]));
-}
-
-/**
- * GET to retrieve all buy transactions
- * @param _request - The request object
- * @returns The buy transactions
- */
 export async function GET(_request: NextRequest) {
   try {
     const session = await requireAuth();
@@ -27,39 +18,49 @@ export async function GET(_request: NextRequest) {
     });
 
     return NextResponse.json(buyTransactions);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Error retrieving transactions' }, { status: 500 });
   }
 }
 
-/**
- * POST to create a new buy transaction
- * @param request - The request object
- * @returns The new buy transaction
- */
 export async function POST(request: NextRequest) {
+  const limit = await rateLimit(request, { key: 'tx:buy', limit: 5, windowSec: 60 });
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: rateLimitHeaders(limit) },
+    );
+  }
+
+  let rawBody: unknown;
   try {
-    const data = await request.json();
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
-    if (!hasRequiredFields(data)) {
-      return NextResponse.json({ error: 'Missing data' }, { status: 400 });
-    }
+  const parsed = BuyTxSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'Invalid payload', issues: parsed.error.flatten() },
+      { status: 422 },
+    );
+  }
+  const data = parsed.data;
 
-    const amount = parseFloat(data.amount);
-    const fees =
-      data.fees !== undefined
-        ? parseFloat(data.fees.toString())
-        : parseFloat((amount * FEES).toFixed(DECIMALS_FIXED_TO_FOUR));
+  const baseAmount = data.amount ?? data.fiatAmount;
+  const fees = data.fees ?? Number((baseAmount * FEES).toFixed(DECIMALS_FIXED_TO_FOUR));
 
+  try {
     const newTransaction = await prisma.buyTransaction.create({
       data: {
         ref: data.ref,
         date: new Date(),
         email: data.email,
-        fullName: data.fullName || '',
-        cvu: data.cvu || '',
+        fullName: data.fullName,
+        cvu: data.cvu,
         walletAddress: data.walletAddress,
-        status: data.status || 'pending',
+        status: data.status ?? 'pending',
         blockchain: data.blockchain,
         fiat: data.fiat,
         fiatAmount: data.fiatAmount,
@@ -69,26 +70,29 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    try {
-      await sendTransactionEmail({
-        email: data.email,
-        fullName: data.fullName,
-        transactionRef: newTransaction.ref,
-        transactionType: 'buy',
-        date: newTransaction.date.toLocaleDateString(),
-        blockchain: data.blockchain,
-        fiatSymbol: data.fiat,
-        fiatAmount: data.fiatAmount,
-        tokenSymbol: data.crypto,
-        tokenAmount: data.cryptoAmount,
-        walletAddress: data.walletAddress,
-      });
-    } catch (emailError) {
-      return NextResponse.json({ error: 'Error sending confirmation email' }, { status: 500 });
-    }
+    after(async () => {
+      try {
+        await sendTransactionEmail({
+          email: data.email,
+          fullName: data.fullName,
+          transactionRef: newTransaction.ref,
+          transactionType: 'buy',
+          date: newTransaction.date.toLocaleDateString(),
+          blockchain: data.blockchain,
+          fiatSymbol: data.fiat,
+          fiatAmount: String(data.fiatAmount),
+          tokenSymbol: data.crypto,
+          tokenAmount: String(data.cryptoAmount),
+          walletAddress: data.walletAddress,
+        });
+      } catch (emailError) {
+        console.error('[buy] confirmation email failed', { ref: newTransaction.ref, emailError });
+      }
+    });
 
-    return NextResponse.json(newTransaction, { status: 201 });
+    return NextResponse.json(newTransaction, { status: 201, headers: rateLimitHeaders(limit) });
   } catch (error) {
+    console.error('[buy] create transaction failed', error);
     return NextResponse.json({ error: 'Error creating buy transaction' }, { status: 500 });
   }
 }
