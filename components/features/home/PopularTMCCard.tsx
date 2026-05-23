@@ -39,7 +39,7 @@ const PopularTMCCard = () => {
       className="bg-color5 text-color4 text-base sm:text-lg shadow-lg rounded-xl overflow-hidden flex flex-col min-w-0 w-full
                     max-w-[90%] sm:max-w-full mx-auto"
     >
-      <Image src="/images/tmc/tmc.png" alt="TMC" width={800} height={800} className="object-cover w-full h-64" />
+      <Image src="/images/tmc/tmc.webp" alt="TMC" width={800} height={800} className="object-cover w-full h-64" />
       <div className="p-3 sm:p-4 flex flex-col flex-grow min-h-[180px]">
         <div>
           <h3 className="font-semibold text-lg sm:text-xl">Tokeshare MarketCap 20</h3>
