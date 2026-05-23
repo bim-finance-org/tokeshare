@@ -6,8 +6,8 @@ import { FEES, DECIMALS_FIXED_TO_FOUR } from '@/constants/api';
 
 const REQUIRED_FIELDS = ['walletAddress', 'blockchain', 'crypto', 'cryptoAmount', 'email', 'fiat', 'fiatAmount', 'ref'];
 
-function hasRequiredFields(data: any) {
-  return REQUIRED_FIELDS.every((field) => data[field]);
+function hasRequiredFields(data: Record<string, unknown>) {
+  return REQUIRED_FIELDS.every((field) => Boolean(data[field]));
 }
 
 /**

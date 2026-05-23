@@ -6,14 +6,14 @@ import { DECIMALS_FIXED_TO_TWO, FEES } from '@/constants/api';
 
 const BASE_REQUIRED_FIELDS = ['blockchain', 'crypto', 'cryptoAmount', 'fiat', 'fiatAmount', 'email', 'fullName', 'ref'];
 
-function hasRequiredFields(data: any) {
-  const baseValid = BASE_REQUIRED_FIELDS.every((field) => data[field]);
+function hasRequiredFields(data: Record<string, unknown>) {
+  const baseValid = BASE_REQUIRED_FIELDS.every((field) => Boolean(data[field]));
   if (!baseValid) return false;
 
   if (data.paymentMethod === 'usdc_transfer') {
-    return !!data.walletAddress && !!data.txHash;
+    return Boolean(data.walletAddress) && Boolean(data.txHash);
   }
-  return !!data.iban;
+  return Boolean(data.iban);
 }
 
 /**
