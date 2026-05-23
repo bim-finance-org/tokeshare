@@ -10,6 +10,7 @@ import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { ZAP_TMC_ABI } from '@/contracts/abis/zap_tmc_abi';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { useCallback, useMemo } from 'react';
+import type { Blockchain } from '@/enums/Blockchain';
 
 // TMC to CMC20 ratio: 1 TMC = 1/10 CMC20
 export const TMC_CMC20_RATIO = 10;
@@ -201,6 +202,7 @@ export const useTmcSwap = () => {
       outputToken: Address;
       routerAddress: Address;
       walletAddress: Address;
+      blockchain?: Blockchain;
     }) => {
       const decimals = getTokenDecimals(params.inputToken);
       if (decimals === undefined) {
@@ -257,6 +259,7 @@ export const useTmcSwap = () => {
       outputToken: Address;
       routerAddress: Address;
       walletAddress: Address;
+      blockchain?: Blockchain;
     }) => {
       const tmcBalance = await checkTokenBalance(BASE_CONTRACTS.TMC as Address, params.walletAddress);
       const tmcAmountBigInt = BigInt((parseFloat(params.amount) * Math.pow(10, 18)).toString());

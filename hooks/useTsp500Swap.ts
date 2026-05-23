@@ -10,6 +10,7 @@ import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { ZAP_TSP500_ABI } from '@/contracts/abis/zap_tsp500_abi';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { useCallback, useMemo } from 'react';
+import type { Blockchain } from '@/enums/Blockchain';
 
 // TSP500 to deSPXA ratio: 1 TSP500 = 1/10 deSPXA
 export const TSP500_DESPXA_RATIO = 10;
@@ -201,6 +202,7 @@ export const useTsp500Swap = () => {
       outputToken: Address;
       routerAddress: Address;
       walletAddress: Address;
+      blockchain?: Blockchain;
     }) => {
       const decimals = getTokenDecimals(params.inputToken);
       if (decimals === undefined) {
@@ -257,6 +259,7 @@ export const useTsp500Swap = () => {
       outputToken: Address;
       routerAddress: Address;
       walletAddress: Address;
+      blockchain?: Blockchain;
     }) => {
       const tsp500Balance = await checkTokenBalance(BASE_CONTRACTS.TSP500 as Address, params.walletAddress);
       const tsp500AmountBigInt = BigInt((parseFloat(params.amount) * Math.pow(10, 18)).toString());
