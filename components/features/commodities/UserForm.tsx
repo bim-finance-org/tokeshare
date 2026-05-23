@@ -18,7 +18,7 @@ interface UserFormProps {
   crypto: string;
   tggAmount: string;
   tggPrice: number;
-  setShowUserForm: Function;
+  setShowUserForm: (show: boolean) => void;
 }
 
 interface FormData {
