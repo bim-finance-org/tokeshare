@@ -23,6 +23,7 @@ import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { useAutoSwitchNetwork } from '@/hooks/useAutoSwitchNetwork';
 import { TokenType } from '@/enums/TokenType';
 import { useSwapHandlerByToken } from '@/hooks/swapHandlers/useSwapHandlerByToken';
+import { notify } from '@/lib/notify';
 
 export type SwapQuoteParams = {
   inputToken: Address;
@@ -44,7 +45,6 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   const [amount, setAmount] = useState('0');
   const [isTggFirst, setIsTggFirst] = useState(false);
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
-  const [errorTransaction, setErrorTransaction] = useState('');
 
   const { isConnected, address } = useAccount();
 
@@ -93,16 +93,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   }, [calculatedOutputAmount, isTggFirst, isLoadingQuote]);
 
   useEffect(() => {
-    if (!errorTransaction) return;
-    const timeout = setTimeout(() => setErrorTransaction(''), 3000);
-    return () => clearTimeout(timeout);
-  }, [errorTransaction]);
-
-  useEffect(() => {
-    if (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      setErrorTransaction(errorMessage);
-    }
+    if (error) notify.error(error);
   }, [error]);
 
   // Handle stablecoin amount change
@@ -176,8 +167,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         });
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      setErrorTransaction(errorMessage);
+      notify.error(error);
     } finally {
       setIsPreparingSwap(false);
     }
@@ -256,14 +246,6 @@ const Swap = ({ token }: { token: TokenInfo }) => {
             <AlertDescription>Your transaction is being processed. Please wait...</AlertDescription>
           </Alert>
         )}
-
-        {errorTransaction ? (
-          <Alert className="bg-red-500">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{errorTransaction}</AlertDescription>
-          </Alert>
-        ) : null}
 
         {isConnected && !isOnCorrectChain && (
           <Alert className="bg-amber-500">
