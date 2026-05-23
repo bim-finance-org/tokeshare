@@ -174,7 +174,7 @@ La quasi-totalité des `<button>` n'ont pas `type="button"` explicite (BuyModal,
 
 | # | Lot | Sévérité | Statut | Notes |
 |---|---|---|---|---|
-| 1 | Rate-limit (Upstash) + validation Zod sur toutes les routes API + atomicité tx/email | 🔴 | ⏳ | Anti-spam DB |
+| 1 | Rate-limit + validation Zod sur toutes les routes API + atomicité tx/email | 🔴 | ✅ | `lib/ratelimit.ts` (ioredis + fallback) ; schémas Zod centralisés ; email via `after()` (Next 16) |
 | 2 | Retirer `next/head` du NavBar, déplacer JSON-LD vers `next/script` ou Metadata | 🔴 | ✅ | Migré vers `next/script` (id + strategy=afterInteractive) |
 | 3 | `app/api/snapshot/route.ts` : passer de `fs.writeFileSync` à Redis ou Blob | 🔴 | ✅ | Cache Redis `snapshot:holders:latest` + GET; readers via `/api/snapshot` |
 | 4 | Throw au boot si `NEXTAUTH_SECRET` ou `DASHBOARD_PASSWORD` absents | 🔴 | ✅ | Throw au load de `lib/authOptions.ts` |
