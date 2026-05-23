@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
+import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
 
 const CACHE_EXPIRATION_SECONDS = 20 * 60;
 const MS_PER_SECOND = 1000;
@@ -81,18 +82,26 @@ async function getCachedOrFetch<Data>(
  * @returns The prices of cryptocurrencies
  */
 export async function GET(request: NextRequest) {
+  const limit = await rateLimit(request, { key: 'cmc:quotes', limit: 60, windowSec: 60 });
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: rateLimitHeaders(limit) },
+    );
+  }
+
   try {
     const cryptoIds = extractCryptoIds(request);
     if (!cryptoIds) {
       return NextResponse.json(
         { error: 'Invalid or missing ID parameter (must be comma-separated integers)' },
-        { status: 400 },
+        { status: 400, headers: rateLimitHeaders(limit) },
       );
     }
 
     const cacheKey = `cmc:prices:id:${cryptoIds}`;
     const result = await getCachedOrFetch<CmcQuoteResponse>(cacheKey, () => fetchCoinMarketCap(cryptoIds));
-    return NextResponse.json(result);
+    return NextResponse.json(result, { headers: rateLimitHeaders(limit) });
   } catch (error) {
     return NextResponse.json(
       {
