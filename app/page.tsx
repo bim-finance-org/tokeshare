@@ -11,8 +11,8 @@ const HERO_BLUR_DATA_URL =
 export default function Home() {
   return (
     <>
-      <div className="relative h-screen bg-color1">
-        <div className="relative h-screen">
+      <div className="relative h-screen bg-color4 md:bg-color1">
+        <div className="relative hidden h-screen md:block">
           <Image
             src="/images/bg-image-1.webp"
             alt="House"
@@ -35,7 +35,7 @@ export default function Home() {
           </p>
           <p className="text-white text-sm md:text-lg">The future of finance lies in tokenization.</p>
           <Link href="/marketplace/commodities">
-            <button type="button" className="rounded-lg w-48 bg-color4 px-6 py-2 text-sm md:text-lg hover:scale-105 transition-transform duration-300">
+            <button type="button" className="rounded-lg w-48 bg-color4 border border-white/40 md:border-transparent px-6 py-2 text-sm md:text-lg hover:scale-105 transition-transform duration-300">
               Marketplace
             </button>
           </Link>
