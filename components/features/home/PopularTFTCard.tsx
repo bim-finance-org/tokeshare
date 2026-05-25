@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import LocationIcon from '../../icons/card/LocationIcon';
 import ArrowIcon from '../../icons/arrows/ArrowIcon';
-import QuadIcon from '../../icons/card/QuadIcon';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
@@ -13,7 +12,6 @@ import { getLogger } from '@/lib/logger';
 const log = getLogger('home:popular-tft');
 import { Blockchain } from '@/enums/Blockchain';
 import { Address } from 'viem';
-import { Skeleton } from '../../ui/skeleton';
 
 const PopularTFTCard = () => {
   const cardRef = useRef<HTMLDivElement>(null);

@@ -12,7 +12,6 @@ const log = getLogger('french-tacos:card');
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { Address } from 'viem';
-import { Skeleton } from '../../ui/skeleton';
 
 const TacosCard = () => {
   const [balance, setBalance] = useState<number | null>(null);

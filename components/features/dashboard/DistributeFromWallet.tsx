@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { parseAbi, type Address } from 'viem';
 import { CONTRACTS } from '@/contracts/contracts';
 import { base } from 'viem/chains';
-import { TOKENS } from '@/config/token';
 import ConnectWalletButton from '@/components/shared/ConnectButton';
 
 type FrontRowBase = { address: Address; balance_raw: string; balance: string; percent: string };

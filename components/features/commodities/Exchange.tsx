@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Buy from '@/components/features/commodities/Buy';
 import Sell from '@/components/features/commodities/Sell';
 import Swap from '@/components/features/commodities/Swap';

@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import FrenchTacosHighlights from './FrenchTacosHighlights';
 import FrenchTacosFinancials from './FrenchTacosFinancials';
-import FrenchTacosDetails from './FrenchTacosDetails';
 import FrenchTacosBlockchain from './FrenchTacosBlockchain';
 import FrenchTacosOffering from './FrenchTacosOffering';
 import FrenchTacosRenovation from './FrenchTacosRenovation';
