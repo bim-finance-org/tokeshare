@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('building-in-progress');
 
 const BuildingInProgress = () => {
   const [email, setEmail] = useState('');
@@ -38,7 +41,7 @@ const BuildingInProgress = () => {
       setIsSubmitting(false);
     } catch (error) {
       setIsSubmitting(false);
-      console.error("Erreur d'inscription:", error);
+      log.error('email subscription failed', error);
       setError('An error occurred. Please try again later.');
     }
   };

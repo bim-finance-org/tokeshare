@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-export const usePaxgPrice = () => {
+export const usePaxgPrice = ({ enabled = true }: { enabled?: boolean } = {}) => {
   return useQuery({
     queryKey: ['paxgPrice'],
     queryFn: async () => {
@@ -11,6 +11,7 @@ export const usePaxgPrice = () => {
       const data = await response.json();
       return data.price;
     },
+    enabled,
     staleTime: 5 * 60 * 1000, // Les données sont considérées comme fraîches pendant 5 minutes
     refetchInterval: 5 * 60 * 1000, // Rafraîchissement toutes les 5 minutes
     retry: 3, // 3 tentatives en cas d'échec

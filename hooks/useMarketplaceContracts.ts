@@ -5,9 +5,8 @@ import { Address } from 'viem';
 import { usePublicClient, useWalletClient, useWriteContract, useReadContract, useAccount } from 'wagmi';
 import { getTokenAddress, getTokenDecimals } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
-import { TokenInfo } from '@/config/token';
 import { PUBLIC_CLIENTS } from '@/lib/clients';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 export function useMarketplaceContract() {
   const wagmiClient = usePublicClient();
@@ -19,7 +18,6 @@ export function useMarketplaceContract() {
 
   const tokenAddress = getTokenAddress('TFT_001', Blockchain.Base) as Address;
 
-  // Call useReadContract directly at the top level (not inside a function)
   const tftTokenInfoResult = useReadContract({
     address: CONTRACTS.MARKETPLACE as Address,
     abi: MARKETPLACE_ABI,
@@ -30,130 +28,128 @@ export function useMarketplaceContract() {
 
   const tokenInfo = tftTokenInfoResult.data;
 
-  // Vérifie le solde du token
-  const checkTokenBalance = async (tokenAddress: Address, owner: Address): Promise<bigint> => {
-    if (!publicClient) throw new Error('Public client non disponible');
+  const checkTokenBalance = useCallback(
+    async (tokenAddr: Address, owner: Address): Promise<bigint> => {
+      if (!publicClient) throw new Error('Public client non disponible');
+      return (await publicClient.readContract({
+        address: tokenAddr,
+        abi: ERC20_ABI,
+        functionName: 'balanceOf',
+        args: [owner],
+      })) as bigint;
+    },
+    [publicClient],
+  );
 
-    return (await publicClient.readContract({
-      address: tokenAddress,
-      abi: ERC20_ABI,
-      functionName: 'balanceOf',
-      args: [owner],
-    })) as bigint;
-  };
+  const checkAllowance = useCallback(
+    async (tokenAddr: Address, owner: Address, spender: Address): Promise<bigint> => {
+      if (!publicClient) throw new Error('Public client non disponible');
+      return (await publicClient.readContract({
+        address: tokenAddr,
+        abi: ERC20_ABI,
+        functionName: 'allowance',
+        args: [owner, spender],
+      })) as bigint;
+    },
+    [publicClient],
+  );
 
-  // Vérifie l'allowance
-  const checkAllowance = async (tokenAddress: Address, owner: Address, spender: Address): Promise<bigint> => {
-    if (!publicClient) throw new Error('Public client non disponible');
+  const approveToken = useCallback(
+    async (tokenAddr: Address, spender: Address, amount: bigint) => {
+      if (!walletClient) throw new Error('Wallet client non disponible');
+      const txHash = await walletClient.writeContract({
+        address: tokenAddr,
+        abi: ERC20_ABI,
+        functionName: 'approve',
+        args: [spender, amount],
+      });
+      if (publicClient) {
+        await publicClient.waitForTransactionReceipt({ hash: txHash });
+      }
+    },
+    [walletClient, publicClient],
+  );
 
-    return (await publicClient.readContract({
-      address: tokenAddress,
-      abi: ERC20_ABI,
-      functionName: 'allowance',
-      args: [owner, spender],
-    })) as bigint;
-  };
+  const sellTokenOnMarketplace = useCallback(
+    async (tokenSymbol: string, tokenAmount: string, stableToReceive: string) => {
+      if (!publicClient) throw new Error('Public client non disponible');
+      if (!userAddress) throw new Error('Utilisateur non connecté');
 
-  // Approve un token
-  const approveToken = async (tokenAddress: Address, spender: Address, amount: bigint) => {
-    if (!walletClient) throw new Error('Wallet client non disponible');
+      const tokenDecimals = getTokenDecimals(tokenSymbol);
+      if (tokenDecimals === undefined) throw new Error('Token decimals not found');
 
-    const txHash = await walletClient.writeContract({
-      address: tokenAddress,
-      abi: ERC20_ABI,
-      functionName: 'approve',
-      args: [spender, amount],
-    });
+      const parsedTokenAmount = parseFloat(tokenAmount);
+      if (isNaN(parsedTokenAmount)) throw new Error('Montant token invalide');
 
-    if (publicClient) {
-      await publicClient.waitForTransactionReceipt({ hash: txHash });
-    }
-  };
+      const stablecoinAddress = getTokenAddress(stableToReceive, Blockchain.Base);
+      if (!stablecoinAddress || !tokenAddress) throw new Error('Adresse de token introuvable');
 
-  const sellTokenOnMarketplace = async (tokenSymbol: string, tokenAmount: string, stableToReceive: string) => {
-    if (!publicClient) throw new Error('Public client non disponible');
-    if (!userAddress) throw new Error('Utilisateur non connecté');
+      const amountTokenParsed = BigInt(Math.floor(parsedTokenAmount * 10 ** tokenDecimals));
 
-    const tokenDecimals = getTokenDecimals(tokenSymbol);
-    if (tokenDecimals === undefined) throw new Error('Token decimals not found');
+      const allowance = await checkAllowance(tokenAddress, userAddress, CONTRACTS.MARKETPLACE as Address);
+      if (allowance < amountTokenParsed) {
+        await approveToken(tokenAddress, CONTRACTS.MARKETPLACE as Address, amountTokenParsed);
+      }
 
-    const parsedTokenAmount = parseFloat(tokenAmount);
-    if (isNaN(parsedTokenAmount)) throw new Error('Montant token invalide');
+      await writeContract({
+        address: CONTRACTS.MARKETPLACE as Address,
+        abi: MARKETPLACE_ABI,
+        functionName: 'sellTokens',
+        args: [tokenAddress, amountTokenParsed, stablecoinAddress],
+      });
+    },
+    [publicClient, userAddress, tokenAddress, checkAllowance, approveToken, writeContract],
+  );
 
-    const stablecoinAddress = getTokenAddress(stableToReceive, Blockchain.Base);
-    if (!stablecoinAddress || !tokenAddress) throw new Error('Adresse de token introuvable');
+  const buyTokenOnMarketplace = useCallback(
+    async (tokenSymbol: string, tokenAmount: string, stableToPay: string) => {
+      if (!publicClient) throw new Error('Public client non disponible');
+      if (!userAddress) throw new Error('Utilisateur non connecté');
 
-    const amountTokenParsed = BigInt(Math.floor(parsedTokenAmount * 10 ** tokenDecimals));
+      const stableDecimals = getTokenDecimals(stableToPay);
+      const tokenDecimals = getTokenDecimals(tokenSymbol);
+      if (stableDecimals === undefined || tokenDecimals === undefined) {
+        throw new Error('Impossible d’obtenir les décimales des tokens');
+      }
 
-    const allowance = await checkAllowance(tokenAddress, userAddress, CONTRACTS.MARKETPLACE as Address);
-    if (allowance < amountTokenParsed) {
-      await approveToken(tokenAddress, CONTRACTS.MARKETPLACE as Address, amountTokenParsed);
-    }
+      const parsedTokenAmount = parseFloat(tokenAmount);
+      if (isNaN(parsedTokenAmount)) throw new Error('Montant token invalide');
 
-    await writeContract({
-      address: CONTRACTS.MARKETPLACE as Address,
-      abi: MARKETPLACE_ABI,
-      functionName: 'sellTokens',
-      args: [tokenAddress, amountTokenParsed, stablecoinAddress],
-    });
-  };
+      const stableCoinAddress = getTokenAddress(stableToPay, Blockchain.Base);
+      if (!stableCoinAddress || !tokenAddress) throw new Error('Adresse de token introuvable');
 
-  const buyTokenOnMarketplace = async (tokenSymbol: string, tokenAmount: string, stableToPay: string) => {
-    if (!publicClient) throw new Error('Public client non disponible');
-    if (!userAddress) throw new Error('Utilisateur non connecté');
+      const [pricePerToken] = (tokenInfo ?? []) as [bigint];
+      const amountTokenParsed = BigInt(Math.floor(parsedTokenAmount * 10 ** tokenDecimals));
+      const estimatedStableAmount = (parsedTokenAmount * Number(pricePerToken)) / 1e18;
+      const approveAmount = BigInt(Math.floor(estimatedStableAmount * 10 ** stableDecimals));
 
-    const stableDecimals = getTokenDecimals(stableToPay);
-    const tokenDecimals = getTokenDecimals(tokenSymbol);
+      const allowance = await checkAllowance(stableCoinAddress, userAddress, CONTRACTS.MARKETPLACE as Address);
+      if (allowance < approveAmount) {
+        await approveToken(stableCoinAddress, CONTRACTS.MARKETPLACE as Address, approveAmount);
+      }
 
-    if (stableDecimals === undefined || tokenDecimals === undefined) {
-      throw new Error('Impossible d’obtenir les décimales des tokens');
-    }
+      await writeContract({
+        address: CONTRACTS.MARKETPLACE as Address,
+        abi: MARKETPLACE_ABI,
+        functionName: 'buyTokens',
+        args: [tokenAddress, amountTokenParsed, stableCoinAddress],
+      });
+    },
+    [publicClient, userAddress, tokenAddress, tokenInfo, checkAllowance, approveToken, writeContract],
+  );
 
-    const parsedTokenAmount = parseFloat(tokenAmount);
-    if (isNaN(parsedTokenAmount)) {
-      throw new Error('Montant token invalide');
-    }
-
-    const stableCoinAddress = getTokenAddress(stableToPay, Blockchain.Base);
-
-    if (!stableCoinAddress || !tokenAddress) {
-      throw new Error('Adresse de token introuvable');
-    }
-
-    const [pricePerToken, tokenDecimalsOnChain, isActive] = (tokenInfo ?? []) as [bigint, number, boolean];
-
-    const amountTokenParsed = BigInt(Math.floor(parsedTokenAmount * 10 ** tokenDecimals));
-
-    const estimatedStableAmount = (parsedTokenAmount * Number(pricePerToken)) / 1e18;
-
-    const approveAmount = BigInt(Math.floor(estimatedStableAmount * 10 ** stableDecimals));
-
-    console.log(estimatedStableAmount);
-
-    const allowance = await checkAllowance(stableCoinAddress, userAddress, CONTRACTS.MARKETPLACE as Address);
-
-    if (allowance < approveAmount) {
-      await approveToken(stableCoinAddress, CONTRACTS.MARKETPLACE as Address, approveAmount);
-    }
-
-    await writeContract({
-      address: CONTRACTS.MARKETPLACE as Address,
-      abi: MARKETPLACE_ABI,
-      functionName: 'buyTokens',
-      args: [tokenAddress, amountTokenParsed, stableCoinAddress],
-    });
-  };
-
-  function getMarketplaceBalance(token: Address): Promise<bigint> {
-    if (!publicClient) throw new Error('Public client non disponible');
-
-    return publicClient.readContract({
-      address: token,
-      abi: ERC20_ABI,
-      functionName: 'balanceOf',
-      args: [CONTRACTS.MARKETPLACE as Address],
-    }) as Promise<bigint>;
-  }
+  const getMarketplaceBalance = useCallback(
+    (token: Address): Promise<bigint> => {
+      if (!publicClient) throw new Error('Public client non disponible');
+      return publicClient.readContract({
+        address: token,
+        abi: ERC20_ABI,
+        functionName: 'balanceOf',
+        args: [CONTRACTS.MARKETPLACE as Address],
+      }) as Promise<bigint>;
+    },
+    [publicClient],
+  );
 
   return useMemo(
     () => ({
@@ -169,6 +165,18 @@ export function useMarketplaceContract() {
       approveToken,
       getMarketplaceBalance,
     }),
-    [tftTokenInfoResult.data, tftTokenInfoResult.isLoading, isPending, error, hash],
+    [
+      buyTokenOnMarketplace,
+      sellTokenOnMarketplace,
+      tftTokenInfoResult.data,
+      tftTokenInfoResult.isLoading,
+      isPending,
+      error,
+      hash,
+      checkTokenBalance,
+      checkAllowance,
+      approveToken,
+      getMarketplaceBalance,
+    ],
   );
 }

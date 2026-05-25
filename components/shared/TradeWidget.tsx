@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TokenInput from './TokenInput';
 import TokenSelector from './TokenSelector';
 import TokenDisplay from '@/components/shared/TokenDisplay';
-import { useAccount } from 'wagmi';
 import CryptoBalance from './CryptoBalance';
 import MaxButton from './MaxButton';
 import { Blockchain } from '@/enums/Blockchain';
@@ -32,14 +31,17 @@ const TradeWidget = ({
   readOnly = false,
   lockedToken = false,
 }: TradeWidgetProps) => {
-  const [selectedToken, setSelectedToken] = useState(defaultToken || 'USDC');
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+
+  // The selected token is fully controlled by the parent via `defaultToken`;
+  // there is no local state mirroring it. (Previously a useEffect copied
+  // defaultToken into local state on every prop change.)
+  const selectedToken = defaultToken || 'USDC';
 
   // Vérifie si le token est un crypto token fixe (non-stablecoin)
   const isTGG = selectedToken === 'TGG' || selectedToken === 'TFT_001' || selectedToken === 'TMC';
 
   const handleTokenSelect = (token: string) => {
-    setSelectedToken(token);
     onTokenChange(token);
     setIsSelectorOpen(false);
   };
@@ -51,10 +53,6 @@ const TradeWidget = ({
       onValueChange(numValue.toString());
     }
   };
-
-  useEffect(() => {
-    setSelectedToken(defaultToken || 'USDC');
-  }, [defaultToken]);
 
   return (
     <div className="bg-color1 p-3 sm:p-4 rounded-xl shadow-md">

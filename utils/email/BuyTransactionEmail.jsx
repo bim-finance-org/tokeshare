@@ -100,7 +100,7 @@ const BuyTransactionEmail = ({
               </Row>
 
               <Text className="text-xs text-gray-600 font-bold mt-3">
-                *Don't forget to include the transaction reference when making your transfer.
+                *Don&apos;t forget to include the transaction reference when making your transfer.
               </Text>
             </Section>
 

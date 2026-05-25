@@ -7,6 +7,9 @@ import {
   allowAllModules,
   type ISupportedWallet,
 } from '@creit.tech/stellar-wallets-kit';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('stellar');
 
 type StellarContextValue = {
   address: string | undefined;
@@ -36,18 +39,19 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
     });
     kitRef.current = kit;
 
-    if (storedWalletId) {
-      setWalletId(storedWalletId);
-      kit
-        .getAddress({ skipRequestAccess: true })
-        .then(({ address }) => {
-          if (address) setAddress(address);
-        })
-        .catch(() => {
-          localStorage.removeItem(STORAGE_KEY);
-          setWalletId(undefined);
-        });
-    }
+    if (!storedWalletId) return;
+
+    // All state updates happen inside the promise callbacks (never
+    // synchronously in the effect body) so this doesn't cascade renders.
+    kit
+      .getAddress({ skipRequestAccess: true })
+      .then(({ address }) => {
+        setWalletId(storedWalletId);
+        if (address) setAddress(address);
+      })
+      .catch(() => {
+        localStorage.removeItem(STORAGE_KEY);
+      });
   }, []);
 
   const connect = useCallback(async () => {
@@ -63,12 +67,12 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
             setAddress(address);
             localStorage.setItem(STORAGE_KEY, option.id);
           } catch (error) {
-            console.error('Stellar wallet connection failed:', error);
+            log.error('wallet connection failed', error);
           }
         },
       });
     } catch (error) {
-      console.error('Stellar modal error:', error);
+      log.error('modal error', error);
     }
   }, []);
 

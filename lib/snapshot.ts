@@ -1,8 +1,6 @@
 // scripts/snapshot.ts
-import { createPublicClient, http, formatUnits, parseUnits, parseAbiItem, Address } from 'viem';
+import { createPublicClient, http, formatUnits, parseUnits, parseAbiItem, type AbiEvent, type Address } from 'viem';
 import { base } from 'viem/chains';
-import fs from 'node:fs';
-import path from 'node:path';
 
 type BalanceRow = { address: Address; balance: bigint };
 
@@ -28,7 +26,6 @@ const MARKETPLACE_NEW: Address = '0xe0F632423a6bf824d7E4463470549b73048C3f4e';
 const EXCLUDE = new Set<Address>([MARKETPLACE_OLD, MARKETPLACE_NEW]);
 
 const PERCENT_DECIMALS = 4;
-const OUTPUT_JSON_PATH = path.join(process.cwd(), 'public/snapshots/holders_snapshot.json');
 const FIXED_TOTAL_SUPPLY_TOKENS = '1000';
 
 const ERC20_ABI = [
@@ -77,12 +74,11 @@ function makeRanges(fromBlock: bigint, toBlock: bigint, step: bigint): Range[] {
 async function getLogsRangeWithRetry(
   address: Address,
   range: Range,
-  event: any,
+  event: AbiEvent,
   maxRetries = 4
 ): Promise<TransferLog[]> {
-  let step = range.toBlock - range.fromBlock + 1n;
-  let from = range.fromBlock;
-  let to = range.toBlock;
+  const from = range.fromBlock;
+  const to = range.toBlock;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -230,11 +226,6 @@ export async function generateSnapshot(opts?: { totalUsdc?: string | null }): Pr
     PERCENT_DECIMALS,
     totalSupplyRaw,
   );
-
-  // 7) Persist to disk
-  const dir = path.dirname(OUTPUT_JSON_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(OUTPUT_JSON_PATH, JSON.stringify(frontRows, null, 2), 'utf-8');
 
   return frontRows;
 }

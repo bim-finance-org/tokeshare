@@ -2,14 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import LocationIcon from '../../icons/card/LocationIcon';
-import { FaChartLine } from 'react-icons/fa6';
+import { LineChart } from 'lucide-react';
 import Link from 'next/link';
 import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('french-tacos:card');
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { Address } from 'viem';
-import { Skeleton } from '../../ui/skeleton';
 
 const TacosCard = () => {
   const [balance, setBalance] = useState<number | null>(null);
@@ -24,7 +26,7 @@ const TacosCard = () => {
         const formattedBalance = Number(rawBalance) / 10 ** 18;
         setBalance(formattedBalance);
       } catch (err) {
-        console.error('Erreur de fetch balance :', err);
+        log.error('balance fetch failed', err);
         setHasError(true);
         setBalance(null);
       }
@@ -90,7 +92,7 @@ const TacosCard = () => {
 
         <div className="bg-color2/20 rounded-xl p-6 mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <FaChartLine size={32} />
+            <LineChart size={32} />
             <span className="font-bold text-xl">Net yield:</span>
             <span className="ml-auto font-semibold text-green-600 text-xl">11.76%/year</span>
           </div>
@@ -99,7 +101,7 @@ const TacosCard = () => {
 
         <div className="flex justify-center">
           <Link href="/marketplace/other/french-tacos">
-            <button className="flex items-center justify-between bg-color2 rounded-3xl px-8 mt-4 text-xl w-72 hover:bg-color4 hover:text-white transition-colors duration-300 shadow-md font-semibold">
+            <button type="button" className="flex items-center justify-between bg-color2 rounded-3xl px-8 mt-4 text-xl w-72 hover:bg-color4 hover:text-white transition-colors duration-300 shadow-md font-semibold">
               <span className="text-color1 hover:text-white">Buy</span>
               <ArrowIcon size={32} className="text-white" />
             </button>

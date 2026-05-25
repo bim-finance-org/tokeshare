@@ -3,14 +3,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import LocationIcon from '../../icons/card/LocationIcon';
 import ArrowIcon from '../../icons/arrows/ArrowIcon';
-import QuadIcon from '../../icons/card/QuadIcon';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('home:popular-tft');
 import { Blockchain } from '@/enums/Blockchain';
 import { Address } from 'viem';
-import { Skeleton } from '../../ui/skeleton';
 
 const PopularTFTCard = () => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -28,7 +29,7 @@ const PopularTFTCard = () => {
         const formattedBalance = Number(rawBalance) / 10 ** 18;
         setBalance(formattedBalance);
       } catch (err) {
-        console.error('Erreur de fetch balance :', err);
+        log.error('balance fetch failed', err);
         setHasError(true);
         setBalance(null); // pour éviter que 0 soit interprété comme SOLD OUT
       }
@@ -96,7 +97,7 @@ const PopularTFTCard = () => {
           <h5 className="text-blue-600 font-bold text-lg sm:text-xl">$ 31.25</h5>
 
           <Link href="/marketplace/other/french-tacos">
-            <button className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
+            <button type="button" className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
               <h5>Buy TFT</h5>
               <span className="ml-2">
                 <ArrowIcon size={24} />

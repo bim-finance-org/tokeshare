@@ -1,5 +1,5 @@
 import { Period } from '@/enums/Period';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 interface PerformanceData {
   todayPrice?: number;
@@ -11,38 +11,24 @@ interface PerformanceData {
   source: string;
 }
 
+async function fetchPaxgPerformance(period: Period): Promise<PerformanceData> {
+  const res = await fetch(`/api/commodities/paxg/performance?period=${period}`);
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.error || 'Unknown error');
+  }
+  return res.json();
+}
+
 export function usePaxgPerformance(period: Period = Period.OneDay) {
-  const [data, setData] = useState<PerformanceData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['paxg-performance', period],
+    queryFn: () => fetchPaxgPerformance(period),
+  });
 
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoading(true);
-    setError(null);
-
-    fetch(`/api/commodities/paxg/performance?period=${period}`)
-      .then(async (res) => {
-        if (!res.ok) {
-          const json = await res.json();
-          throw new Error(json.error || 'Unknow error');
-        }
-        return res.json();
-      })
-      .then((json) => {
-        if (isMounted) setData(json);
-      })
-      .catch((e) => {
-        if (isMounted) setError(e.message);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [period]);
-
-  return { data, isLoading, error };
+  return {
+    data: data ?? null,
+    isLoading,
+    error: error ? (error as Error).message : null,
+  };
 }

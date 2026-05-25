@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useMemo } from 'react';
 import TradeWidget from '../../../components/shared/TradeWidget';
 import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/shared/Blockchains';
@@ -8,7 +8,7 @@ import { calculateTGGPrice, calculateTMCPrice, calculateTSP500Price, convertTGGT
 import ConnectButton from '@/components/shared/ConnectButton';
 import { useAccount } from 'wagmi';
 import UserForm from './UserForm';
-import { TokenContexts } from '@/context/TokenContexts';
+import { useTokenContext } from '@/context/TokenContexts';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
 import { useCmc20Price } from '@/hooks/useCmc20Price';
 import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
@@ -16,9 +16,7 @@ import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { useTGGBalance } from '@/hooks/useTGGBalance';
 import { useTFTBalance } from '@/hooks/useTFTBalance';
 import { Address } from 'viem';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { INTERVAL_PRICE_UPDATE, TFT_001_PRICE_USD, TFT_001_SELL_FEES_COEF, FEES_COEF } from '@/constants/constants';
+import { TFT_001_PRICE_USD, TFT_001_SELL_FEES_COEF } from '@/constants/constants';
 import { Badge } from '@/components/ui/badge';
 import { ExchangeSection } from '@/enums/ExchangeSection';
 import { TokenInfo } from '@/config/token';
@@ -28,19 +26,17 @@ const Sell = ({ token }: { token: TokenInfo }) => {
     sell: { token: selectedCurrency, blockchain: selectedBlockchain },
     updateSellToken: setSelectedCurrency,
     updateSellBlockchain: setSelectedBlockchain,
-  } = useContext(TokenContexts);
+  } = useTokenContext();
 
-  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [amountToSell, setAmountToSell] = useState('1');
-  const [receiveAmount, setReceiveAmount] = useState('0');
-  const [tggPrice, setTggPrice] = useState<number>(0);
   const [showUserForm, setShowUserForm] = useState(false);
   const [showBalanceError, setShowBalanceError] = useState(false);
   const [isBelowMin, setBelownMin] = useState(false);
   const { isConnected, address } = useAccount();
-  const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
-  const { data: cmc20Price, isLoading: isCmc20Loading } = useCmc20Price();
-  const { data: despxaPrice } = useDeSPXAPrice();
+  // Only the active token's price feed hits the network — the others stay idle.
+  const { data: paxgPrice } = usePaxgPrice({ enabled: token.symbol === 'TGG' });
+  const { data: cmc20Price } = useCmc20Price({ enabled: token.symbol === 'TMC' });
+  const { data: despxaPrice } = useDeSPXAPrice({ enabled: token.symbol === 'TSP500' });
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
   const isTFT = token.symbol === 'TFT_001';
@@ -53,38 +49,34 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   const formattedBalance = isTFT ? tftFormattedBalance : tggFormattedBalance;
   const checkSufficientBalance = isTFT ? tftCheckBalance : tggCheckBalance;
 
-  useEffect(() => {
+  // Derived: token price computed from upstream price feeds.
+  // The upstream hooks already refetch on their own interval via TanStack
+  // Query, so no local polling is needed.
+  const tggPrice = useMemo<number>(() => {
+    if (isTFT) return TFT_001_PRICE_USD;
+    if (token.symbol === 'TGG' && paxgPrice) return calculateTGGPrice(paxgPrice);
+    if (token.symbol === 'TMC' && cmc20Price) return calculateTMCPrice(cmc20Price);
+    if (token.symbol === 'TSP500' && despxaPrice) return calculateTSP500Price(despxaPrice);
+    return 0;
+  }, [isTFT, token.symbol, paxgPrice, cmc20Price, despxaPrice]);
+
+  // Derived: fiat amount the user will receive, net of fees for TFT.
+  const receiveAmount = useMemo(() => {
+    if (tggPrice <= 0 || (!isTFT && isRatesLoading)) return '0';
+    const tokenAmount = parseFloat(amountToSell) || 0;
+
     if (isTFT) {
-      setTggPrice(TFT_001_PRICE_USD);
-      return;
+      const grossValue = tokenAmount * TFT_001_PRICE_USD;
+      const netValue = grossValue * (1 - TFT_001_SELL_FEES_COEF);
+      if (selectedCurrency === 'USD') return netValue.toFixed(2);
+      if (!exchangeRates) return '0';
+      const fiatRate = exchangeRates[selectedCurrency as keyof typeof exchangeRates];
+      return (netValue * fiatRate).toFixed(2);
     }
 
-    const updatePrice = async () => {
-      if (token.symbol === 'TGG') {
-        const calculatedPrice = calculateTGGPrice(paxgPrice);
-        setTggPrice(calculatedPrice);
-      } else if (token.symbol === 'TMC' && cmc20Price) {
-        const calculatedPrice = calculateTMCPrice(cmc20Price);
-        setTggPrice(calculatedPrice);
-      } else if (token.symbol === 'TSP500' && despxaPrice) {
-        const calculatedPrice = calculateTSP500Price(despxaPrice);
-        setTggPrice(calculatedPrice);
-      }
-    };
-    updatePrice();
-    const interval = setInterval(updatePrice, INTERVAL_PRICE_UPDATE);
-    return () => clearInterval(interval);
-  }, [paxgPrice, cmc20Price, despxaPrice, token.symbol, isTFT]);
-
-  useEffect(() => {
-    if (tggPrice > 0 && (isTFT || !isRatesLoading)) {
-      calculateReceiveAmount();
-    }
-  }, [tggPrice, exchangeRates, selectedCurrency, amountToSell]);
-
-  useEffect(() => {
-    setShowBalanceError(false);
-  }, [amountToSell]);
+    const fiatValue = convertTGGToFiat(tokenAmount, selectedCurrency, exchangeRates, tggPrice);
+    return fiatValue !== undefined ? fiatValue.toFixed(2) : '0';
+  }, [amountToSell, tggPrice, exchangeRates, selectedCurrency, isTFT, isRatesLoading]);
 
   const isLoadingBalance = isTFT ? isLoadingTFTBalance : isLoadingTGGBalance;
   const hasInsufficientBalance =
@@ -92,42 +84,17 @@ const Sell = ({ token }: { token: TokenInfo }) => {
       ? !checkSufficientBalance(amountToSell).hasSufficient
       : false;
 
-  const calculateReceiveAmount = () => {
-    const tokenAmount = parseFloat(amountToSell) || 0;
-
-    if (isTFT) {
-      const grossValue = tokenAmount * TFT_001_PRICE_USD;
-      const netValue = grossValue * (1 - TFT_001_SELL_FEES_COEF);
-      if (selectedCurrency === 'USD') {
-        setReceiveAmount(netValue.toFixed(2));
-      } else if (exchangeRates) {
-        const fiatRate = exchangeRates[selectedCurrency as keyof typeof exchangeRates];
-        setReceiveAmount((netValue * fiatRate).toFixed(2));
-      }
-      return;
-    }
-
-    const fiatValue = convertTGGToFiat(tokenAmount, selectedCurrency, exchangeRates, tggPrice);
-    if (fiatValue !== undefined) {
-      setReceiveAmount(fiatValue.toFixed(2));
-    } else {
-      setReceiveAmount('0');
-    }
-  };
-
   const handleCurrencyChange = (currency: string) => {
     setSelectedCurrency(currency);
-    calculateReceiveAmount();
   };
 
   const handleTggAmountChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setAmountToSell(amount);
-      if (parseFloat(amount) < 0.5) {
-        setBelownMin(true);
-      } else {
-        setBelownMin(false);
-      }
+      setBelownMin(parseFloat(amount) < 0.5);
+      // Clearing the balance error here (instead of via an effect on
+      // amountToSell) avoids a setState-in-effect cascade.
+      if (showBalanceError) setShowBalanceError(false);
     }
   };
 
@@ -215,7 +182,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
 
       <div className="mt-6">
         {isConnected ? (
-          <button
+          <button type="button"
             onClick={() => handleSellClick(true)}
             className={`w-full py-3 rounded-xl font-medium shadow-sm transition-all duration-200
     ${isBelowMin || hasInsufficientBalance ? 'bg-color4 text-white opacity-50 cursor-not-allowed' : 'bg-color4 text-white hover:bg-opacity-90'}`}

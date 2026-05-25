@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-export const useCmc20Price = () => {
+export const useCmc20Price = ({ enabled = true }: { enabled?: boolean } = {}) => {
   return useQuery({
     queryKey: ['cmc20Price'],
     queryFn: async () => {
@@ -11,6 +11,7 @@ export const useCmc20Price = () => {
       const data = await response.json();
       return data.price;
     },
+    enabled,
     staleTime: 5 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
     retry: 3,

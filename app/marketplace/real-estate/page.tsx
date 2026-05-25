@@ -14,7 +14,7 @@ const page = () => {
             secure and compliant way.
           </p>
         </div>
-        <button className="bg-color4 w-full sm:w-64 text-xl sm:text-2xl p-4 rounded-2xl my-8 sm:my-12 hover:scale-105">
+        <button type="button" className="bg-color4 w-full sm:w-64 text-xl sm:text-2xl p-4 rounded-2xl my-8 sm:my-12 hover:scale-105">
           Properties
         </button>
       </div>

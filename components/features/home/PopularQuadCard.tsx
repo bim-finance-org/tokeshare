@@ -64,7 +64,7 @@ const PopularQuadCard: React.FC<PopularQuadCardProps> = ({ quad }) => {
           <h5 className="text-blue-600 font-bold text-lg sm:text-xl">{price}</h5>
 
           {/* <Link href={link} > */}
-          <button className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
+          <button type="button" className="px-8 w-full sm:w-auto bg-color4 text-white rounded-lg flex items-center justify-center whitespace-nowrap hover:bg-color2">
             <h5>Available Soon</h5>
             <span className="ml-2">
               <ArrowIcon size={24} />

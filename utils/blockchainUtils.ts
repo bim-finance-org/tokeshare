@@ -7,17 +7,22 @@ import { getBlockchainTokens, getTokenAddress } from './token';
 import { TOKENS } from '@/config/token';
 import { getChainIdFromBlockchain } from './getChainIdFromBlockchain';
 
-// Hook pour récupérer toutes les balances d'une blockchain en une fois
-export const useAllTokenBalances = (blockchain: Blockchain) => {
+// Hook pour récupérer toutes les balances d'une blockchain en une fois.
+// Accepte null pour permettre l'appel inconditionnel depuis un composant
+// qui n'a pas encore choisi de chaîne (la query reste désactivée tant
+// que la blockchain est null).
+export const useAllTokenBalances = (blockchain: Blockchain | null) => {
   const { address } = useAccount();
-  const tokens = getBlockchainTokens(blockchain);
+  const tokens = blockchain ? getBlockchainTokens(blockchain) : [];
 
-  const contracts = tokens.map((token) => ({
-    address: token.addresses[blockchain] as Address,
-    abi: ERC20_ABI,
-    functionName: 'balanceOf',
-    args: [address],
-  }));
+  const contracts = blockchain
+    ? tokens.map((token) => ({
+        address: token.addresses[blockchain] as Address,
+        abi: ERC20_ABI,
+        functionName: 'balanceOf',
+        args: [address],
+      }))
+    : [];
 
   const {
     data: balances,
@@ -26,7 +31,7 @@ export const useAllTokenBalances = (blockchain: Blockchain) => {
   } = useReadContracts({
     contracts,
     query: {
-      enabled: !!address && contracts.length > 0,
+      enabled: !!address && !!blockchain && contracts.length > 0,
     },
   });
 
@@ -38,7 +43,7 @@ export const useAllTokenBalances = (blockchain: Blockchain) => {
       acc[token.symbol] = {
         raw,
         formatted: raw ? (Number(raw) / Math.pow(10, decimals)).toFixed(6) : '0',
-        address: token.addresses[blockchain],
+        address: blockchain ? token.addresses[blockchain] : undefined,
         decimals,
       };
       return acc;

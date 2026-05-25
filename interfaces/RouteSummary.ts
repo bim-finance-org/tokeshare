@@ -16,7 +16,7 @@ export interface RouteSummary {
     isInBps: boolean;
     feeReceiver: string;
   };
-  route: any[][];
+  route: unknown[][];
   routeID: string;
   checksum: string;
   timestamp: string;

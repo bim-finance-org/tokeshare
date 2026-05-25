@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { CheckCircle } from 'lucide-react';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('dashboard:buy-modal');
 
 interface BuyTransaction {
   id: number;
@@ -54,7 +57,7 @@ const BuyModal = () => {
         const data = await response.json();
         setTransactions(data);
       } catch (error) {
-        console.error('Error fetching transactions:', error);
+        log.error('fetch failed', error);
         setError('Unable to load transactions. Please try again.');
       } finally {
         setIsLoading(false);
@@ -104,7 +107,7 @@ const BuyModal = () => {
       // Close expanded menu
       setExpandedTransactionId(null);
     } catch (error) {
-      console.error('Error updating status:', error);
+      log.error('status update failed', error);
       setError('Unable to update status. Please try again.');
     }
   };
@@ -141,7 +144,7 @@ const BuyModal = () => {
       // Open interface with three buttons
       setExpandedTransactionId(transactionId);
     } catch (error) {
-      console.error('Error updating status:', error);
+      log.error('status update failed', error);
       setError('Unable to update status. Please try again.');
     }
   };
@@ -214,7 +217,7 @@ const BuyModal = () => {
       setNewCryptoAmount(0);
       setExpandedTransactionId(null);
     } catch (error) {
-      console.error('Error updating transaction:', error);
+      log.error('tx update failed', error);
       setError('Unable to update transaction. Please try again.');
     }
   };
@@ -236,7 +239,7 @@ const BuyModal = () => {
         }, 1000);
       })
       .catch((err) => {
-        console.error('Failed to copy text: ', err);
+        log.error('clipboard copy failed', err);
       });
   };
 
@@ -405,7 +408,7 @@ const BuyModal = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {transaction.status === 'completed' || transaction.status === 'failed' ? (
                       <div className="flex flex-col gap-2">
-                        <button
+                        <button type="button"
                           onClick={() => handleChangeStatus(transaction.id, 'pending')}
                           className="bg-gray-500 text-white px-4 py-2 rounded-md"
                         >
@@ -424,13 +427,13 @@ const BuyModal = () => {
                           />
                         </div>
                         <div className="flex gap-2">
-                          <button
+                          <button type="button"
                             onClick={() => handleConfirmValidation(transaction.id)}
                             className="bg-green-500 text-white px-4 py-2 rounded-md"
                           >
                             Confirm
                           </button>
-                          <button
+                          <button type="button"
                             onClick={handleCancelValidation}
                             className="bg-gray-500 text-white px-4 py-2 rounded-md"
                           >
@@ -440,19 +443,19 @@ const BuyModal = () => {
                       </div>
                     ) : expandedTransactionId === transaction.id ? (
                       <div className="flex flex-col gap-2">
-                        <button
+                        <button type="button"
                           onClick={() => handleChangeStatus(transaction.id, 'pending')}
                           className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                         >
                           Pending
                         </button>
-                        <button
+                        <button type="button"
                           onClick={() => handleStartValidation(transaction.id, transaction.cryptoAmount)}
                           className="bg-green-500 text-white px-4 py-2 rounded-md"
                         >
                           Validate
                         </button>
-                        <button
+                        <button type="button"
                           onClick={() => handleChangeStatus(transaction.id, 'failed')}
                           className="bg-red-500 text-white px-4 py-2 rounded-md"
                         >
@@ -461,13 +464,13 @@ const BuyModal = () => {
                       </div>
                     ) : transaction.status === 'pending' ? (
                       <div className="flex flex-col gap-2">
-                        <button
+                        <button type="button"
                           onClick={() => handleReceived(transaction.id)}
                           className="bg-blue-500 text-white px-4 py-2 rounded-md"
                         >
                           Received
                         </button>
-                        <button
+                        <button type="button"
                           onClick={() => handleChangeStatus(transaction.id, 'failed')}
                           className="bg-red-500 text-white px-4 py-2 rounded-md"
                         >
@@ -476,7 +479,7 @@ const BuyModal = () => {
                       </div>
                     ) : (
                       <div className="flex flex-col gap-2">
-                        <button
+                        <button type="button"
                           onClick={() => handleChangeStatus(transaction.id, 'failed')}
                           className="bg-red-500 text-white px-4 py-2 rounded-md"
                         >

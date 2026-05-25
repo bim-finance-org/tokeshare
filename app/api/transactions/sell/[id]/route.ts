@@ -1,7 +1,10 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, validateId, validateCryptoAmount } from '@/lib/api-utils';
+import { getLogger } from '@/lib/logger';
 import { DECIMALS_FIXED_TO_TWO, FEES, TFT_001_SELL_FEES } from '@/constants/api';
+
+const log = getLogger('api:tx:sell:patch');
 
 const ADMIN_SETTABLE_STATUS = ['pending', 'received', 'completed', 'failed'] as const;
 type AdminStatus = (typeof ADMIN_SETTABLE_STATUS)[number];
@@ -71,7 +74,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     const updated = await prisma.sellTransaction.update({ where: { id }, data });
     return NextResponse.json(updated);
   } catch (error) {
-    console.error('Error updating sell transaction:', error);
+    log.error('update failed', error);
     return NextResponse.json({ error: 'Error updating transaction' }, { status: 500 });
   }
 }

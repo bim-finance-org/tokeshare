@@ -1,7 +1,4 @@
-'use client';
-
-import React, { useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -20,10 +17,8 @@ const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
 
   const { name, images, number, surface, city, price, tokenPrice, expectedIncome, dateIncome, tokenIncome } = general;
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
   return (
-    <div ref={containerRef} className="bg-color1 shadow-lg max-w-xl rounded-3xl">
+    <div className="bg-color1 shadow-lg max-w-xl rounded-3xl">
       <div className="image-container">
         <Image
           src={images[0]}
@@ -88,13 +83,20 @@ const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
         <div className="flex justify-center">
           {id === '1' ? (
             <Link href={`/marketplace/real-estate/${id}`}>
-              <button className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300">
+              <button
+                type="button"
+                className="flex items-center justify-between bg-color2 rounded-3xl px-4 py-1 mt-4 w-64 hover:bg-color4 hover:text-white transition-colors duration-300"
+              >
                 <h5 className="text-color1 hover:text-white">Learn More</h5>
                 <ArrowIcon size={24} />
               </button>
             </Link>
           ) : (
-            <button className="flex items-center justify-between bg-gray-400 rounded-3xl px-4 py-1 mt-4 w-64 cursor-not-allowed">
+            <button
+              type="button"
+              disabled
+              className="flex items-center justify-between bg-gray-400 rounded-3xl px-4 py-1 mt-4 w-64 cursor-not-allowed"
+            >
               <h5 className="text-gray-600">Learn More</h5>
               <ArrowIcon size={24} />
             </button>

@@ -62,7 +62,7 @@ const TMCCard = () => {
 
         <div className="flex justify-center mt-4 w-full">
           <Link href="/marketplace/stock-etf/tmc">
-            <button className="bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition">
+            <button type="button" className="bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition">
               <div className="flex w-full justify-between items-center px-8">
                 <h6 className="whitespace-nowrap pr-10">Buy TMC</h6>
                 <ArrowIcon size={24} />

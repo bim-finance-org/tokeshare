@@ -36,7 +36,7 @@ const TokenSelector = ({ isOpen, type, blockchain, onClose, onSelect }: TokenSel
             />
           )}
         </div>
-        <button
+        <button type="button"
           onClick={onClose}
           className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition-all duration-200"
         >

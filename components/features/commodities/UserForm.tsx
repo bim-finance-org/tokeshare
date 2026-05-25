@@ -1,8 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
+import { useMutation } from '@tanstack/react-query';
 import ConnectButton from '@/components/shared/ConnectButton';
 import BuyInfo from './BuyInfo';
-import { TokenContexts } from '@/context/TokenContexts';
+import { useTokenContext } from '@/context/TokenContexts';
 import { generatePayReference } from '@/utils/RandomRefs';
 import { useTGGBalance } from '@/hooks/useTGGBalance';
 import { useTGGTransfer } from '@/hooks/useTGGTransfer';
@@ -18,7 +19,7 @@ interface UserFormProps {
   crypto: string;
   tggAmount: string;
   tggPrice: number;
-  setShowUserForm: Function;
+  setShowUserForm: (show: boolean) => void;
 }
 
 interface FormData {
@@ -37,23 +38,48 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   const {
     buy: { blockchain: buyBlockchain },
     sell: { blockchain: sellBlockchain },
-  } = useContext(TokenContexts);
+  } = useTokenContext();
 
   const { isConnected, address } = useAccount();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('userFormData');
-      if (saved) return JSON.parse(saved);
-    }
-    return {
-      firstName: '',
-      lastName: '',
-      email: '',
-      iban: type === 'sell' ? '' : undefined,
-    };
+  // Stable SSR-safe initial: server and client first render produce the same
+  // tree. localStorage is read after mount in the effect below.
+  const [formData, setFormDataState] = useState<FormData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    iban: type === 'sell' ? '' : undefined,
   });
+
+  // Write-through setter: every change is persisted immediately, no separate
+  // useEffect needed (and no setState-in-effect lint trip on persist).
+  const setFormData = useCallback((next: FormData | ((prev: FormData) => FormData)) => {
+    setFormDataState((prev) => {
+      const value = typeof next === 'function' ? (next as (p: FormData) => FormData)(prev) : next;
+      try {
+        localStorage.setItem('userFormData', JSON.stringify(value));
+      } catch {
+        // quota exceeded or private mode — best effort
+      }
+      return value;
+    });
+  }, []);
+
+  // One-shot hydration from localStorage after mount. Necessary for browser-only
+  // state; useSyncExternalStore isn't a fit because formData is mutated by user
+  // inputs, not just read from storage.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('userFormData');
+      if (saved) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot hydration from external storage
+        setFormDataState(JSON.parse(saved));
+      }
+    } catch {
+      // ignore malformed entries
+    }
+  }, []);
 
   const [ref, setRef] = useState<string>(() => generatePayReference());
 
@@ -87,70 +113,53 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('userFormData', JSON.stringify(formData));
-    }
-  }, [formData]);
-
-  useEffect(() => {
-    if (receiptSuccess && hash) {
-      handleApiSubmission();
-    } else if (receiptError) {
-      notify.error(receiptError, { fallback: 'Transaction failed. Please contact support for assistance.' });
-    }
-  }, [receiptSuccess, receiptError, hash]);
-
-  useEffect(() => {
     if (transferError) notify.error(transferError);
   }, [transferError]);
 
-  const handleApiSubmission = async () => {
-    try {
-      let apiData;
+  // Posting the transaction to /api/transactions/* is wrapped in a mutation
+  // so the success / error / settled state transitions live in the mutation
+  // callbacks instead of inside the receipt-success effect — that keeps the
+  // effect body free of synchronous setState.
+  const submitTransactionMutation = useMutation({
+    mutationFn: async () => {
+      const cryptoAmount = parseFloat(tggAmount);
+      const fiatAmount = parseFloat(amount);
+      const isBuy = type === 'buy';
+      const feesCoef = isBuy ? FEES_COEF : isTFT ? TFT_001_SELL_FEES_COEF : FEES_COEF;
+      const feesValue = parseFloat((fiatAmount * feesCoef).toFixed(NUMBER_TO_FIXE_2));
 
-      if (type === 'buy') {
-        const cryptoAmount = parseFloat(tggAmount);
-        const fiatAmount = parseFloat(amount);
-        const feesValue = parseFloat((fiatAmount * FEES_COEF).toFixed(NUMBER_TO_FIXE_2));
+      const apiData = isBuy
+        ? {
+            ref,
+            email: formData.email,
+            fullName: `${formData.firstName} ${formData.lastName}`,
+            cvu: '',
+            walletAddress: address || '',
+            status: 'pending',
+            blockchain: buyBlockchain,
+            fiat: currency,
+            fiatAmount,
+            crypto,
+            cryptoAmount,
+            fees: feesValue,
+          }
+        : {
+            ref,
+            email: formData.email,
+            fullName: `${formData.firstName} ${formData.lastName}`,
+            iban: formData.iban || '',
+            status: 'pending',
+            blockchain: sellBlockchain,
+            fiat: currency,
+            fiatAmount,
+            crypto,
+            cryptoAmount,
+            fees: feesValue,
+            paymentMethod: 'bank_transfer',
+            txHash: hash || null,
+          };
 
-        apiData = {
-          ref: ref,
-          email: formData.email,
-          fullName: `${formData.firstName} ${formData.lastName}`,
-          cvu: '',
-          walletAddress: address || '',
-          status: 'pending',
-          blockchain: buyBlockchain,
-          fiat: currency,
-          fiatAmount: fiatAmount,
-          crypto: crypto,
-          cryptoAmount: cryptoAmount,
-          fees: feesValue,
-        };
-      } else {
-        const cryptoAmount = parseFloat(tggAmount);
-        const fiatAmount = parseFloat(amount);
-        const feesCoef = isTFT ? TFT_001_SELL_FEES_COEF : FEES_COEF;
-        const feesValue = parseFloat((fiatAmount * feesCoef).toFixed(NUMBER_TO_FIXE_2));
-
-        apiData = {
-          ref: ref,
-          email: formData.email,
-          fullName: `${formData.firstName} ${formData.lastName}`,
-          iban: formData.iban || '',
-          status: 'pending',
-          blockchain: sellBlockchain,
-          fiat: currency,
-          fiatAmount: fiatAmount,
-          crypto: crypto,
-          cryptoAmount: cryptoAmount,
-          fees: feesValue,
-          paymentMethod: 'bank_transfer',
-          txHash: hash || null,
-        };
-      }
-
-      const endpoint = type === 'buy' ? '/api/transactions/buy' : '/api/transactions/sell';
+      const endpoint = isBuy ? '/api/transactions/buy' : '/api/transactions/sell';
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,23 +167,30 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
       });
 
       const data = await response.json();
-
       if (!response.ok) {
-        console.log(data);
         throw new Error(data.error || 'An error occurred during the transaction');
       }
-
-      setShowConfirmation(true);
-    } catch (err) {
+      return data;
+    },
+    onSuccess: () => setShowConfirmation(true),
+    onError: (err) => {
       if (err instanceof SyntaxError && err.message.includes('JSON')) {
         notify.error('Server connection error. Please try again later.');
       } else {
         notify.error(err);
       }
-    } finally {
-      setIsLoading(false);
+    },
+    onSettled: () => setIsLoading(false),
+  });
+
+  useEffect(() => {
+    if (receiptSuccess && hash) {
+      submitTransactionMutation.mutate();
+    } else if (receiptError) {
+      notify.error(receiptError, { fallback: 'Transaction failed. Please contact support for assistance.' });
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receiptSuccess, receiptError, hash]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,7 +202,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
     try {
       if (type === Action.Buy) {
         setIsLoading(true);
-        await handleApiSubmission();
+        await submitTransactionMutation.mutateAsync();
       } else {
         if (isTFT) {
           tftTransfer.transferTFTToTokeShare(tggAmount);
@@ -212,7 +228,7 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
     <div className="p-6 w-full text-color4 max-w-md mx-auto rounded-2xl space-y-4 ">
       {!showConfirmation ? (
         <>
-          <button onClick={() => setShowUserForm(false)} className="bg-color4 text-white p-2 rounded-sm">
+          <button type="button" onClick={() => setShowUserForm(false)} className="bg-color4 text-white p-2 rounded-sm">
             Go back
           </button>
           <form onSubmit={handleSubmit} className="space-y-4">

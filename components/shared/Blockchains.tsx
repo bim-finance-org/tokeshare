@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PolygonIcon from '@/components/icons/blockchains/PolygonIcon';
 import BaseIcon from '@/components/icons/blockchains/BaseIcon';
 import EthereumIcon from '@/components/icons/blockchains/EthereumIcon';
 import ArrowDownIcon from '@/components/icons/arrows/ArrowDownIcon';
-import { TokenContexts } from '@/context/TokenContexts';
+import { useTokenContext } from '@/context/TokenContexts';
 import { Blockchain } from '@/enums/Blockchain';
 import { ExchangeSection } from '@/enums/ExchangeSection';
 import { getTokenBlockchains } from '@/utils/token';
@@ -19,8 +19,7 @@ interface BlockchainsProps {
 const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
   const availableBlockchains = getTokenBlockchains(tokenSymbol);
 
-  // Context
-  const tokenContext = useContext(TokenContexts);
+  const tokenContext = useTokenContext();
 
   // Sélection actuelle depuis le context
   let blockchain: Blockchain = Blockchain.Polygon;
@@ -87,7 +86,7 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
+      <button type="button"
         onClick={toggleDropdown}
         className="flex items-center cursor-default gap-3 px-3 py-2 bg-color1 rounded-xl shadow-md transition-all duration-200"
       >
@@ -102,7 +101,7 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
       {isOpen && (
         <div className="absolute z-50 top-full left-0 mt-2 rounded-xl shadow-xl border overflow-hidden transform transition-all duration-200 bg-white">
           {availableBlockchains.map((chain) => (
-            <button
+            <button type="button"
               key={chain}
               onClick={() => handleSelect(chain)}
               className={`flex items-center gap-3 w-full px-3 py-2 transition-colors duration-200 ${

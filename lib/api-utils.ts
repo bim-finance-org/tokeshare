@@ -2,12 +2,14 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import { ALLOWED_STATUS } from '@/constants/api';
 
-export function validateStatus(status: any): status is (typeof ALLOWED_STATUS)[number] {
-  return typeof status === 'string' && ALLOWED_STATUS.includes(status as any);
+type AllowedStatus = (typeof ALLOWED_STATUS)[number];
+
+export function validateStatus(status: unknown): status is AllowedStatus {
+  return typeof status === 'string' && (ALLOWED_STATUS as readonly string[]).includes(status);
 }
 
-export function validateId(id: any): number | null {
-  const parsed = parseInt(id);
+export function validateId(id: unknown): number | null {
+  const parsed = parseInt(String(id), 10);
   return isNaN(parsed) ? null : parsed;
 }
 

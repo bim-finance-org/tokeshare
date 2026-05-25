@@ -40,13 +40,13 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
           {name}
         </h1>
         <div className="flex space-x-3">
-          <button className="text-xs sm:text-sm md:text-base lg:text-lg px-3 py-1 border rounded text-color4 border-color4 ">
+          <button type="button" className="text-xs sm:text-sm md:text-base lg:text-lg px-3 py-1 border rounded text-color4 border-color4 ">
             View Smart Contracts
           </button>
-          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-blue-500 text-white px-3 py-1 rounded transform hover:scale-105 transition">
+          <button type="button" className="text-xs sm:text-sm md:text-base lg:text-lg bg-blue-500 text-white px-3 py-1 rounded transform hover:scale-105 transition">
             POL
           </button>
-          <button className="text-xs sm:text-sm md:text-base lg:text-lg bg-color4 text-white px-3 py-1 rounded transform hover:scale-105 transition">
+          <button type="button" className="text-xs sm:text-sm md:text-base lg:text-lg bg-color4 text-white px-3 py-1 rounded transform hover:scale-105 transition">
             BASE
           </button>
         </div>
@@ -57,10 +57,10 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
         {isMobile ? (
           // 🟢 CARROUSEL MOBILE (1 image affichée)
           <>
-            <button className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 prev-button">
+            <button type="button" className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 prev-button">
               <ArrowIcon size={24} className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180" />
             </button>
-            <button className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 next-button">
+            <button type="button" className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 next-button">
               <ArrowIcon size={24} className="text-color5 hover:scale-110 hover:text-color2 transition" />
             </button>
 
@@ -95,10 +95,10 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
         ) : (
           // 🔵 CARROUSEL PC (3 images affichées)
           <>
-            <button className="absolute left-0 sm:-left-10 top-1/2 transform -translate-y-1/2 z-10 prev-button">
+            <button type="button" className="absolute left-0 sm:-left-10 top-1/2 transform -translate-y-1/2 z-10 prev-button">
               <ArrowIcon size={32} className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180" />
             </button>
-            <button className="absolute right-0 sm:-right-10 top-1/2 transform -translate-y-1/2 z-10 next-button">
+            <button type="button" className="absolute right-0 sm:-right-10 top-1/2 transform -translate-y-1/2 z-10 next-button">
               <ArrowIcon size={32} className="text-color5 hover:scale-110 hover:text-color2 transition" />
             </button>
 
@@ -136,7 +136,7 @@ const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
         <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">
           TOTAL INVESTMENT: {price.toLocaleString()}
         </h2>
-        <button className="text-sm sm:text-md md:text-lg lg:text-xl mt-4 px-10 sm:px-12 py-2 bg-color2 text-white rounded-full hover:bg-color4 transition">
+        <button type="button" className="text-sm sm:text-md md:text-lg lg:text-xl mt-4 px-10 sm:px-12 py-2 bg-color2 text-white rounded-full hover:bg-color4 transition">
           SOON
         </button>
       </div>

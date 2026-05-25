@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useStellarAccount } from '@/context/StellarContext';
 import { useXlmPrice } from '@/hooks/useXlmPrice';
@@ -28,46 +28,38 @@ const PocStellarPage = () => {
   const { address, isConnected, connect, disconnect } = useStellarAccount();
   const { data: xlmPrice, isLoading: isXlmLoading } = useXlmPrice();
 
-  const [xlmAmount, setXlmAmount] = useState('');
-  const [tokenAmount, setTokenAmount] = useState('');
-  const [lastEdited, setLastEdited] = useState<'xlm' | 'token'>('xlm');
+  // The user types in exactly one of the two inputs at a time. We store that
+  // single value + which side it represents, and derive the other side
+  // during render — no effect, no cascade.
+  const [inputValue, setInputValue] = useState('');
+  const [inputSide, setInputSide] = useState<'xlm' | 'token'>('xlm');
   const [purchased, setPurchased] = useState<{ xlm: string; tokens: string } | null>(null);
 
-  const xlmToUsd = useMemo(() => (xlmPrice ?? 0), [xlmPrice]);
-  const tokensPerXlm = useMemo(() => (xlmToUsd > 0 ? xlmToUsd / TOKEN_PRICE_USD : 0), [xlmToUsd]);
+  const xlmToUsd = xlmPrice ?? 0;
+  const tokensPerXlm = xlmToUsd > 0 ? xlmToUsd / TOKEN_PRICE_USD : 0;
 
-  useEffect(() => {
-    if (!xlmPrice) return;
-    if (lastEdited === 'xlm') {
-      const xlm = parseFloat(xlmAmount);
-      if (!isNaN(xlm) && xlm > 0) {
-        const tokens = (xlm * xlmPrice) / TOKEN_PRICE_USD;
-        setTokenAmount(tokens.toFixed(4));
-      } else {
-        setTokenAmount('');
-      }
-    } else {
-      const tokens = parseFloat(tokenAmount);
-      if (!isNaN(tokens) && tokens > 0) {
-        const xlm = (tokens * TOKEN_PRICE_USD) / xlmPrice;
-        setXlmAmount(xlm.toFixed(4));
-      } else {
-        setXlmAmount('');
-      }
-    }
-  }, [xlmAmount, tokenAmount, xlmPrice, lastEdited]);
+  const derivedOtherSide = useMemo(() => {
+    if (!xlmPrice) return '';
+    const num = parseFloat(inputValue);
+    if (isNaN(num) || num <= 0) return '';
+    if (inputSide === 'xlm') return ((num * xlmPrice) / TOKEN_PRICE_USD).toFixed(4);
+    return ((num * TOKEN_PRICE_USD) / xlmPrice).toFixed(4);
+  }, [inputValue, inputSide, xlmPrice]);
+
+  const xlmAmount = inputSide === 'xlm' ? inputValue : derivedOtherSide;
+  const tokenAmount = inputSide === 'token' ? inputValue : derivedOtherSide;
 
   const handleXlmChange = (value: string) => {
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      setLastEdited('xlm');
-      setXlmAmount(value);
+      setInputSide('xlm');
+      setInputValue(value);
     }
   };
 
   const handleTokenChange = (value: string) => {
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      setLastEdited('token');
-      setTokenAmount(value);
+      setInputSide('token');
+      setInputValue(value);
     }
   };
 

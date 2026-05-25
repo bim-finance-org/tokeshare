@@ -1,7 +1,6 @@
 import { TOKENS } from '@/config/token';
 import { TokenType } from '@/enums/TokenType';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 export interface StablecoinPrices {
   [key: string]: number | undefined;
@@ -73,34 +72,3 @@ export const useAllStablePrices = (refetchInterval = CACHE_EXPIRATION) => {
   });
 };
 
-/**
- * Hook à appeler au chargement de l'application pour précharger tous les prix
- */
-export const usePrefetchStablePrices = () => {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    queryClient.prefetchQuery({
-      queryKey: STABLE_PRICES_QUERY_KEY,
-      queryFn: async () => {
-        const idsParam = STABLECOIN_TOKENS.map((token) => token.cmcId).join(',');
-
-        const response = await fetch(`/api/cmc?ids=${idsParam}`);
-        if (!response.ok) throw new Error('Failed to fetch stablecoin prices');
-
-        const data = await response.json();
-        const prices: Record<string, number | undefined> = {};
-
-        STABLECOIN_TOKENS.forEach((token) => {
-          const id = token.cmcId;
-          prices[token.symbol] = (id && data.data?.data[id]?.quote?.USD?.price) ?? undefined;
-        });
-
-        return prices;
-      },
-      staleTime: CACHE_EXPIRATION,
-    });
-  }, [queryClient]);
-
-  return null;
-};

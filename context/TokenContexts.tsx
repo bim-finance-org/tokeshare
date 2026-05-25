@@ -1,101 +1,167 @@
 'use client';
 
-import React, { createContext, useState, ReactNode, useMemo } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
 import { Blockchain } from '@/enums/Blockchain';
 
-export const TokenContexts = createContext({
-  // États
-  swap: { token: 'USDT', blockchain: Blockchain.Polygon },
-  buy: { token: 'USD', blockchain: Blockchain.Polygon },
-  sell: { token: 'USD', blockchain: Blockchain.Polygon },
+type TokenState = { token: string; blockchain: Blockchain };
+type Prefs = { swap: TokenState; buy: TokenState; sell: TokenState };
 
-  // Actions
-  updateSwapToken: (token: string) => {},
-  updateSwapBlockchain: (blockchain: Blockchain) => {},
-  updateBuyToken: (token: string) => {},
-  updateBuyBlockchain: (blockchain: Blockchain) => {},
-  updateSellToken: (token: string) => {},
-  updateSellBlockchain: (blockchain: Blockchain) => {},
-});
+export interface TokenContextValue extends Prefs {
+  updateSwapToken: (token: string) => void;
+  updateSwapBlockchain: (blockchain: Blockchain) => void;
+  updateBuyToken: (token: string) => void;
+  updateBuyBlockchain: (blockchain: Blockchain) => void;
+  updateSellToken: (token: string) => void;
+  updateSellBlockchain: (blockchain: Blockchain) => void;
+}
+
+const DEFAULTS: Prefs = {
+  swap: { token: 'USDC', blockchain: Blockchain.Polygon },
+  buy: { token: 'EUR', blockchain: Blockchain.Polygon },
+  sell: { token: 'USD', blockchain: Blockchain.Polygon },
+};
+
+const STORAGE_KEY = 'tokeshare:token-prefs';
+
+// Module-level store. Single source of truth for the active tab.
+let cachedPrefs: Prefs = DEFAULTS;
+let cacheInitialized = false;
+const listeners = new Set<() => void>();
+
+function readFromStorage(): Prefs {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<Prefs>;
+      return {
+        swap: { ...DEFAULTS.swap, ...parsed.swap },
+        buy: { ...DEFAULTS.buy, ...parsed.buy },
+        sell: { ...DEFAULTS.sell, ...parsed.sell },
+      };
+    }
+  } catch {
+    // corrupted entry — fall back to defaults
+  }
+  return DEFAULTS;
+}
+
+function ensureHydrated() {
+  if (!cacheInitialized && typeof window !== 'undefined') {
+    cachedPrefs = readFromStorage();
+    cacheInitialized = true;
+  }
+}
+
+function subscribe(listener: () => void): () => void {
+  ensureHydrated();
+  listeners.add(listener);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === STORAGE_KEY) {
+      cachedPrefs = readFromStorage();
+      listeners.forEach((l) => l());
+    }
+  };
+  window.addEventListener('storage', onStorage);
+  return () => {
+    listeners.delete(listener);
+    window.removeEventListener('storage', onStorage);
+  };
+}
+
+function getSnapshot(): Prefs {
+  ensureHydrated();
+  return cachedPrefs;
+}
+
+// SSR / first-render snapshot — stable across server/client to avoid hydration
+// mismatches. The client snapshot takes over right after hydration thanks to
+// useSyncExternalStore's contract.
+function getServerSnapshot(): Prefs {
+  return DEFAULTS;
+}
+
+function updatePrefs(updater: (prev: Prefs) => Prefs) {
+  ensureHydrated();
+  const next = updater(cachedPrefs);
+  if (next === cachedPrefs) return;
+  cachedPrefs = next;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // quota exceeded or private mode — best-effort persistence
+  }
+  listeners.forEach((l) => l());
+}
+
+const TokenContext = createContext<TokenContextValue | null>(null);
+
+export function useTokenContext(): TokenContextValue {
+  const ctx = useContext(TokenContext);
+  if (!ctx) {
+    throw new Error('useTokenContext must be used within a <TokenProvider>');
+  }
+  return ctx;
+}
 
 export const TokenProvider = ({ children }: { children: ReactNode }) => {
-  // États séparés pour chaque page
-  const [swapToken, setSwapToken] = useState(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('swapToken') || 'USDC' : 'USDC',
+  const prefs = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  const updateSwapToken = useCallback(
+    (token: string) => updatePrefs((p) => ({ ...p, swap: { ...p.swap, token } })),
+    [],
   );
-  const [swapBlockchain, setSwapBlockchain] = useState<Blockchain>(() =>
-    typeof window !== 'undefined'
-      ? (localStorage.getItem('swapBlockchain') as Blockchain) || Blockchain.Polygon
-      : Blockchain.Polygon,
+  const updateSwapBlockchain = useCallback(
+    (blockchain: Blockchain) => updatePrefs((p) => ({ ...p, swap: { ...p.swap, blockchain } })),
+    [],
   );
-  const [buyToken, setBuyToken] = useState(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('buyToken') || 'EUR' : 'EUR',
+  const updateBuyToken = useCallback(
+    (token: string) => updatePrefs((p) => ({ ...p, buy: { ...p.buy, token } })),
+    [],
   );
-  const [buyBlockchain, setBuyBlockchain] = useState<Blockchain>(() =>
-    typeof window !== 'undefined'
-      ? (localStorage.getItem('buyBlockchain') as Blockchain) || Blockchain.Polygon
-      : Blockchain.Polygon,
+  const updateBuyBlockchain = useCallback(
+    (blockchain: Blockchain) => updatePrefs((p) => ({ ...p, buy: { ...p.buy, blockchain } })),
+    [],
   );
-  const [sellToken, setSellToken] = useState(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('sellToken') || 'USD' : 'USD',
+  const updateSellToken = useCallback(
+    (token: string) => updatePrefs((p) => ({ ...p, sell: { ...p.sell, token } })),
+    [],
   );
-  const [sellBlockchain, setSellBlockchain] = useState<Blockchain>(() =>
-    typeof window !== 'undefined'
-      ? (localStorage.getItem('sellBlockchain') as Blockchain) || Blockchain.Polygon
-      : Blockchain.Polygon,
+  const updateSellBlockchain = useCallback(
+    (blockchain: Blockchain) => updatePrefs((p) => ({ ...p, sell: { ...p.sell, blockchain } })),
+    [],
   );
 
-  // Save to localStorage when values change
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('swapToken', swapToken);
-    }
-  }, [swapToken]);
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('swapBlockchain', swapBlockchain);
-    }
-  }, [swapBlockchain]);
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('buyToken', buyToken);
-    }
-  }, [buyToken]);
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('buyBlockchain', buyBlockchain);
-    }
-  }, [buyBlockchain]);
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sellToken', sellToken);
-    }
-  }, [sellToken]);
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sellBlockchain', sellBlockchain);
-    }
-  }, [sellBlockchain]);
-
-  const contextValue = useMemo(
+  const value = useMemo<TokenContextValue>(
     () => ({
-      swap: { token: swapToken, blockchain: swapBlockchain },
-      buy: { token: buyToken, blockchain: buyBlockchain },
-      sell: { token: sellToken, blockchain: sellBlockchain },
-      updateSwapToken: setSwapToken,
-      updateSwapBlockchain: setSwapBlockchain,
-      updateBuyToken: setBuyToken,
-      updateBuyBlockchain: setBuyBlockchain,
-      updateSellToken: setSellToken,
-      updateSellBlockchain: setSellBlockchain,
+      swap: prefs.swap,
+      buy: prefs.buy,
+      sell: prefs.sell,
+      updateSwapToken,
+      updateSwapBlockchain,
+      updateBuyToken,
+      updateBuyBlockchain,
+      updateSellToken,
+      updateSellBlockchain,
     }),
-    [swapToken, swapBlockchain, buyToken, buyBlockchain, sellToken, sellBlockchain],
+    [
+      prefs.swap,
+      prefs.buy,
+      prefs.sell,
+      updateSwapToken,
+      updateSwapBlockchain,
+      updateBuyToken,
+      updateBuyBlockchain,
+      updateSellToken,
+      updateSellBlockchain,
+    ],
   );
 
-  return <TokenContexts.Provider value={contextValue}>{children}</TokenContexts.Provider>;
+  return <TokenContext.Provider value={value}>{children}</TokenContext.Provider>;
 };

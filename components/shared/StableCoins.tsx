@@ -12,15 +12,14 @@ interface StableCoinsProps {
 }
 
 const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
+  const { isConnected } = useAccount();
+  const { balances, isLoading, error } = useAllTokenBalances(blockchain);
+
   if (blockchain === null) {
-    return;
+    return null;
   }
 
   const stablecoins = getTokensByTypeAndByBlockchain(blockchain, TokenType.Stablecoin);
-
-  const { isConnected } = useAccount();
-
-  const { balances, isLoading, error } = useAllTokenBalances(blockchain);
 
   const renderStablecoinButton = (token: TokenInfo) => {
     const { symbol } = token;
@@ -28,7 +27,7 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
     const balance = balances[symbol]?.formatted || '0';
 
     return (
-      <button
+      <button type="button"
         key={symbol}
         onClick={() => {
           onSelect(symbol);

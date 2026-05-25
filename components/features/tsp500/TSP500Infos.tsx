@@ -20,7 +20,7 @@ const TSP500Infos = () => {
     <div className="w-full max-w-4xl mx-auto">
       {/* Tabs */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4">
-        <button
+        <button type="button"
           onClick={() => setActiveTab('DETAILS')}
           className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
             activeTab === 'DETAILS'
@@ -30,7 +30,7 @@ const TSP500Infos = () => {
         >
           DETAILS
         </button>
-        <button
+        <button type="button"
           onClick={() => setActiveTab('BLOCKCHAIN')}
           className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
             activeTab === 'BLOCKCHAIN'
@@ -155,7 +155,7 @@ const TSP500Infos = () => {
               <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between">
                 <h3 className="text-base sm:text-lg font-semibold">Tokeshare S&amp;P500 (TSP500)</h3>
                 <div className="flex items-center gap-2 cursor-pointer mt-1 sm:mt-0" onClick={handleOnesheetClick}>
-                  <button className="text-sm sm:text-base text-blue-500 hover:text-blue-600">Onesheet</button>
+                  <button type="button" className="text-sm sm:text-base text-blue-500 hover:text-blue-600">Onesheet</button>
                   <NewTabIcon />
                 </div>
               </div>

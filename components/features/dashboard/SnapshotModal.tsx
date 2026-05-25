@@ -31,16 +31,15 @@ const SnapshotPanel = () => {
           totalUsdc: totalUsdc.trim() || null,
         }),
       });
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
-        throw new Error(j.error || 'Snapshot API error');
+      const payload = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        rows?: FrontRow[];
+        error?: string;
+      };
+      if (!res.ok || !payload.rows) {
+        throw new Error(payload.error || 'Snapshot API error');
       }
-
-      const file = `/snapshots/holders_snapshot.json?ts=${Date.now()}`;
-      const jsonRes = await fetch(file, { cache: 'no-store' });
-      if (!jsonRes.ok) throw new Error('Unable to read snapshot file');
-      const data = (await jsonRes.json()) as FrontRow[];
-      setRows(data);
+      setRows(payload.rows);
     } catch (err) {
       notify.error(err);
     } finally {

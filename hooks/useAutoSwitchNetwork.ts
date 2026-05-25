@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useAccount, useSwitchChain } from 'wagmi';
 import { Blockchain } from '@/enums/Blockchain';
 
@@ -13,50 +13,44 @@ type SwitchStatus = 'idle' | 'switching' | 'success' | 'wrong_network';
 export function useAutoSwitchNetwork(blockchain: Blockchain) {
   const { isConnected, chainId: currentChainId } = useAccount();
   const { switchChain, isPending } = useSwitchChain();
-  const [status, setStatus] = useState<SwitchStatus>('idle');
 
   const targetChainId = CHAIN_IDS[blockchain];
-
   const isOnCorrectChain = currentChainId === targetChainId;
+
+  // Tracks the chain we last auto-triggered a switch from. Using a ref means
+  // the de-dup logic does not require state and therefore can't cascade a
+  // render from inside the effect below.
+  const lastAttemptedFromChainRef = useRef<number | undefined>(undefined);
 
   const attemptSwitch = useCallback(() => {
     if (!isConnected || !targetChainId || isOnCorrectChain) return;
-
-    setStatus('switching');
-
-    switchChain(
-      { chainId: targetChainId },
-      {
-        onSuccess: () => {
-          setStatus('success');
-        },
-        onError: (error) => {
-          console.error('Network switch failed:', error);
-          setStatus('wrong_network');
-        },
-      }
-    );
+    switchChain({ chainId: targetChainId });
   }, [isConnected, targetChainId, isOnCorrectChain, switchChain]);
 
+  // Auto-attempt the switch once per (wrong) chain. If the user dismisses
+  // the wallet prompt we won't loop; if they switch to a different wrong
+  // chain we will try again.
   useEffect(() => {
-    if (!isConnected) {
-      setStatus('idle');
-      return;
-    }
-
-    if (isOnCorrectChain) {
-      setStatus('success');
-      return;
-    }
-
+    if (!isConnected || isOnCorrectChain || isPending) return;
+    if (lastAttemptedFromChainRef.current === currentChainId) return;
+    lastAttemptedFromChainRef.current = currentChainId;
     attemptSwitch();
-  }, [isConnected, isOnCorrectChain, attemptSwitch]);
+  }, [isConnected, isOnCorrectChain, isPending, currentChainId, attemptSwitch]);
 
-  useEffect(() => {
-    if (isOnCorrectChain && status === 'wrong_network') {
-      setStatus('success');
-    }
-  }, [currentChainId, isOnCorrectChain, status]);
+  // Derived status — no state mirroring of wagmi inputs.
+  const status: SwitchStatus = !isConnected
+    ? 'idle'
+    : isOnCorrectChain
+      ? 'success'
+      : isPending
+        ? 'switching'
+        : 'wrong_network';
+
+  // Manual retry resets the dedup gate so a click really re-attempts.
+  const retry = () => {
+    lastAttemptedFromChainRef.current = undefined;
+    attemptSwitch();
+  };
 
   return {
     status,
@@ -64,6 +58,6 @@ export function useAutoSwitchNetwork(blockchain: Blockchain) {
     isPending,
     currentChainId,
     targetChainId,
-    retry: attemptSwitch,
+    retry,
   };
 }

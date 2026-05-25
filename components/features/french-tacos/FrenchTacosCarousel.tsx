@@ -8,6 +8,9 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('french-tacos:carousel');
 import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
@@ -43,7 +46,7 @@ const FrenchTacosCarousel: React.FC = () => {
         const formattedBalance = Number(rawBalance) / 10 ** 18;
         setBalance(formattedBalance);
       } catch (err) {
-        console.error('Erreur de fetch balance :', err);
+        log.error('balance fetch failed', err);
         setHasError(true);
         setBalance(null);
       }
@@ -82,10 +85,10 @@ const FrenchTacosCarousel: React.FC = () => {
       <div className="relative w-full max-w-4xl mt-6">
         {isMobile ? (
           <>
-            <button className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 prev-button">
+            <button type="button" className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 prev-button">
               <ArrowIcon size={24} className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180" />
             </button>
-            <button className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 next-button">
+            <button type="button" className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 next-button">
               <ArrowIcon size={24} className="text-color5 hover:scale-110 hover:text-color2 transition" />
             </button>
             <Swiper
@@ -117,10 +120,10 @@ const FrenchTacosCarousel: React.FC = () => {
           </>
         ) : (
           <>
-            <button className="absolute left-0 sm:-left-10 top-1/2 transform -translate-y-1/2 z-10 prev-button">
+            <button type="button" className="absolute left-0 sm:-left-10 top-1/2 transform -translate-y-1/2 z-10 prev-button">
               <ArrowIcon size={32} className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180" />
             </button>
-            <button className="absolute right-0 sm:-right-10 top-1/2 transform -translate-y-1/2 z-10 next-button">
+            <button type="button" className="absolute right-0 sm:-right-10 top-1/2 transform -translate-y-1/2 z-10 next-button">
               <ArrowIcon size={32} className="text-color5 hover:scale-110 hover:text-color2 transition" />
             </button>
             <Swiper

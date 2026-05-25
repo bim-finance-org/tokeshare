@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-export const useDeSPXAPrice = () => {
+export const useDeSPXAPrice = ({ enabled = true }: { enabled?: boolean } = {}) => {
   return useQuery({
     queryKey: ['despxaPrice'],
     queryFn: async () => {
@@ -11,6 +11,7 @@ export const useDeSPXAPrice = () => {
       const data = await response.json();
       return data.price as number;
     },
+    enabled,
     staleTime: 5 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
     retry: 3,
