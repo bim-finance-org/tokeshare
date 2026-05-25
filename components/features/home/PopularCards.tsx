@@ -5,6 +5,7 @@ import ArrowLongLineIcon from '../../icons/arrows/ArrowLongLineIcon';
 import PopularCommoditiesCard from './PopularCommoditiesCard';
 import PopularTFTCard from './PopularTFTCard';
 import PopularTMCCard from './PopularTMCCard';
+import PopularTSP500Card from './PopularTSP500Card';
 
 import commoditiesData from '../../../data/commoditiesData.json';
 
@@ -31,7 +32,7 @@ const PopularHouses: React.FC = () => {
         <PopularTFTCard />
         <PopularCommoditiesCard key={2} commodity={commoditiesData[0]} />
         <PopularTMCCard />
-        <PopularTMCCard />
+        <PopularTSP500Card />
       </div>
     </div>
   );
