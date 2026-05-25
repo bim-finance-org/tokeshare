@@ -28,7 +28,7 @@ const PopularHouses: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-1 custom-r:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 min-[1200px]:grid-cols-4 gap-4 sm:gap-6">
         <PopularTFTCard />
         <PopularCommoditiesCard key={2} commodity={commoditiesData[0]} />
         <PopularTMCCard />
