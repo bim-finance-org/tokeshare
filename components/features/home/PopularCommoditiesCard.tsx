@@ -46,17 +46,18 @@ const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ commodi
   return (
     <div
       ref={cardRef}
-      className="bg-color5 text-color4 text-base sm:text-lg shadow-lg rounded-xl overflow-hidden flex flex-col min-w-0 
+      className="bg-color5 text-color4 text-base sm:text-lg shadow-lg rounded-xl overflow-hidden flex flex-col min-w-0 w-full
                     max-w-[90%] sm:max-w-full mx-auto"
     >
       <Image src={image} alt="House" width={800} height={800} className="object-cover w-hull h-64" />
-      <div className="p-3 sm:p-4 flex flex-col flex-grow">
+      <div className="p-3 sm:p-4 flex flex-col flex-grow min-h-[180px]">
         <div>
           <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
+          <div className="pt-2">1g {name}</div>
         </div>
-        <div className="pt-2">1g {name}</div>
+        <div className="flex-grow"></div>
         <div
-          className={`mt-4 flex ${isColumn ? 'flex-col items-start' : 'flex-row items-center'} justify-between gap-2 sm:gap-4`}
+          className={`flex ${isColumn ? 'flex-col items-start' : 'flex-row items-center'} justify-between gap-2 sm:gap-4`}
         >
           <h5 className={`font-bold text-lg sm:text-xl ${isLoading ? 'text-gray-400' : 'text-blue-600'}`}>
             {displayPrice}

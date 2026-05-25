@@ -56,7 +56,7 @@ const PopularTFTCard = () => {
   return (
     <div
       ref={cardRef}
-      className="bg-color5 text-color4 text-base sm:text-lg shadow-lg rounded-xl overflow-hidden flex flex-col min-w-0 
+      className="bg-color5 text-color4 text-base sm:text-lg shadow-lg rounded-xl overflow-hidden flex flex-col min-w-0 w-full
                     max-w-[90%] sm:max-w-full mx-auto"
     >
       <Image
@@ -66,7 +66,7 @@ const PopularTFTCard = () => {
         height={800}
         className="object-cover w-hull h-64"
       />
-      <div className="p-3 sm:p-4 flex flex-col flex-grow">
+      <div className="p-3 sm:p-4 flex flex-col flex-grow min-h-[180px]">
         <div>
           <h3 className="font-semibold text-lg sm:text-xl">French Tacos</h3>
 
@@ -91,8 +91,10 @@ const PopularTFTCard = () => {
           </div>
         </div>
 
+        <div className="flex-grow"></div>
+
         <div
-          className={`mt-4 flex ${isColumn ? 'flex-col items-start' : 'flex-row items-center'} justify-between gap-2 sm:gap-4`}
+          className={`flex ${isColumn ? 'flex-col items-start' : 'flex-row items-center'} justify-between gap-2 sm:gap-4`}
         >
           <h5 className="text-blue-600 font-bold text-lg sm:text-xl">$ 31.25</h5>
 
