@@ -33,9 +33,10 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   const [showBalanceError, setShowBalanceError] = useState(false);
   const [isBelowMin, setBelownMin] = useState(false);
   const { isConnected, address } = useAccount();
-  const { data: paxgPrice } = usePaxgPrice();
-  const { data: cmc20Price } = useCmc20Price();
-  const { data: despxaPrice } = useDeSPXAPrice();
+  // Only the active token's price feed hits the network — the others stay idle.
+  const { data: paxgPrice } = usePaxgPrice({ enabled: token.symbol === 'TGG' });
+  const { data: cmc20Price } = useCmc20Price({ enabled: token.symbol === 'TMC' });
+  const { data: despxaPrice } = useDeSPXAPrice({ enabled: token.symbol === 'TSP500' });
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
   const isTFT = token.symbol === 'TFT_001';

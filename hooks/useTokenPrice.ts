@@ -10,24 +10,24 @@ export type TokenPriceResult = {
   isLoading: boolean;
 };
 
-export function useTGGPrice(): TokenPriceResult {
-  const { data: paxgPrice, isLoading } = usePaxgPrice();
+export function useTGGPrice(enabled = true): TokenPriceResult {
+  const { data: paxgPrice, isLoading } = usePaxgPrice({ enabled });
   return {
     price: paxgPrice !== undefined ? calculateTGGPrice(paxgPrice) : null,
     isLoading,
   };
 }
 
-export function useTMCPrice(): TokenPriceResult {
-  const { data: cmc20Price, isLoading } = useCmc20Price();
+export function useTMCPrice(enabled = true): TokenPriceResult {
+  const { data: cmc20Price, isLoading } = useCmc20Price({ enabled });
   return {
     price: cmc20Price !== undefined ? calculateTMCPrice(cmc20Price) : null,
     isLoading,
   };
 }
 
-export function useTSP500Price(): TokenPriceResult {
-  const { data: despxaPrice, isLoading } = useDeSPXAPrice();
+export function useTSP500Price(enabled = true): TokenPriceResult {
+  const { data: despxaPrice, isLoading } = useDeSPXAPrice({ enabled });
   return {
     price: despxaPrice !== undefined ? calculateTSP500Price(despxaPrice) : null,
     isLoading,
@@ -48,9 +48,11 @@ export function useTFTPrice(): TokenPriceResult {
  * price query that is actually needed.
  */
 export function useTokenPrice(symbol: string): TokenPriceResult {
-  const tgg = useTGGPrice();
-  const tmc = useTMCPrice();
-  const tsp500 = useTSP500Price();
+  // Rules-of-hooks forces every price hook to run, but gating their underlying
+  // query with `enabled` means only the active symbol's feed hits the network.
+  const tgg = useTGGPrice(symbol === 'TGG');
+  const tmc = useTMCPrice(symbol === 'TMC');
+  const tsp500 = useTSP500Price(symbol === 'TSP500');
   const tft = useTFTPrice();
 
   return useMemo(() => {

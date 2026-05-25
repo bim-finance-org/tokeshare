@@ -39,9 +39,10 @@ const Buy = ({ token }: { token: TokenInfo }) => {
   const [showBuyNext, setShowBuyNext] = useState(false);
   const [isBelowMin, setBelownMin] = useState(false);
   const { isConnected } = useAccount();
-  const { data: paxgPrice, isLoading: isPaxgLoading } = usePaxgPrice();
-  const { data: cmc20Price, isLoading: isCmc20Loading } = useCmc20Price();
-  const { data: despxaPrice } = useDeSPXAPrice();
+  // Only the active token's price feed hits the network — the others stay idle.
+  const { data: paxgPrice } = usePaxgPrice({ enabled: token.symbol === 'TGG' });
+  const { data: cmc20Price } = useCmc20Price({ enabled: token.symbol === 'TMC' });
+  const { data: despxaPrice } = useDeSPXAPrice({ enabled: token.symbol === 'TSP500' });
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
   // Mise à jour du prix du token
