@@ -313,7 +313,9 @@ export function useZapSwap(config: UseZapSwapConfig) {
       const contracts = resolveContracts(blockchain);
 
       const baseBalance = await checkTokenBalance(contracts.baseToken, params.walletAddress);
-      const baseAmountBigInt = BigInt((parseFloat(params.amount) * Math.pow(10, 18)).toString());
+      // parseUnits keeps full precision and avoids the exponential-notation
+      // throw that `parseFloat(x) * 1e18` hits past ~1e21.
+      const baseAmountBigInt = parseUnits(params.amount, 18);
       if (baseBalance < baseAmountBigInt) {
         throw new Error(
           `Insufficient balance. Required: ${params.amount}, Available: ${(Number(baseBalance) / Math.pow(10, 18)).toFixed(4)}`,
