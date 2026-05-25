@@ -182,7 +182,7 @@ La quasi-totalité des `<button>` n'ont pas `type="button"` explicite (BuyModal,
 | 6 | Ajouter `loading.tsx`, `error.tsx`, `global-error.tsx`, `not-found.tsx`, `sitemap.ts`, `robots.ts`, `opengraph-image` | 🟠 | ✅ | `opengraph-image` ajouté via next/og (edge) |
 | 7 | `generateMetadata` dynamique sur pages détail | 🟠 | ✅ | Posé sur real-estate/[id] et commodities/[name] |
 | 8 | Factoriser `useZAP*Contract`, swap handlers, `useTokenPrice`, `useSwap` (TGG/TMC/TSP500) | 🟡 | ✅ | `useZapHook`, `useZapSwapHandler`, `useZapSwap` ; `useTokenPrice` splitté en 4 hooks dédiés (1033→567 lignes côté swap) |
-| 9 | `useUserTokenAssets` → multicall ; déplacer `usePrefetchStablePrices` aux pages concernées | 🟡 | ✅ | `PUBLIC_CLIENTS` en `batch: { multicall: true }` ; `usePrefetchStablePrices` retiré (Exchange déclenche déjà la query sur les pages concernées) |
+| 9 | `useUserTokenAssets` → multicall ; déplacer `usePrefetchStablePrices` aux pages concernées | 🟡 | ✅ | `PUBLIC_CLIENTS` en `batch: { multicall: true }` ; `usePrefetchStablePrices` retiré (Exchange déclenche déjà la query sur les pages concernées) — **maj 2026-05-25 : `useUserTokenAssets` réécrit en `client.multicall()` réel (le batch config seul ne suffisait pas, cf. revue)** |
 | 10 | `useSwap` : `useCallback` + supprimer try/throw bruyants | 🟡 | ✅ | Appliqué aussi à `useTmcSwap`, `useTsp500Swap`, `useMarketplaceContract` (mêmes warnings exhaustive-deps) |
 | 11 | LCP : `priority`/`sizes`/`blurDataURL` sur la hero ; AVIF dans `next.config.ts` | 🟡 | ✅ | `priority` + `sizes` + `blurDataURL` (sharp 10px blur inline) ; AVIF + WebP configurés |
 | 12 | `<Suspense>` autour des blocs Wagmi | 🟡 | ✅ | `Exchange` chargé via `next/dynamic({ ssr:false, loading: ExchangeSkeleton })` sur les 4 pages marketplace |
@@ -193,3 +193,122 @@ La quasi-totalité des `<button>` n'ont pas `type="button"` explicite (BuyModal,
 | 17 | `type="button"` partout, `@wagmi/cli`, logger central | 🟢 | 🟡 | `lib/logger.ts` (leveled, scoped, env-aware) ; `type="button"` sweep (79 boutons) ; reste `@wagmi/cli` |
 
 Légende : ✅ done · 🟡 partiel · ⏳ à faire
+
+---
+
+## 💬 Revue de la branche (2026-05-23)
+
+Revue indépendante de la branche `refacto` (76 commits atomiques, ~5k+ / 3.3k− sur 114 fichiers).
+
+### Vue d'ensemble
+
+Refacto sérieux, structuré, discipliné. La méthode (plan → lots → `docs(REFACTO): mark lot X done` après chaque lot) est exemplaire pour un chantier de cette taille. Commits conventionnels (`feat/fix/refactor/perf/chore/docs`), scopés, courts — facile à reviewer. Lint passe (0 erreur, 44 warnings résiduels).
+
+### Ce qui est vraiment bien
+
+**Sécurité — solide**
+- `lib/authOptions.ts` : fallbacks en dur supprimés, throw au boot si l'env manque. C'était critique.
+- `lib/ratelimit.ts` : Redis primaire + fallback in-memory LRU (5k entrées), headers `X-RateLimit-*` + `Retry-After`. Pas de dépendance Upstash, autonome.
+- `lib/schemas/transactions.ts` : Zod centralisé, `discriminatedUnion` sur `paymentMethod` pour Sell (élégant), `preprocess` pour rester rétro-compatible. Les `: any` ont disparu des routes.
+- Atomicité tx/email via `after()` : l'email part en post-traitement, l'erreur Resend ne fait plus échouer une transaction déjà persistée. Vrai bug, pas seulement de l'hygiène.
+- `/api/snapshot` : `fs.writeFileSync` → Redis. Indispensable serverless / multi-instance.
+
+**Architecture App Router — propre**
+- NavBar : `next/head` → `next/script` avec `id` + `strategy="afterInteractive"`. Le JSON-LD sortira enfin dans le HTML.
+- RSC : home, `real-estate/[id]`, `commodities/[name]`, `dashboard` repassées en serveur. Dashboard splittée en page RSC + îlots client (`DashboardLogin`, `SignOutButton`).
+- Tous les fichiers spéciaux présents : `error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`.
+- `generateMetadata` dynamique sur les pages détail avec `params: Promise<{...}>` (signature Next 15).
+
+**Perf / React — gros gain**
+- `useZapSwap` : factory qui collapse `useSwap` (TGG) + `useTmcSwap` + `useTsp500Swap` — `useSwap.ts` passe de 427 à 33 lignes. Pareil pour `useContracts` (3 `useZAP*Contract` → un seul `useZapHook`).
+- `useTokenPrice` splitté en 4 hooks dédiés : un composant n'appelle plus 4 hooks de prix pour en utiliser 1.
+- `TokenContexts` reconstruit sur **`useSyncExternalStore`** avec store module-level et `getServerSnapshot()` stable. Idiome React 19, tue le mismatch d'hydratation des `typeof window !== 'undefined'`.
+- Anti-pattern setState-in-useEffect retiré dans `Buy`, `Sell`, `Swap`, `TradeWidget`, `useAutoSwitchNetwork`, `useSwapQuote`, `usePaxgPerformance`, `UserForm` — dérivation pendant le render.
+- `useCallback` mis sur les helpers de `useSwap`, `useTmcSwap`, `useTsp500Swap`, `useMarketplaceContract`. Le `useMemo` qui retournait un objet neuf à chaque render n'a plus aucun sens dans l'ancien code, c'est corrigé.
+- `Exchange` chargé via `next/dynamic({ ssr: false, loading: ExchangeSkeleton })` sur les 4 pages marketplace — retire le flash Wagmi et allège le bundle initial.
+- `PUBLIC_CLIENTS` : `batch: { multicall: true }` + `http({ batch: { batchSize: 1000, wait: 16 } })` partout.
+
+**Hygiène**
+- `fs` (paquet bidon), `redis` (doublon ioredis), `react-icons` (lucide-react choisi) — tous retirés.
+- Logger central `lib/logger.ts` (leveled, scoped, env-aware) + migration de tous les `console.*` (il n'en reste 2 dans `error.tsx`/`global-error.tsx`, ce qui est l'idiome Next).
+- `type="button"` sweep sur 79 boutons.
+- POC (`poc-stellar`, `buildingInProgress`) sortis des index via `robots.ts` + meta `noindex`.
+
+### Ce qui mérite un coup d'œil
+
+**🟠 `useUserTokenAssets` — le multicall est seulement à moitié fait**
+
+`hooks/useUserTokenAssets.ts:26-57` : la boucle est toujours `for...of` séquentielle avec `await` à chaque itération.
+
+```ts
+for (const token of cryptos) {
+  for (const [chainStr, tokenAddr] of Object.entries(token.addresses)) {
+    ...
+    const raw = await client.readContract({ ... });  // ← séquentiel
+  }
+}
+```
+
+`batch: { multicall: true }` sur le client **ne batche que les appels émis dans le même tick d'event loop**. Comme chaque `await` résout avant de lancer le suivant, viem ne voit jamais 2 reads simultanés — donc pas de multicall.
+
+Fix recommandé (lot 9) :
+```ts
+publicClient.multicall({ contracts: [{ address, abi, functionName: 'balanceOf', args }, ...] })
+```
+ou au moins un `Promise.all` sur des `readContract()` non-attendus. Aujourd'hui, ça reste N appels HTTP par chain × token. Le statut ✅ du lot 9 est trompeur sur cet aspect.
+
+> ✅ **Corrigé** (`perf(useUserTokenAssets): batch balances via multicall`) — les appels `balanceOf` sont groupés par chain et émis via `client.multicall({ allowFailure: true })` : 1 round-trip par chain au lieu de N. Résultats agrégés en ordre déterministe (`Promise.all` + `flat()`).
+
+**🟠 `Buy.tsx` n'utilise pas les hooks splittés**
+
+`components/features/commodities/Buy.tsx:42-44` appelle encore `usePaxgPrice()`, `useCmc20Price()`, `useDeSPXAPrice()` **tous les trois** à chaque render, alors qu'on a maintenant `useTGGPrice/useTMCPrice/useTSP500Price` qui font exactement ça mais ciblé. Le bénéfice du lot 8 (split `useTokenPrice`) ne s'applique pas à ce composant — à vérifier dans `Sell.tsx` et `Swap.tsx` qui ont peut-être le même problème.
+
+Bonus : `useEffect(() => { ... setInterval(updatePrice, 30000) ... })` dans le même fichier — inutile, les TanStack Query en dessous gèrent déjà leur propre `refetchInterval`. C'est un mirror state (`tggPrice` en `useState`) qui survit au refacto alors qu'on pourrait juste dériver pendant le render.
+
+> ✅ **Corrigé / nuancé** (`perf(price-feeds): gate by active token`) — vérification faite : `Swap.tsx` utilisait déjà le dispatcher `useTokenPrice(token.symbol)`, seuls `Buy`/`Sell` appelaient les 3 feeds en direct. Le vrai problème n'était pas le passage par le dispatcher (rules-of-hooks impose d'appeler tous les hooks de toute façon) mais l'absence de gating : les 3 feeds HTTP partaient sur chaque page. Ajout d'un `{ enabled }` optionnel sur `usePaxgPrice`/`useCmc20Price`/`useDeSPXAPrice`, threadé dans les hooks dédiés et le dispatcher, + gating des appels directs de `Buy`/`Sell` → seul le feed du token actif tire le réseau. Les 2 `isLoading` morts de `Buy` sont retirés. Le `setInterval` de `Buy` reste à nettoyer (mirror state non-bloquant).
+
+**🟡 44 warnings ESLint résiduels**
+
+Surtout des imports inutilisés (`Link`, `Skeleton`, `FrenchTacosDetails`, `QuadIcon`) et 2 `react-hooks/exhaustive-deps` (`TacosCard`, `PopularTFTCard` — `getMarketplaceBalance` manquant dans les deps de `useEffect`). Aucune règle n'a été silenced, c'est de la dette propre à finir.
+
+**🟡 Lots partiels assumés**
+
+Bien marqués 🟡 dans le tableau, pas un reproche, juste à finir :
+- `next.config.ts` : `remotePatterns` pas listés.
+- `output: 'standalone'` pas ajouté (OK si pas de Docker).
+- `@wagmi/cli` pas mis en place — les ABIs JSON restent typés en `as Abi` au point d'appel.
+
+**🟢 Détails**
+
+- `useZapSwap.ts:316` : `BigInt((parseFloat(params.amount) * Math.pow(10, 18)).toString())` — la conversion float→BigInt via `* 10^18` perd des chiffres sur les grosses valeurs (précision IEEE-754). `parseUnits(params.amount, 18)` ferait pareil sans le détour float. Bug latent hérité de l'ancien code, pas introduit par le refacto, mais visible maintenant qu'il est centralisé.
+- `lib/ratelimit.ts:39-41` : éviction LRU naïve (drop la première clé d'insertion). Suffisant comme fallback dégradé, mais une entrée chaude peut se faire évincer.
+- `BuyTxSchema` accepte `crypto` comme string libre `min(1).max(10)` — pas de whitelist `z.enum(['TGG', 'TMC', ...])`. Idem pour `blockchain` / `fiat`. Le validateur Zod ne ferme pas complètement la porte ; les valeurs métier sont contrôlées en aval mais une enum serait plus stricte.
+
+### Verdict
+
+Très bon travail. La discipline (plan → lots → status) est exemplaire et la quasi-totalité des findings critiques et importants sont vraiment traités, pas juste cochés. Les 2 vrais points à reprendre avant de merger :
+
+1. **`useUserTokenAssets`** — faire le vrai multicall (ou `Promise.all`) pour réellement gagner le RTT.
+2. **`Buy`/`Sell`/`Swap`** — basculer sur les hooks de prix dédiés, sinon le split de `useTokenPrice` n'a aucun effet sur les pages qui l'utilisaient déjà via les hooks bas niveau.
+
+Le reste (lint warnings, `@wagmi/cli`, `remotePatterns`) peut suivre dans des PR de finition.
+
+---
+
+## ✅ Suivi post-revue (2026-05-25)
+
+Les 2 bloqueurs du verdict sont traités (détails inline ci-dessus) :
+
+| Point | Commit | État |
+|---|---|---|
+| `useUserTokenAssets` → vrai multicall | `perf(useUserTokenAssets): batch balances via multicall` | ✅ |
+| Gating des feeds de prix par token actif (Buy/Sell + dispatcher) | `perf(price-feeds): gate PAXG/CMC20/deSPXA queries by active token` | ✅ |
+
+Reste à faire (non bloquant) :
+
+- **Read on-chain TFT non gaté** : le dispatcher `useTokenPrice` appelle toujours `useTFTPrice()` (read `getTokenInfo` via `useMarketplaceContract`) sur toutes les pages. Gating hors-scope car `useMarketplaceContract` est un hook partagé qui sert aussi aux transactions — à traiter séparément si besoin.
+- **`Buy.tsx` `setInterval(updatePrice, 30000)`** : mirror state à supprimer au profit d'un `useMemo` (comme `Sell.tsx` le fait déjà).
+- **Warnings ESLint** (42 restants) : imports/vars inutilisés + 2 `exhaustive-deps`.
+- **Lots 14 / 17 partiels** : `remotePatterns`, `output: 'standalone'` (si Docker), `@wagmi/cli`.
+- **`useZapSwap.ts:316`** : conversion float→BigInt à remplacer par `parseUnits`.
+- **Schémas Zod** : `crypto`/`blockchain`/`fiat` en `z.enum(...)` plutôt que string libre.
