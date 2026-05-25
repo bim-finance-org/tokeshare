@@ -310,5 +310,5 @@ Reste à faire (non bloquant) :
 - **`Buy.tsx` `setInterval(updatePrice, 30000)`** : mirror state à supprimer au profit d'un `useMemo` (comme `Sell.tsx` le fait déjà).
 - **Warnings ESLint** (42 restants) : imports/vars inutilisés + 2 `exhaustive-deps`.
 - **Lots 14 / 17 partiels** : `remotePatterns`, `output: 'standalone'` (si Docker), `@wagmi/cli`.
-- **`useZapSwap.ts:316`** : conversion float→BigInt à remplacer par `parseUnits`.
+- **`useZapSwap.ts:316`** : ✅ corrigé en `parseUnits(params.amount, 18)` (`fix(useZapSwap)`). Reste `:329` (`paymentAmount` via `Math.floor(conversion * 1e18)`) — même classe de bug mais `conversion` est un float calculé, pas une string user ; à reprendre avec précaution (floor vs round).
 - **Schémas Zod** : `crypto`/`blockchain`/`fiat` en `z.enum(...)` plutôt que string libre.
