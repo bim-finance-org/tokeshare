@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { name: 'Other', path: '/marketplace/other' },
   { name: 'Partners', path: '/partners' },
   { name: 'Dashboard', path: '/user/dashboard' },
-];
+] as const;
 
 const NavBar: React.FC<NavBarProps> = () => {
   const pathname = usePathname();

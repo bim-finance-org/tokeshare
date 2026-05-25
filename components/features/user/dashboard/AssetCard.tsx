@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import type { Route } from 'next';
 import { AssetData } from '@/interfaces/AssetData';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -25,7 +26,7 @@ const AssetCard = ({ asset }: { asset: AssetData }) => {
               size="sm"
               variant="outline"
             >
-              <Link href={asset.internalUrl ?? '#'} rel="noopener noreferrer" className="text-sm md:text-lg">
+              <Link href={(asset.internalUrl ?? '#') as Route} rel="noopener noreferrer" className="text-sm md:text-lg">
                 View Asset
               </Link>
             </Button>

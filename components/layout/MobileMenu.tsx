@@ -46,7 +46,7 @@ const MobileMenu: React.FC = () => {
           className={`absolute top-14 left-1/2 transform -translate-x-1/2 w-full bg-color3 shadow-lg custom-r:hidden rounded-b-xl transition-all duration-300 ${pathname === '/' ? 'bg-transparent text-color7' : 'bg-color3'}`}
         >
           <ul className="flex flex-col items-start space-y-4 p-6">
-            {[
+            {([
               { name: 'Home', path: '/' },
               { name: 'Real Estate', path: '/marketplace/real-estate' },
               { name: 'Commodities', path: '/marketplace/commodities' },
@@ -54,7 +54,7 @@ const MobileMenu: React.FC = () => {
               { name: 'Other', path: '/marketplace/other' },
               { name: 'Partners', path: '/partners' },
               { name: 'Dashboard', path: '/user/dashboard' },
-            ].map(({ name, path }, index) => (
+            ] as const).map(({ name, path }, index) => (
               <li key={index} className="relative w-full">
                 <Link
                   href={path}
