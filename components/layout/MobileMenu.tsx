@@ -43,7 +43,9 @@ const MobileMenu: React.FC = () => {
 
       {isMenuOpen && (
         <div
-          className={`absolute top-14 left-1/2 transform -translate-x-1/2 w-full bg-color3 shadow-lg custom-r:hidden rounded-b-xl transition-all duration-300 ${pathname === '/' ? 'bg-transparent text-color7' : 'bg-color3'}`}
+          className={`absolute top-14 left-1/2 w-full -translate-x-1/2 transform rounded-b-xl shadow-lg transition-all duration-300 custom-r:hidden ${
+            pathname === '/' ? 'border-t border-white/10 bg-black/70 backdrop-blur-md' : 'bg-color3'
+          }`}
         >
           <ul className="flex flex-col items-start space-y-4 p-6">
             {([
