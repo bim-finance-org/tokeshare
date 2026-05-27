@@ -5,7 +5,6 @@ import Exchange from '@/components/features/commodities/ExchangeLazy';
 import Contracts from '@/components/shared/Contracts';
 import TMCInfos from '@/components/features/tmc/TMCInfos';
 import { BASE_CONTRACTS } from '@/contracts/contracts';
-import { TOKENS } from '@/config/token';
 
 const TMCPage = () => {
   return (
@@ -29,7 +28,7 @@ const TMCPage = () => {
               Buy, Sell, or Swap Tokeshare MarketCap 20 Index
             </span>
           </h2>
-          <Exchange token={TOKENS['TMC']} />
+          <Exchange tokenSymbol="TMC" />
         </div>
       </div>
 

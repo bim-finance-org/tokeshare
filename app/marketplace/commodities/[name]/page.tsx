@@ -7,7 +7,6 @@ import Exchange from '@/components/features/commodities/ExchangeLazy';
 import Contracts from '@/components/shared/Contracts';
 import CommoditiesInfos from '@/components/features/commodities/CommoditiesInfos';
 import { CONTRACTS, ETH_CONTRACTS } from '@/contracts/contracts';
-import { TOKENS } from '@/config/token';
 
 interface PageProps {
   params: Promise<{ name: string }>;
@@ -74,7 +73,7 @@ const CommodityPage = async ({ params }: PageProps) => {
               Buy, Sell, or Swap Tokeshare Gold Gram
             </span>
           </h2>
-          <Exchange token={TOKENS['TGG']} />
+          <Exchange tokenSymbol="TGG" />
         </div>
       </div>
       <div className="pt-6 sm:pt-8 md:pt-12">

@@ -5,7 +5,6 @@ import Exchange from '@/components/features/commodities/ExchangeLazy';
 import Contracts from '@/components/shared/Contracts';
 import TSP500Infos from '@/components/features/tsp500/TSP500Infos';
 import { BASE_CONTRACTS } from '@/contracts/contracts';
-import { TOKENS } from '@/config/token';
 
 const TSP500Page = () => {
   return (
@@ -29,7 +28,7 @@ const TSP500Page = () => {
               Buy, Sell, or Swap Tokeshare S&amp;P500
             </span>
           </h2>
-          <Exchange token={TOKENS['TSP500']} />
+          <Exchange tokenSymbol="TSP500" />
         </div>
       </div>
 

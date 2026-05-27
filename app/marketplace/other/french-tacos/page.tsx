@@ -1,7 +1,6 @@
 import Exchange from '@/components/features/commodities/ExchangeLazy';
 import FrenchTacosCarousel from '@/components/features/french-tacos/FrenchTacosCarousel';
 import FrenchTacosInfo from '@/components/features/french-tacos/FrenchTacosInfo';
-import { TOKENS } from '@/config/token';
 import React from 'react';
 import Map from '@/components/features/real-estate/HouseMap';
 
@@ -9,7 +8,7 @@ const page = () => {
   return (
     <div>
       <FrenchTacosCarousel />
-      <Exchange token={TOKENS['TFT_001']} />
+      <Exchange tokenSymbol="TFT_001" />
       <FrenchTacosInfo />
       <div className="py-8 px-4 rounded-xl mx-auto w-full md:w-4/5 lg:pl-16 text-color4">
         <h2 className="text-2xl font-bold mb-4">🍔 ABOUT THE BUSINESS</h2>
