@@ -7,19 +7,19 @@ import { useXlmPrice } from '@/hooks/useXlmPrice';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
 import { Badge } from '@/components/ui/badge';
 
-const TOKEN_PRICE_USD = 50;
+const TOKEN_PRICE_USD = 10;
 const TOKEN_SYMBOL = 'TRES';
 const PROPERTY = {
-  name: 'Villa Coral, Las Terrenas, Dominican Republic',
+  name: 'Angel Cœur Caribe, Las Terrenas, Dominican Republic',
   city: 'Playa Bonita',
   country: 'Dominican Republic',
   image: '/images/img-house-2.webp',
-  surface: '142 m²',
-  bedrooms: '3 Beds',
+  surface: '96 m²',
+  bedrooms: '2 Beds',
   bathrooms: '2 Baths',
-  totalValue: '$ 420.000',
-  totalTokens: '8.400',
-  expectedIncome: '7% - 10%',
+  totalValue: '$ 230.000',
+  totalTokens: '23.000',
+  expectedIncome: '7% - 12%',
 };
 
 const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-6)}`;
