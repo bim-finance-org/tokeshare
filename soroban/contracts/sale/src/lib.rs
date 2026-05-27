@@ -10,7 +10,9 @@
 //! XLM from the buyer to the treasury and sends TRES from the contract to the
 //! buyer. The price is fixed in XLM (no oracle) and is admin-updatable.
 
-use soroban_sdk::{contract, contracterror, contractimpl, contracttype, panic_with_error, token, Address, Env};
+use soroban_sdk::{
+    contract, contracterror, contractimpl, contracttype, panic_with_error, token, Address, Env, TryFromVal, Val,
+};
 
 /// Both XLM and classic Stellar assets use 7 decimals, so one whole unit is
 /// 10^7 base units ("stroops"). `price` is expressed as XLM stroops per one
@@ -40,6 +42,7 @@ pub enum Error {
     InvalidPrice = 1,
     InvalidAmount = 2,
     InsufficientInventory = 3,
+    NotInitialized = 4,
 }
 
 #[contract]
@@ -77,11 +80,10 @@ impl SaleContract {
             panic_with_error!(&env, Error::InvalidAmount);
         }
 
-        let storage = env.storage().instance();
-        let price: i128 = storage.get(&DataKey::Price).unwrap();
-        let tres_sac: Address = storage.get(&DataKey::TresSac).unwrap();
-        let xlm_sac: Address = storage.get(&DataKey::XlmSac).unwrap();
-        let treasury: Address = storage.get(&DataKey::Treasury).unwrap();
+        let price: i128 = load(&env, &DataKey::Price);
+        let tres_sac: Address = load(&env, &DataKey::TresSac);
+        let xlm_sac: Address = load(&env, &DataKey::XlmSac);
+        let treasury: Address = load(&env, &DataKey::Treasury);
 
         let xlm_cost = cost(price, tres_amount);
 
@@ -100,7 +102,9 @@ impl SaleContract {
         // balance automatically as the direct invoker.
         tres.transfer(&contract, &buyer, &tres_amount);
 
-        storage.extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
         xlm_cost
     }
 
@@ -126,7 +130,7 @@ impl SaleContract {
     /// Admin: recover unsold TRES from the contract.
     pub fn withdraw_tres(env: Env, to: Address, amount: i128) {
         Self::require_admin(&env);
-        let tres_sac: Address = env.storage().instance().get(&DataKey::TresSac).unwrap();
+        let tres_sac: Address = load(&env, &DataKey::TresSac);
         token::TokenClient::new(&env, &tres_sac).transfer(&env.current_contract_address(), &to, &amount);
     }
 
@@ -134,30 +138,30 @@ impl SaleContract {
 
     /// XLM cost (stroops) for `tres_amount` TRES base units at the current price.
     pub fn quote(env: Env, tres_amount: i128) -> i128 {
-        let price: i128 = env.storage().instance().get(&DataKey::Price).unwrap();
+        let price: i128 = load(&env, &DataKey::Price);
         cost(price, tres_amount)
     }
 
     /// TRES still available for sale (contract balance, in base units).
     pub fn available(env: Env) -> i128 {
-        let tres_sac: Address = env.storage().instance().get(&DataKey::TresSac).unwrap();
+        let tres_sac: Address = load(&env, &DataKey::TresSac);
         token::TokenClient::new(&env, &tres_sac).balance(&env.current_contract_address())
     }
 
     pub fn price(env: Env) -> i128 {
-        env.storage().instance().get(&DataKey::Price).unwrap()
+        load(&env, &DataKey::Price)
     }
 
     pub fn admin(env: Env) -> Address {
-        env.storage().instance().get(&DataKey::Admin).unwrap()
+        load(&env, &DataKey::Admin)
     }
 
     pub fn treasury(env: Env) -> Address {
-        env.storage().instance().get(&DataKey::Treasury).unwrap()
+        load(&env, &DataKey::Treasury)
     }
 
     fn require_admin(env: &Env) {
-        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
+        let admin: Address = load(env, &DataKey::Admin);
         admin.require_auth();
     }
 }
@@ -166,6 +170,16 @@ impl SaleContract {
 /// `overflow-checks = true` (release profile) turns any overflow into a panic.
 fn cost(price: i128, tres_amount: i128) -> i128 {
     (tres_amount * price + SCALE - 1) / SCALE
+}
+
+/// Read a required config value from instance storage. Every key is written by
+/// the constructor, so a missing key means the contract was never initialized —
+/// fail with a typed error instead of an opaque `unwrap` panic.
+fn load<V: TryFromVal<Env, Val>>(env: &Env, key: &DataKey) -> V {
+    env.storage()
+        .instance()
+        .get(key)
+        .unwrap_or_else(|| panic_with_error!(env, Error::NotInitialized))
 }
 
 mod test;
