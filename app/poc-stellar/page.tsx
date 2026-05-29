@@ -88,7 +88,7 @@ const PocStellarPage = () => {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Property card */}
           <section className="bg-white rounded-2xl shadow-md overflow-hidden">
-            <div className="relative h-72 w-full">
+            <div className="relative aspect-[3/2] w-full">
               <Image src={PROPERTY.image} alt={PROPERTY.name} fill className="object-cover" priority />
             </div>
             <div className="p-6 space-y-4">
