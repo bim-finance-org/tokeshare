@@ -2,21 +2,23 @@
 
 //! TRES sale contract.
 //!
-//! Sells a fixed-price token (TRES) for XLM. Both TRES and XLM are accessed
-//! through their Stellar Asset Contracts (SAC), so this contract works with a
-//! classic Stellar asset wrapped into Soroban and with the native XLM SAC.
+//! Sells a fixed-price token (TRES) for a payment asset (e.g. USDC, or native
+//! XLM). Both the TRES token and the payment asset are accessed through their
+//! Stellar Asset Contracts (SAC), so this works with any classic Stellar asset
+//! wrapped into Soroban as well as the native XLM SAC.
 //!
 //! Flow: the contract is pre-funded with TRES. A buyer calls `buy`, which pulls
-//! XLM from the buyer to the treasury and sends TRES from the contract to the
-//! buyer. The price is fixed in XLM (no oracle) and is admin-updatable.
+//! the payment asset from the buyer to the treasury and sends TRES from the
+//! contract to the buyer. The price is fixed (no oracle) and admin-updatable.
 
 use soroban_sdk::{
     contract, contracterror, contractimpl, contracttype, panic_with_error, token, Address, Env, TryFromVal, Val,
 };
 
-/// Both XLM and classic Stellar assets use 7 decimals, so one whole unit is
-/// 10^7 base units ("stroops"). `price` is expressed as XLM stroops per one
-/// whole TRES, and amounts are passed in TRES base units.
+/// XLM and classic Stellar assets (including USDC on Stellar) all use 7
+/// decimals, so one whole unit is 10^7 base units ("stroops"). `price` is
+/// expressed as payment-asset stroops per one whole TRES, and amounts are
+/// passed in TRES base units.
 const SCALE: i128 = 10_000_000;
 
 // Instance-storage TTL management (~5s ledgers). Each state-changing call bumps
@@ -30,7 +32,7 @@ const INSTANCE_LIFETIME_THRESHOLD: u32 = INSTANCE_BUMP_AMOUNT - DAY_IN_LEDGERS;
 enum DataKey {
     Admin,
     TresSac,
-    XlmSac,
+    PaySac,
     Treasury,
     Price,
 }
@@ -50,12 +52,12 @@ pub struct SaleContract;
 
 #[contractimpl]
 impl SaleContract {
-    /// Runs once at deploy. `price` is XLM stroops per one whole TRES.
+    /// Runs once at deploy. `price` is payment-asset stroops per one whole TRES.
     pub fn __constructor(
         env: Env,
         admin: Address,
         tres_sac: Address,
-        xlm_sac: Address,
+        pay_sac: Address,
         treasury: Address,
         price: i128,
     ) {
@@ -65,15 +67,15 @@ impl SaleContract {
         let storage = env.storage().instance();
         storage.set(&DataKey::Admin, &admin);
         storage.set(&DataKey::TresSac, &tres_sac);
-        storage.set(&DataKey::XlmSac, &xlm_sac);
+        storage.set(&DataKey::PaySac, &pay_sac);
         storage.set(&DataKey::Treasury, &treasury);
         storage.set(&DataKey::Price, &price);
         storage.extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
     }
 
-    /// Buy `tres_amount` (TRES base units) paying XLM at the current price.
-    /// Returns the XLM cost in stroops. The buyer authorizes both this call and
-    /// the XLM transfer out of their account.
+    /// Buy `tres_amount` (TRES base units) paying the payment asset at the
+    /// current price. Returns the payment cost in stroops. The buyer authorizes
+    /// both this call and the payment transfer out of their account.
     pub fn buy(env: Env, buyer: Address, tres_amount: i128) -> i128 {
         buyer.require_auth();
         if tres_amount <= 0 {
@@ -82,22 +84,22 @@ impl SaleContract {
 
         let price: i128 = load(&env, &DataKey::Price);
         let tres_sac: Address = load(&env, &DataKey::TresSac);
-        let xlm_sac: Address = load(&env, &DataKey::XlmSac);
+        let pay_sac: Address = load(&env, &DataKey::PaySac);
         let treasury: Address = load(&env, &DataKey::Treasury);
 
-        let xlm_cost = cost(price, tres_amount);
+        let pay_cost = cost(price, tres_amount);
 
         let tres = token::TokenClient::new(&env, &tres_sac);
-        let xlm = token::TokenClient::new(&env, &xlm_sac);
+        let pay = token::TokenClient::new(&env, &pay_sac);
         let contract = env.current_contract_address();
 
         if tres.balance(&contract) < tres_amount {
             panic_with_error!(&env, Error::InsufficientInventory);
         }
 
-        // Buyer -> treasury (XLM): the SAC calls buyer.require_auth() internally,
-        // covered by the buyer's signature on this invocation tree.
-        xlm.transfer(&buyer, &treasury, &xlm_cost);
+        // Buyer -> treasury (payment asset): the SAC calls buyer.require_auth()
+        // internally, covered by the buyer's signature on this invocation tree.
+        pay.transfer(&buyer, &treasury, &pay_cost);
         // Contract -> buyer (TRES): a contract authorizes transfers of its own
         // balance automatically as the direct invoker.
         tres.transfer(&contract, &buyer, &tres_amount);
@@ -105,10 +107,10 @@ impl SaleContract {
         env.storage()
             .instance()
             .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
-        xlm_cost
+        pay_cost
     }
 
-    /// Admin: update the fixed XLM price (stroops per whole TRES).
+    /// Admin: update the fixed price (payment-asset stroops per whole TRES).
     pub fn set_price(env: Env, price: i128) {
         Self::require_admin(&env);
         if price <= 0 {
@@ -119,7 +121,7 @@ impl SaleContract {
         storage.extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
     }
 
-    /// Admin: change where incoming XLM is sent.
+    /// Admin: change where incoming payment is sent.
     pub fn set_treasury(env: Env, treasury: Address) {
         Self::require_admin(&env);
         let storage = env.storage().instance();
@@ -136,7 +138,7 @@ impl SaleContract {
 
     // ---- views ----
 
-    /// XLM cost (stroops) for `tres_amount` TRES base units at the current price.
+    /// Payment cost (stroops) for `tres_amount` TRES base units at the current price.
     pub fn quote(env: Env, tres_amount: i128) -> i128 {
         let price: i128 = load(&env, &DataKey::Price);
         cost(price, tres_amount)

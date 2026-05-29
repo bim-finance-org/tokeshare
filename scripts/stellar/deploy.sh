@@ -3,8 +3,10 @@
 # Deploy the TRES sale on Stellar: issue the classic asset, wrap it as a SAC,
 # deploy the Soroban sale contract, and fund it with sale inventory.
 #
-# Config comes from environment variables (see .env.example). Secrets are read
-# from env at runtime and never stored in the repo.
+# The payment asset is configurable via PAY_ASSET ("native" for XLM, or
+# "CODE:ISSUER" for a classic asset such as USDC). Config comes from environment
+# variables (see .env.example). Secrets are read from env at runtime and never
+# stored in the repo.
 #
 # Usage:
 #   ./deploy.sh                # run for real (asks for confirmation)
@@ -60,7 +62,16 @@ require_env \
   ASSET_CODE ISSUER_PUBLIC ISSUER_SECRET \
   DISTRIBUTOR_PUBLIC DISTRIBUTOR_SECRET TREASURY_PUBLIC \
   ADMIN_PUBLIC ADMIN_SECRET \
-  TOTAL_SUPPLY SALE_INVENTORY PRICE_XLM_PER_TRES
+  TOTAL_SUPPLY SALE_INVENTORY PRICE_PER_TRES
+
+PAY_ASSET="${PAY_ASSET:-native}" # "native" (XLM) or "CODE:ISSUER" (e.g. USDC)
+if [[ "$PAY_ASSET" == "native" ]]; then
+  PAY_CODE="XLM"; PAY_ISSUER=""
+else
+  PAY_CODE="${PAY_ASSET%%:*}"; PAY_ISSUER="${PAY_ASSET#*:}"
+  # Treasury must hold a trustline to receive a non-native payment asset.
+  require_env TREASURY_SECRET
+fi
 
 WASM_PATH="${WASM_PATH:-$SCRIPT_DIR/../../soroban/target/wasm32v1-none/release/tres_sale.wasm}"
 [[ "${DRY_RUN:-0}" == "1" || -f "$WASM_PATH" ]] || \
@@ -73,7 +84,7 @@ NET=(--rpc-url "$RPC_URL" --network-passphrase "$NETWORK_PASSPHRASE")
 
 SUPPLY_STROOPS=$(to_stroops "$TOTAL_SUPPLY")
 INVENTORY_STROOPS=$(to_stroops "$SALE_INVENTORY")
-PRICE_STROOPS=$(to_stroops "$PRICE_XLM_PER_TRES") # XLM stroops per 1 whole TRES
+PRICE_STROOPS=$(to_stroops "$PRICE_PER_TRES") # payment-asset stroops per 1 whole TRES
 
 # ---- summary + confirmation ------------------------------------------------
 
@@ -82,14 +93,15 @@ cat >&2 <<EOF
 ================ TRES sale deployment ================
   Network passphrase : $NETWORK_PASSPHRASE
   RPC URL            : $RPC_URL
-  Asset              : $ASSET
+  TRES asset         : $ASSET
+  Payment asset      : $PAY_ASSET
   Issuer             : $ISSUER_PUBLIC
   Distributor        : $DISTRIBUTOR_PUBLIC
-  Treasury (gets XLM): $TREASURY_PUBLIC
+  Treasury (gets pay): $TREASURY_PUBLIC
   Admin (owns sale)  : $ADMIN_PUBLIC
   Total supply       : $TOTAL_SUPPLY TRES ($SUPPLY_STROOPS stroops)
   Sale inventory     : $SALE_INVENTORY TRES ($INVENTORY_STROOPS stroops)
-  Price              : $PRICE_XLM_PER_TRES XLM / TRES ($PRICE_STROOPS stroops)
+  Price              : $PRICE_PER_TRES $PAY_CODE / TRES ($PRICE_STROOPS stroops)
   Wasm               : $WASM_PATH
   DRY_RUN            : ${DRY_RUN:-0}
 ======================================================
@@ -102,11 +114,11 @@ if [[ "${DRY_RUN:-0}" != "1" && "${SKIP_CONFIRM:-0}" != "1" ]]; then
 fi
 
 # ---- 1. distributor trustline to TRES --------------------------------------
-echo ">> [1/6] Creating distributor trustline to $ASSET" >&2
+echo ">> [1/7] Creating distributor trustline to $ASSET" >&2
 run stellar tx new change-trust --source-account "$DISTRIBUTOR_SECRET" --line "$ASSET" "${NET[@]}"
 
 # ---- 2. issue total supply: issuer -> distributor --------------------------
-echo ">> [2/6] Issuing $TOTAL_SUPPLY $ASSET_CODE to the distributor" >&2
+echo ">> [2/7] Issuing $TOTAL_SUPPLY $ASSET_CODE to the distributor" >&2
 run stellar tx new payment \
   --source-account "$ISSUER_SECRET" \
   --destination "$DISTRIBUTOR_PUBLIC" \
@@ -114,27 +126,42 @@ run stellar tx new payment \
   --amount "$SUPPLY_STROOPS" \
   "${NET[@]}"
 
-# ---- 3. wrap the classic asset into a Soroban SAC --------------------------
-echo ">> [3/6] Deriving/deploying the TRES Stellar Asset Contract" >&2
+# ---- 3. treasury trustline to the payment asset (non-native only) ----------
+if [[ "$PAY_ASSET" != "native" ]]; then
+  echo ">> [3/7] Creating treasury trustline to $PAY_ASSET" >&2
+  run stellar tx new change-trust --source-account "$TREASURY_SECRET" --line "$PAY_ASSET" "${NET[@]}"
+else
+  echo ">> [3/7] Payment asset is native XLM — no treasury trustline needed" >&2
+fi
+
+# ---- 4. wrap the TRES asset into a Soroban SAC -----------------------------
+echo ">> [4/7] Deriving/deploying the TRES Stellar Asset Contract" >&2
 TRES_SAC=$(capture stellar contract id asset --asset "$ASSET" "${NET[@]}")
 run stellar contract asset deploy --asset "$ASSET" --source-account "$ADMIN_SECRET" "${NET[@]}" \
   || echo "   (TRES SAC may already be deployed — continuing)" >&2
 
-# ---- 4. native XLM SAC id (already deployed on the network) ----------------
-echo ">> [4/6] Resolving the native XLM SAC id" >&2
-XLM_SAC=$(capture stellar contract id asset --asset native "${NET[@]}")
+# ---- 5. resolve (and deploy if needed) the payment asset SAC ---------------
+echo ">> [5/7] Resolving the payment asset SAC id ($PAY_ASSET)" >&2
+PAY_SAC=$(capture stellar contract id asset --asset "$PAY_ASSET" "${NET[@]}")
+# The native XLM SAC is always present; a classic asset (e.g. USDC) needs its
+# SAC deployed before the contract can move it. On mainnet USDC's SAC already
+# exists, so this is a no-op caught below.
+if [[ "$PAY_ASSET" != "native" ]]; then
+  run stellar contract asset deploy --asset "$PAY_ASSET" --source-account "$ADMIN_SECRET" "${NET[@]}" \
+    || echo "   (payment SAC may already be deployed — continuing)" >&2
+fi
 
-# ---- 5. deploy the sale contract with its constructor args -----------------
-echo ">> [5/6] Deploying the sale contract" >&2
+# ---- 6. deploy the sale contract with its constructor args -----------------
+echo ">> [6/7] Deploying the sale contract" >&2
 SALE_ID=$(capture stellar contract deploy --wasm "$WASM_PATH" --source-account "$ADMIN_SECRET" "${NET[@]}" -- \
   --admin "$ADMIN_PUBLIC" \
   --tres_sac "$TRES_SAC" \
-  --xlm_sac "$XLM_SAC" \
+  --pay_sac "$PAY_SAC" \
   --treasury "$TREASURY_PUBLIC" \
   --price "$PRICE_STROOPS")
 
-# ---- 6. fund the sale contract with TRES inventory -------------------------
-echo ">> [6/6] Funding the sale contract with $SALE_INVENTORY $ASSET_CODE" >&2
+# ---- 7. fund the sale contract with TRES inventory -------------------------
+echo ">> [7/7] Funding the sale contract with $SALE_INVENTORY $ASSET_CODE" >&2
 run stellar contract invoke --id "$TRES_SAC" --source-account "$DISTRIBUTOR_SECRET" "${NET[@]}" -- \
   transfer --from "$DISTRIBUTOR_PUBLIC" --to "$SALE_ID" --amount "$INVENTORY_STROOPS"
 
@@ -152,7 +179,9 @@ NEXT_PUBLIC_STELLAR_RPC_URL="$RPC_URL"
 NEXT_PUBLIC_TRES_ASSET_CODE="$ASSET_CODE"
 NEXT_PUBLIC_TRES_ASSET_ISSUER="$ISSUER_PUBLIC"
 NEXT_PUBLIC_TRES_SAC_ID="$TRES_SAC"
-NEXT_PUBLIC_XLM_SAC_ID="$XLM_SAC"
+NEXT_PUBLIC_PAY_ASSET_CODE="$PAY_CODE"
+NEXT_PUBLIC_PAY_ASSET_ISSUER="$PAY_ISSUER"
+NEXT_PUBLIC_PAY_SAC_ID="$PAY_SAC"
 NEXT_PUBLIC_TRES_SALE_CONTRACT_ID="$SALE_ID"
 EOF
 
@@ -160,7 +189,7 @@ cat >&2 <<EOF
 
 ✅ Deployment complete.
   TRES SAC          : $TRES_SAC
-  XLM SAC           : $XLM_SAC
+  Payment SAC ($PAY_CODE) : $PAY_SAC
   Sale contract     : $SALE_ID
 
 Frontend env written to: $OUT
