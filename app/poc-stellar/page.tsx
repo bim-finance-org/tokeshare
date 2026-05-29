@@ -15,7 +15,7 @@ const PROPERTY = {
   name: 'Angel Cœur Caribe, Las Terrenas, Dominican Republic',
   city: 'Playa Bonita',
   country: 'Dominican Republic',
-  image: '/images/img-house-2.webp',
+  image: '/images/stellar/steallr_poc.jpeg',
   surface: '96 m²',
   bedrooms: '2 Beds',
   bathrooms: '2 Baths',
