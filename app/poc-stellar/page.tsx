@@ -1,69 +1,53 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { useStellarAccount } from '@/context/StellarContext';
-import { useXlmPrice } from '@/hooks/useXlmPrice';
+import { useBuyTres, useSaleInfo, useStellarBalances } from '@/hooks/useTresSale';
+import { stellarConfig, isStellarConfigured } from '@/config/stellar';
+import { explorerTxUrl } from '@/lib/stellar';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
 import { Badge } from '@/components/ui/badge';
 
-const TOKEN_PRICE_USD = 50;
-const TOKEN_SYMBOL = 'TRES';
+const TOKEN_SYMBOL = stellarConfig.tres.code;
+const PAY_SYMBOL = stellarConfig.pay.code;
 const PROPERTY = {
-  name: 'Villa Coral, Las Terrenas, Dominican Republic',
+  name: 'Angel Cœur Caribe, Las Terrenas, Dominican Republic',
   city: 'Playa Bonita',
   country: 'Dominican Republic',
-  image: '/images/img-house-2.webp',
-  surface: '142 m²',
-  bedrooms: '3 Beds',
+  image: '/images/stellar/steallr_poc.jpeg',
+  surface: '96 m²',
+  bedrooms: '2 Beds',
   bathrooms: '2 Baths',
-  totalValue: '$ 420.000',
-  totalTokens: '8.400',
-  expectedIncome: '7% - 10%',
+  totalValue: '$ 230.000',
+  totalTokens: '23.000',
+  expectedIncome: '7% - 12%',
 };
 
 const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-6)}`;
 
 const PocStellarPage = () => {
   const { address, isConnected, connect, disconnect } = useStellarAccount();
-  const { data: xlmPrice, isLoading: isXlmLoading } = useXlmPrice();
+  const { data: saleInfo, isLoading: isSaleLoading } = useSaleInfo();
+  const { data: balances } = useStellarBalances();
+  const buy = useBuyTres();
 
-  // The user types in exactly one of the two inputs at a time. We store that
-  // single value + which side it represents, and derive the other side
-  // during render — no effect, no cascade.
-  const [inputValue, setInputValue] = useState('');
-  const [inputSide, setInputSide] = useState<'xlm' | 'token'>('xlm');
-  const [purchased, setPurchased] = useState<{ xlm: string; tokens: string } | null>(null);
+  const [tokenAmount, setTokenAmount] = useState('');
 
-  const xlmToUsd = xlmPrice ?? 0;
-  const tokensPerXlm = xlmToUsd > 0 ? xlmToUsd / TOKEN_PRICE_USD : 0;
+  const fmtBalance = (value?: string) =>
+    parseFloat(value ?? '0').toLocaleString('en-US', { maximumFractionDigits: 2 });
 
-  const derivedOtherSide = useMemo(() => {
-    if (!xlmPrice) return '';
-    const num = parseFloat(inputValue);
-    if (isNaN(num) || num <= 0) return '';
-    if (inputSide === 'xlm') return ((num * xlmPrice) / TOKEN_PRICE_USD).toFixed(4);
-    return ((num * TOKEN_PRICE_USD) / xlmPrice).toFixed(4);
-  }, [inputValue, inputSide, xlmPrice]);
+  const priceUnits = saleInfo ? parseFloat(saleInfo.priceUnits) : 0;
+  const tokenNum = parseFloat(tokenAmount) || 0;
+  const cost = tokenNum > 0 && priceUnits > 0 ? tokenNum * priceUnits : 0;
+  const available = saleInfo ? parseFloat(saleInfo.availableUnits) : 0;
 
-  const xlmAmount = inputSide === 'xlm' ? inputValue : derivedOtherSide;
-  const tokenAmount = inputSide === 'token' ? inputValue : derivedOtherSide;
-
-  const handleXlmChange = (value: string) => {
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      setInputSide('xlm');
-      setInputValue(value);
-    }
+  const handleAmountChange = (value: string) => {
+    if (value === '' || /^\d*\.?\d*$/.test(value)) setTokenAmount(value);
   };
 
-  const handleTokenChange = (value: string) => {
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      setInputSide('token');
-      setInputValue(value);
-    }
-  };
-
-  const isInvalid = !xlmAmount || parseFloat(xlmAmount) <= 0 || !tokenAmount || parseFloat(tokenAmount) <= 0;
+  const exceedsInventory = available > 0 && tokenNum > available;
+  const isInvalid = tokenNum <= 0 || exceedsInventory;
 
   const handleBuy = () => {
     if (!isConnected) {
@@ -71,8 +55,18 @@ const PocStellarPage = () => {
       return;
     }
     if (isInvalid) return;
-    setPurchased({ xlm: xlmAmount, tokens: tokenAmount });
+    buy.mutate(tokenAmount);
   };
+
+  const buttonLabel = !isConnected
+    ? 'Connect Stellar wallet'
+    : buy.isPending
+      ? 'Processing…'
+      : exceedsInventory
+        ? 'Not enough inventory'
+        : tokenNum <= 0
+          ? 'Enter an amount'
+          : `Buy ${tokenAmount} ${TOKEN_SYMBOL}`;
 
   return (
     <div className="min-h-screen bg-color1">
@@ -80,14 +74,21 @@ const PocStellarPage = () => {
         <div className="mb-6 flex items-center gap-3">
           <Badge className="bg-color3 text-color4">POC — Stellar</Badge>
           <p className="text-sm text-color6">
-            Proof of concept · pay with XLM · prices are live · no transaction is broadcast
+            Real on-chain purchase · pay with {PAY_SYMBOL} on Stellar · fixed price
           </p>
         </div>
+
+        {!isStellarConfigured && (
+          <div className="mb-6 rounded-xl border border-amber-400 bg-amber-50 p-4 text-sm text-amber-800">
+            The sale contract is not configured yet. Set the <code>NEXT_PUBLIC_*</code> Stellar variables to enable
+            purchases.
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Property card */}
           <section className="bg-white rounded-2xl shadow-md overflow-hidden">
-            <div className="relative h-72 w-full">
+            <div className="relative aspect-[3/2] w-full">
               <Image src={PROPERTY.image} alt={PROPERTY.name} fill className="object-cover" priority />
             </div>
             <div className="p-6 space-y-4">
@@ -122,7 +123,9 @@ const PocStellarPage = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-color6">Token price</span>
-                  <span className="font-semibold text-color4">${TOKEN_PRICE_USD.toFixed(2)}</span>
+                  <span className="font-semibold text-color4">
+                    {saleInfo ? `${saleInfo.priceUnits} ${PAY_SYMBOL}` : '—'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-color6">Expected income</span>
@@ -160,38 +163,26 @@ const PocStellarPage = () => {
               )}
             </div>
 
-            {/* YOU SEND - XLM */}
-            <div className="bg-color1 p-4 rounded-xl shadow-sm">
-              <div className="flex justify-between items-center gap-4">
-                <div className="flex-1">
-                  <label className="block text-xs uppercase text-color6 mb-1">You send</label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={xlmAmount}
-                    onChange={(e) => handleXlmChange(e.target.value)}
-                    placeholder="0.0"
-                    className="w-full bg-transparent text-2xl font-semibold text-color4 outline-none"
-                  />
-                </div>
-                <div className="flex items-center gap-2 bg-white rounded-full px-3 py-2">
-                  <StellarIcon size={24} />
-                  <span className="font-semibold text-color4">XLM</span>
-                </div>
+            {isConnected && (
+              <div className="flex items-center justify-between rounded-lg bg-color1 px-3 py-2 text-sm">
+                <span className="text-color6">Your balance</span>
+                <span className="font-medium text-color4">
+                  {fmtBalance(balances?.tres)} {TOKEN_SYMBOL}
+                </span>
               </div>
-            </div>
+            )}
 
-            {/* YOU RECEIVE - TOKEN */}
+            {/* YOU BUY - TOKEN */}
             <div className="bg-color1 p-4 rounded-xl shadow-sm">
               <div className="flex justify-between items-center gap-4">
                 <div className="flex-1">
-                  <label className="block text-xs uppercase text-color6 mb-1">You receive</label>
+                  <label className="block text-xs uppercase text-color6 mb-1">You buy</label>
                   <input
                     type="text"
                     inputMode="decimal"
                     value={tokenAmount}
-                    onChange={(e) => handleTokenChange(e.target.value)}
-                    placeholder="0.0"
+                    onChange={(e) => handleAmountChange(e.target.value)}
+                    placeholder="0"
                     className="w-full bg-transparent text-2xl font-semibold text-color4 outline-none"
                   />
                 </div>
@@ -201,22 +192,31 @@ const PocStellarPage = () => {
               </div>
             </div>
 
+            {/* YOU PAY - USDC */}
+            <div className="bg-color1 p-4 rounded-xl shadow-sm">
+              <div className="flex justify-between items-center gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs uppercase text-color6 mb-1">You pay</label>
+                  <p className="w-full text-2xl font-semibold text-color4">{cost > 0 ? cost.toFixed(2) : '0.00'}</p>
+                </div>
+                <div className="flex items-center gap-2 bg-white rounded-full px-3 py-2">
+                  <span className="font-semibold text-color4">{PAY_SYMBOL}</span>
+                </div>
+              </div>
+            </div>
+
             {/* Rate info */}
             <div className="bg-color1 rounded-lg p-3 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-color6">XLM price</span>
+                <span className="text-color6">Price</span>
                 <Badge className="font-medium">
-                  {isXlmLoading ? '...' : xlmToUsd ? `$${xlmToUsd.toFixed(4)}` : 'unavailable'}
+                  {isSaleLoading ? '...' : saleInfo ? `1 ${TOKEN_SYMBOL} = ${saleInfo.priceUnits} ${PAY_SYMBOL}` : '—'}
                 </Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-color6">1 {TOKEN_SYMBOL}</span>
-                <Badge className="font-medium">${TOKEN_PRICE_USD.toFixed(2)}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-color6">Rate</span>
+                <span className="text-color6">Available</span>
                 <Badge className="font-medium">
-                  {tokensPerXlm > 0 ? `1 XLM ≈ ${tokensPerXlm.toFixed(6)} ${TOKEN_SYMBOL}` : '—'}
+                  {isSaleLoading ? '...' : saleInfo ? `${saleInfo.availableUnits} ${TOKEN_SYMBOL}` : '—'}
                 </Badge>
               </div>
             </div>
@@ -224,19 +224,30 @@ const PocStellarPage = () => {
             <button
               type="button"
               onClick={handleBuy}
-              disabled={isConnected && (isInvalid || isXlmLoading)}
+              disabled={!isStellarConfigured || (isConnected && (isInvalid || buy.isPending))}
               className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {!isConnected ? 'Connect Stellar wallet' : isInvalid ? 'Enter an amount' : `Buy ${tokenAmount} ${TOKEN_SYMBOL}`}
+              {buttonLabel}
             </button>
 
-            {purchased && (
+            {buy.isError && (
+              <div className="rounded-xl border border-red-400 bg-red-50 p-4 text-sm text-red-800">
+                <p className="font-semibold">Purchase failed</p>
+                <p className="break-words">{buy.error instanceof Error ? buy.error.message : 'Unknown error'}</p>
+              </div>
+            )}
+
+            {buy.isSuccess && buy.data && (
               <div className="rounded-xl border border-green-500 bg-green-50 p-4 text-sm text-green-800">
-                <p className="font-semibold">Purchase simulated</p>
-                <p>
-                  Sent {purchased.xlm} XLM · received {purchased.tokens} {TOKEN_SYMBOL}
-                </p>
-                <p className="mt-1 text-xs text-green-700">No transaction was broadcast — this is a PoC.</p>
+                <p className="font-semibold">Purchase confirmed</p>
+                <a
+                  href={explorerTxUrl(buy.data)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline break-all"
+                >
+                  View transaction on Stellar Expert
+                </a>
               </div>
             )}
           </section>

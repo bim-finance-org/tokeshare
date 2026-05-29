@@ -27,7 +27,7 @@ const NavBar: React.FC<NavBarProps> = () => {
 
   const classNav =
     pathname === '/'
-      ? 'bg-transparent text-color1 absolute top-0 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50'
+      ? 'bg-transparent text-color1 absolute top-10 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50'
       : 'bg-color3 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50 transition-all duration-300 hover:shadow-lg';
 
   return (

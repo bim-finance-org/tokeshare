@@ -8,6 +8,7 @@ import {
   type ISupportedWallet,
 } from '@creit.tech/stellar-wallets-kit';
 import { getLogger } from '@/lib/logger';
+import { stellarConfig } from '@/config/stellar';
 
 const log = getLogger('stellar');
 
@@ -17,6 +18,7 @@ type StellarContextValue = {
   isConnected: boolean;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
+  signTransaction: (xdr: string) => Promise<string>;
 };
 
 const StellarContext = createContext<StellarContextValue | undefined>(undefined);
@@ -33,7 +35,7 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
     const storedWalletId = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) ?? undefined : undefined;
 
     const kit = new StellarWalletsKit({
-      network: WalletNetwork.PUBLIC,
+      network: stellarConfig.networkPassphrase as WalletNetwork,
       selectedWalletId: storedWalletId,
       modules: allowAllModules(),
     });
@@ -85,6 +87,19 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
     setWalletId(undefined);
   }, []);
 
+  const signTransaction = useCallback(
+    async (xdr: string): Promise<string> => {
+      const kit = kitRef.current;
+      if (!kit || !address) throw new Error('Wallet not connected');
+      const { signedTxXdr } = await kit.signTransaction(xdr, {
+        address,
+        networkPassphrase: stellarConfig.networkPassphrase as WalletNetwork,
+      });
+      return signedTxXdr;
+    },
+    [address],
+  );
+
   const value = useMemo<StellarContextValue>(
     () => ({
       address,
@@ -92,8 +107,9 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
       isConnected: !!address,
       connect,
       disconnect,
+      signTransaction,
     }),
-    [address, walletId, connect, disconnect],
+    [address, walletId, connect, disconnect, signTransaction],
   );
 
   return <StellarContext.Provider value={value}>{children}</StellarContext.Provider>;
