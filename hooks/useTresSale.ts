@@ -6,6 +6,7 @@ import { isStellarConfigured } from '@/config/stellar';
 import {
   buildBuyXdr,
   buildTrustlineXdr,
+  getBalances,
   hasTresTrustline,
   readAvailable,
   readPrice,
@@ -29,6 +30,17 @@ export function useSaleInfo() {
         availableUnits: stroopsToUnits(availableStroops),
       };
     },
+  });
+}
+
+/** Connected wallet's TRES / USDC / XLM balances (classic balances via Horizon). */
+export function useStellarBalances() {
+  const { address } = useStellarAccount();
+  return useQuery({
+    queryKey: ['stellar-balances', address],
+    enabled: !!address,
+    staleTime: 30_000,
+    queryFn: () => getBalances(address!),
   });
 }
 
@@ -61,6 +73,7 @@ export function useBuyTres() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tres-sale-info'] });
+      queryClient.invalidateQueries({ queryKey: ['stellar-balances'] });
     },
   });
 }

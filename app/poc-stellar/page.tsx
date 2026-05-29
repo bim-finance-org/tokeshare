@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useStellarAccount } from '@/context/StellarContext';
-import { useBuyTres, useSaleInfo } from '@/hooks/useTresSale';
+import { useBuyTres, useSaleInfo, useStellarBalances } from '@/hooks/useTresSale';
 import { stellarConfig, isStellarConfigured } from '@/config/stellar';
 import { explorerTxUrl } from '@/lib/stellar';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
@@ -29,9 +29,13 @@ const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-6)}
 const PocStellarPage = () => {
   const { address, isConnected, connect, disconnect } = useStellarAccount();
   const { data: saleInfo, isLoading: isSaleLoading } = useSaleInfo();
+  const { data: balances } = useStellarBalances();
   const buy = useBuyTres();
 
   const [tokenAmount, setTokenAmount] = useState('');
+
+  const fmtBalance = (value?: string) =>
+    parseFloat(value ?? '0').toLocaleString('en-US', { maximumFractionDigits: 2 });
 
   const priceUnits = saleInfo ? parseFloat(saleInfo.priceUnits) : 0;
   const tokenNum = parseFloat(tokenAmount) || 0;
@@ -158,6 +162,15 @@ const PocStellarPage = () => {
                 </button>
               )}
             </div>
+
+            {isConnected && (
+              <div className="flex items-center justify-between rounded-lg bg-color1 px-3 py-2 text-sm">
+                <span className="text-color6">Your balance</span>
+                <span className="font-medium text-color4">
+                  {fmtBalance(balances?.tres)} {TOKEN_SYMBOL}
+                </span>
+              </div>
+            )}
 
             {/* YOU BUY - TOKEN */}
             <div className="bg-color1 p-4 rounded-xl shadow-sm">

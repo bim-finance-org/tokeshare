@@ -82,6 +82,26 @@ export async function buildTrustlineXdr(address: string): Promise<string> {
   return tx.toXDR();
 }
 
+// ---- wallet balances (classic trustline balances via Horizon) -------------
+
+export type WalletBalances = { tres: string; usdc: string; xlm: string };
+
+export async function getBalances(address: string): Promise<WalletBalances> {
+  const res = await fetch(`${horizonUrl}/accounts/${address}`);
+  if (res.status === 404) return { tres: '0', usdc: '0', xlm: '0' }; // unfunded
+  if (!res.ok) throw new Error('failed to load account');
+  const data = await res.json();
+  const balances: Array<{ asset_type: string; asset_code?: string; asset_issuer?: string; balance: string }> =
+    data.balances ?? [];
+  const find = (code: string, issuer: string) =>
+    balances.find((b) => b.asset_code === code && b.asset_issuer === issuer)?.balance ?? '0';
+  return {
+    tres: find(stellarConfig.tres.code, stellarConfig.tres.issuer),
+    usdc: find(stellarConfig.pay.code, stellarConfig.pay.issuer),
+    xlm: balances.find((b) => b.asset_type === 'native')?.balance ?? '0',
+  };
+}
+
 // ---- buy (Soroban invoke) --------------------------------------------------
 
 export async function buildBuyXdr(buyer: string, tresStroops: bigint): Promise<string> {
