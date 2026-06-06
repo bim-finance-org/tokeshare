@@ -52,8 +52,8 @@ const PopularCommoditiesCard: React.FC<PopularCommoditiesCardProps> = ({ commodi
       <Image src={image} alt="House" width={800} height={800} className="object-cover w-hull h-64" />
       <div className="p-3 sm:p-4 flex flex-col flex-grow min-h-[180px]">
         <div>
-          <h3 className="font-semibold text-lg sm:text-xl">{name}</h3>
-          <div className="pt-2">1g {name}</div>
+          <h3 className="font-semibold text-lg sm:text-xl">Tokeshare Gold Gram</h3>
+          <div className="pt-2">1 gram of gold</div>
         </div>
         <div className="flex-grow"></div>
         <div
