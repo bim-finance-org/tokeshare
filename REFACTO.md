@@ -15,35 +15,6 @@ tous à `useZapSwap`.
 
 ---
 
-## 🟠 Important
-
-### Sécurité / backend
-
-- ~~**Rate-limit Redis non atomique** : `INCR` puis `EXPIRE` séparés → clé sans TTL possible.~~
-  ✅ Script Lua (`INCR` + `EXPIRE` + `TTL` en un eval atomique, 1 round-trip).
-- ~~**Fallback rate-limit inefficace en serverless** : éviction par ordre d'insertion.~~ ✅ Éviction
-  par expiration (`evictOne`) : purge des expirés puis drop du soonest-to-expire.
-- ~~**Routes vers APIs payantes sans rate-limit** + cache stampede.~~ ✅ `rateLimit` 60/min/IP sur les
-  8 routes + `singleFlight` (coalescing du miss) → 1 appel amont partagé.
-- ~~**Cache-busting `/api/cmc`** : IDs non normalisés/whitelistés.~~ ✅ Dedupe + whitelist (IDs
-  affichés) + tri + cap → clé de cache stable.
-- ~~**Fuite d'infos dans les erreurs** : `details: error.message` renvoyé au client.~~ ✅ `details`
-  retiré des 8 routes ; erreur loggée côté serveur (logger scopé), message générique au client.
-
----
-
-## 🟡 Perf / précision
-
-- ~~**Précision float→fixed-point** dans `computeTsgWithdrawAmount` : `parseFloat(amount) * 10 ** 9`.~~
-  ✅ Le `× 1e9` s'annulait avec le dénominateur et **dégradait** la précision (intermédiaire > 2^53) ;
-  remplacé par une division directe par `ONCE_DIVISION` (plus juste, pas de bigint car le résultat est
-  un ratio flottant).
-- ~~**Constante troy-ounce définie 3 fois, 2 échelles** ; `computeTgg/TsgWithdrawAmount` identiques.~~
-  ✅ `hooks/goldLikeWithdrawAmount.ts` partagé (TGG + TSG) ; `GRAMS_PER_TROY_OUNCE_SCALED` supprimé,
-  `ONCE_DIVISION` (constants.ts) = source unique.
-
----
-
 ## 🟢 Hygiène
 
 - **Aucun header de sécurité / CSP / `X-Frame-Options`** (dashboard admin embeddable en iframe →
@@ -58,17 +29,15 @@ tous à `useZapSwap`.
 - `isTggFirst` (`Swap.tsx`) pilote désormais tous les tokens → renommer `isTokenFirst`.
 - ~~`SwapQuoteParams` déclaré deux fois (`Swap.tsx:26` + `useSwapQuote.ts:22`).~~ ✅ Centralisé dans
   `hooks/swapQuote/types.ts`, importé partout.
-- `lib/snapshot.ts` : en-tête `// scripts/snapshot.ts` erroné, `ERC20_ABI` redéfini inline, RPC
-  hardcodé `base.publicnode.com`, adresses dupliquées.
+- ~~`lib/snapshot.ts` : en-tête erroné, `ERC20_ABI` inline, RPC hardcodé, adresses dupliquées.~~
+  ✅ En-tête corrigé ; réutilise `ERC20_ABI` partagé, `PUBLIC_CLIENTS[Base]` (fallback + multicall)
+  et `ADDRESSES.Base.TFT_001`.
 - 4 casts `as Abi` résiduels (`useContracts.ts:35,57`, `useZapSwap.ts:142,147`) → `@wagmi/cli`.
+  **Reste** : mise en place d'outillage (dev-dep + codegen), à traiter séparément.
 
 ### Accessibilité / i18n / micro-copy
 
-- `components/shared/TokenInput.tsx:22-31` : label non associé à l'`<input>` (pas de
-  `htmlFor`/`aria-label`) ; bouton switch de direction (`Swap.tsx:210`) sans `aria-label`.
 - `components/shared/CryptoBalance.tsx:25` : « Balance: 0 » quand déconnecté (trompeur) → « — ».
-- i18n FR/EN mélangé côté admin : `components/features/dashboard/DistributeFromWallet.tsx:57,79,126`,
-  `app/dashboard/DashboardLogin.tsx:55`.
 - `app/marketplace/other/page.tsx:8` : « Invest in **others** assets » → « other assets » ; page au
   pluriel mais une seule carte.
 - `components/features/user/dashboard/AssetCard.tsx:29` : `href={… ?? '#'}` (lien mort si pas d'URL).
@@ -93,9 +62,9 @@ tous à `useZapSwap`.
 | 10  | Source unique pour les adresses de contrats                              | 🟠       | ✅     | `contracts/addresses.ts` = registre unique (par chaîne) ; `contracts.ts` + `TOKENS` dérivent ; vérifié value-preserving vs git HEAD ; corrige le mislabel TFT (Polygon→Base)                                                                                               |
 | 11  | Skeleton/loader cohérents + états prix/quote indisponibles               | 🟠       | ⏳     | `ExchangeSkeleton`, `Exchange`, `Swap`                                                                                                                                                                                                                                     |
 | 12  | Précision `parseUnits` + constante troy-ounce partagée                   | 🟡       | ✅     | `goldLikeWithdrawAmount` partagé (division directe par `ONCE_DIVISION`, précision corrigée) ; scaled 1e9 supprimé                                                                                                                                                          |
-| 13  | Headers de sécurité / CSP / X-Frame-Options                              | 🟢       | ⏳     | `next.config.ts` ou `middleware.ts`                                                                                                                                                                                                                                        |
+| 13  | Headers de sécurité / CSP / X-Frame-Options                              | 🟢       | 🟡     | Headers ajoutés (`next.config.ts`) ; CSP resource complet (allowlist wallet/RPC) reste à faire                                                                                                                                                                             |
 | 14  | A11y (labels, aria) + i18n EN + micro-copy                               | 🟢       | ⏳     | `TokenInput`, `DistributeFromWallet`, etc.                                                                                                                                                                                                                                 |
 | 15  | Socle de tests (compute\*WithdrawAmount, schémas Zod, ratelimit)         | 🟠       | ⏳     | aucun test aujourd'hui                                                                                                                                                                                                                                                     |
-| 16  | Nettoyage : `@wagmi/cli`, aggregators dupliqués, scories `snapshot.ts`   | 🟢       | ⏳     | dette basse                                                                                                                                                                                                                                                                |
+| 16  | Nettoyage : `@wagmi/cli`, aggregators dupliqués, scories `snapshot.ts`   | 🟢       | 🟡     | Aggregators dédupliqués + `snapshot.ts` nettoyé + `isTggFirst`→`isTokenFirst` + Prisma Emails + snapshot lock ; **reste** `@wagmi/cli`                                                                                                                                      |
 
 Légende : ✅ done · 🟡 partiel · ⏳ à faire
