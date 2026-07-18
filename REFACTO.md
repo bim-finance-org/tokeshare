@@ -44,9 +44,11 @@ tous à `useZapSwap`.
   `onClick`/`Link` → impression de site cassé.~~ ✅ Remplacé par une ancre `<a href="#properties">`
   qui défile vers la grille (`id="properties"` + `scroll-mt-24`), sans quitter le Server Component.
 
-- **Portfolio : aucun état « wallet non connecté ».** `app/user/dashboard/page.tsx` +
+- ~~**Portfolio : aucun état « wallet non connecté ».** `app/user/dashboard/page.tsx` +
   `hooks/useUserTokenAssets.ts:119` : query désactivée sans `address` → affiche « No assets found »
-  au lieu de « Connectez votre wallet ». **Fix** : détecter `!address` + `<ConnectButton />`.
+  au lieu de « Connectez votre wallet ».~~ ✅ La page détecte `!isConnected` (`useAccount`) et affiche
+  « Connect your wallet to see your portfolio. » + `<ConnectButton />` ; la valeur totale (« $0 »
+  trompeur) est masquée tant que le wallet n'est pas connecté.
 
 ### Sécurité
 
