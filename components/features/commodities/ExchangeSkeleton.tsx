@@ -1,4 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import SwapFormSkeleton from './SwapFormSkeleton';
 
 export default function ExchangeSkeleton() {
   return (
@@ -8,12 +9,7 @@ export default function ExchangeSkeleton() {
         <Skeleton className="flex-1 h-10 sm:h-12 rounded-none" />
       </div>
 
-      <div className="p-3 sm:p-6 w-full space-y-4">
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-10 w-10 mx-auto rounded-full" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-12 w-full rounded-lg" />
-      </div>
+      <SwapFormSkeleton />
     </div>
   );
 }
