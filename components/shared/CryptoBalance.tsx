@@ -14,15 +14,13 @@ const CryptoBalance = ({ currency, blockchain }: { currency: string; blockchain:
     return numBalance.toFixed(4).replace(/\.?0+$/, ''); // Supprime les zéros inutiles
   };
 
+  // Nothing to show until a wallet is connected.
+  if (!isConnected) return null;
+
   return (
     <div className="flex gap-1 sm:gap-2 whitespace-nowrap">
-      {isConnected && (
-        <>
-          <p className="text-color4 text-xs sm:text-sm font-medium">Balance:</p>
-          <p className="text-color4 text-xs sm:text-sm font-medium">{formatBalance(balance)}</p>
-        </>
-      )}
-      {!isConnected && <p className="text-color4 text-xs sm:text-sm font-medium">Balance: —</p>}
+      <p className="text-color4 text-xs sm:text-sm font-medium">Balance:</p>
+      <p className="text-color4 text-xs sm:text-sm font-medium">{formatBalance(balance)}</p>
     </div>
   );
 };
