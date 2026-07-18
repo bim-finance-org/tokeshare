@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
+import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { singleFlight } from '@/lib/singleFlight';
 
 const CACHE_KEY_CMC20_CONSTITUENTS = 'cmc20:constituents';
 const CACHE_EXPIRATION_SECONDS = 3600; // 1 hour cache (constituents don't change often)
@@ -54,8 +56,11 @@ async function getCachedOrFetch<Data>(
       age: Math.round((now - cached.timestamp) / MS_PER_SECOND),
     };
   }
-  const freshData = await fetcher();
-  await setCache(key, freshData, expiration);
+  const freshData = await singleFlight(key, async () => {
+    const fresh = await fetcher();
+    await setCache(key, fresh, expiration);
+    return fresh;
+  });
   return {
     data: freshData,
     source: 'coinmarketcap-api',
@@ -104,7 +109,12 @@ async function fetchCmc20Constituents(): Promise<CachedConstituents> {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const limit = await rateLimit(request, { key: 'api:cmc20-constituents', limit: 60, windowSec: 60 });
+  if (!limit.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: rateLimitHeaders(limit) });
+  }
+
   try {
     const { data, source, cachedAt, age } = await getCachedOrFetch<CachedConstituents>(
       CACHE_KEY_CMC20_CONSTITUENTS,

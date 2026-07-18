@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
+import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { singleFlight } from '@/lib/singleFlight';
 
 const CACHE_KEY_CMC20_PRICE = 'cmc20:price';
 const CACHE_EXPIRATION_SECONDS = 60;
@@ -30,8 +32,11 @@ async function getCachedOrFetch<Data>(
       age: Math.round((now - cached.timestamp) / MS_PER_SECOND),
     };
   }
-  const freshData = await fetcher();
-  await setCache(key, freshData, expiration);
+  const freshData = await singleFlight(key, async () => {
+    const fresh = await fetcher();
+    await setCache(key, fresh, expiration);
+    return fresh;
+  });
   return {
     data: freshData,
     source: 'coinmarketcap-api',
@@ -73,7 +78,12 @@ async function fetchCmc20Price(): Promise<CachedPrice> {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const limit = await rateLimit(request, { key: 'api:cmc20-price', limit: 60, windowSec: 60 });
+  if (!limit.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: rateLimitHeaders(limit) });
+  }
+
   try {
     const { data, source, cachedAt, age } = await getCachedOrFetch<CachedPrice>(
       CACHE_KEY_CMC20_PRICE,

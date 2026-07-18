@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
+import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { singleFlight } from '@/lib/singleFlight';
 import { Period } from '@/enums/Period';
 
 // CoinGecko id du XAGM (Matrixdock Silver), le sous-jacent du TSG.
@@ -49,8 +51,11 @@ async function getCachedOrFetch<Data>(
   if (cached) {
     return { data: cached, source: 'redis-cache' };
   }
-  const freshData = await fetcher();
-  await setCache(key, freshData, expiration);
+  const freshData = await singleFlight(key, async () => {
+    const fresh = await fetcher();
+    await setCache(key, fresh, expiration);
+    return fresh;
+  });
   return { data: freshData, source: 'coingecko-api' };
 }
 
@@ -80,6 +85,11 @@ function buildPerformanceResult(prices: [number, number][], period: string) {
 }
 
 export async function GET(request: NextRequest) {
+  const limit = await rateLimit(request, { key: 'api:xagm-perf', limit: 60, windowSec: 60 });
+  if (!limit.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: rateLimitHeaders(limit) });
+  }
+
   try {
     const period = extractPeriode(request);
     if (!period) {
