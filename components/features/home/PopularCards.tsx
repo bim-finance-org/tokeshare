@@ -1,41 +1,26 @@
 import React from 'react';
-
-import ArrowLongLineIcon from '../../icons/arrows/ArrowLongLineIcon';
-
-import PopularCommoditiesCard from './PopularCommoditiesCard';
 import PopularTFTCard from './PopularTFTCard';
-import PopularTMCCard from './PopularTMCCard';
-import PopularTSP500Card from './PopularTSP500Card';
+import CommoditiesCard from '@/components/features/commodities/CommoditiesCard';
+import TMCCard from '@/components/features/tmc/TMCCard';
+import TSP500Card from '@/components/features/tsp500/TSP500Card';
+import commoditiesData from '@/data/commoditiesData.json';
 
-import commoditiesData from '../../../data/commoditiesData.json';
-
-const PopularHouses: React.FC = () => {
+const PopularCards: React.FC = () => {
   return (
-    <div className="px-4 sm:px-10 lg:px-24 relative py-8 sm:py-10">
-      <div className="flex items-center mb-4">
-        <div className="w-10 sm:w-12 h-1 bg-color4 mr-2"></div>
-        <h3 className=" text-2xl sm:text-3xl text-color4">POPULAR</h3>
-      </div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h4 className=" text-xl sm:text-2xl text-color4">Our Popular Assets</h4>
-        <div className="flex items-center space-x-2 mt-3 sm:mt-0">
-          {/* <a href="/explore-all" className="flex items-center hover:scale-105 transition-transform duration-300"> */}
-          <button type="button" className="text-lg sm:text-2xl text-color4">Explore All</button>
-          <div className="relative pr-4">
-            <ArrowLongLineIcon size={96} className="px-2" />
-          </div>
-          {/* </a> */}
-        </div>
+    <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+      <div className="mb-6">
+        <span className="text-xs font-semibold uppercase tracking-[0.15em] text-color2">Popular</span>
+        <h2 className="mt-1 font-titleSemibold text-2xl text-color4 sm:text-3xl">Our popular assets</h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 min-[1200px]:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 min-[1200px]:grid-cols-4">
         <PopularTFTCard />
-        <PopularCommoditiesCard key={2} commodity={commoditiesData[0]} />
-        <PopularTMCCard />
-        <PopularTSP500Card />
+        <CommoditiesCard commodity={commoditiesData[0]} />
+        <TMCCard />
+        <TSP500Card />
       </div>
-    </div>
+    </section>
   );
 };
 
-export default PopularHouses;
+export default PopularCards;

@@ -81,7 +81,7 @@ const AssetCard = ({ name, image, price, isLoading, perfs, href, ctaSymbol, imag
           </span>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className={`mt-3 grid gap-2 ${perfs.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
           {perfs.map((perf) => (
             <PerfTile key={perf.label} label={perf.label} value={perf.value} />
           ))}
