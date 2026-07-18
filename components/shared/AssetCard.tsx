@@ -43,6 +43,8 @@ const PerfTile = ({ label, value }: PerfStat) => {
 
 const AssetCard = ({ name, image, price, isLoading, perfs, href, ctaSymbol, imagePriority }: AssetCardProps) => {
   const tradable = Boolean(href);
+  // Shrink the title for long names so it stays on a single line.
+  const nameSize = name.length > 20 ? 'text-sm' : name.length > 15 ? 'text-lg' : 'text-xl';
 
   return (
     <div className="mx-auto flex h-full w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-black/5">
@@ -67,7 +69,9 @@ const AssetCard = ({ name, image, price, isLoading, perfs, href, ctaSymbol, imag
           {tradable ? 'Live' : 'Soon'}
         </span>
 
-        <h3 className="absolute bottom-3 left-4 right-4 truncate font-titleSemibold text-xl text-white drop-shadow">
+        <h3
+          className={`absolute bottom-3 left-4 right-4 truncate font-titleSemibold leading-tight text-white drop-shadow ${nameSize}`}
+        >
           {name}
         </h3>
       </div>
