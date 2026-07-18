@@ -22,7 +22,7 @@ const CryptoBalance = ({ currency, blockchain }: { currency: string; blockchain:
           <p className="text-color4 text-xs sm:text-sm font-medium">{formatBalance(balance)}</p>
         </>
       )}
-      {!isConnected && <p className="text-color4 text-xs sm:text-sm font-medium">Balance: 0</p>}
+      {!isConnected && <p className="text-color4 text-xs sm:text-sm font-medium">Balance: —</p>}
     </div>
   );
 };

@@ -5,7 +5,7 @@ const page = () => {
   return (
     <div>
       <div className="px-6 md:px-32 bg-color7 pb-20 h-96">
-        <h1 className="text-color6 text-3xl sm:text-4xl py-8 sm:py-12">Invest in others assets</h1>
+        <h1 className="text-color6 text-3xl sm:text-4xl py-8 sm:py-12">Invest in other assets</h1>
         <div className="text-color3 text-lg sm:text-2xl space-y-4 text-justify ">
           <p>With Tokeshare, discover a new way to access unique investment opportunities in Latin America.</p>
           <p>Thanks to tokenization, we offer you the opportunity to become a co-owner of a diverse range of assets.</p>
