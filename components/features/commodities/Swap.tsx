@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import TradeWidget from '@/components/shared/TradeWidget';
+import TradeWidget, { type TokenSelectorConfig } from '@/components/shared/TradeWidget';
+import TokenSelector from '@/components/shared/TokenSelector';
 import Image from 'next/image';
 import Blockchains from '@/components/shared/Blockchains';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
@@ -52,6 +53,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   const [inputAmount, setInputAmount] = useState('10');
   const [isTokenFirst, setIsTokenFirst] = useState(false);
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
+  // Which widget (if any) asked to open the token list. Lifted here so the
+  // picker renders at the card level and covers the whole swap body.
+  const [tokenPicker, setTokenPicker] = useState<TokenSelectorConfig | null>(null);
 
   const { isConnected, address } = useAccount();
 
@@ -267,7 +271,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
       </div>
 
       <div className="flex flex-col gap-4 sm:gap-6 relative">
-        <TradeWidget {...topWidgetProps} />
+        <TradeWidget {...topWidgetProps} onOpenSelector={setTokenPicker} />
 
         <div className="z-10 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <button
@@ -282,7 +286,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           </button>
         </div>
 
-        <TradeWidget {...bottomWidgetProps} />
+        <TradeWidget {...bottomWidgetProps} onOpenSelector={setTokenPicker} />
       </div>
 
       <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-3 sm:space-y-4">
@@ -418,6 +422,22 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           <ConnectButton />
         )}
       </div>
+
+      {/* Token picker: rendered at the card root so it fills the whole swap body
+          (widgets + info panel + Swap button), not just a single widget. */}
+      {tokenPicker && (
+        <TokenSelector
+          isOpen
+          type={tokenPicker.type}
+          blockchain={tokenPicker.blockchain}
+          selected={tokenPicker.selected}
+          onSelect={(token) => {
+            tokenPicker.onSelect(token);
+            setTokenPicker(null);
+          }}
+          onClose={() => setTokenPicker(null)}
+        />
+      )}
     </div>
   );
 };

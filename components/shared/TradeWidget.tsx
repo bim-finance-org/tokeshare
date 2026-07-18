@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import TokenInput from './TokenInput';
-import TokenSelector from './TokenSelector';
 import TokenDisplay from '@/components/shared/TokenDisplay';
 import CryptoBalance from './CryptoBalance';
 import MaxButton from './MaxButton';
 import { Blockchain } from '@/enums/Blockchain';
+
+export interface TokenSelectorConfig {
+  type: 'fiat' | 'crypto' | 'stablecoin';
+  blockchain: Blockchain;
+  selected: string;
+  onSelect: (token: string) => void;
+}
 
 interface TradeWidgetProps {
   type: 'fiat' | 'crypto' | 'stablecoin';
@@ -17,6 +23,10 @@ interface TradeWidgetProps {
   showBalance?: boolean;
   readOnly?: boolean;
   lockedToken?: boolean;
+  // Opening the token list is delegated to the parent so the picker can render
+  // at the swap-card level and cover the whole body (widgets + info + CTA)
+  // instead of being trapped inside this widget's box.
+  onOpenSelector: (config: TokenSelectorConfig) => void;
 }
 
 const TradeWidget = ({
@@ -30,22 +40,14 @@ const TradeWidget = ({
   showBalance = false,
   readOnly = false,
   lockedToken = false,
+  onOpenSelector,
 }: TradeWidgetProps) => {
-  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
-
-  // The selected token is fully controlled by the parent via `defaultToken`;
-  // there is no local state mirroring it. (Previously a useEffect copied
-  // defaultToken into local state on every prop change.)
+  // The selected token is fully controlled by the parent via `defaultToken`.
   const selectedToken = defaultToken || 'USDC';
 
   // Vérifie si le token est un crypto token fixe (non-stablecoin)
   const isTGG =
     selectedToken === 'TGG' || selectedToken === 'TSG' || selectedToken === 'TFT_001' || selectedToken === 'TMC';
-
-  const handleTokenSelect = (token: string) => {
-    onTokenChange(token);
-    setIsSelectorOpen(false);
-  };
 
   const handleMaxClick = (maxValue: string) => {
     // Formater la valeur max pour enlever les zéros inutiles
@@ -53,6 +55,11 @@ const TradeWidget = ({
     if (!isNaN(numValue)) {
       onValueChange(numValue.toString());
     }
+  };
+
+  const canOpen = !isTGG && !lockedToken;
+  const openSelector = () => {
+    if (canOpen) onOpenSelector({ type, blockchain, selected: selectedToken, onSelect: onTokenChange });
   };
 
   return (
@@ -68,16 +75,6 @@ const TradeWidget = ({
           />
         </div>
 
-        {isSelectorOpen && (
-          <TokenSelector
-            type={type}
-            blockchain={blockchain}
-            onSelect={(token) => handleTokenSelect(token)}
-            isOpen={isSelectorOpen}
-            onClose={() => setIsSelectorOpen(false)}
-          />
-        )}
-
         {/* Bouton MAX - placé entre l'input et l'icône */}
         {!readOnly && showBalance && !(isTGG && type === 'stablecoin') && (
           <div className="flex items-end pb-3">
@@ -86,11 +83,7 @@ const TradeWidget = ({
         )}
 
         <div className="flex flex-col items-end gap-1 sm:gap-2 flex-shrink-0">
-          <TokenDisplay
-            token={selectedToken}
-            isOpenable={!isTGG && !lockedToken}
-            onTokenClick={() => !isTGG && !lockedToken && setIsSelectorOpen(true)}
-          />
+          <TokenDisplay token={selectedToken} isOpenable={canOpen} onTokenClick={openSelector} />
           {showBalance && <CryptoBalance currency={selectedToken} blockchain={blockchain} />}
         </div>
       </div>

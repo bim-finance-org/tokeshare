@@ -1,4 +1,5 @@
 import React from 'react';
+import { Check } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import { useAllTokenBalances } from '@/utils/blockchainUtils';
 import { Blockchain } from '@/enums/Blockchain';
@@ -9,9 +10,13 @@ import { TokenInfo } from '@/config/token';
 interface StableCoinsProps {
   onSelect: (currency: string) => void;
   blockchain: Blockchain | null;
+  query?: string;
+  selected?: string;
 }
 
-const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
+const label = (symbol: string) => (symbol === 'USDCE' ? 'USDC.e' : symbol);
+
+const StableCoins = ({ onSelect, blockchain, query = '', selected }: StableCoinsProps) => {
   const { isConnected } = useAccount();
   const { balances, isLoading, error } = useAllTokenBalances(blockchain);
 
@@ -20,38 +25,52 @@ const StableCoins = ({ onSelect, blockchain }: StableCoinsProps) => {
   }
 
   const stablecoins = getTokensByTypeAndByBlockchain(blockchain, TokenType.Stablecoin);
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? stablecoins.filter((t) => label(t.symbol).toLowerCase().includes(q) || t.name.toLowerCase().includes(q))
+    : stablecoins;
 
   const renderStablecoinButton = (token: TokenInfo) => {
-    const { symbol } = token;
+    const { symbol, name } = token;
     const Icon = token.icon;
     const balance = balances[symbol]?.formatted || '0';
+    const isSelected = selected === symbol;
 
     return (
-      <button type="button"
+      <button
+        type="button"
         key={symbol}
-        onClick={() => {
-          onSelect(symbol);
-        }}
-        className="flex items-center justify-between w-full p-2 hover:bg-gray-200 rounded-lg transition-colors border-b border-gray-200"
+        onClick={() => onSelect(symbol)}
+        className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+          isSelected ? 'bg-color1' : 'hover:bg-gray-50'
+        }`}
       >
-        <div className="flex items-center gap-3">
-          {Icon && <Icon />}
-          <span className="text-color4 font-medium">{symbol === 'USDCE' ? 'USDC.e' : symbol}</span>
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center">{Icon && <Icon />}</span>
+          <div className="flex min-w-0 flex-col items-start">
+            <span className="font-semibold leading-tight text-color4">{label(symbol)}</span>
+            <span className="max-w-[160px] truncate text-xs text-gray-400">{name}</span>
+          </div>
         </div>
 
-        {isConnected && (
-          <span className="text-sm text-color4 font-medium">Balance: {isLoading ? 'Loading...' : balance}</span>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {isConnected && (
+            <span className="text-sm font-medium tabular-nums text-color4">{isLoading ? '…' : balance}</span>
+          )}
+          {isSelected && <Check className="h-4 w-4 text-color2" />}
+        </div>
       </button>
     );
   };
 
   return (
-    <div>
-      <h1 className="text-2xl text-color2 font-bold border-b-2 border-color2 pb-2">Select a Stablecoin</h1>
-      <h2 className="text-lg text-color2 font-bold mt-4 mb-2">Available on {blockchain}</h2>
-      {error && <div className="text-red-500 text-sm mb-2">Erreur: {error.toString()}</div>}
-      <div className="flex flex-col gap-1 min-w-[200px]">{stablecoins.map(renderStablecoinButton)}</div>
+    <div className="flex flex-col gap-0.5">
+      {error && <div className="mb-2 px-3 text-sm text-red-500">Error: {error.toString()}</div>}
+      {filtered.length === 0 ? (
+        <p className="py-8 text-center text-sm text-gray-400">No token matches your search.</p>
+      ) : (
+        filtered.map(renderStablecoinButton)
+      )}
     </div>
   );
 };
