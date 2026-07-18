@@ -1,6 +1,9 @@
-// scripts/snapshot.ts
-import { createPublicClient, http, formatUnits, parseUnits, parseAbiItem, type AbiEvent, type Address } from 'viem';
-import { base } from 'viem/chains';
+// lib/snapshot.ts — holder snapshot of the TFT token on Base.
+import { formatUnits, parseUnits, parseAbiItem, type AbiEvent, type Address } from 'viem';
+import { PUBLIC_CLIENTS } from '@/lib/clients';
+import { ADDRESSES } from '@/contracts/addresses';
+import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
+import { Blockchain } from '@/enums/Blockchain';
 
 type BalanceRow = { address: Address; balance: bigint };
 
@@ -16,8 +19,7 @@ type FrontRow = FrontRowBase | FrontRowWithUsdc;
 
 type TransferLog = { args: { from: Address; to: Address; value: bigint } };
 
-const RPC = 'https://base.publicnode.com';
-const TFT_001: Address = '0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26';
+const TFT_001 = ADDRESSES[Blockchain.Base].TFT_001 as Address;
 const FROM_BLOCK: bigint = 33201495n;
 const SNAPSHOT_BLOCK: bigint | null = null; // null => latest
 
@@ -28,15 +30,10 @@ const EXCLUDE = new Set<Address>([MARKETPLACE_OLD, MARKETPLACE_NEW]);
 const PERCENT_DECIMALS = 4;
 const FIXED_TOTAL_SUPPLY_TOKENS = '1000';
 
-const ERC20_ABI = [
-  { type: 'function', name: 'balanceOf', stateMutability: 'view', inputs: [{ type: 'address' }], outputs: [{ type: 'uint256' }] },
-  { type: 'function', name: 'decimals', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint8' }] },
-] as const;
-
 const TRANSFER_EVENT = parseAbiItem('event Transfer(address indexed from, address indexed to, uint256 value)');
 const ZERO_ADDR: Address = '0x0000000000000000000000000000000000000000';
 
-const publicClient = createPublicClient({ chain: base, transport: http(RPC) });
+const publicClient = PUBLIC_CLIENTS[Blockchain.Base];
 
 /** --- Utils: simple promise pool for concurrency control --- */
 async function mapPool<T, R>(items: T[], limit: number, worker: (t: T, i: number) => Promise<R>): Promise<R[]> {
