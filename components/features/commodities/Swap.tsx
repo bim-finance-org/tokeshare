@@ -261,12 +261,24 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   return (
     <div className="p-3 sm:p-6 w-full relative">
+      <div className="flex items-center justify-between mb-4 sm:mb-5">
+        <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-gray-400">Network</span>
+        <Blockchains section={ExchangeSection.Swap} onSelect={handleBlockchainSelect} tokenSymbol={token.symbol} />
+      </div>
+
       <div className="flex flex-col gap-4 sm:gap-6 relative">
         <TradeWidget {...topWidgetProps} />
 
-        <div className="z-10 pt-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <button type="button" onClick={handleSwap} className="relative w-10 h-10 sm:w-[60px] sm:h-[60px] hover:scale-110 active:scale-95 transition-transform duration-200">
-            <Image src="/images/switch.png" alt="Swap" fill className="object-contain" />
+        <div className="z-10 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <button
+            type="button"
+            onClick={handleSwap}
+            aria-label="Switch direction"
+            className="flex items-center justify-center w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white ring-1 ring-black/10 shadow-md hover:scale-110 hover:rotate-180 active:scale-95 transition-transform duration-300"
+          >
+            <span className="relative w-5 h-5 sm:w-7 sm:h-7">
+              <Image src="/images/switch.png" alt="Swap" fill className="object-contain" />
+            </span>
           </button>
         </div>
 
@@ -274,11 +286,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
       </div>
 
       <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-        <Blockchains section={ExchangeSection.Swap} onSelect={handleBlockchainSelect} tokenSymbol={token.symbol} />
-
         {/* État de la transaction */}
         {showPreparingAlert && (
-          <Alert className="bg-color1">
+          <Alert className="bg-color1 border-black/5 rounded-xl text-color4">
             <Loader2 className="h-4 w-4 animate-spin" />
             <AlertTitle>Preparing Swap</AlertTitle>
             <AlertDescription>
@@ -288,7 +298,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         )}
 
         {isPending && (
-          <Alert className="bg-color1">
+          <Alert className="bg-color1 border-black/5 rounded-xl text-color4">
             <Loader2 className="h-4 w-4 animate-spin" />
             <AlertTitle>Transaction Processing</AlertTitle>
             <AlertDescription>Your transaction is being processed. Please wait...</AlertDescription>
@@ -296,7 +306,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         )}
 
         {isConnected && !isOnCorrectChain && (
-          <Alert className="bg-amber-500">
+          <Alert className="bg-amber-50 border-amber-200 text-amber-900 rounded-xl [&>svg]:text-amber-600">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Wrong Network</AlertTitle>
             <AlertDescription className="flex flex-col gap-2">
@@ -319,7 +329,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         )}
 
         {priceUnavailable && (
-          <Alert className="bg-amber-500">
+          <Alert className="bg-amber-50 border-amber-200 text-amber-900 rounded-xl [&>svg]:text-amber-600">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Price unavailable</AlertTitle>
             <AlertDescription className="flex flex-col gap-2">
@@ -336,44 +346,46 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         )}
 
         {/* Informations sur les prix */}
-        <div className="bg-color1 rounded-lg p-3 space-y-2 ">
+        <div className="bg-color1 rounded-2xl px-3.5 py-3 space-y-2.5 ring-1 ring-inset ring-black/5">
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
-            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">Instant</Badge>
+            <span className="text-gray-500 text-xs sm:text-sm font-medium">Delivery time</span>
+            <span className="inline-flex items-center gap-1.5 text-color4 text-xs sm:text-sm font-semibold">
+              <span className="h-1.5 w-1.5 rounded-full bg-color3" />
+              Instant
+            </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">{token.symbol} Price:</span>
+            <span className="text-gray-500 text-xs sm:text-sm font-medium">{token.symbol} Price</span>
             {isPriceLoading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <Skeleton className="h-4 w-16" />
               </div>
             ) : (
-              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tokenPrice?.toFixed(2)}</Badge>
+              <span className="text-color4 text-xs sm:text-sm font-semibold tabular-nums">${tokenPrice?.toFixed(2)}</span>
             )}
           </div>
 
-          <div className="flex items-center justify-between ">
-            <span className="text-color4 text-xs sm:text-sm font-medium">Exchange rate:</span>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-500 text-xs sm:text-sm font-medium">Exchange rate</span>
             {isPriceLoading || isLoadingQuote ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <Skeleton className="h-4 w-20" />
               </div>
             ) : (
-              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">{exchangeRateInfo()}</Badge>
+              <span className="text-color4 text-xs sm:text-sm font-semibold tabular-nums">{exchangeRateInfo()}</span>
             )}
           </div>
 
           {/* Afficher les erreurs de quote si il y en a */}
           {quoteError && (
-            <div className="flex items-center justify-between">
-              <span className="text-color4 text-xs sm:text-sm font-medium">Quote status:</span>
+            <div className="flex items-center justify-between pt-1 border-t border-black/5">
+              <span className="text-gray-500 text-xs sm:text-sm font-medium">Quote status</span>
               <Badge variant="destructive">Error loading quote</Badge>
             </div>
           )}
-
         </div>
       </div>
 
@@ -381,8 +393,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         {isConnected ? (
           <button type="button"
             onClick={swaping}
-            className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
-              canSwap ? 'bg-color4 text-white hover:bg-opacity-90' : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+            className={`w-full py-3 sm:py-3.5 rounded-2xl font-titleSemibold tracking-wide transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
+              canSwap
+                ? 'bg-color4 text-white shadow-md hover:bg-color2 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
             disabled={!canSwap}
           >

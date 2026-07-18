@@ -19,7 +19,7 @@ const TokenInput = ({ label, value, onChange, placeholder, disabled = false }: T
 
   return (
     <div className="w-26 sm:w-40">
-      <p className="text-color4 text-sm sm:text-lg font-medium">{label}</p>
+      <p className="text-gray-400 text-[11px] sm:text-xs font-semibold uppercase tracking-wider mb-0.5">{label}</p>
       <input
         type="text"
         value={value}
@@ -28,7 +28,7 @@ const TokenInput = ({ label, value, onChange, placeholder, disabled = false }: T
         placeholder={placeholder}
         inputMode="decimal"
         maxLength={12}
-        className="bg-transparent text-2xl text-color4 font-medium outline-none w-full px-2 py-1 transition-all duration-200"
+        className="bg-transparent text-2xl sm:text-3xl text-color4 font-titleSemibold outline-none w-full py-1 transition-all duration-200 placeholder:text-gray-300 disabled:cursor-default"
       />
     </div>
   );

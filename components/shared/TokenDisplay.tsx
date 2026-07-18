@@ -28,7 +28,12 @@ const TokenDisplay = ({
   onTokenClick: () => void;
 }) => {
   return (
-    <div className="flex items-center gap-1 sm:gap-2 border border-color4 rounded-lg p-1.5 sm:p-2 cursor-pointer" onClick={onTokenClick}>
+    <div
+      className={`flex items-center gap-1.5 sm:gap-2 bg-white ring-1 ring-inset ring-black/5 shadow-sm rounded-xl px-2 py-1.5 sm:px-2.5 sm:py-2 transition duration-200 ${
+        isOpenable ? 'cursor-pointer hover:ring-black/20 hover:shadow' : 'cursor-default'
+      }`}
+      onClick={onTokenClick}
+    >
       {token === 'EUR' && <EURIcon />}
       {token === 'TGG' && <TGGIcon />}
       {token === 'TSG' && <TSGIcon />}
@@ -47,8 +52,8 @@ const TokenDisplay = ({
       {token === 'USDCE' && <USDCEIcon />}
       {token === 'USDS' && <USDSIcon />}
       {token === 'TMC' && <TMCIcon />}
-      <span className="font-medium text-color4 text-sm sm:text-base">{token}</span>
-      {isOpenable && <ArrowDownIcon strokeColor="#4F5B76" className="w-10 h-4" />}
+      <span className="font-titleSemibold text-color4 text-sm sm:text-base">{token}</span>
+      {isOpenable && <ArrowDownIcon strokeColor="#4F5B76" className="w-4 h-4" />}
     </div>
   );
 };

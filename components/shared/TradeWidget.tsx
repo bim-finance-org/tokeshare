@@ -56,7 +56,7 @@ const TradeWidget = ({
   };
 
   return (
-    <div className="bg-color1 p-3 sm:p-4 rounded-xl shadow-md">
+    <div className="bg-color1 p-3.5 sm:p-4 rounded-2xl ring-1 ring-inset ring-black/5 transition duration-200 hover:ring-black/10 focus-within:ring-2 focus-within:ring-blue-400">
       <div className="flex justify-between items-center gap-2 sm:gap-4">
         <div>
           <TokenInput
