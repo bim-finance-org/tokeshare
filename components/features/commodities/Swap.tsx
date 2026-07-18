@@ -137,6 +137,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           tokenSymbol: token.symbol,
           stablecoin,
           amount: tokenAmount,
+          // Buy: spend exactly the stablecoin amount the user typed (top widget),
+          // not a value re-derived from the quoted token amount × spot price.
+          stablecoinAmount: inputAmount,
           blockchain: selectedBlockchain,
           walletAddress: address as Address,
         });

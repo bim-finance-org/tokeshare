@@ -53,22 +53,29 @@ export function useZapSwapHandler({
 
   return useMemo<TokenSwapHandler>(
     () => ({
-      swapIn: async ({ stablecoin, amount, blockchain, walletAddress }) => {
+      swapIn: async ({ stablecoin, amount, stablecoinAmount, blockchain, walletAddress }) => {
         const inputToken = getTokenAddress(stablecoin, blockchain);
         if (!inputToken) throw new Error('Input token address not found');
-        if (!price) throw new Error('Token price unavailable');
 
         const stableDecimals = getTokenDecimals(stablecoin);
         if (stableDecimals === undefined) throw new Error('Stablecoin decimals unknown');
 
-        const parsedAmount = parseFloat(amount);
-        if (isNaN(parsedAmount)) throw new Error('Invalid amount');
-
-        const stableAmount = parsedAmount * price;
+        // Preferred path: spend exactly the stablecoin amount the user entered.
+        // Fallback (no explicit input): derive it from the token amount and the
+        // spot price — kept for callers that don't pass stablecoinAmount.
+        let stableAmount: string;
+        if (stablecoinAmount != null && stablecoinAmount !== '') {
+          stableAmount = stablecoinAmount;
+        } else {
+          if (!price) throw new Error('Token price unavailable');
+          const parsedAmount = parseFloat(amount);
+          if (isNaN(parsedAmount)) throw new Error('Invalid amount');
+          stableAmount = (parsedAmount * price).toString();
+        }
 
         await swapMint({
           inputToken,
-          inputAmount: stableAmount.toString(),
+          inputAmount: stableAmount,
           outputToken: resolveOutputToken(blockchain),
           routerAddress: router,
           walletAddress,
