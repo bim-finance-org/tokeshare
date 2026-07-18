@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Address } from 'viem';
 import { useSwap } from './useSwap';
+import { useTsgSwap } from './useTsgSwap';
 import { TMC_CMC20_RATIO } from './useTmcSwap';
 import { TSP500_DESPXA_RATIO } from './useTsp500Swap';
-import { BASE_CONTRACTS, getTGGContracts } from '@/contracts/contracts';
+import { BASE_CONTRACTS, getTGGContracts, getTSGContracts } from '@/contracts/contracts';
 import { getTokenDecimals } from '@/utils/tokenUtils';
 import { SwapDirection } from '@/enums/Directions';
 import { Blockchain } from '@/enums/Blockchain';
@@ -108,6 +109,7 @@ export const useSwapQuote = (
   blockchain: Blockchain = Blockchain.Polygon,
 ): SwapQuoteResult => {
   const { getSwapRoute, getConversion } = useSwap();
+  const { getSwapRoute: getSilverRoute, getConversion: getSilverConversion } = useTsgSwap();
 
   const inputAmount = params?.inputAmount || '';
   const { debouncedValue: debouncedAmount, isTyping } = useSmartDebounce(inputAmount, DEBOUNCE_DELAY_MS);
@@ -159,6 +161,58 @@ export const useSwapQuote = (
             tokenIn: contracts.PAXG as Address,
             tokenOut: params.outputToken,
             amountIn: paxgAmountBase,
+            gasInclude: true,
+            slippageTolerance: SLIPPAGE_TOLERANCE,
+          },
+          blockchain,
+        );
+
+        const outputDecimals = getTokenDecimals(params.outputToken);
+        if (outputDecimals == null) throw new Error('Missing decimal');
+        const stablecoinAmount = parseFloat(route.amountOut) / 10 ** outputDecimals;
+        return {
+          outputAmount: stablecoinAmount.toFixed(NUMBER_TO_FIXE_4),
+          exchangeRate: (stablecoinAmount / amount).toFixed(NUMBER_TO_FIXE_6),
+        };
+      }
+
+      if (tokenSymbol === 'TSG') {
+        const contracts = getTSGContracts(blockchain);
+        const xagmDecimals = getTokenDecimals(contracts.XAGM as Address);
+        if (xagmDecimals == null) throw new Error('Missing decimal');
+
+        if (params.direction === SwapDirection.StablecoinToToken) {
+          const inputDecimals = getTokenDecimals(params.inputToken);
+          if (inputDecimals == null) throw new Error('Missing decimal');
+          const amountInBase = BigInt(Math.floor(amount * 10 ** inputDecimals)).toString();
+
+          const route = await getSilverRoute(
+            {
+              tokenIn: params.inputToken,
+              tokenOut: contracts.XAGM as Address,
+              amountIn: amountInBase,
+              gasInclude: true,
+              slippageTolerance: SLIPPAGE_TOLERANCE,
+            },
+            blockchain,
+          );
+
+          const xagmAmount = parseFloat(route.amountOut) / 10 ** xagmDecimals;
+          const tsgAmount = xagmAmount * ONCE_DIVISION;
+          return {
+            outputAmount: tsgAmount.toFixed(NUMBER_TO_FIXE_6),
+            exchangeRate: (tsgAmount / amount).toFixed(NUMBER_TO_FIXE_6),
+          };
+        }
+
+        const xagmAmount = await getSilverConversion({ amount: amount.toString(), blockchain });
+        const xagmAmountBase = BigInt(Math.floor(xagmAmount * 10 ** xagmDecimals)).toString();
+
+        const route = await getSilverRoute(
+          {
+            tokenIn: contracts.XAGM as Address,
+            tokenOut: params.outputToken,
+            amountIn: xagmAmountBase,
             gasInclude: true,
             slippageTolerance: SLIPPAGE_TOLERANCE,
           },

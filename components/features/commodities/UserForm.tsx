@@ -7,6 +7,7 @@ import { useTokenContext } from '@/context/TokenContexts';
 import { generatePayReference } from '@/utils/RandomRefs';
 import { useTGGBalance } from '@/hooks/useTGGBalance';
 import { useTGGTransfer } from '@/hooks/useTGGTransfer';
+import { useTSGTransfer } from '@/hooks/useTSGTransfer';
 import { useTFTTransfer } from '@/hooks/useTFTTransfer';
 import { FEES_COEF, NUMBER_TO_FIXE_2, TFT_001_SELL_FEES_COEF } from '@/constants/constants';
 import { Action } from '@/enums/Actions';
@@ -84,13 +85,15 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
   const [ref, setRef] = useState<string>(() => generatePayReference());
 
   const isTFT = crypto === 'TFT_001';
+  const isTSG = crypto === 'TSG';
 
   const blockchain = type === Action.Sell ? sellBlockchain : buyBlockchain;
   const { formattedBalance, checkSufficientBalance, isLoading: balanceLoading } = useTGGBalance(address, blockchain);
   const tggTransfer = useTGGTransfer();
+  const tsgTransfer = useTSGTransfer();
   const tftTransfer = useTFTTransfer();
 
-  const activeTransfer = isTFT ? tftTransfer : tggTransfer;
+  const activeTransfer = isTFT ? tftTransfer : isTSG ? tsgTransfer : tggTransfer;
   const transferPending = activeTransfer.isPending;
   const transferError = activeTransfer.error;
   const hash = activeTransfer.hash;
@@ -206,6 +209,8 @@ const UserForm = ({ type, amount, currency, crypto, tggAmount, tggPrice, setShow
       } else {
         if (isTFT) {
           tftTransfer.transferTFTToTokeShare(tggAmount);
+        } else if (isTSG) {
+          tsgTransfer.transferTSGToTokeShare(tggAmount, blockchain);
         } else {
           tggTransfer.transferTGGToTokeShare(tggAmount, blockchain);
         }

@@ -4,16 +4,24 @@ import React, { useState, useMemo } from 'react';
 import TradeWidget from '../../../components/shared/TradeWidget';
 import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/shared/Blockchains';
-import { calculateTGGPrice, calculateTMCPrice, calculateTSP500Price, convertTGGToFiat } from '@/utils/priceUtils';
+import {
+  calculateTGGPrice,
+  calculateTSGPrice,
+  calculateTMCPrice,
+  calculateTSP500Price,
+  convertTGGToFiat,
+} from '@/utils/priceUtils';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { useAccount } from 'wagmi';
 import UserForm from './UserForm';
 import { useTokenContext } from '@/context/TokenContexts';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
+import { useXagmPrice } from '@/hooks/useXagmPrice';
 import { useCmc20Price } from '@/hooks/useCmc20Price';
 import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { useTGGBalance } from '@/hooks/useTGGBalance';
+import { useTSGBalance } from '@/hooks/useTSGBalance';
 import { useTFTBalance } from '@/hooks/useTFTBalance';
 import { Address } from 'viem';
 import { TFT_001_PRICE_USD, TFT_001_SELL_FEES_COEF } from '@/constants/constants';
@@ -35,19 +43,23 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   const { isConnected, address } = useAccount();
   // Only the active token's price feed hits the network — the others stay idle.
   const { data: paxgPrice } = usePaxgPrice({ enabled: token.symbol === 'TGG' });
+  const { data: xagmPrice } = useXagmPrice({ enabled: token.symbol === 'TSG' });
   const { data: cmc20Price } = useCmc20Price({ enabled: token.symbol === 'TMC' });
   const { data: despxaPrice } = useDeSPXAPrice({ enabled: token.symbol === 'TSP500' });
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
 
   const isTFT = token.symbol === 'TFT_001';
+  const isTSG = token.symbol === 'TSG';
 
   const { formattedBalance: tggFormattedBalance, checkSufficientBalance: tggCheckBalance, isLoading: isLoadingTGGBalance } =
     useTGGBalance(address as Address, selectedBlockchain);
+  const { formattedBalance: tsgFormattedBalance, checkSufficientBalance: tsgCheckBalance, isLoading: isLoadingTSGBalance } =
+    useTSGBalance(address as Address, selectedBlockchain);
   const { formattedBalance: tftFormattedBalance, checkSufficientBalance: tftCheckBalance, isLoading: isLoadingTFTBalance } =
     useTFTBalance(address as Address);
 
-  const formattedBalance = isTFT ? tftFormattedBalance : tggFormattedBalance;
-  const checkSufficientBalance = isTFT ? tftCheckBalance : tggCheckBalance;
+  const formattedBalance = isTFT ? tftFormattedBalance : isTSG ? tsgFormattedBalance : tggFormattedBalance;
+  const checkSufficientBalance = isTFT ? tftCheckBalance : isTSG ? tsgCheckBalance : tggCheckBalance;
 
   // Derived: token price computed from upstream price feeds.
   // The upstream hooks already refetch on their own interval via TanStack
@@ -55,10 +67,11 @@ const Sell = ({ token }: { token: TokenInfo }) => {
   const tggPrice = useMemo<number>(() => {
     if (isTFT) return TFT_001_PRICE_USD;
     if (token.symbol === 'TGG' && paxgPrice) return calculateTGGPrice(paxgPrice);
+    if (token.symbol === 'TSG' && xagmPrice) return calculateTSGPrice(xagmPrice);
     if (token.symbol === 'TMC' && cmc20Price) return calculateTMCPrice(cmc20Price);
     if (token.symbol === 'TSP500' && despxaPrice) return calculateTSP500Price(despxaPrice);
     return 0;
-  }, [isTFT, token.symbol, paxgPrice, cmc20Price, despxaPrice]);
+  }, [isTFT, token.symbol, paxgPrice, xagmPrice, cmc20Price, despxaPrice]);
 
   // Derived: fiat amount the user will receive, net of fees for TFT.
   const receiveAmount = useMemo(() => {
@@ -78,7 +91,7 @@ const Sell = ({ token }: { token: TokenInfo }) => {
     return fiatValue !== undefined ? fiatValue.toFixed(2) : '0';
   }, [amountToSell, tggPrice, exchangeRates, selectedCurrency, isTFT, isRatesLoading]);
 
-  const isLoadingBalance = isTFT ? isLoadingTFTBalance : isLoadingTGGBalance;
+  const isLoadingBalance = isTFT ? isLoadingTFTBalance : isTSG ? isLoadingTSGBalance : isLoadingTGGBalance;
   const hasInsufficientBalance =
     isConnected && !isLoadingBalance && !!amountToSell && parseFloat(amountToSell) > 0
       ? !checkSufficientBalance(amountToSell).hasSufficient

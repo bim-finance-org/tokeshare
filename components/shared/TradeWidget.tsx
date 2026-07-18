@@ -39,7 +39,8 @@ const TradeWidget = ({
   const selectedToken = defaultToken || 'USDC';
 
   // Vérifie si le token est un crypto token fixe (non-stablecoin)
-  const isTGG = selectedToken === 'TGG' || selectedToken === 'TFT_001' || selectedToken === 'TMC';
+  const isTGG =
+    selectedToken === 'TGG' || selectedToken === 'TSG' || selectedToken === 'TFT_001' || selectedToken === 'TMC';
 
   const handleTokenSelect = (token: string) => {
     onTokenChange(token);

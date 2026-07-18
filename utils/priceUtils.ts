@@ -8,6 +8,14 @@ export const calculateTGGPrice = (paxgPrice: number): number => {
 };
 
 /**
+ * Calcule le prix du TSG basé sur le prix du XAGM (Matrixdock Silver).
+ * 1 XAGM = 1 once troy d'argent, 1 TSG = 1 gramme → division par 31.1034768.
+ */
+export const calculateTSGPrice = (xagmPrice: number): number => {
+  return xagmPrice / 31.1034768;
+};
+
+/**
  * Calcule le prix du TMC basé sur le prix du CMC20
  * 1 TMC = 1/10 CMC20
  */

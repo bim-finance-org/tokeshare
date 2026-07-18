@@ -15,6 +15,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function useCommodityData(name: string) {
   if (name === 'Gold') name = 'paxg';
+  else if (name === 'Silver') name = 'silver';
   else name = '';
 
   const {

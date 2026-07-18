@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
+import { useXagmPrice } from '@/hooks/useXagmPrice';
 import { useCmc20Price } from '@/hooks/useCmc20Price';
 import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
-import { calculateTGGPrice, calculateTMCPrice, calculateTSP500Price } from '@/utils/priceUtils';
+import { calculateTGGPrice, calculateTSGPrice, calculateTMCPrice, calculateTSP500Price } from '@/utils/priceUtils';
 import { useMarketplaceContract } from './useMarketplaceContracts';
 
 export type TokenPriceResult = {
@@ -14,6 +15,14 @@ export function useTGGPrice(enabled = true): TokenPriceResult {
   const { data: paxgPrice, isLoading } = usePaxgPrice({ enabled });
   return {
     price: paxgPrice !== undefined ? calculateTGGPrice(paxgPrice) : null,
+    isLoading,
+  };
+}
+
+export function useTSGPrice(enabled = true): TokenPriceResult {
+  const { data: xagmPrice, isLoading } = useXagmPrice({ enabled });
+  return {
+    price: xagmPrice !== undefined ? calculateTSGPrice(xagmPrice) : null,
     isLoading,
   };
 }
@@ -51,6 +60,7 @@ export function useTokenPrice(symbol: string): TokenPriceResult {
   // Rules-of-hooks forces every price hook to run, but gating their underlying
   // query with `enabled` means only the active symbol's feed hits the network.
   const tgg = useTGGPrice(symbol === 'TGG');
+  const tsg = useTSGPrice(symbol === 'TSG');
   const tmc = useTMCPrice(symbol === 'TMC');
   const tsp500 = useTSP500Price(symbol === 'TSP500');
   const tft = useTFTPrice();
@@ -59,6 +69,8 @@ export function useTokenPrice(symbol: string): TokenPriceResult {
     switch (symbol) {
       case 'TGG':
         return tgg;
+      case 'TSG':
+        return tsg;
       case 'TMC':
         return tmc;
       case 'TSP500':
@@ -68,5 +80,5 @@ export function useTokenPrice(symbol: string): TokenPriceResult {
       default:
         return { price: null, isLoading: false };
     }
-  }, [symbol, tgg, tmc, tsp500, tft]);
+  }, [symbol, tgg, tsg, tmc, tsp500, tft]);
 }

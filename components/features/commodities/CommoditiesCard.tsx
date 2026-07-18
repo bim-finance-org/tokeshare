@@ -5,7 +5,7 @@ import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Commodity } from '@/interfaces/Commodity';
-import { calculateTGGPrice } from '@/utils/priceUtils';
+import { calculateTGGPrice, calculateTSGPrice } from '@/utils/priceUtils';
 import { useCommodityData } from '@/hooks/useCommodityData';
 interface CommoditiesCardProps {
   commodity: Commodity;
@@ -21,8 +21,12 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
     return `$${price.toFixed(2)}`;
   };
 
+  // The underlying spot (PAXG for gold, XAGM for silver) is per troy ounce; both
+  // convert to a per-gram token price via the same 31.1034768 divisor.
+  const toGramPrice = name === 'Silver' ? calculateTSGPrice : calculateTGGPrice;
+
   // Display price based on availability
-  const displayPrice = isLoading ? 'Loading...' : price ? formatPrice(calculateTGGPrice(price)) : null;
+  const displayPrice = isLoading ? 'Loading...' : price ? formatPrice(toGramPrice(price)) : null;
 
   return (
     <div className="text-color4 min-w-[280px] max-w-[400px] w-full mx-auto">
@@ -71,11 +75,13 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
           </div>
         </div>
         <div className="flex justify-center mt-4 w-full">
-          {name === 'Gold' ? (
+          {name === 'Gold' || name === 'Silver' ? (
             <Link href={`/marketplace/commodities/${name}`} rel="noopener noreferrer">
               <button type="button" className="bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition">
                 <div className="flex w-full justify-between items-center px-8">
-                  <h6 className="whitespace-nowrap pr-10">Buy Gold (TGG)</h6>
+                  <h6 className="whitespace-nowrap pr-10">
+                    {name === 'Silver' ? 'Buy Silver (TSG)' : 'Buy Gold (TGG)'}
+                  </h6>
                   <ArrowIcon size={24} />
                 </div>
               </button>

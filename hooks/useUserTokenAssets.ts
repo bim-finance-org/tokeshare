@@ -10,18 +10,32 @@ import { TokenType } from '@/enums/TokenType';
 import { Blockchain } from '@/enums/Blockchain';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { AssetData } from '@/interfaces/AssetData';
-import { useTGGPrice, useTFTPrice } from '@/hooks/useTokenPrice';
+import { useTGGPrice, useTSGPrice, useTFTPrice } from '@/hooks/useTokenPrice';
 import { getLogger } from '@/lib/logger';
 
 const log = getLogger('user-assets');
 
 type BalanceCall = { token: TokenInfo; address: Address };
 
-function toAsset(token: TokenInfo, chain: Blockchain, rawBalance: bigint, tggPrice: number, tftPrice: number): AssetData | null {
+function toAsset(
+  token: TokenInfo,
+  chain: Blockchain,
+  rawBalance: bigint,
+  tggPrice: number,
+  tsgPrice: number,
+  tftPrice: number,
+): AssetData | null {
   const balance = Number(rawBalance) / 10 ** token.decimals;
   if (balance <= 0) return null;
 
-  const unitPrice = token.symbol === 'TGG' ? tggPrice : tftPrice;
+  const unitPrice = token.symbol === 'TGG' ? tggPrice : token.symbol === 'TSG' ? tsgPrice : tftPrice;
+
+  const imageUrl =
+    token.symbol === 'TGG'
+      ? '/images/currencies/tgg.png'
+      : token.symbol === 'TSG'
+        ? '/images/img-silver.webp'
+        : '/images/currencies/tft.png';
 
   return {
     name: token.name,
@@ -29,7 +43,7 @@ function toAsset(token: TokenInfo, chain: Blockchain, rawBalance: bigint, tggPri
     symbol: token.symbol,
     totalPrice: balance * unitPrice,
     blockchain: chain,
-    imageUrl: token.symbol === 'TGG' ? '/images/currencies/tgg.png' : '/images/currencies/tft.png',
+    imageUrl,
     internalUrl: token.internalUrl,
   };
 }
@@ -37,6 +51,7 @@ function toAsset(token: TokenInfo, chain: Blockchain, rawBalance: bigint, tggPri
 async function fetchUserTokenAssets(
   address: Address,
   tggPrice: number,
+  tsgPrice: number,
   tftPrice: number,
 ): Promise<AssetData[]> {
   const cryptos = Object.values(TOKENS).filter((t) => t.type === TokenType.Crypto);
@@ -74,7 +89,7 @@ async function fetchUserTokenAssets(
             log.warn(`failed to fetch ${token.symbol} on ${chain}`, res.error);
             return [];
           }
-          const asset = toAsset(token, chain, res.result as bigint, tggPrice, tftPrice);
+          const asset = toAsset(token, chain, res.result as bigint, tggPrice, tsgPrice, tftPrice);
           return asset ? [asset] : [];
         });
       } catch (e) {
@@ -93,13 +108,14 @@ export function useUserTokenAssets(): {
 } {
   const { address } = useAccount();
   const { price: tggPrice, isLoading: tggLoading } = useTGGPrice();
+  const { price: tsgPrice, isLoading: tsgLoading } = useTSGPrice();
   const { price: tftPrice, isLoading: tftLoading } = useTFTPrice();
 
-  const pricesReady = !tggLoading && !tftLoading;
+  const pricesReady = !tggLoading && !tsgLoading && !tftLoading;
 
   const { data: assets, isLoading: assetsLoading } = useQuery({
-    queryKey: ['user-token-assets', address, tggPrice, tftPrice],
-    queryFn: () => fetchUserTokenAssets(address as Address, tggPrice ?? 0, tftPrice ?? 0),
+    queryKey: ['user-token-assets', address, tggPrice, tsgPrice, tftPrice],
+    queryFn: () => fetchUserTokenAssets(address as Address, tggPrice ?? 0, tsgPrice ?? 0, tftPrice ?? 0),
     enabled: !!address && pricesReady,
   });
 

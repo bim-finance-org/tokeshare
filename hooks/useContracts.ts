@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useWriteContract } from 'wagmi';
 import { parseUnits, type Abi, type Address } from 'viem';
-import { BASE_CONTRACTS, getTGGContracts } from '@/contracts/contracts';
+import { BASE_CONTRACTS, getTGGContracts, getTSGContracts } from '@/contracts/contracts';
 import { ZAP_ABI } from '@/contracts/abis/zap_abi';
 import { ZAP_TMC_ABI } from '@/contracts/abis/zap_tmc_abi';
 import { ZAP_TSP500_ABI } from '@/contracts/abis/zap_tsp500_abi';
@@ -67,6 +67,12 @@ function useZapHook(abi: ZapAbi, staticAddress: Address | null) {
 
 export function useZAPContract() {
   return useZapHook(ZAP_ABI, null);
+}
+
+// TSG (silver) is Ethereum-only, so the ZAP address is static (unlike TGG which
+// resolves per chain). Placeholder until the silver ZAP is deployed.
+export function useZAPSilverContract() {
+  return useZapHook(ZAP_ABI, getTSGContracts(Blockchain.Ethereum).ZAP as Address);
 }
 
 export function useZAPTMCContract() {

@@ -13,6 +13,8 @@ const KNOWN_DECIMALS: Record<string, number> = {
   // Ethereum
   '0x45804880de22913dafe09f4980848ece6ecbaf78': 18, // PAXG (Ethereum)
   '0x0764ff270aaceda56d0940327c50f8a199573a9b': 18, // TGG (Ethereum)
+  '0x123ffe0a3c62878dcbee2742227dc8990058d9e1': 9, // XAGM (silver reserve, Ethereum)
+  '0x2544a889c03111853d8af56eb4bd010edee5e11f': 18, // TSG (Ethereum)
   '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': 6, // USDC (Ethereum)
   '0xdac17f958d2ee523a2206206994597c13d831ec7': 6, // USDT (Ethereum)
   '0x6b175474e89094c44da98b954eedeac495271d0f': 18, // DAI (Ethereum)

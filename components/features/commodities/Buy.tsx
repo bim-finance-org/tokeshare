@@ -6,12 +6,14 @@ import BankIcon from '@/components/icons/BankIcon';
 import Blockchains from '@/components/shared/Blockchains';
 import {
   calculateTGGPrice,
+  calculateTSGPrice,
   calculateTMCPrice,
   calculateTSP500Price,
   convertFiatToTGG,
   convertTGGToFiat,
 } from '@/utils/priceUtils';
 import { usePaxgPrice } from '@/hooks/usePaxgPrice';
+import { useXagmPrice } from '@/hooks/useXagmPrice';
 import { useCmc20Price } from '@/hooks/useCmc20Price';
 import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
 import { useAccount } from 'wagmi';
@@ -41,6 +43,7 @@ const Buy = ({ token }: { token: TokenInfo }) => {
   const { isConnected } = useAccount();
   // Only the active token's price feed hits the network — the others stay idle.
   const { data: paxgPrice } = usePaxgPrice({ enabled: token.symbol === 'TGG' });
+  const { data: xagmPrice } = useXagmPrice({ enabled: token.symbol === 'TSG' });
   const { data: cmc20Price } = useCmc20Price({ enabled: token.symbol === 'TMC' });
   const { data: despxaPrice } = useDeSPXAPrice({ enabled: token.symbol === 'TSP500' });
   const { data: exchangeRates, isLoading: isRatesLoading } = useExchangeRates();
@@ -50,6 +53,9 @@ const Buy = ({ token }: { token: TokenInfo }) => {
     const updatePrice = () => {
       if (token.symbol === 'TGG' && paxgPrice) {
         const calculatedPrice = calculateTGGPrice(paxgPrice);
+        setTggPrice(calculatedPrice);
+      } else if (token.symbol === 'TSG' && xagmPrice) {
+        const calculatedPrice = calculateTSGPrice(xagmPrice);
         setTggPrice(calculatedPrice);
       } else if (token.symbol === 'TMC' && cmc20Price) {
         const calculatedPrice = calculateTMCPrice(cmc20Price);
@@ -64,14 +70,19 @@ const Buy = ({ token }: { token: TokenInfo }) => {
     updatePrice();
     const interval = setInterval(updatePrice, 30000);
     return () => clearInterval(interval);
-  }, [paxgPrice, cmc20Price, despxaPrice, token.symbol]);
+  }, [paxgPrice, xagmPrice, cmc20Price, despxaPrice, token.symbol]);
 
   // Derived: crypto amount computed during render from the fiat input.
   const tggAmount = useMemo(() => {
     if (tggPrice <= 0 || isRatesLoading) return '0';
     const numericAmount = parseFloat(amountToSend) || 0;
 
-    if (token.symbol === 'TGG' || token.symbol === 'TMC' || token.symbol === 'TSP500') {
+    if (
+      token.symbol === 'TGG' ||
+      token.symbol === 'TSG' ||
+      token.symbol === 'TMC' ||
+      token.symbol === 'TSP500'
+    ) {
       const value = convertFiatToTGG(numericAmount, selectedCurrency, exchangeRates, tggPrice);
       return value !== undefined ? value.toFixed(4) : '0';
     }
