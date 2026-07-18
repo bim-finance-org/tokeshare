@@ -43,10 +43,10 @@ tous à `useZapSwap`.
   de query). Le montage inconditionnel de `useSwap()`+`useTsgSwap()` reste (Rules of Hooks) mais isolé
   dans `useQuoteStrategies`.
 
-- **Hooks morts avec bug de scaling latent.** `useZapTmcFees`/`useZapTsp500Fees`
-  (`hooks/useTmcSwap.ts:12-40`, `hooks/useTsp500Swap.ts:12-40`) : zéro consommateur, 28 lignes
-  dupliquées, et divisent le fee par **100** alors que `useZapSwap.getZapFees` divise par **10000** —
-  100× d'écart sur le même champ on-chain. **Fix** : supprimer.
+- ~~**Hooks morts avec bug de scaling latent.** `useZapTmcFees`/`useZapTsp500Fees` : zéro consommateur,
+  28 lignes dupliquées, divisent le fee par **100** vs **10000** dans `getZapFees` (100× d'écart).~~
+  ✅ Supprimés (+ import `useReadContract` orphelin) ; la vraie lecture de fee reste dans
+  `useZapSwap.getZapFees`.
 
 - **Adresses de contrats dupliquées** entre `contracts/contracts.ts` et `config/token.ts` (TGG, TSG,
   TMC, TSP500, TFT…). Divergence silencieuse déjà visible (double TODO TSP500). **Fix** : une seule
@@ -123,7 +123,7 @@ tous à `useZapSwap`.
 | 3   | Corriger commentaire TSG + vérifier déploiement TSP500 (gater si besoin) | 🔴       | ✅     | Commentaires TSG corrigés (`contracts.ts`, `useContracts.ts`) ; TODO TSP500/ZAP_TSP500 retirés (déjà câblés en prod, confirmé)                                                                                                                                             |
 | 4   | Garde-fou solde insuffisant + bouton MAX + toast succès (Swap EVM)       | 🔴       | ✅     | Garde-fou solde + labels « Insufficient {token} balance » / « Enter an amount » (`Swap.tsx`) ; toast de succès + lien explorer à la confirmation (`notify.success` accepte un ReactNode). MAX déjà présent (`TradeWidget`) ; erreur brute déjà normalisée par `parseError` |
 | 5   | Bouton « Properties » mort + état wallet non connecté (portfolio)        | 🔴       | 🟡     | Bouton « Properties » corrigé (ancre `#properties` + `scroll-mt-24`, `real-estate/page.tsx`) ; état wallet non connecté (`user/dashboard`) reste à faire                                                                                                                   |
-| 6   | Supprimer hooks morts `useZapTmcFees`/`useZapTsp500Fees` (bug 100×)      | 🟠       | ⏳     | `useTmcSwap.ts`, `useTsp500Swap.ts`                                                                                                                                                                                                                                        |
+| 6   | Supprimer hooks morts `useZapTmcFees`/`useZapTsp500Fees` (bug 100×)      | 🟠       | ✅     | Supprimés + import `useReadContract` orphelin ; ratios conservés (utilisés par le refacto quote)                                                                                                                                                                          |
 | 7   | Factoriser la branche quote TSG↔TGG (`computeZapQuote`)                  | 🟠       | ✅     | Pattern stratégie (`hooks/swapQuote/`), `useSwapQuote` 290→83, comportement préservé + dedup `SwapQuoteParams`                                                                                                                                                             |
 | 8   | Rate-limit atomique (Lua) + garantie Redis en prod                       | 🟠       | ⏳     | `ratelimit.ts`, `redis.ts`                                                                                                                                                                                                                                                 |
 | 9   | Rate-limit + anti-stampede + whitelist IDs sur routes APIs payantes      | 🟠       | ⏳     | `cmc`, `cmc20/*`, `commodities/*`                                                                                                                                                                                                                                          |
