@@ -102,7 +102,7 @@ const TacosCard = () => {
         <div className="flex justify-center">
           <Link href="/marketplace/other/french-tacos">
             <button type="button" className="flex items-center justify-between bg-color2 rounded-3xl px-8 mt-4 text-xl w-72 hover:bg-color4 hover:text-white transition-colors duration-300 shadow-md font-semibold">
-              <span className="text-color1 hover:text-white">Buy</span>
+              <span className="text-color1 hover:text-white">Swap</span>
               <ArrowIcon size={32} className="text-white" />
             </button>
           </Link>

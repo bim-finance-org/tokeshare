@@ -23,17 +23,11 @@ const Blockchains = ({ onSelect, section, tokenSymbol }: BlockchainsProps) => {
 
   // Sélection actuelle depuis le context
   let blockchain: Blockchain = Blockchain.Polygon;
-  let updateBlockchain = (chain: Blockchain) => {};
+  let updateBlockchain: (chain: Blockchain) => void = () => {};
 
   if (section === ExchangeSection.Swap) {
     blockchain = tokenContext.swap.blockchain;
     updateBlockchain = tokenContext.updateSwapBlockchain;
-  } else if (section === ExchangeSection.Buy) {
-    blockchain = tokenContext.buy.blockchain;
-    updateBlockchain = tokenContext.updateBuyBlockchain;
-  } else if (section === ExchangeSection.Sell) {
-    blockchain = tokenContext.sell.blockchain;
-    updateBlockchain = tokenContext.updateSellBlockchain;
   }
 
   // Si la blockchain sélectionnée n'est pas dispo pour le token, la forcer à la première dispo

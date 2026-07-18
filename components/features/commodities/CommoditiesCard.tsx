@@ -80,7 +80,7 @@ const CommoditiesCard: React.FC<CommoditiesCardProps> = ({ commodity }) => {
               <button type="button" className="bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition">
                 <div className="flex w-full justify-between items-center px-8">
                   <h6 className="whitespace-nowrap pr-10">
-                    {name === 'Silver' ? 'Buy Silver (TSG)' : 'Buy Gold (TGG)'}
+                    {name === 'Silver' ? 'Swap Silver (TSG)' : 'Swap Gold (TGG)'}
                   </h6>
                   <ArrowIcon size={24} />
                 </div>
