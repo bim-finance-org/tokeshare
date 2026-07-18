@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
 import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('api:cmc');
 
 const CACHE_EXPIRATION_SECONDS = 20 * 60;
 const MS_PER_SECOND = 1000;
 const CMC_API_URL = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
 
 type CmcQuoteResponse = Record<string, unknown>;
+
+// Only the CoinMarketCap IDs we actually display (stablecoins + CMC20). Anything
+// else is rejected so an attacker can't rotate arbitrary IDs to bypass the cache
+// and burn the paid CMC quota.
+const ALLOWED_CMC_IDS = new Set(['38442', '3408', '825', '4943', '2989', '18852', '20641', '24927']);
+const MAX_CMC_IDS = 20;
 
 interface CachedData<Data> {
   data: Data;
@@ -24,7 +33,13 @@ function extractCryptoIds(request: NextRequest): string | null {
   if (!idParam || !/^\d+(,\d+)*$/.test(idParam)) {
     return null;
   }
-  return idParam;
+  // Dedupe + whitelist + sort → `1,2` and `2,1` resolve to one stable cache key.
+  const ids = Array.from(new Set(idParam.split(','))).filter((id) => ALLOWED_CMC_IDS.has(id));
+  if (ids.length === 0 || ids.length > MAX_CMC_IDS) {
+    return null;
+  }
+  ids.sort((a, b) => Number(a) - Number(b));
+  return ids.join(',');
 }
 
 /**
@@ -103,12 +118,7 @@ export async function GET(request: NextRequest) {
     const result = await getCachedOrFetch<CmcQuoteResponse>(cacheKey, () => fetchCoinMarketCap(cryptoIds));
     return NextResponse.json(result, { headers: rateLimitHeaders(limit) });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch data from CoinMarketCap',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 },
-    );
+    log.error('CoinMarketCap fetch failed', error);
+    return NextResponse.json({ error: 'Failed to fetch data from CoinMarketCap' }, { status: 500 });
   }
 }

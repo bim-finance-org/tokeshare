@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import Image from 'next/image';
 import Blockchains from '@/components/shared/Blockchains';
-import { useAccount } from 'wagmi';
+import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { useTokenContext } from '@/context/TokenContexts';
-import { useSwapQuote } from '@/hooks/useSwapQuote';
+import { useSwapQuote, MINIMUM_AMOUNT_TO_GET_QUOTE, type SwapQuoteParams } from '@/hooks/useSwapQuote';
 import { Address } from 'viem';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,6 +15,7 @@ import { SwapDirection } from '@/enums/Directions';
 import { TokenInfo } from '@/config/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { getTokenAddress, getTokenBlockchains } from '@/utils/token';
+import { useTokenBalance } from '@/utils/blockchainUtils';
 import { useTokenPrice } from '@/hooks/useTokenPrice';
 import { ExchangeSection } from '@/enums/ExchangeSection';
 import { useAutoSwitchNetwork } from '@/hooks/useAutoSwitchNetwork';
@@ -23,11 +24,10 @@ import { useSwapHandlerByToken } from '@/hooks/swapHandlers/useSwapHandlerByToke
 import { useRefreshBalancesOnConfirm } from '@/hooks/useRefreshBalancesOnConfirm';
 import { notify } from '@/lib/notify';
 
-export type SwapQuoteParams = {
-  inputToken: Address;
-  outputToken: Address;
-  inputAmount: string;
-  direction: SwapDirection;
+const EXPLORERS: Record<Blockchain, string> = {
+  [Blockchain.Polygon]: 'https://polygonscan.com',
+  [Blockchain.Base]: 'https://basescan.org',
+  [Blockchain.Ethereum]: 'https://etherscan.io',
 };
 
 const Swap = ({ token }: { token: TokenInfo }) => {
@@ -47,15 +47,17 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   const { isOnCorrectChain, isPending: isSwitchingNetwork, retry: retrySwitch } = useAutoSwitchNetwork(targetBlockchain);
 
   // Single source of truth: the value the user just typed into the editable
-  // (top) widget. Direction (`isTggFirst`) decides which token it represents.
+  // (top) widget. Direction (`isTokenFirst`) decides which token it represents.
   // The output amount is derived purely from the quote API.
   const [inputAmount, setInputAmount] = useState('10');
-  const [isTggFirst, setIsTggFirst] = useState(false);
+  const [isTokenFirst, setIsTokenFirst] = useState(false);
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
 
   const { isConnected, address } = useAccount();
 
-  const { price: tokenPrice, isLoading: isPriceLoading } = useTokenPrice(token.symbol);
+  const { price: tokenPrice, isLoading: isPriceLoading, isError: isPriceError, refetch: refetchPrice } = useTokenPrice(
+    token.symbol,
+  );
   const { swapIn, swapOut, isPending, error, hash } = useSwapHandlerByToken(token.symbol);
 
   // Once the swap tx confirms, refresh balances so the widgets reflect the new
@@ -63,12 +65,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   useRefreshBalancesOnConfirm(hash as `0x${string}` | undefined);
 
   const swapQuoteParams = useMemo<SwapQuoteParams | null>(() => {
-    const inputToken = getTokenAddress(isTggFirst ? token.symbol : stablecoin, selectedBlockchain);
-    const outputToken = getTokenAddress(isTggFirst ? stablecoin : token.symbol, selectedBlockchain);
+    const inputToken = getTokenAddress(isTokenFirst ? token.symbol : stablecoin, selectedBlockchain);
+    const outputToken = getTokenAddress(isTokenFirst ? stablecoin : token.symbol, selectedBlockchain);
     if (!inputToken || !outputToken) return null;
-    const direction = isTggFirst ? SwapDirection.TokenToStablecoin : SwapDirection.StablecoinToToken;
+    const direction = isTokenFirst ? SwapDirection.TokenToStablecoin : SwapDirection.StablecoinToToken;
     return { inputToken, outputToken, inputAmount, direction };
-  }, [isTggFirst, inputAmount, stablecoin, selectedBlockchain, token.symbol]);
+  }, [isTokenFirst, inputAmount, stablecoin, selectedBlockchain, token.symbol]);
 
   const {
     outputAmount: calculatedOutputAmount,
@@ -83,6 +85,28 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   useEffect(() => {
     if (error) notify.error(error);
   }, [error]);
+
+  // Success feedback: fire a toast (with an explorer link) once the swap tx
+  // confirms on-chain, so the user gets a clear "done" signal instead of only
+  // a discreet truncated hash. Guarded by a ref so it fires once per hash.
+  const { isSuccess: isSwapConfirmed } = useWaitForTransactionReceipt({ hash: hash as `0x${string}` | undefined });
+  const notifiedHashRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!isSwapConfirmed || !hash || notifiedHashRef.current === hash) return;
+    notifiedHashRef.current = hash;
+    notify.success(
+      'Swap confirmed',
+      <a
+        href={`${EXPLORERS[selectedBlockchain]}/tx/${hash}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 underline hover:no-underline"
+      >
+        View on explorer
+        <ExternalLink className="h-3 w-3" />
+      </a>,
+    );
+  }, [isSwapConfirmed, hash, selectedBlockchain]);
 
   const handleInputChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
@@ -102,14 +126,14 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   };
 
   const handleSwap = () => {
-    const newIsTggFirst = !isTggFirst;
+    const newIsTggFirst = !isTokenFirst;
     if (newIsTggFirst && token.symbol === 'TFT_001') {
       setStablecoin('USDC');
     }
     // Carry over the calculated output as the new input so the visible amount
     // doesn't reset when the user flips direction.
     if (calculatedOutputAmount) setInputAmount(calculatedOutputAmount);
-    setIsTggFirst(newIsTggFirst);
+    setIsTokenFirst(newIsTggFirst);
   };
 
   // Préparation des informations d'échange
@@ -134,10 +158,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     // swapIn / swapOut both expect the token (crypto) amount:
     // - Stablecoin → Token: token amount is the OUTPUT (from the quote)
     // - Token → Stablecoin: token amount is the INPUT (user typed it)
-    const tokenAmount = isTggFirst ? inputAmount : outputAmount;
+    const tokenAmount = isTokenFirst ? inputAmount : outputAmount;
 
     try {
-      if (!isTggFirst) {
+      if (!isTokenFirst) {
         await swapIn({
           tokenSymbol: token.symbol,
           stablecoin,
@@ -171,9 +195,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   // Déterminer quel widget est en entrée (modifiable) et lequel est en sortie (lecture seule)
   const topWidgetProps = {
-    type: (isTggFirst ? TokenType.Crypto : TokenType.Stablecoin) as TokenType,
+    type: (isTokenFirst ? TokenType.Crypto : TokenType.Stablecoin) as TokenType,
     label: 'YOU SEND',
-    defaultToken: isTggFirst ? token.symbol : stablecoin,
+    defaultToken: isTokenFirst ? token.symbol : stablecoin,
     value: inputAmount,
     onValueChange: handleInputChange,
     onTokenChange: handleTokenChange,
@@ -182,12 +206,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     readOnly: false,
   };
 
-  const isTftSellMode = isTggFirst && token.symbol === 'TFT_001';
+  const isTftSellMode = isTokenFirst && token.symbol === 'TFT_001';
 
   const bottomWidgetProps = {
-    type: (isTggFirst ? TokenType.Stablecoin : TokenType.Crypto) as TokenType,
+    type: (isTokenFirst ? TokenType.Stablecoin : TokenType.Crypto) as TokenType,
     label: 'YOU RECEIVE',
-    defaultToken: isTggFirst ? (isTftSellMode ? 'USDC' : stablecoin) : token.symbol,
+    defaultToken: isTokenFirst ? (isTftSellMode ? 'USDC' : stablecoin) : token.symbol,
     value: outputAmount,
     onValueChange: () => {},
     onTokenChange: handleTokenChange,
@@ -200,6 +224,40 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   // Vérifier si les prix sont disponibles pour permettre l'affichage
   let arePricesAvailable;
   if (tokenPrice) arePricesAvailable = tokenPrice > 0 && !isLoadingQuote;
+
+  // Price feed failed / returned nothing (and not just still loading): surface a
+  // retry instead of leaving the Swap button silently disabled.
+  const priceUnavailable = !isPriceLoading && (isPriceError || !tokenPrice);
+
+  // Garde-fou de solde : le widget du haut est ce que l'utilisateur envoie.
+  // On compare le montant saisi au solde on-chain de ce token pour bloquer le
+  // swap AVANT qu'il ne revert (évite une approbation + du gas gaspillés).
+  const inputTokenSymbol = isTokenFirst ? token.symbol : stablecoin;
+  const inputBalance = useTokenBalance(inputTokenSymbol, selectedBlockchain);
+  const parsedAmount = parseFloat(inputAmount);
+  const hasValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
+  // Below this the quote query stays disabled (output would read "0"): tell the
+  // user why instead of leaving a mute widget.
+  const isBelowMinimum = hasValidAmount && parsedAmount < MINIMUM_AMOUNT_TO_GET_QUOTE;
+  const isInsufficientBalance = isConnected && hasValidAmount && parseFloat(inputBalance) < parsedAmount;
+
+  const canSwap = Boolean(
+    arePricesAvailable &&
+      hasValidAmount &&
+      !isBelowMinimum &&
+      !isInsufficientBalance &&
+      !isPending &&
+      !isPreparingSwap &&
+      isOnCorrectChain,
+  );
+
+  const swapButtonLabel = !hasValidAmount
+    ? 'Enter an amount'
+    : isBelowMinimum
+      ? `Minimum ${MINIMUM_AMOUNT_TO_GET_QUOTE} ${inputTokenSymbol}`
+      : isInsufficientBalance
+        ? `Insufficient ${inputTokenSymbol} balance`
+        : 'Swap';
 
   return (
     <div className="p-3 sm:p-6 w-full relative">
@@ -260,6 +318,23 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           </Alert>
         )}
 
+        {priceUnavailable && (
+          <Alert className="bg-amber-500">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Price unavailable</AlertTitle>
+            <AlertDescription className="flex flex-col gap-2">
+              <span>{token.symbol} price could not be loaded. Please try again.</span>
+              <button
+                type="button"
+                onClick={() => refetchPrice()}
+                className="text-sm underline hover:no-underline self-start"
+              >
+                Retry
+              </button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Informations sur les prix */}
         <div className="bg-color1 rounded-lg p-3 space-y-2 ">
           <div className="flex items-center justify-between">
@@ -299,29 +374,6 @@ const Swap = ({ token }: { token: TokenInfo }) => {
             </div>
           )}
 
-          {hash && (
-            <div className="flex items-center justify-between pt-2 border-t">
-              <span className="text-color4 text-xs sm:text-sm font-medium">Transaction:</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-black bg-gray-100 font-mono px-2 py-1 rounded">
-                  {hash.slice(0, 6)}...{hash.slice(-4)}
-                </span>
-                <button type="button"
-                  onClick={() => {
-                    const explorers: Record<Blockchain, string> = {
-                      [Blockchain.Polygon]: 'https://polygonscan.com',
-                      [Blockchain.Base]: 'https://basescan.org',
-                      [Blockchain.Ethereum]: 'https://etherscan.io',
-                    };
-                    window.open(`${explorers[selectedBlockchain]}/tx/${hash}`, '_blank');
-                  }}
-                  className="inline-flex items-center text-blue-600 hover:text-blue-800"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -330,11 +382,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           <button type="button"
             onClick={swaping}
             className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
-              arePricesAvailable && !isPending && !isPreparingSwap && isOnCorrectChain
-                ? 'bg-color4 text-white hover:bg-opacity-90'
-                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              canSwap ? 'bg-color4 text-white hover:bg-opacity-90' : 'bg-gray-400 text-gray-200 cursor-not-allowed'
             }`}
-            disabled={!arePricesAvailable || isPending || isPreparingSwap || !isOnCorrectChain}
+            disabled={!canSwap}
           >
             {isPreparingSwap ? (
               <>
@@ -347,7 +397,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
                 <span>Processing transaction...</span>
               </>
             ) : (
-              'Swap'
+              swapButtonLabel
             )}
           </button>
         ) : (

@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
+import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { singleFlight } from '@/lib/singleFlight';
+import { getLogger } from '@/lib/logger';
 import { Period } from '@/enums/Period';
+
+const log = getLogger('api:xagm-perf');
 
 // CoinGecko id du XAGM (Matrixdock Silver), le sous-jacent du TSG.
 const COINGECKO_URL = 'https://api.coingecko.com/api/v3/coins/matrixdock-silver/market_chart';
@@ -49,8 +54,11 @@ async function getCachedOrFetch<Data>(
   if (cached) {
     return { data: cached, source: 'redis-cache' };
   }
-  const freshData = await fetcher();
-  await setCache(key, freshData, expiration);
+  const freshData = await singleFlight(key, async () => {
+    const fresh = await fetcher();
+    await setCache(key, fresh, expiration);
+    return fresh;
+  });
   return { data: freshData, source: 'coingecko-api' };
 }
 
@@ -80,6 +88,11 @@ function buildPerformanceResult(prices: [number, number][], period: string) {
 }
 
 export async function GET(request: NextRequest) {
+  const limit = await rateLimit(request, { key: 'api:xagm-perf', limit: 60, windowSec: 60 });
+  if (!limit.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: rateLimitHeaders(limit) });
+  }
+
   try {
     const period = extractPeriode(request);
     if (!period) {
@@ -93,9 +106,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ ...data, source });
   } catch (e) {
-    return NextResponse.json(
-      { error: 'Failed to get XAGM performance', details: e instanceof Error ? e.message : e },
-      { status: 500 },
-    );
+    log.error('XAGM performance failed', e);
+    return NextResponse.json({ error: 'Failed to get XAGM performance' }, { status: 500 });
   }
 }

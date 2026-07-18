@@ -97,7 +97,7 @@ const HomeCard: React.FC<HomeCardProps> = ({ house }) => {
               disabled
               className="flex items-center justify-between bg-gray-400 rounded-3xl px-4 py-1 mt-4 w-64 cursor-not-allowed"
             >
-              <h5 className="text-gray-600">Learn More</h5>
+              <h5 className="text-gray-600">Coming soon</h5>
               <ArrowIcon size={24} />
             </button>
           )}

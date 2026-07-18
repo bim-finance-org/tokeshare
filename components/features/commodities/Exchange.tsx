@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Swap from '@/components/features/commodities/Swap';
+import SwapFormSkeleton from '@/components/features/commodities/SwapFormSkeleton';
 import { useAllStablePrices } from '@/hooks/useStablePrice';
 
 import { TOKENS } from '@/config/token';
@@ -27,13 +28,13 @@ const Exchange: React.FC<ExchangeProps> = ({ tokenSymbol }) => {
         </div>
       </div>
 
-      <div className="p-2 sm:p-4 w-full">
-        {isLoading || !token ? (
-          <div className="text-center py-4 text-color4">Loading...</div>
-        ) : (
+      {isLoading || !token ? (
+        <SwapFormSkeleton />
+      ) : (
+        <div className="p-2 sm:p-4 w-full">
           <Swap token={token} />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

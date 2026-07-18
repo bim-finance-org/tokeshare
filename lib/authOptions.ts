@@ -1,6 +1,31 @@
 // lib/authOptions.ts
+import { createHash, timingSafeEqual } from 'crypto';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { rateLimit } from '@/lib/ratelimit';
+
+// Constant-time password check. Hashing both sides to a fixed-length digest
+// makes timingSafeEqual usable regardless of input length (it throws on length
+// mismatch) and avoids leaking the password length through the comparison.
+function passwordMatches(input: string, expected: string): boolean {
+  const inputHash = createHash('sha256').update(input).digest();
+  const expectedHash = createHash('sha256').update(expected).digest();
+  return timingSafeEqual(inputHash, expectedHash);
+}
+
+// The dashboard uses a single shared password, so the login endpoint is the
+// prime brute-force target. NextAuth's `authorize` receives a plain-object
+// `headers` map (not a Headers instance), so rebuild a minimal Request for
+// rateLimit()'s IP extraction.
+function requestFromAuthHeaders(headers?: Record<string, unknown>): Request {
+  const h = new Headers();
+  if (headers) {
+    for (const [key, value] of Object.entries(headers)) {
+      if (typeof value === 'string') h.set(key, value);
+    }
+  }
+  return new Request('http://internal/auth/callback/credentials', { headers: h });
+}
 
 const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD;
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
@@ -19,9 +44,20 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.password) return null;
-        if (credentials.password === DASHBOARD_PASSWORD) {
+
+        // Throttle by client IP before comparing the password: 5 attempts / min.
+        const { success } = await rateLimit(requestFromAuthHeaders(req?.headers), {
+          key: 'auth:login',
+          limit: 5,
+          windowSec: 60,
+        });
+        if (!success) {
+          throw new Error('Trop de tentatives de connexion. Réessayez dans une minute.');
+        }
+
+        if (passwordMatches(credentials.password, DASHBOARD_PASSWORD)) {
           return { id: '1', name: 'Dashboard Admin', role: 'admin' };
         }
         return null;

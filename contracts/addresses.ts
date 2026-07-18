@@ -1,0 +1,54 @@
+import { Blockchain } from '@/enums/Blockchain';
+
+/**
+ * Single source of truth for every on-chain address, keyed by chain then symbol.
+ * Both the token catalog (`config/token.ts`) and the contract getters
+ * (`contracts/contracts.ts`) derive from here — never hardcode an address
+ * anywhere else, so an address only ever needs updating in one place.
+ */
+export const ADDRESSES = {
+  [Blockchain.Polygon]: {
+    TGG: '0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71',
+    ZAP: '0xA5E2A2084426475F3E0D9cc6a261C2125bC43589',
+    PAXG: '0x553d3D295e0f695B9228246232eDF400ed3560B5',
+    MARKETPLACE: '0xe0F632423a6bf824d7E4463470549b73048C3f4e',
+    BATCH_DISTRIBUTOR: '0x8c1eCBa803f7B83a2De69A99fb8D4a17776d1f2d',
+    USDC: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
+    USDT: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+    DAI: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+    EURS: '0xE111178A87A3BFf0c8d18DECBa5798827539Ae99',
+    USDCE: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  },
+  [Blockchain.Base]: {
+    TMC: '0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4',
+    ZAP_TMC: '0x17b4CA0f1A49dB2c42596B3152c39C8aA7B7a0D9',
+    CMC20: '0xa0A8481fc246Cd12f75227aBB96220fF5360fad3',
+    TSP500: '0x9476d702Dc72242A7cEfBf802da8F09ddb305e51',
+    ZAP_TSP500: '0xd7Ff11db71FBB64dC967efEB91eFa7A81287272D',
+    DESPXA: '0x9c5C365e764829876243d0b289733B9D2b729685',
+    // TFT lives on Base (the old CONTRACTS.TFT_001 was mislabeled "Polygon").
+    TFT_001: '0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26',
+    USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    DAI: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+    EURC: '0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42',
+    CRVUSD: '0x417Ac0e078398C154EdFadD9Ef675d30Be60Af93',
+    BOLD: '0x03569cc076654f82679c4ba2124d64774781b01d',
+    USDS: '0x820c137fa70c8691f0e44dc420a5e53c168921dc',
+  },
+  [Blockchain.Ethereum]: {
+    TGG: '0x0764fF270AaCEdA56d0940327C50f8A199573A9b',
+    ZAP: '0x1bF1a3b4D0662385B116de6f720d664B40721de5',
+    PAXG: '0x45804880De22913dAFE09f4980848ECE6EcbAf78',
+    TSG: '0x2544a889C03111853D8af56eb4bD010EDEE5E11f',
+    ZAP_SILVER: '0x608325b9e5a4b29f1d0d9238620cf3BbFD57AE10',
+    XAGM: '0x123ffe0a3C62878dcbee2742227dc8990058d9E1',
+    USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+    DAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+  },
+} as const;
+
+/** Trusted swap aggregators (KyberSwap router — same address on every chain). */
+export const AGGREGATORS = {
+  kyberSwap: '0x6131B5fae19EA4f9D964eAc0408E4408b66337b5',
+} as const;

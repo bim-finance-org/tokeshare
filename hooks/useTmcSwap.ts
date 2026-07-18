@@ -1,5 +1,4 @@
 import type { Address } from 'viem';
-import { useReadContract } from 'wagmi';
 import { BASE_CONTRACTS } from '@/contracts/contracts';
 import { ZAP_TMC_ABI } from '@/contracts/abis/zap_tmc_abi';
 import { Blockchain } from '@/enums/Blockchain';
@@ -8,36 +7,6 @@ import { useZapSwap, type ResolvedZapContracts } from './useZapSwap';
 
 // TMC to CMC20 ratio: 1 TMC = 1/10 CMC20
 export const TMC_CMC20_RATIO = 10;
-
-export const useZapTmcFees = () => {
-  const {
-    data: zapMintFeeRaw,
-    isLoading: isLoadingMintFee,
-    error: mintFeeError,
-  } = useReadContract({
-    address: BASE_CONTRACTS.ZAP_TMC as Address,
-    abi: ZAP_TMC_ABI,
-    functionName: 'zapMintFee',
-  });
-
-  const {
-    data: zapWithdrawFeeRaw,
-    isLoading: isLoadingWithdrawFee,
-    error: withdrawFeeError,
-  } = useReadContract({
-    address: BASE_CONTRACTS.ZAP_TMC as Address,
-    abi: ZAP_TMC_ABI,
-    functionName: 'zapWithdrawFee',
-  });
-
-  return {
-    zapMintFee: zapMintFeeRaw ? Number(zapMintFeeRaw) / 100 : 0,
-    zapWithdrawFee: zapWithdrawFeeRaw ? Number(zapWithdrawFeeRaw) / 100 : 0,
-    isLoading: isLoadingMintFee || isLoadingWithdrawFee,
-    error: mintFeeError || withdrawFeeError,
-    raw: { zapMintFeeRaw, zapWithdrawFeeRaw },
-  };
-};
 
 const TMC_CONTRACTS: ResolvedZapContracts = {
   zap: BASE_CONTRACTS.ZAP_TMC as Address,

@@ -30,14 +30,38 @@ export interface RateLimitResult {
   reset: number;
 }
 
+// Evict by expiry, not insertion order: purge everything already expired, and
+// only if still at capacity drop the entry that expires soonest (it resets
+// first, so it's the least useful to keep). This stops an attacker from
+// flooding fresh keys to evict their own still-active limiter.
+function evictOne(now: number): void {
+  let purged = false;
+  for (const [key, value] of memoryStore) {
+    if (value.expiresAt <= now) {
+      memoryStore.delete(key);
+      purged = true;
+    }
+  }
+  if (purged || memoryStore.size < MEMORY_CACHE_MAX) return;
+
+  let soonestKey: string | undefined;
+  let soonest = Infinity;
+  for (const [key, value] of memoryStore) {
+    if (value.expiresAt < soonest) {
+      soonest = value.expiresAt;
+      soonestKey = key;
+    }
+  }
+  if (soonestKey) memoryStore.delete(soonestKey);
+}
+
 function memoryHit(fullKey: string, limit: number, windowSec: number): RateLimitResult {
   const now = Date.now();
   const entry = memoryStore.get(fullKey);
 
   if (!entry || entry.expiresAt <= now) {
     if (memoryStore.size >= MEMORY_CACHE_MAX) {
-      const firstKey = memoryStore.keys().next().value;
-      if (firstKey) memoryStore.delete(firstKey);
+      evictOne(now);
     }
     const fresh = { count: 1, expiresAt: now + windowSec * 1000 };
     memoryStore.set(fullKey, fresh);
@@ -49,17 +73,28 @@ function memoryHit(fullKey: string, limit: number, windowSec: number): RateLimit
   return { success: entry.count <= limit, limit, remaining, reset: entry.expiresAt };
 }
 
+// Atomic fixed-window counter: INCR, set the TTL on first hit, and read the TTL
+// back — all in one server-side script so a crash between INCR and EXPIRE can
+// never leave a key without a TTL (which would ban the IP forever). Also cuts
+// the 3 round-trips down to 1.
+const RATE_LIMIT_LUA = `
+local current = redis.call('INCR', KEYS[1])
+if current == 1 then
+  redis.call('EXPIRE', KEYS[1], ARGV[1])
+end
+return {current, redis.call('TTL', KEYS[1])}
+`;
+
 export async function rateLimit(request: Request, options: RateLimitOptions): Promise<RateLimitResult> {
   const identifier = options.identifier ?? getClientIp(request);
   const fullKey = `ratelimit:${options.key}:${identifier}`;
 
   if (redisClient) {
     try {
-      const count = await redisClient.incr(fullKey);
-      if (count === 1) {
-        await redisClient.expire(fullKey, options.windowSec);
-      }
-      const ttl = await redisClient.ttl(fullKey);
+      const [count, ttl] = (await redisClient.eval(RATE_LIMIT_LUA, 1, fullKey, options.windowSec)) as [
+        number,
+        number,
+      ];
       const reset = Date.now() + (ttl > 0 ? ttl * 1000 : options.windowSec * 1000);
       const remaining = Math.max(0, options.limit - count);
       return { success: count <= options.limit, limit: options.limit, remaining, reset };

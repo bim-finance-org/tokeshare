@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const tokenInfo = COMMODITY_TOKENS[commodity.name];
   const title = `${commodity.name} · Tokeshare`;
   const description = tokenInfo
-    ? `Trade tokenized ${commodity.name} (${tokenInfo.symbol}) on Tokeshare — buy, sell or swap.`
+    ? `Swap tokenized ${commodity.name} (${tokenInfo.symbol}) on Tokeshare.`
     : `Trade tokenized ${commodity.name} on Tokeshare.`;
   return {
     title,
@@ -116,7 +116,7 @@ const CommodityPage = async ({ params }: PageProps) => {
           <h2 className="text-center text-2xl sm:text-3xl text-color4 font-semibold mb-4 sm:mb-8">
             Trade {tokenInfo.symbol}
             <span className="block text-base sm:text-lg text-color4/80 mt-2 font-normal">
-              Buy, Sell, or Swap {tokenInfo.tradeName}
+              Swap {tokenInfo.tradeName}
             </span>
           </h2>
           <Exchange tokenSymbol={tokenInfo.symbol} />

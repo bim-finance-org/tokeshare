@@ -14,13 +14,19 @@ const page = () => {
             secure and compliant way.
           </p>
         </div>
-        <button type="button" className="bg-color4 w-full sm:w-64 text-xl sm:text-2xl p-4 rounded-2xl my-8 sm:my-12 hover:scale-105">
+        <a
+          href="#properties"
+          className="inline-block text-center bg-color4 w-full sm:w-64 text-xl sm:text-2xl p-4 rounded-2xl my-8 sm:my-12 transition-transform hover:scale-105"
+        >
           Properties
-        </button>
+        </a>
       </div>
 
       {/* 🏡 Responsive Grid */}
-      <div className="flex flex-wrap justify-center gap-x-10 gap-y-10 max-w-7xl mx-auto px-4 mb-24 transform -translate-y-10 sm:-translate-y-20">
+      <div
+        id="properties"
+        className="flex flex-wrap justify-center gap-x-10 gap-y-10 max-w-7xl mx-auto px-4 mb-24 transform -translate-y-10 sm:-translate-y-20 scroll-mt-24"
+      >
         {housesData.map((house, index) => (
           <div key={index} className="w-full  max-w-lg flex justify-center">
             <HouseCard house={house} />

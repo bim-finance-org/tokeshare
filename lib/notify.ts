@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { parseError } from '@/lib/errors';
 import { getLogger } from '@/lib/logger';
@@ -17,11 +18,11 @@ export const notify = {
     });
   },
 
-  success(title: string, description?: string) {
-    return toast({ title, description });
+  success(title: string, description?: ReactNode) {
+    return toast({ variant: 'success', title, description });
   },
 
-  info(title: string, description?: string) {
+  info(title: string, description?: ReactNode) {
     return toast({ title, description });
   },
 };

@@ -10,9 +10,14 @@ import TSP500Icon from '@/components/icons/currency/TSP500Icon';
 import USDCIcon from '@/components/icons/currency/USDCIcon';
 import USDSIcon from '@/components/icons/currency/USDSIcon';
 import USDTIcon from '@/components/icons/currency/USDTIcon';
+import { ADDRESSES } from '@/contracts/addresses';
 import { Blockchain } from '@/enums/Blockchain';
 import { TokenType } from '@/enums/TokenType';
 import { IconComponent } from '@/types/Common';
+
+const POLY = ADDRESSES[Blockchain.Polygon];
+const BASE = ADDRESSES[Blockchain.Base];
+const ETH = ADDRESSES[Blockchain.Ethereum];
 
 export type TokenInfo = {
   symbol: string;
@@ -30,8 +35,8 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'TGG',
     name: 'Tokeshare Gold Gram',
     addresses: {
-      Polygon: '0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71',
-      Ethereum: '0x0764fF270AaCEdA56d0940327C50f8A199573A9b',
+      Polygon: POLY.TGG,
+      Ethereum: ETH.TGG,
     },
     decimals: 18,
     type: TokenType.Crypto,
@@ -42,7 +47,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'TSG',
     name: 'Tokeshare Silver Gram',
     addresses: {
-      Ethereum: '0x2544a889C03111853D8af56eb4bD010EDEE5E11f',
+      Ethereum: ETH.TSG,
     },
     decimals: 18,
     type: TokenType.Crypto,
@@ -53,7 +58,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'TMC',
     name: 'Tokeshare MarketCap 20 Index',
     addresses: {
-      Base: '0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4',
+      Base: BASE.TMC,
     },
     decimals: 18,
     type: TokenType.Crypto,
@@ -65,7 +70,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'TSP500',
     name: 'Tokeshare S&P500',
     addresses: {
-      Base: '0x9476d702Dc72242A7cEfBf802da8F09ddb305e51', // TODO: replace with deployed address
+      Base: BASE.TSP500,
     },
     decimals: 18,
     type: TokenType.Crypto,
@@ -76,7 +81,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'TFT_001',
     name: 'Tokeshare French Tacos',
     addresses: {
-      Base: '0xB48F4d5E455a6d67f26FE364a201F51FF71aaB26',
+      Base: BASE.TFT_001,
     },
     decimals: 18,
     type: TokenType.Crypto,
@@ -86,9 +91,9 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'USDC',
     name: 'USD Coin',
     addresses: {
-      Polygon: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
-      Base: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-      Ethereum: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      Polygon: POLY.USDC,
+      Base: BASE.USDC,
+      Ethereum: ETH.USDC,
     },
     decimals: 6,
     type: TokenType.Stablecoin,
@@ -99,8 +104,8 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'USDT',
     name: 'Tether USD',
     addresses: {
-      Polygon: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
-      Ethereum: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      Polygon: POLY.USDT,
+      Ethereum: ETH.USDT,
     },
     decimals: 6,
     type: TokenType.Stablecoin,
@@ -111,9 +116,9 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'DAI',
     name: 'Dai Stablecoin',
     addresses: {
-      Polygon: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
-      Base: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
-      Ethereum: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      Polygon: POLY.DAI,
+      Base: BASE.DAI,
+      Ethereum: ETH.DAI,
     },
     decimals: 18,
     type: TokenType.Stablecoin,
@@ -124,7 +129,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'EURS',
     name: 'Stasis Euro',
     addresses: {
-      Polygon: '0xE111178A87A3BFf0c8d18DECBa5798827539Ae99',
+      Polygon: POLY.EURS,
     },
     decimals: 2,
     type: TokenType.Stablecoin,
@@ -135,7 +140,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'USDCE',
     name: 'USD Coin Bridged',
     addresses: {
-      Polygon: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+      Polygon: POLY.USDCE,
     },
     decimals: 6,
     type: TokenType.Stablecoin,
@@ -146,7 +151,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'EURC',
     name: 'Euro Coin',
     addresses: {
-      Base: '0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42',
+      Base: BASE.EURC,
     },
     decimals: 6,
     type: TokenType.Stablecoin,
@@ -157,7 +162,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'CRVUSD',
     name: 'Curve USD',
     addresses: {
-      Base: '0x417Ac0e078398C154EdFadD9Ef675d30Be60Af93',
+      Base: BASE.CRVUSD,
     },
     decimals: 18,
     type: TokenType.Stablecoin,
@@ -168,7 +173,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'BOLD',
     name: 'Bold Stablecoin',
     addresses: {
-      Base: '0x03569cc076654f82679c4ba2124d64774781b01d',
+      Base: BASE.BOLD,
     },
     decimals: 18,
     type: TokenType.Stablecoin,
@@ -178,7 +183,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     symbol: 'USDS',
     name: 'Usds',
     addresses: {
-      Base: '0x820c137fa70c8691f0e44dc420a5e53c168921dc',
+      Base: BASE.USDS,
     },
     decimals: 18,
     type: TokenType.Stablecoin,

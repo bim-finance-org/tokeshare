@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
+import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { singleFlight } from '@/lib/singleFlight';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('api:paxg-price');
 
 const CACHE_KEY_PAXG_PRICE = 'paxg:price';
 const CACHE_EXPIRATION_SECONDS = 60;
@@ -26,8 +31,11 @@ async function getCachedOrFetch<Data>(
       age: Math.round((now - cached.timestamp) / MS_PER_SECOND),
     };
   }
-  const freshData = await fetcher();
-  await setCache(key, freshData, expiration);
+  const freshData = await singleFlight(key, async () => {
+    const fresh = await fetcher();
+    await setCache(key, fresh, expiration);
+    return fresh;
+  });
   return {
     data: freshData,
     source: 'cryptoprices-api',
@@ -56,7 +64,12 @@ async function fetchPaxgPrice(): Promise<CachedPrice> {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const limit = await rateLimit(request, { key: 'api:paxg-price', limit: 60, windowSec: 60 });
+  if (!limit.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: rateLimitHeaders(limit) });
+  }
+
   try {
     const { data, source, cachedAt, age } = await getCachedOrFetch<CachedPrice>(
       CACHE_KEY_PAXG_PRICE,
@@ -70,9 +83,7 @@ export async function GET() {
       age,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error retrieving PAXG price', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 },
-    );
+    log.error('PAXG price failed', error);
+    return NextResponse.json({ error: 'Error retrieving PAXG price' }, { status: 500 });
   }
 }

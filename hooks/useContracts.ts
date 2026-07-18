@@ -70,7 +70,7 @@ export function useZAPContract() {
 }
 
 // TSG (silver) is Ethereum-only, so the ZAP address is static (unlike TGG which
-// resolves per chain). Placeholder until the silver ZAP is deployed.
+// resolves per chain). The silver ZAP is deployed on Ethereum Mainnet.
 export function useZAPSilverContract() {
   return useZapHook(ZAP_ABI, getTSGContracts(Blockchain.Ethereum).ZAP as Address);
 }
