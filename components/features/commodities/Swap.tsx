@@ -24,6 +24,7 @@ import { TokenType } from '@/enums/TokenType';
 import { useSwapHandlerByToken } from '@/hooks/swapHandlers/useSwapHandlerByToken';
 import { useRefreshBalancesOnConfirm } from '@/hooks/useRefreshBalancesOnConfirm';
 import { notify } from '@/lib/notify';
+import { showSwapProgress, type SwapPhase } from '@/lib/swapToast';
 
 const EXPLORERS: Record<Blockchain, string> = {
   [Blockchain.Polygon]: 'https://polygonscan.com',
@@ -112,6 +113,31 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     );
   }, [isSwapConfirmed, hash, selectedBlockchain]);
 
+  // Derived swap phase. `isConfirming` keeps us in "processing" from the moment
+  // the tx hash exists until the receipt confirms — bridging the gap after
+  // signing where isPending is already false but the hash/receipt isn't in yet
+  // (in wagmi v2 hash lands as isPending flips, so the button never blinks back
+  // to "Swap"). Drives both the button and the progress toast.
+  const isConfirming = Boolean(hash) && !isSwapConfirmed;
+  const swapPhase: 'idle' | SwapPhase = isPending || isConfirming ? 'processing' : isPreparingSwap ? 'preparing' : 'idle';
+
+  // Mirror the phase into a single themed progress toast (preparing → processing
+  // with a progress bar). The success/error toasts replace it on settle. Calls
+  // the external toast store only — no component setState in the effect.
+  const swapProgressRef = useRef<ReturnType<typeof showSwapProgress> | null>(null);
+  useEffect(() => {
+    if (swapPhase === 'idle') {
+      // Flow ended: drop the handle so the next swap starts a fresh toast.
+      swapProgressRef.current = null;
+      return;
+    }
+    if (swapProgressRef.current) {
+      swapProgressRef.current.setPhase(swapPhase);
+    } else {
+      swapProgressRef.current = showSwapProgress(swapPhase);
+    }
+  }, [swapPhase]);
+
   const handleInputChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
       setInputAmount(amount);
@@ -188,14 +214,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     } catch (error: unknown) {
       notify.error(error);
     } finally {
+      // The write is fire-and-forget, so this resolves before signing. That's
+      // fine: once it resolves, isPending (then the hash → isConfirming) keep
+      // swapPhase on "processing" until the tx settles.
       setIsPreparingSwap(false);
     }
   };
-
-  // While the wagmi tx is pending we display the 'Transaction Processing'
-  // alert instead of 'Preparing swap'. Deriving this in render lets us drop
-  // the effect that used to flip isPreparingSwap on isPending.
-  const showPreparingAlert = isPreparingSwap && !isPending;
 
   // Déterminer quel widget est en entrée (modifiable) et lequel est en sortie (lecture seule)
   const topWidgetProps = {
@@ -252,8 +276,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
       hasValidAmount &&
       !isBelowMinimum &&
       !isInsufficientBalance &&
-      !isPending &&
-      !isPreparingSwap &&
+      swapPhase === 'idle' &&
       isOnCorrectChain,
   );
 
@@ -292,25 +315,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
       </div>
 
       <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-        {/* État de la transaction */}
-        {showPreparingAlert && (
-          <Alert className="bg-color1 border-black/5 rounded-xl text-color4">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <AlertTitle>Preparing Swap</AlertTitle>
-            <AlertDescription>
-              Checking balances and allowances. Please approve any pending transactions in your wallet.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {isPending && (
-          <Alert className="bg-color1 border-black/5 rounded-xl text-color4">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <AlertTitle>Transaction Processing</AlertTitle>
-            <AlertDescription>Your transaction is being processed. Please wait...</AlertDescription>
-          </Alert>
-        )}
-
+        {/* Swap progress is surfaced via a toast (see swapPhase effect). */}
         {isConnected && !isOnCorrectChain && (
           <Alert className="bg-amber-50 border-amber-200 text-amber-900 rounded-xl [&>svg]:text-amber-600">
             <AlertCircle className="h-4 w-4" />
@@ -406,12 +411,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
             }`}
             disabled={!canSwap}
           >
-            {isPreparingSwap ? (
+            {swapPhase === 'preparing' ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Preparing swap...</span>
               </>
-            ) : isPending ? (
+            ) : swapPhase === 'processing' ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Processing transaction...</span>
