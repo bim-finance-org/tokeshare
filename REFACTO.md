@@ -34,13 +34,13 @@ tous à `useZapSwap`.
 
 ## 🟡 Perf / précision
 
-- **Précision float→fixed-point** dans `computeTsgWithdrawAmount` (`hooks/useTsgSwap.ts`) :
-  `parseFloat(amount) * 10 ** 9`. **Fix** : `parseUnits` (même classe de bug que celle notée dans
-  l'audit précédent pour `useZapSwap`).
-- **Constante troy-ounce définie 3 fois, 2 échelles** : `constants/constants.ts:7` (`31.1034768`),
-  `hooks/useSwap.ts:9` et `hooks/useTsgSwap.ts:9` (`31_103_476_800`). `computeTggWithdrawAmount` et
-  `computeTsgWithdrawAmount` sont identiques à la constante près. **Fix** : constante partagée +
-  `computeGoldLikeWithdrawAmount(amount, fee, scaled)`.
+- ~~**Précision float→fixed-point** dans `computeTsgWithdrawAmount` : `parseFloat(amount) * 10 ** 9`.~~
+  ✅ Le `× 1e9` s'annulait avec le dénominateur et **dégradait** la précision (intermédiaire > 2^53) ;
+  remplacé par une division directe par `ONCE_DIVISION` (plus juste, pas de bigint car le résultat est
+  un ratio flottant).
+- ~~**Constante troy-ounce définie 3 fois, 2 échelles** ; `computeTgg/TsgWithdrawAmount` identiques.~~
+  ✅ `hooks/goldLikeWithdrawAmount.ts` partagé (TGG + TSG) ; `GRAMS_PER_TROY_OUNCE_SCALED` supprimé,
+  `ONCE_DIVISION` (constants.ts) = source unique.
 
 ---
 
@@ -92,7 +92,7 @@ tous à `useZapSwap`.
 | 9   | Rate-limit + anti-stampede + whitelist IDs sur routes APIs payantes      | 🟠       | ✅     | `rateLimit` 60/min + `singleFlight` sur 8 routes ; whitelist/normalisation IDs `/api/cmc` ; fuite `details` retirée                                                                                                                                                        |
 | 10  | Source unique pour les adresses de contrats                              | 🟠       | ✅     | `contracts/addresses.ts` = registre unique (par chaîne) ; `contracts.ts` + `TOKENS` dérivent ; vérifié value-preserving vs git HEAD ; corrige le mislabel TFT (Polygon→Base)                                                                                               |
 | 11  | Skeleton/loader cohérents + états prix/quote indisponibles               | 🟠       | ⏳     | `ExchangeSkeleton`, `Exchange`, `Swap`                                                                                                                                                                                                                                     |
-| 12  | Précision `parseUnits` + constante troy-ounce partagée                   | 🟡       | ⏳     | `useTsgSwap.ts`, `constants.ts`                                                                                                                                                                                                                                            |
+| 12  | Précision `parseUnits` + constante troy-ounce partagée                   | 🟡       | ✅     | `goldLikeWithdrawAmount` partagé (division directe par `ONCE_DIVISION`, précision corrigée) ; scaled 1e9 supprimé                                                                                                                                                          |
 | 13  | Headers de sécurité / CSP / X-Frame-Options                              | 🟢       | ⏳     | `next.config.ts` ou `middleware.ts`                                                                                                                                                                                                                                        |
 | 14  | A11y (labels, aria) + i18n EN + micro-copy                               | 🟢       | ⏳     | `TokenInput`, `DistributeFromWallet`, etc.                                                                                                                                                                                                                                 |
 | 15  | Socle de tests (compute\*WithdrawAmount, schémas Zod, ratelimit)         | 🟠       | ⏳     | aucun test aujourd'hui                                                                                                                                                                                                                                                     |
