@@ -1,67 +1,99 @@
 import Link from 'next/link';
+import Image from 'next/image';
+import type { Route } from 'next';
 import LinkedinIcon from '@/components/icons/social/LinkedinIcon';
 import XIcon from '@/components/icons/social/XIcon';
-import Image from 'next/image';
+
+type FooterLink = { href: Route; label: string };
+
+const MARKETPLACE_LINKS: FooterLink[] = [
+  { href: '/marketplace/real-estate', label: 'Real Estate' },
+  { href: '/marketplace/commodities', label: 'Commodities' },
+  { href: '/marketplace/stock-etf', label: 'Stock & ETF' },
+  { href: '/marketplace/other', label: 'Other' },
+];
+
+const INFORMATION_LINKS: FooterLink[] = [
+  { href: '/partners', label: 'Partners' },
+  { href: '/terms-of-service', label: 'Terms of Service' },
+  { href: '/privacy-policy', label: 'Privacy Policy' },
+  { href: '/general-disclaimer', label: 'General Disclaimer' },
+];
+
+const FooterColumn = ({ title, links }: { title: string; links: FooterLink[] }) => (
+  <div>
+    <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/40">{title}</h3>
+    <ul className="space-y-2.5">
+      {links.map(({ href, label }) => (
+        <li key={href}>
+          <Link href={href} className="text-sm text-white/70 transition-colors hover:text-white">
+            {label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 
 const Footer = () => {
   return (
-    <footer className="pt-12 bg-color4 text-white">
-      <div className="flex flex-col md:flex-row justify-around items-start p-8 pb-12 w-4/5 mx-auto">
-        <div className="mb-6 md:mb-0 relative w-[200px] h-[200px]">
-          <Image src="/logos/shorts/logo_tokeshare-04.webp" alt="Logo Tokeshare" fill className="object-contain" />
-        </div>
+    <footer className="bg-color4 text-white">
+      <div className="mx-auto max-w-6xl px-6 py-14">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-4 lg:gap-12">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <div className="relative h-14 w-14">
+              <Image src="/logos/shorts/logo_tokeshare-04.webp" alt="Tokeshare" fill className="object-contain" />
+            </div>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
+              Tokenized real-world assets, on-chain.
+            </p>
+            <div className="mt-6 flex items-center gap-4">
+              <Link
+                href="https://x.com/Tokeshare"
+                target="_blank"
+                aria-label="Tokeshare on X"
+                className="text-white/70 transition-all hover:scale-110 hover:text-white"
+              >
+                <XIcon size={40} />
+              </Link>
+              <Link
+                href="https://www.linkedin.com/company/tokeshare/"
+                target="_blank"
+                aria-label="Tokeshare on LinkedIn"
+                className="text-white/70 transition-all hover:scale-110 hover:text-white"
+              >
+                <LinkedinIcon size={40} />
+              </Link>
+            </div>
+          </div>
 
-        <div className="mb-6 md:mb-0">
-          <h1 className="text-xl font-bold text-color2 mb-4">MARKETPLACE</h1>
-          <ul className="space-y-2">
-            <li className="hover:underline cursor-pointer">
-              <Link href="/marketplace/real-estate">Real Estate</Link>
-            </li>
-            <li className="hover:underline cursor-pointer">
-              <Link href="/marketplace/commodities">Commodities</Link>
-            </li>
-            <li className="hover:underline cursor-pointer">
-              <Link href="/marketplace/stock-etf">Stock & ETF</Link>
-            </li>
-            <li className="hover:underline cursor-pointer">
-              <Link href="/marketplace/other">Other</Link>
-            </li>
-          </ul>
-        </div>
+          {/* Link columns */}
+          <FooterColumn title="Marketplace" links={MARKETPLACE_LINKS} />
+          <FooterColumn title="Information" links={INFORMATION_LINKS} />
 
-        <div className="mb-6 md:mb-0">
-          <h1 className="text-xl font-bold text-color2 mb-4">INFORMATION</h1>
-          <ul className="space-y-2">
-            <li className="hover:underline cursor-pointer">
-              <Link href="/partners">Partners</Link>
-            </li>
-            <li className="hover:underline cursor-pointer">
-              <Link href="/terms-of-service">Terms of Service</Link>
-            </li>
-            <li className="hover:underline cursor-pointer">
-              <Link href="/privacy-policy">Privacy Policy</Link>
-            </li>
-            <li className="hover:underline cursor-pointer">
-              <Link href="/general-disclaimer">General Disclaimer</Link>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h1 className="text-xl font-bold text-color2 mb-4">CONTACT US</h1>
-          <p className="mb-8 text-lg">contact@tokeshare.co</p>
-          <div className="flex space-x-4 text-2xl text-color2 mt-4">
-            <Link href="https://x.com/Tokeshare" target="_blank">
-              <XIcon size={56} className="hover:scale-105" />
-            </Link>
-            <Link href="https://www.linkedin.com/company/tokeshare/" target="_blank">
-              <LinkedinIcon size={56} className="hover:scale-105" />
-            </Link>
+          {/* Contact */}
+          <div>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/40">Contact</h3>
+            <a
+              href="mailto:contact@tokeshare.co"
+              className="text-sm text-white/70 transition-colors hover:text-white"
+            >
+              contact@tokeshare.co
+            </a>
           </div>
         </div>
       </div>
-      <div className="bg-color3 text-xl text-center py-2">
-        <p>© {new Date().getFullYear()} Tokeshare™. All Rights Reserved.</p>
+
+      {/* Bottom bar */}
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-5 text-xs text-white/45 sm:flex-row">
+          <p>© {new Date().getFullYear()} Tokeshare™. All rights reserved.</p>
+          <p className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-color2" />
+            Built on Polygon &amp; Base
+          </p>
+        </div>
       </div>
     </footer>
   );
