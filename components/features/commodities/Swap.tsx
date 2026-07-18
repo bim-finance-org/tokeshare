@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import TradeWidget from '@/components/shared/TradeWidget';
 import Image from 'next/image';
 import Blockchains from '@/components/shared/Blockchains';
-import { useAccount } from 'wagmi';
+import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { useTokenContext } from '@/context/TokenContexts';
 import { useSwapQuote } from '@/hooks/useSwapQuote';
@@ -29,6 +29,12 @@ export type SwapQuoteParams = {
   outputToken: Address;
   inputAmount: string;
   direction: SwapDirection;
+};
+
+const EXPLORERS: Record<Blockchain, string> = {
+  [Blockchain.Polygon]: 'https://polygonscan.com',
+  [Blockchain.Base]: 'https://basescan.org',
+  [Blockchain.Ethereum]: 'https://etherscan.io',
 };
 
 const Swap = ({ token }: { token: TokenInfo }) => {
@@ -84,6 +90,28 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   useEffect(() => {
     if (error) notify.error(error);
   }, [error]);
+
+  // Success feedback: fire a toast (with an explorer link) once the swap tx
+  // confirms on-chain, so the user gets a clear "done" signal instead of only
+  // a discreet truncated hash. Guarded by a ref so it fires once per hash.
+  const { isSuccess: isSwapConfirmed } = useWaitForTransactionReceipt({ hash: hash as `0x${string}` | undefined });
+  const notifiedHashRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!isSwapConfirmed || !hash || notifiedHashRef.current === hash) return;
+    notifiedHashRef.current = hash;
+    notify.success(
+      'Swap confirmed',
+      <a
+        href={`${EXPLORERS[selectedBlockchain]}/tx/${hash}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 underline hover:no-underline"
+      >
+        View on explorer
+        <ExternalLink className="h-3 w-3" />
+      </a>,
+    );
+  }, [isSwapConfirmed, hash, selectedBlockchain]);
 
   const handleInputChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
@@ -327,14 +355,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
                   {hash.slice(0, 6)}...{hash.slice(-4)}
                 </span>
                 <button type="button"
-                  onClick={() => {
-                    const explorers: Record<Blockchain, string> = {
-                      [Blockchain.Polygon]: 'https://polygonscan.com',
-                      [Blockchain.Base]: 'https://basescan.org',
-                      [Blockchain.Ethereum]: 'https://etherscan.io',
-                    };
-                    window.open(`${explorers[selectedBlockchain]}/tx/${hash}`, '_blank');
-                  }}
+                  onClick={() => window.open(`${EXPLORERS[selectedBlockchain]}/tx/${hash}`, '_blank')}
                   className="inline-flex items-center text-blue-600 hover:text-blue-800"
                 >
                   <ExternalLink className="h-3 w-3" />
