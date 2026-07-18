@@ -36,11 +36,12 @@ tous à `useZapSwap`.
 
 ### Code / SRP
 
-- **`useSwapQuote.ts` — SRP violé + copier-coller TSG.** `queryFn` de ~155 lignes (`:126-281`) avec
-  4 branches ; la branche TSG (`:179-229`) est quasi identique caractère pour caractère à la branche
-  TGG (`:130-177`). **Fix** : extraire `computeZapQuote({ getRoute, getConversion, underlying,
-underlyingDecimals })` : ~290 → ~120 lignes. Bonus : le hook monte `useSwap()` **et** `useTsgSwap()`
-  inconditionnellement (`:111-112`) même pour un quote TMC.
+- ~~**`useSwapQuote.ts` — SRP violé + copier-coller TSG.** `queryFn` de ~155 lignes avec 4 branches ;
+  TSG quasi identique à TGG.~~ ✅ Pattern stratégie (`hooks/swapQuote/`) : `computeZapQuote()` partagé
+  paramétré par `ZapQuoteConfig`, `computeTftQuote()`, registre `useQuoteStrategies()`. `useSwapQuote`
+  passe de **290 → 83 lignes**, plus aucun `if`. Comportement préservé (mêmes calculs/précisions/clé
+  de query). Le montage inconditionnel de `useSwap()`+`useTsgSwap()` reste (Rules of Hooks) mais isolé
+  dans `useQuoteStrategies`.
 
 - **Hooks morts avec bug de scaling latent.** `useZapTmcFees`/`useZapTsp500Fees`
   (`hooks/useTmcSwap.ts:12-40`, `hooks/useTsp500Swap.ts:12-40`) : zéro consommateur, 28 lignes
@@ -92,7 +93,8 @@ underlyingDecimals })` : ~290 → ~120 lignes. Bonus : le hook monte `useSwap()`
 - `BASE_TRUSTED_AGGREGATORS` == `TRUSTED_AGGREGATORS` (`contracts/contracts.ts:60-66`, valeurs
   identiques, l'un non utilisé).
 - `isTggFirst` (`Swap.tsx`) pilote désormais tous les tokens → renommer `isTokenFirst`.
-- `SwapQuoteParams` déclaré deux fois (`Swap.tsx:26` + `useSwapQuote.ts:22`).
+- ~~`SwapQuoteParams` déclaré deux fois (`Swap.tsx:26` + `useSwapQuote.ts:22`).~~ ✅ Centralisé dans
+  `hooks/swapQuote/types.ts`, importé partout.
 - `lib/snapshot.ts` : en-tête `// scripts/snapshot.ts` erroné, `ERC20_ABI` redéfini inline, RPC
   hardcodé `base.publicnode.com`, adresses dupliquées.
 - 4 casts `as Abi` résiduels (`useContracts.ts:35,57`, `useZapSwap.ts:142,147`) → `@wagmi/cli`.
@@ -122,7 +124,7 @@ underlyingDecimals })` : ~290 → ~120 lignes. Bonus : le hook monte `useSwap()`
 | 4   | Garde-fou solde insuffisant + bouton MAX + toast succès (Swap EVM)       | 🔴       | ✅     | Garde-fou solde + labels « Insufficient {token} balance » / « Enter an amount » (`Swap.tsx`) ; toast de succès + lien explorer à la confirmation (`notify.success` accepte un ReactNode). MAX déjà présent (`TradeWidget`) ; erreur brute déjà normalisée par `parseError` |
 | 5   | Bouton « Properties » mort + état wallet non connecté (portfolio)        | 🔴       | 🟡     | Bouton « Properties » corrigé (ancre `#properties` + `scroll-mt-24`, `real-estate/page.tsx`) ; état wallet non connecté (`user/dashboard`) reste à faire                                                                                                                   |
 | 6   | Supprimer hooks morts `useZapTmcFees`/`useZapTsp500Fees` (bug 100×)      | 🟠       | ⏳     | `useTmcSwap.ts`, `useTsp500Swap.ts`                                                                                                                                                                                                                                        |
-| 7   | Factoriser la branche quote TSG↔TGG (`computeZapQuote`)                  | 🟠       | ⏳     | `useSwapQuote.ts` ~290→~120                                                                                                                                                                                                                                                |
+| 7   | Factoriser la branche quote TSG↔TGG (`computeZapQuote`)                  | 🟠       | ✅     | Pattern stratégie (`hooks/swapQuote/`), `useSwapQuote` 290→83, comportement préservé + dedup `SwapQuoteParams`                                                                                                                                                             |
 | 8   | Rate-limit atomique (Lua) + garantie Redis en prod                       | 🟠       | ⏳     | `ratelimit.ts`, `redis.ts`                                                                                                                                                                                                                                                 |
 | 9   | Rate-limit + anti-stampede + whitelist IDs sur routes APIs payantes      | 🟠       | ⏳     | `cmc`, `cmc20/*`, `commodities/*`                                                                                                                                                                                                                                          |
 | 10  | Source unique pour les adresses de contrats                              | 🟠       | ⏳     | `contracts.ts` ⟷ `token.ts`                                                                                                                                                                                                                                                |
