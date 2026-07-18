@@ -170,7 +170,7 @@ tous à `useZapSwap`.
 | 1 | Retirer les textes « Buy, Sell » (UI + metadata SEO) | 🔴 | ✅ | « Swap {name} » sur tmc/tsp500/commodities + description SEO régénérée ; langage légal (terms-of-service) conservé |
 | 2 | Rate-limit + comparaison constant-time sur login admin | 🔴 | ⏳ | `authOptions.ts` + `ratelimit.ts` |
 | 3 | Corriger commentaire TSG + vérifier déploiement TSP500 (gater si besoin) | 🔴 | ⏳ | `contracts.ts`, `token.ts` |
-| 4 | Garde-fou solde insuffisant + bouton MAX + toast succès (Swap EVM) | 🔴 | ⏳ | `Swap.tsx`, `useZapSwap.ts` |
+| 4 | Garde-fou solde insuffisant + bouton MAX + toast succès (Swap EVM) | 🔴 | 🟡 | Garde-fou solde + label « Insufficient {token} balance » / « Enter an amount » ✅ (`Swap.tsx`). MAX déjà présent (`TradeWidget`/`MaxButton`). Erreur brute déjà normalisée par `parseError`. **Reste** : toast de succès à la confirmation |
 | 5 | Bouton « Properties » mort + état wallet non connecté (portfolio) | 🔴 | ⏳ | `real-estate/page.tsx`, `user/dashboard` |
 | 6 | Supprimer hooks morts `useZapTmcFees`/`useZapTsp500Fees` (bug 100×) | 🟠 | ⏳ | `useTmcSwap.ts`, `useTsp500Swap.ts` |
 | 7 | Factoriser la branche quote TSG↔TGG (`computeZapQuote`) | 🟠 | ⏳ | `useSwapQuote.ts` ~290→~120 |

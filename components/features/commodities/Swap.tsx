@@ -15,6 +15,7 @@ import { SwapDirection } from '@/enums/Directions';
 import { TokenInfo } from '@/config/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { getTokenAddress, getTokenBlockchains } from '@/utils/token';
+import { useTokenBalance } from '@/utils/blockchainUtils';
 import { useTokenPrice } from '@/hooks/useTokenPrice';
 import { ExchangeSection } from '@/enums/ExchangeSection';
 import { useAutoSwitchNetwork } from '@/hooks/useAutoSwitchNetwork';
@@ -201,6 +202,25 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   let arePricesAvailable;
   if (tokenPrice) arePricesAvailable = tokenPrice > 0 && !isLoadingQuote;
 
+  // Garde-fou de solde : le widget du haut est ce que l'utilisateur envoie.
+  // On compare le montant saisi au solde on-chain de ce token pour bloquer le
+  // swap AVANT qu'il ne revert (évite une approbation + du gas gaspillés).
+  const inputTokenSymbol = isTggFirst ? token.symbol : stablecoin;
+  const inputBalance = useTokenBalance(inputTokenSymbol, selectedBlockchain);
+  const parsedAmount = parseFloat(inputAmount);
+  const hasValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
+  const isInsufficientBalance = isConnected && hasValidAmount && parseFloat(inputBalance) < parsedAmount;
+
+  const canSwap = Boolean(
+    arePricesAvailable && hasValidAmount && !isInsufficientBalance && !isPending && !isPreparingSwap && isOnCorrectChain,
+  );
+
+  const swapButtonLabel = !hasValidAmount
+    ? 'Enter an amount'
+    : isInsufficientBalance
+      ? `Insufficient ${inputTokenSymbol} balance`
+      : 'Swap';
+
   return (
     <div className="p-3 sm:p-6 w-full relative">
       <div className="flex flex-col gap-4 sm:gap-6 relative">
@@ -330,11 +350,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           <button type="button"
             onClick={swaping}
             className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
-              arePricesAvailable && !isPending && !isPreparingSwap && isOnCorrectChain
-                ? 'bg-color4 text-white hover:bg-opacity-90'
-                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              canSwap ? 'bg-color4 text-white hover:bg-opacity-90' : 'bg-gray-400 text-gray-200 cursor-not-allowed'
             }`}
-            disabled={!arePricesAvailable || isPending || isPreparingSwap || !isOnCorrectChain}
+            disabled={!canSwap}
           >
             {isPreparingSwap ? (
               <>
@@ -347,7 +365,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
                 <span>Processing transaction...</span>
               </>
             ) : (
-              'Swap'
+              swapButtonLabel
             )}
           </button>
         ) : (
