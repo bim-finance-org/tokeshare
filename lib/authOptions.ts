@@ -1,7 +1,17 @@
 // lib/authOptions.ts
+import { createHash, timingSafeEqual } from 'crypto';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { rateLimit } from '@/lib/ratelimit';
+
+// Constant-time password check. Hashing both sides to a fixed-length digest
+// makes timingSafeEqual usable regardless of input length (it throws on length
+// mismatch) and avoids leaking the password length through the comparison.
+function passwordMatches(input: string, expected: string): boolean {
+  const inputHash = createHash('sha256').update(input).digest();
+  const expectedHash = createHash('sha256').update(expected).digest();
+  return timingSafeEqual(inputHash, expectedHash);
+}
 
 // The dashboard uses a single shared password, so the login endpoint is the
 // prime brute-force target. NextAuth's `authorize` receives a plain-object
@@ -47,7 +57,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Trop de tentatives de connexion. Réessayez dans une minute.');
         }
 
-        if (credentials.password === DASHBOARD_PASSWORD) {
+        if (passwordMatches(credentials.password, DASHBOARD_PASSWORD)) {
           return { id: '1', name: 'Dashboard Admin', role: 'admin' };
         }
         return null;

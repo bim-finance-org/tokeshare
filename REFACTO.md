@@ -57,8 +57,9 @@ tous à `useZapSwap`.
   via `rateLimit()` (Request reconstruit depuis les headers NextAuth) ; au-delà, throw d'un message
   distinct surfacé dans `DashboardLogin`.
 
-- **Comparaison de mot de passe non constant-time** (`lib/authOptions.ts:24`, `===`) → sensible au
-  timing. **Fix** : `crypto.timingSafeEqual`.
+- ~~**Comparaison de mot de passe non constant-time** (`lib/authOptions.ts:24`, `===`) → sensible au
+  timing.~~ ✅ `passwordMatches()` hashe les deux côtés en SHA-256 puis `crypto.timingSafeEqual`
+  (constant-time, longueur non fuitée).
 
 ### Config contrats
 
@@ -172,7 +173,7 @@ tous à `useZapSwap`.
 | # | Lot | Sévérité | Statut | Notes |
 |---|---|---|---|---|
 | 1 | Retirer les textes « Buy, Sell » (UI + metadata SEO) | 🔴 | ✅ | « Swap {name} » sur tmc/tsp500/commodities + description SEO régénérée ; langage légal (terms-of-service) conservé |
-| 2 | Rate-limit + comparaison constant-time sur login admin | 🔴 | 🟡 | Rate-limit 5/min/IP dans `authorize` ✅ ; **reste** : `crypto.timingSafeEqual` sur le mot de passe |
+| 2 | Rate-limit + comparaison constant-time sur login admin | 🔴 | ✅ | Rate-limit 5/min/IP dans `authorize` + `passwordMatches()` (SHA-256 → `timingSafeEqual`) |
 | 3 | Corriger commentaire TSG + vérifier déploiement TSP500 (gater si besoin) | 🔴 | ⏳ | `contracts.ts`, `token.ts` |
 | 4 | Garde-fou solde insuffisant + bouton MAX + toast succès (Swap EVM) | 🔴 | ✅ | Garde-fou solde + labels « Insufficient {token} balance » / « Enter an amount » (`Swap.tsx`) ; toast de succès + lien explorer à la confirmation (`notify.success` accepte un ReactNode). MAX déjà présent (`TradeWidget`) ; erreur brute déjà normalisée par `parseError` |
 | 5 | Bouton « Properties » mort + état wallet non connecté (portfolio) | 🔴 | 🟡 | Bouton « Properties » corrigé (ancre `#properties` + `scroll-mt-24`, `real-estate/page.tsx`) ; état wallet non connecté (`user/dashboard`) reste à faire |
