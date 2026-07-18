@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
 import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
 import { singleFlight } from '@/lib/singleFlight';
+import { getLogger } from '@/lib/logger';
 import { Period } from '@/enums/Period';
+
+const log = getLogger('api:paxg-perf');
 
 const COINGECKO_URL = 'https://api.coingecko.com/api/v3/coins/pax-gold/market_chart';
 
@@ -102,9 +105,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ ...data, source });
   } catch (e) {
-    return NextResponse.json(
-      { error: 'Failed to get PAXG performance', details: e instanceof Error ? e.message : e },
-      { status: 500 },
-    );
+    log.error('PAXG performance failed', e);
+    return NextResponse.json({ error: 'Failed to get PAXG performance' }, { status: 500 });
   }
 }

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
 import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
 import { singleFlight } from '@/lib/singleFlight';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('api:tsp500-price');
 
 const CACHE_KEY_TSP500_PRICE = 'tsp500:price';
 const CACHE_EXPIRATION_SECONDS = 60;
@@ -94,9 +97,7 @@ export async function GET(request: Request) {
       age,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error retrieving deSPXA price', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 },
-    );
+    log.error('deSPXA price failed', error);
+    return NextResponse.json({ error: 'Error retrieving deSPXA price' }, { status: 500 });
   }
 }

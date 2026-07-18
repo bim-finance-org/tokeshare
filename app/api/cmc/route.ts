@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
 import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('api:cmc');
 
 const CACHE_EXPIRATION_SECONDS = 20 * 60;
 const MS_PER_SECOND = 1000;
@@ -115,12 +118,7 @@ export async function GET(request: NextRequest) {
     const result = await getCachedOrFetch<CmcQuoteResponse>(cacheKey, () => fetchCoinMarketCap(cryptoIds));
     return NextResponse.json(result, { headers: rateLimitHeaders(limit) });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch data from CoinMarketCap',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 },
-    );
+    log.error('CoinMarketCap fetch failed', error);
+    return NextResponse.json({ error: 'Failed to fetch data from CoinMarketCap' }, { status: 500 });
   }
 }

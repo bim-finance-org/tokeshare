@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getFromCache, setCache } from '@/lib/redis';
 import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
 import { singleFlight } from '@/lib/singleFlight';
+import { getLogger } from '@/lib/logger';
+
+const log = getLogger('api:cmc20-constituents');
 
 const CACHE_KEY_CMC20_CONSTITUENTS = 'cmc20:constituents';
 const CACHE_EXPIRATION_SECONDS = 3600; // 1 hour cache (constituents don't change often)
@@ -129,9 +132,7 @@ export async function GET(request: Request) {
       age,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error retrieving CMC20 constituents', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 },
-    );
+    log.error('CMC20 constituents failed', error);
+    return NextResponse.json({ error: 'Error retrieving CMC20 constituents' }, { status: 500 });
   }
 }
