@@ -15,34 +15,12 @@ tous à `useZapSwap`.
 
 ---
 
-## 🟢 Hygiène
-
-- **Aucun header de sécurité / CSP / `X-Frame-Options`** (dashboard admin embeddable en iframe →
-  clickjacking). Pas de `headers()` dans `next.config.ts` ni `middleware.ts`.
-- **Modèle Prisma `Emails`** (`prisma/schema.prisma:11-13`) : email (PII) en clé primaire, pas de
-  `createdAt`/consentement/désinscription. (Bon point : réponse toujours `success` sur doublon → pas
-  d'énumération.)
-- **`snapshot` POST** (`app/api/snapshot/route.ts`) : bien auth-gated, mais scan Base coûteux
-  (`maxDuration=300`) sans rate-limit ni verrou « un à la fois ».
-- ~~`BASE_TRUSTED_AGGREGATORS` == `TRUSTED_AGGREGATORS` (valeurs identiques, l'un non utilisé).~~
-  ✅ `BASE_TRUSTED_AGGREGATORS` (0 usage) supprimé ; `TRUSTED_AGGREGATORS` = `AGGREGATORS` (source unique).
-- `isTggFirst` (`Swap.tsx`) pilote désormais tous les tokens → renommer `isTokenFirst`.
-- ~~`SwapQuoteParams` déclaré deux fois (`Swap.tsx:26` + `useSwapQuote.ts:22`).~~ ✅ Centralisé dans
-  `hooks/swapQuote/types.ts`, importé partout.
-- ~~`lib/snapshot.ts` : en-tête erroné, `ERC20_ABI` inline, RPC hardcodé, adresses dupliquées.~~
-  ✅ En-tête corrigé ; réutilise `ERC20_ABI` partagé, `PUBLIC_CLIENTS[Base]` (fallback + multicall)
-  et `ADDRESSES.Base.TFT_001`.
-- 4 casts `as Abi` résiduels (`useContracts.ts:35,57`, `useZapSwap.ts:142,147`) → `@wagmi/cli`.
-  **Reste** : mise en place d'outillage (dev-dep + codegen), à traiter séparément.
-
 ### Accessibilité / i18n / micro-copy
 
-- `components/shared/CryptoBalance.tsx:25` : « Balance: 0 » quand déconnecté (trompeur) → « — ».
-- `app/marketplace/other/page.tsx:8` : « Invest in **others** assets » → « other assets » ; page au
-  pluriel mais une seule carte.
-- `components/features/user/dashboard/AssetCard.tsx:29` : `href={… ?? '#'}` (lien mort si pas d'URL).
-- `components/features/real-estate/HouseCard.tsx:94-103` : « Learn More » grisé sans dire pourquoi
-  (« Coming soon »).
+- ~~`CryptoBalance` : « Balance: 0 » quand déconnecté (trompeur).~~ ✅ « Balance: — ».
+- ~~`app/marketplace/other/page.tsx` : « Invest in **others** assets ».~~ ✅ « other assets ».
+- ~~`AssetCard` : `href={… ?? '#'}` (lien mort).~~ ✅ Bouton masqué si pas d'`internalUrl`.
+- ~~`HouseCard` : « Learn More » grisé sans explication.~~ ✅ « Coming soon » sur le CTA désactivé.
 
 ---
 
@@ -63,8 +41,8 @@ tous à `useZapSwap`.
 | 11  | Skeleton/loader cohérents + états prix/quote indisponibles               | 🟠       | ⏳     | `ExchangeSkeleton`, `Exchange`, `Swap`                                                                                                                                                                                                                                     |
 | 12  | Précision `parseUnits` + constante troy-ounce partagée                   | 🟡       | ✅     | `goldLikeWithdrawAmount` partagé (division directe par `ONCE_DIVISION`, précision corrigée) ; scaled 1e9 supprimé                                                                                                                                                          |
 | 13  | Headers de sécurité / CSP / X-Frame-Options                              | 🟢       | 🟡     | Headers ajoutés (`next.config.ts`) ; CSP resource complet (allowlist wallet/RPC) reste à faire                                                                                                                                                                             |
-| 14  | A11y (labels, aria) + i18n EN + micro-copy                               | 🟢       | ⏳     | `TokenInput`, `DistributeFromWallet`, etc.                                                                                                                                                                                                                                 |
+| 14  | A11y (labels, aria) + i18n EN + micro-copy                               | 🟢       | ✅     | Micro-copy corrigée (CryptoBalance, other, AssetCard, HouseCard)                                                                                                                                                                                                           |
 | 15  | Socle de tests (compute\*WithdrawAmount, schémas Zod, ratelimit)         | 🟠       | ⏳     | aucun test aujourd'hui                                                                                                                                                                                                                                                     |
-| 16  | Nettoyage : `@wagmi/cli`, aggregators dupliqués, scories `snapshot.ts`   | 🟢       | 🟡     | Aggregators dédupliqués + `snapshot.ts` nettoyé + `isTggFirst`→`isTokenFirst` + Prisma Emails + snapshot lock ; **reste** `@wagmi/cli`                                                                                                                                      |
+| 16  | Nettoyage : `@wagmi/cli`, aggregators dupliqués, scories `snapshot.ts`   | 🟢       | 🟡     | Aggregators dédupliqués + `snapshot.ts` nettoyé + `isTggFirst`→`isTokenFirst` + Prisma Emails + snapshot lock ; **reste** `@wagmi/cli`                                                                                                                                     |
 
 Légende : ✅ done · 🟡 partiel · ⏳ à faire
