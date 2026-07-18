@@ -22,12 +22,16 @@ const Exchange: React.FC<ExchangeProps> = ({ tokenSymbol }) => {
 
   return (
     <div className="flex flex-col bg-white rounded-3xl overflow-hidden w-[calc(100%-16px)] sm:w-11/12 mx-auto max-w-md sm:max-w-lg my-8 sm:my-16 ring-1 ring-black/5 shadow-[0_24px_60px_-24px_rgba(20,20,45,0.28)]">
-      <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <span className="text-base sm:text-lg font-titleSemibold text-color4">Swap</span>
-          <span className="h-1.5 w-1.5 rounded-full bg-color2" />
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-gray-100">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="truncate text-base sm:text-lg font-titleSemibold text-color4">
+            {token ? `Swap ${token.name}` : 'Swap'}
+          </span>
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-color2" />
         </div>
-        <span className="text-[11px] sm:text-xs font-medium tracking-wide text-gray-400">Instant · On-chain</span>
+        <span className="shrink-0 text-[11px] sm:text-xs font-medium tracking-wide text-gray-400">
+          Instant · On-chain
+        </span>
       </div>
 
       {isLoading || !token ? (

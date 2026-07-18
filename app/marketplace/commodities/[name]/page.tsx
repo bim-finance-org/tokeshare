@@ -113,12 +113,6 @@ const CommodityPage = async ({ params }: PageProps) => {
         </div>
 
         <div className="bg-white/5 rounded-2xl backdrop-blur-sm p-4 sm:p-6">
-          <h2 className="text-center text-2xl sm:text-3xl text-color4 font-semibold mb-4 sm:mb-8">
-            Trade {tokenInfo.symbol}
-            <span className="block text-base sm:text-lg text-color4/80 mt-2 font-normal">
-              Swap {tokenInfo.tradeName}
-            </span>
-          </h2>
           <Exchange tokenSymbol={tokenInfo.symbol} />
         </div>
       </div>

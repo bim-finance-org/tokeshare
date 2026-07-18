@@ -22,12 +22,6 @@ const TSP500Page = () => {
 
         {/* Trading Section */}
         <div className="bg-white/5 rounded-2xl backdrop-blur-sm p-4 sm:p-6">
-          <h2 className="text-center text-2xl sm:text-3xl text-color4 font-semibold mb-4 sm:mb-8">
-            Trade TSP500
-            <span className="block text-base sm:text-lg text-color4/80 mt-2 font-normal">
-              Swap Tokeshare S&amp;P500
-            </span>
-          </h2>
           <Exchange tokenSymbol="TSP500" />
         </div>
       </div>
