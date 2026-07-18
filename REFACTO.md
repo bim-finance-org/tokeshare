@@ -167,7 +167,7 @@ tous à `useZapSwap`.
 
 | # | Lot | Sévérité | Statut | Notes |
 |---|---|---|---|---|
-| 1 | Retirer les textes « Buy, Sell » (UI + metadata SEO) | 🔴 | ⏳ | 4 fichiers ; conformité EU |
+| 1 | Retirer les textes « Buy, Sell » (UI + metadata SEO) | 🔴 | ✅ | « Swap {name} » sur tmc/tsp500/commodities + description SEO régénérée ; langage légal (terms-of-service) conservé |
 | 2 | Rate-limit + comparaison constant-time sur login admin | 🔴 | ⏳ | `authOptions.ts` + `ratelimit.ts` |
 | 3 | Corriger commentaire TSG + vérifier déploiement TSP500 (gater si besoin) | 🔴 | ⏳ | `contracts.ts`, `token.ts` |
 | 4 | Garde-fou solde insuffisant + bouton MAX + toast succès (Swap EVM) | 🔴 | ⏳ | `Swap.tsx`, `useZapSwap.ts` |
