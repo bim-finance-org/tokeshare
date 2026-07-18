@@ -30,14 +30,38 @@ export interface RateLimitResult {
   reset: number;
 }
 
+// Evict by expiry, not insertion order: purge everything already expired, and
+// only if still at capacity drop the entry that expires soonest (it resets
+// first, so it's the least useful to keep). This stops an attacker from
+// flooding fresh keys to evict their own still-active limiter.
+function evictOne(now: number): void {
+  let purged = false;
+  for (const [key, value] of memoryStore) {
+    if (value.expiresAt <= now) {
+      memoryStore.delete(key);
+      purged = true;
+    }
+  }
+  if (purged || memoryStore.size < MEMORY_CACHE_MAX) return;
+
+  let soonestKey: string | undefined;
+  let soonest = Infinity;
+  for (const [key, value] of memoryStore) {
+    if (value.expiresAt < soonest) {
+      soonest = value.expiresAt;
+      soonestKey = key;
+    }
+  }
+  if (soonestKey) memoryStore.delete(soonestKey);
+}
+
 function memoryHit(fullKey: string, limit: number, windowSec: number): RateLimitResult {
   const now = Date.now();
   const entry = memoryStore.get(fullKey);
 
   if (!entry || entry.expiresAt <= now) {
     if (memoryStore.size >= MEMORY_CACHE_MAX) {
-      const firstKey = memoryStore.keys().next().value;
-      if (firstKey) memoryStore.delete(firstKey);
+      evictOne(now);
     }
     const fresh = { count: 1, expiresAt: now + windowSec * 1000 };
     memoryStore.set(fullKey, fresh);
