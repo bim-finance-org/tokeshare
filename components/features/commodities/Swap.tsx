@@ -47,10 +47,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   const { isOnCorrectChain, isPending: isSwitchingNetwork, retry: retrySwitch } = useAutoSwitchNetwork(targetBlockchain);
 
   // Single source of truth: the value the user just typed into the editable
-  // (top) widget. Direction (`isTggFirst`) decides which token it represents.
+  // (top) widget. Direction (`isTokenFirst`) decides which token it represents.
   // The output amount is derived purely from the quote API.
   const [inputAmount, setInputAmount] = useState('10');
-  const [isTggFirst, setIsTggFirst] = useState(false);
+  const [isTokenFirst, setIsTokenFirst] = useState(false);
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
 
   const { isConnected, address } = useAccount();
@@ -65,12 +65,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   useRefreshBalancesOnConfirm(hash as `0x${string}` | undefined);
 
   const swapQuoteParams = useMemo<SwapQuoteParams | null>(() => {
-    const inputToken = getTokenAddress(isTggFirst ? token.symbol : stablecoin, selectedBlockchain);
-    const outputToken = getTokenAddress(isTggFirst ? stablecoin : token.symbol, selectedBlockchain);
+    const inputToken = getTokenAddress(isTokenFirst ? token.symbol : stablecoin, selectedBlockchain);
+    const outputToken = getTokenAddress(isTokenFirst ? stablecoin : token.symbol, selectedBlockchain);
     if (!inputToken || !outputToken) return null;
-    const direction = isTggFirst ? SwapDirection.TokenToStablecoin : SwapDirection.StablecoinToToken;
+    const direction = isTokenFirst ? SwapDirection.TokenToStablecoin : SwapDirection.StablecoinToToken;
     return { inputToken, outputToken, inputAmount, direction };
-  }, [isTggFirst, inputAmount, stablecoin, selectedBlockchain, token.symbol]);
+  }, [isTokenFirst, inputAmount, stablecoin, selectedBlockchain, token.symbol]);
 
   const {
     outputAmount: calculatedOutputAmount,
@@ -126,14 +126,14 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   };
 
   const handleSwap = () => {
-    const newIsTggFirst = !isTggFirst;
+    const newIsTggFirst = !isTokenFirst;
     if (newIsTggFirst && token.symbol === 'TFT_001') {
       setStablecoin('USDC');
     }
     // Carry over the calculated output as the new input so the visible amount
     // doesn't reset when the user flips direction.
     if (calculatedOutputAmount) setInputAmount(calculatedOutputAmount);
-    setIsTggFirst(newIsTggFirst);
+    setIsTokenFirst(newIsTggFirst);
   };
 
   // Préparation des informations d'échange
@@ -158,10 +158,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     // swapIn / swapOut both expect the token (crypto) amount:
     // - Stablecoin → Token: token amount is the OUTPUT (from the quote)
     // - Token → Stablecoin: token amount is the INPUT (user typed it)
-    const tokenAmount = isTggFirst ? inputAmount : outputAmount;
+    const tokenAmount = isTokenFirst ? inputAmount : outputAmount;
 
     try {
-      if (!isTggFirst) {
+      if (!isTokenFirst) {
         await swapIn({
           tokenSymbol: token.symbol,
           stablecoin,
@@ -195,9 +195,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   // Déterminer quel widget est en entrée (modifiable) et lequel est en sortie (lecture seule)
   const topWidgetProps = {
-    type: (isTggFirst ? TokenType.Crypto : TokenType.Stablecoin) as TokenType,
+    type: (isTokenFirst ? TokenType.Crypto : TokenType.Stablecoin) as TokenType,
     label: 'YOU SEND',
-    defaultToken: isTggFirst ? token.symbol : stablecoin,
+    defaultToken: isTokenFirst ? token.symbol : stablecoin,
     value: inputAmount,
     onValueChange: handleInputChange,
     onTokenChange: handleTokenChange,
@@ -206,12 +206,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     readOnly: false,
   };
 
-  const isTftSellMode = isTggFirst && token.symbol === 'TFT_001';
+  const isTftSellMode = isTokenFirst && token.symbol === 'TFT_001';
 
   const bottomWidgetProps = {
-    type: (isTggFirst ? TokenType.Stablecoin : TokenType.Crypto) as TokenType,
+    type: (isTokenFirst ? TokenType.Stablecoin : TokenType.Crypto) as TokenType,
     label: 'YOU RECEIVE',
-    defaultToken: isTggFirst ? (isTftSellMode ? 'USDC' : stablecoin) : token.symbol,
+    defaultToken: isTokenFirst ? (isTftSellMode ? 'USDC' : stablecoin) : token.symbol,
     value: outputAmount,
     onValueChange: () => {},
     onTokenChange: handleTokenChange,
@@ -232,7 +232,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   // Garde-fou de solde : le widget du haut est ce que l'utilisateur envoie.
   // On compare le montant saisi au solde on-chain de ce token pour bloquer le
   // swap AVANT qu'il ne revert (évite une approbation + du gas gaspillés).
-  const inputTokenSymbol = isTggFirst ? token.symbol : stablecoin;
+  const inputTokenSymbol = isTokenFirst ? token.symbol : stablecoin;
   const inputBalance = useTokenBalance(inputTokenSymbol, selectedBlockchain);
   const parsedAmount = parseFloat(inputAmount);
   const hasValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
