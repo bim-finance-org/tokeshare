@@ -22,6 +22,8 @@ export type ResolvedZapContracts = {
   zap: Address;
   baseToken: Address;
   paymentToken: Address;
+  /** Decimals of the payment token. Defaults to 18 (PAXG/CMC20/DESPXA); XAGM is 9. */
+  paymentDecimals?: number;
   /** Override the default chain slug derived from the blockchain. */
   kyberChain?: string;
 };
@@ -328,7 +330,8 @@ export function useZapSwap(config: UseZapSwapConfig) {
       }
 
       const conversion = await getConversion({ amount: params.amount, blockchain });
-      const paymentAmount = BigInt(Math.floor(conversion * Math.pow(10, 18))).toString();
+      const paymentDecimals = contracts.paymentDecimals ?? 18;
+      const paymentAmount = BigInt(Math.floor(conversion * Math.pow(10, paymentDecimals))).toString();
 
       const routeSummary = await getSwapRoute(
         {

@@ -2,6 +2,7 @@ import React from 'react';
 import ArrowDownIcon from '@/components/icons/arrows/ArrowDownIcon';
 import EURIcon from '@/components/icons/currency/EURIcon';
 import TGGIcon from '@/components/icons/currency/TGGIcon';
+import TSGIcon from '@/components/icons/currency/TSGIcon';
 import CHFIcon from '@/components/icons/currency/CHFIcon';
 import GBPIcon from '@/components/icons/currency/GBPIcon';
 import CADIcon from '@/components/icons/currency/CADIcon';
@@ -30,6 +31,7 @@ const TokenDisplay = ({
     <div className="flex items-center gap-1 sm:gap-2 border border-color4 rounded-lg p-1.5 sm:p-2 cursor-pointer" onClick={onTokenClick}>
       {token === 'EUR' && <EURIcon />}
       {token === 'TGG' && <TGGIcon />}
+      {token === 'TSG' && <TSGIcon />}
       {token === 'CHF' && <CHFIcon />}
       {token === 'GBP' && <GBPIcon />}
       {token === 'CAD' && <CADIcon />}

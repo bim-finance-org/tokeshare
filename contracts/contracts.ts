@@ -37,6 +37,26 @@ export const getTGGContracts = (blockchain: Blockchain): TGGContracts => {
   return TGG_CONTRACTS_BY_CHAIN[blockchain] ?? TGG_CONTRACTS_BY_CHAIN[Blockchain.Polygon];
 };
 
+// Contrats silver (TSG) sur Ethereum Mainnet.
+// XAGM (Matrixdock Silver) est le sous-jacent réel, l'équivalent du PAXG pour l'or :
+// 1 XAGM = 1 once troy d'argent. Le token TSG et le contrat ZAP ne sont pas encore
+// déployés — placeholders 0x0 à remplacer au lancement.
+export const ETH_SILVER_CONTRACTS = {
+  TSG: '0x2544a889C03111853D8af56eb4bD010EDEE5E11f',
+  ZAP: '0x608325b9e5a4b29f1d0d9238620cf3BbFD57AE10',
+  XAGM: '0x123ffe0a3C62878dcbee2742227dc8990058d9E1',
+};
+
+type TSGContracts = { TSG: string; ZAP: string; XAGM: string };
+
+const TSG_CONTRACTS_BY_CHAIN: Record<string, TSGContracts> = {
+  [Blockchain.Ethereum]: ETH_SILVER_CONTRACTS,
+};
+
+export const getTSGContracts = (blockchain: Blockchain): TSGContracts => {
+  return TSG_CONTRACTS_BY_CHAIN[blockchain] ?? TSG_CONTRACTS_BY_CHAIN[Blockchain.Ethereum];
+};
+
 export const BASE_TRUSTED_AGGREGATORS = {
   kyberSwap: '0x6131B5fae19EA4f9D964eAc0408E4408b66337b5',
 };

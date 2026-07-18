@@ -5,6 +5,7 @@ import EURCIcon from '@/components/icons/currency/EURCIcon';
 import EURSIcon from '@/components/icons/currency/EURSIcon';
 import TGGIcon from '@/components/icons/currency/TGGIcon';
 import TMCIcon from '@/components/icons/currency/TMCIcon';
+import TSGIcon from '@/components/icons/currency/TSGIcon';
 import TSP500Icon from '@/components/icons/currency/TSP500Icon';
 import USDCIcon from '@/components/icons/currency/USDCIcon';
 import USDSIcon from '@/components/icons/currency/USDSIcon';
@@ -36,6 +37,17 @@ export const TOKENS: Record<string, TokenInfo> = {
     type: TokenType.Crypto,
     icon: TGGIcon,
     internalUrl: '/marketplace/commodities/Gold',
+  },
+  TSG: {
+    symbol: 'TSG',
+    name: 'Tokeshare Silver Gram',
+    addresses: {
+      Ethereum: '0x2544a889C03111853D8af56eb4bD010EDEE5E11f',
+    },
+    decimals: 18,
+    type: TokenType.Crypto,
+    icon: TSGIcon,
+    internalUrl: '/marketplace/commodities/Silver',
   },
   TMC: {
     symbol: 'TMC',
