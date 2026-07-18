@@ -19,18 +19,16 @@ tous à `useZapSwap`.
 
 ### Sécurité / backend
 
-- **Rate-limit Redis non atomique** (`lib/ratelimit.ts:56-71`) : `INCR` puis `EXPIRE` séparés → si
-  l'`EXPIRE` échoue, clé sans TTL = IP bloquée à vie. **Fix** : script Lua / pipeline.
-- **Fallback rate-limit inefficace en serverless** : `memoryStore` par-instance → limite réelle =
-  limit × nb d'instances ; éviction par ordre d'insertion (un attaquant peut évincer son propre
-  limiteur).
-- **Routes vers APIs payantes sans rate-limit** (`cmc20/*`, `exchange-rates`, `tsp500/price`,
-  `commodities/*`) : protégées uniquement par le cache → cache stampede à l'expiration (N requêtes =
-  N appels payants), pas de single-flight.
-- **Cache-busting `/api/cmc`** (`app/api/cmc/route.ts:21-28`) : IDs non normalisés/whitelistés →
-  `1,2` vs `2,1` créent des clés distinctes, contournent le cache, consomment le quota CMC.
-- **Fuite d'infos dans les erreurs** : `details: error.message` renvoyé au client (`cmc`, `cmc20`,
-  `tsp500`, `commodities/*performance` propage même `Body: …` de l'API amont).
+- ~~**Rate-limit Redis non atomique** : `INCR` puis `EXPIRE` séparés → clé sans TTL possible.~~
+  ✅ Script Lua (`INCR` + `EXPIRE` + `TTL` en un eval atomique, 1 round-trip).
+- ~~**Fallback rate-limit inefficace en serverless** : éviction par ordre d'insertion.~~ ✅ Éviction
+  par expiration (`evictOne`) : purge des expirés puis drop du soonest-to-expire.
+- ~~**Routes vers APIs payantes sans rate-limit** + cache stampede.~~ ✅ `rateLimit` 60/min/IP sur les
+  8 routes + `singleFlight` (coalescing du miss) → 1 appel amont partagé.
+- ~~**Cache-busting `/api/cmc`** : IDs non normalisés/whitelistés.~~ ✅ Dedupe + whitelist (IDs
+  affichés) + tri + cap → clé de cache stable.
+- ~~**Fuite d'infos dans les erreurs** : `details: error.message` renvoyé au client.~~ ✅ `details`
+  retiré des 8 routes ; erreur loggée côté serveur (logger scopé), message générique au client.
 
 ---
 
@@ -90,8 +88,8 @@ tous à `useZapSwap`.
 | 5   | Bouton « Properties » mort + état wallet non connecté (portfolio)        | 🔴       | 🟡     | Bouton « Properties » corrigé (ancre `#properties` + `scroll-mt-24`, `real-estate/page.tsx`) ; état wallet non connecté (`user/dashboard`) reste à faire                                                                                                                   |
 | 6   | Supprimer hooks morts `useZapTmcFees`/`useZapTsp500Fees` (bug 100×)      | 🟠       | ✅     | Supprimés + import `useReadContract` orphelin ; ratios conservés (utilisés par le refacto quote)                                                                                                                                                                           |
 | 7   | Factoriser la branche quote TSG↔TGG (`computeZapQuote`)                  | 🟠       | ✅     | Pattern stratégie (`hooks/swapQuote/`), `useSwapQuote` 290→83, comportement préservé + dedup `SwapQuoteParams`                                                                                                                                                             |
-| 8   | Rate-limit atomique (Lua) + garantie Redis en prod                       | 🟠       | ⏳     | `ratelimit.ts`, `redis.ts`                                                                                                                                                                                                                                                 |
-| 9   | Rate-limit + anti-stampede + whitelist IDs sur routes APIs payantes      | 🟠       | ⏳     | `cmc`, `cmc20/*`, `commodities/*`                                                                                                                                                                                                                                          |
+| 8   | Rate-limit atomique (Lua) + éviction mémoire par expiration              | 🟠       | ✅     | Lua eval atomique + `evictOne` (`ratelimit.ts`) ; garantie Redis prod = hors-scope (infra)                                                                                                                                                                                 |
+| 9   | Rate-limit + anti-stampede + whitelist IDs sur routes APIs payantes      | 🟠       | ✅     | `rateLimit` 60/min + `singleFlight` sur 8 routes ; whitelist/normalisation IDs `/api/cmc` ; fuite `details` retirée                                                                                                                                                        |
 | 10  | Source unique pour les adresses de contrats                              | 🟠       | ✅     | `contracts/addresses.ts` = registre unique (par chaîne) ; `contracts.ts` + `TOKENS` dérivent ; vérifié value-preserving vs git HEAD ; corrige le mislabel TFT (Polygon→Base)                                                                                               |
 | 11  | Skeleton/loader cohérents + états prix/quote indisponibles               | 🟠       | ⏳     | `ExchangeSkeleton`, `Exchange`, `Swap`                                                                                                                                                                                                                                     |
 | 12  | Précision `parseUnits` + constante troy-ounce partagée                   | 🟡       | ⏳     | `useTsgSwap.ts`, `constants.ts`                                                                                                                                                                                                                                            |
