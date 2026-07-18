@@ -93,7 +93,14 @@ const PocStellarPage = () => {
           {/* Property card */}
           <section className="bg-white rounded-2xl shadow-md overflow-hidden">
             <div className="relative aspect-[3/2] w-full">
-              <Image src={PROPERTY.image} alt={PROPERTY.name} fill className="object-cover" priority />
+              <Image
+                src={PROPERTY.image}
+                alt={PROPERTY.name}
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+                priority
+              />
             </div>
             <div className="p-6 space-y-4">
               <div>

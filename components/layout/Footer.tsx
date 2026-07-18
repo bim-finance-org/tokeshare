@@ -43,7 +43,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="relative h-14 w-14">
-              <Image src="/logos/shorts/logo_tokeshare-04.webp" alt="Tokeshare" fill className="object-contain" />
+              <Image src="/logos/shorts/logo_tokeshare-04.webp" alt="Tokeshare" fill sizes="56px" className="object-contain" />
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
               Tokenized real-world assets, on-chain.

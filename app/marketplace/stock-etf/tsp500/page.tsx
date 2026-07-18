@@ -16,6 +16,7 @@ const TSP500Page = () => {
           logoSrc="/images/image_TSP500.png"
           image="/images/image_TSP500.webp"
           imageAlt="Tokeshare S&P500"
+          imagePriority
           baseContract={BASE_CONTRACTS.TSP500}
         />
 

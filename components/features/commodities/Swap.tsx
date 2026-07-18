@@ -301,7 +301,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
             className="flex items-center justify-center w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white ring-1 ring-black/10 shadow-md hover:scale-110 hover:rotate-180 active:scale-95 transition-transform duration-300"
           >
             <span className="relative w-5 h-5 sm:w-7 sm:h-7">
-              <Image src="/images/switch.png" alt="Swap" fill className="object-contain" />
+              <Image src="/images/switch.png" alt="Swap" fill sizes="28px" className="object-contain" />
             </span>
           </button>
         </div>

@@ -76,6 +76,7 @@ const PhotoCarousel = ({
                 alt={`${altPrefix} ${i + 1}`}
                 fill
                 sizes="(max-width: 1024px) 100vw, 720px"
+                priority={i === 0}
                 className={objectFit}
               />
             </div>
