@@ -10,8 +10,10 @@ Buy/Sell retiré proprement (aucune route ni composant zombie). La couche d'**ex
 est bien factorisée : `useSwap`/`useTsgSwap`/`useTmcSwap`/`useTsp500Swap` (32–65 lignes) délèguent
 tous à `useZapSwap`.
 
-**Manque structurel n°1** : aucun test dans le projet (pas de script `test`, aucun fichier
-`.test`/`.spec`). Pour une app qui manipule des paiements on-chain, c'est la dette la plus lourde.
+~~**Manque structurel n°1** : aucun test dans le projet.~~ ✅ Suite de non-régression Vitest ajoutée
+(62 tests / 13 fichiers) sur la logique pure critique : maths de swap, quotes, câblage des adresses,
+mapping d'erreurs, rate-limit, conversions de prix, schémas Zod, invariants de config. Script `npm test`.
+Reste à couvrir : hooks React / composants (nécessite jsdom + testing-library).
 
 ---
 
@@ -42,7 +44,7 @@ tous à `useZapSwap`.
 | 12  | Précision `parseUnits` + constante troy-ounce partagée                   | 🟡       | ✅     | `goldLikeWithdrawAmount` partagé (division directe par `ONCE_DIVISION`, précision corrigée) ; scaled 1e9 supprimé                                                                                                                                                          |
 | 13  | Headers de sécurité / CSP / X-Frame-Options                              | 🟢       | 🟡     | Headers ajoutés (`next.config.ts`) ; CSP resource complet (allowlist wallet/RPC) reste à faire                                                                                                                                                                             |
 | 14  | A11y (labels, aria) + i18n EN + micro-copy                               | 🟢       | ✅     | Micro-copy corrigée (CryptoBalance, other, AssetCard, HouseCard)                                                                                                                                                                                                           |
-| 15  | Socle de tests (compute\*WithdrawAmount, schémas Zod, ratelimit)         | 🟠       | ⏳     | aucun test aujourd'hui                                                                                                                                                                                                                                                     |
+| 15  | Socle de tests (compute\*WithdrawAmount, schémas Zod, ratelimit)         | 🟠       | ✅     | Vitest + 62 tests (13 fichiers) : swap math, quotes, adresses, erreurs, ratelimit, prix, Zod, config ; `npm test`. Reste hooks/composants (jsdom)                                                                                                                          |
 | 16  | Nettoyage : `@wagmi/cli`, aggregators dupliqués, scories `snapshot.ts`   | 🟢       | 🟡     | Aggregators dédupliqués + `snapshot.ts` nettoyé + `isTggFirst`→`isTokenFirst` + snapshot lock ; Prisma Emails écarté (inutile) ; **reste** `@wagmi/cli`                                                                                                                                     |
 
 Légende : ✅ done · 🟡 partiel · ⏳ à faire
