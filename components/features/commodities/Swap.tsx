@@ -347,22 +347,6 @@ const Swap = ({ token }: { token: TokenInfo }) => {
             </div>
           )}
 
-          {hash && (
-            <div className="flex items-center justify-between pt-2 border-t">
-              <span className="text-color4 text-xs sm:text-sm font-medium">Transaction:</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-black bg-gray-100 font-mono px-2 py-1 rounded">
-                  {hash.slice(0, 6)}...{hash.slice(-4)}
-                </span>
-                <button type="button"
-                  onClick={() => window.open(`${EXPLORERS[selectedBlockchain]}/tx/${hash}`, '_blank')}
-                  className="inline-flex items-center text-blue-600 hover:text-blue-800"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

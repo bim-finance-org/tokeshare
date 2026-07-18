@@ -19,7 +19,7 @@ export const notify = {
   },
 
   success(title: string, description?: ReactNode) {
-    return toast({ title, description });
+    return toast({ variant: 'success', title, description });
   },
 
   info(title: string, description?: ReactNode) {
