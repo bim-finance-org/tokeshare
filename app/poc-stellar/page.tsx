@@ -46,8 +46,10 @@ const PocStellarPage = () => {
     if (value === '' || /^\d*\.?\d*$/.test(value)) setTokenAmount(value);
   };
 
+  const payBalance = parseFloat(balances?.usdc ?? '0');
   const exceedsInventory = available > 0 && tokenNum > available;
-  const isInvalid = tokenNum <= 0 || exceedsInventory;
+  const insufficientPay = isConnected && cost > 0 && cost > payBalance;
+  const isInvalid = tokenNum <= 0 || exceedsInventory || insufficientPay;
 
   const handleBuy = () => {
     if (!isConnected) {
@@ -66,7 +68,9 @@ const PocStellarPage = () => {
         ? 'Not enough inventory'
         : tokenNum <= 0
           ? 'Enter an amount'
-          : `Buy ${tokenAmount} ${TOKEN_SYMBOL}`;
+          : insufficientPay
+            ? `Not enough ${PAY_SYMBOL}`
+            : `Buy ${tokenAmount} ${TOKEN_SYMBOL}`;
 
   return (
     <div className="min-h-screen bg-color1">
@@ -164,11 +168,19 @@ const PocStellarPage = () => {
             </div>
 
             {isConnected && (
-              <div className="flex items-center justify-between rounded-lg bg-color1 px-3 py-2 text-sm">
-                <span className="text-color6">Your balance</span>
-                <span className="font-medium text-color4">
-                  {fmtBalance(balances?.tres)} {TOKEN_SYMBOL}
-                </span>
+              <div className="rounded-lg bg-color1 px-3 py-2 text-sm space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-color6">Your {TOKEN_SYMBOL} balance</span>
+                  <span className="font-medium text-color4">
+                    {fmtBalance(balances?.tres)} {TOKEN_SYMBOL}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-color6">Your {PAY_SYMBOL} balance</span>
+                  <span className="font-medium text-color4">
+                    {fmtBalance(balances?.usdc)} {PAY_SYMBOL}
+                  </span>
+                </div>
               </div>
             )}
 
