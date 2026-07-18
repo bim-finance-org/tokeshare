@@ -40,8 +40,9 @@ tous à `useZapSwap`.
   « Purchase confirmed ». **Fix** : toast de succès + lien explorer. Aligner le feedback du Swap EVM
   sur la qualité du POC est le gain le plus rentable.
 
-- **Bouton « Properties » mort** — `app/marketplace/real-estate/page.tsx:17-19` : `<button>` sans
-  `onClick`/`Link` → impression de site cassé.
+- ~~**Bouton « Properties » mort** — `app/marketplace/real-estate/page.tsx:17-19` : `<button>` sans
+  `onClick`/`Link` → impression de site cassé.~~ ✅ Remplacé par une ancre `<a href="#properties">`
+  qui défile vers la grille (`id="properties"` + `scroll-mt-24`), sans quitter le Server Component.
 
 - **Portfolio : aucun état « wallet non connecté ».** `app/user/dashboard/page.tsx` +
   `hooks/useUserTokenAssets.ts:119` : query désactivée sans `address` → affiche « No assets found »
@@ -171,7 +172,7 @@ tous à `useZapSwap`.
 | 2 | Rate-limit + comparaison constant-time sur login admin | 🔴 | ⏳ | `authOptions.ts` + `ratelimit.ts` |
 | 3 | Corriger commentaire TSG + vérifier déploiement TSP500 (gater si besoin) | 🔴 | ⏳ | `contracts.ts`, `token.ts` |
 | 4 | Garde-fou solde insuffisant + bouton MAX + toast succès (Swap EVM) | 🔴 | ✅ | Garde-fou solde + labels « Insufficient {token} balance » / « Enter an amount » (`Swap.tsx`) ; toast de succès + lien explorer à la confirmation (`notify.success` accepte un ReactNode). MAX déjà présent (`TradeWidget`) ; erreur brute déjà normalisée par `parseError` |
-| 5 | Bouton « Properties » mort + état wallet non connecté (portfolio) | 🔴 | ⏳ | `real-estate/page.tsx`, `user/dashboard` |
+| 5 | Bouton « Properties » mort + état wallet non connecté (portfolio) | 🔴 | 🟡 | Bouton « Properties » corrigé (ancre `#properties` + `scroll-mt-24`, `real-estate/page.tsx`) ; état wallet non connecté (`user/dashboard`) reste à faire |
 | 6 | Supprimer hooks morts `useZapTmcFees`/`useZapTsp500Fees` (bug 100×) | 🟠 | ⏳ | `useTmcSwap.ts`, `useTsp500Swap.ts` |
 | 7 | Factoriser la branche quote TSG↔TGG (`computeZapQuote`) | 🟠 | ⏳ | `useSwapQuote.ts` ~290→~120 |
 | 8 | Rate-limit atomique (Lua) + garantie Redis en prod | 🟠 | ⏳ | `ratelimit.ts`, `redis.ts` |
