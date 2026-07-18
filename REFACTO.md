@@ -15,42 +15,7 @@ tous à `useZapSwap`.
 
 ---
 
-## 🔴 Critique / Haut impact
-
 ## 🟠 Important
-
-### Produit / UX
-
-- ~~**Skeleton incohérent** : `ExchangeSkeleton` affiche 3 onglets, mais le widget n'en a plus
-  qu'un.~~ ✅ Skeleton à un seul onglet.
-- ~~**Double chargement** : skeleton puis texte brut « Loading… ».~~ ✅ `SwapFormSkeleton` partagé
-  entre la frontière lazy et l'état de chargement d'`Exchange`.
-- ~~**Prix indisponible = bouton bloqué en silence** (`Swap.tsx`) : si `useTokenPrice` échoue, bouton
-  grisé sans explication.~~ ✅ Alerte « Price unavailable » + bouton Retry (`isError`/`refetch`
-  remontés dans les hooks de prix).
-- ~~**Quote muet sous 0.01** (`useSwapQuote.ts`) : « 0 » en sortie sans message.~~ ✅ Label bouton
-  « Minimum 0.01 {token} » + désactivation (seuil exporté).
-- ~~**POC Stellar** : pas de vérification du solde USDC avant l'achat.~~ ✅ Solde USDC affiché +
-  garde-fou « Not enough USDC ».
-- ~~**Input plafonné à 8 caractères** (`TokenInput.tsx`).~~ ✅ `maxLength` 8 → 12 + `inputMode=decimal`.
-
-### Code / SRP
-
-- ~~**`useSwapQuote.ts` — SRP violé + copier-coller TSG.** `queryFn` de ~155 lignes avec 4 branches ;
-  TSG quasi identique à TGG.~~ ✅ Pattern stratégie (`hooks/swapQuote/`) : `computeZapQuote()` partagé
-  paramétré par `ZapQuoteConfig`, `computeTftQuote()`, registre `useQuoteStrategies()`. `useSwapQuote`
-  passe de **290 → 83 lignes**, plus aucun `if`. Comportement préservé (mêmes calculs/précisions/clé
-  de query). Le montage inconditionnel de `useSwap()`+`useTsgSwap()` reste (Rules of Hooks) mais isolé
-  dans `useQuoteStrategies`.
-
-- ~~**Hooks morts avec bug de scaling latent.** `useZapTmcFees`/`useZapTsp500Fees` : zéro consommateur,
-  28 lignes dupliquées, divisent le fee par **100** vs **10000** dans `getZapFees` (100× d'écart).~~
-  ✅ Supprimés (+ import `useReadContract` orphelin) ; la vraie lecture de fee reste dans
-  `useZapSwap.getZapFees`.
-
-- **Adresses de contrats dupliquées** entre `contracts/contracts.ts` et `config/token.ts` (TGG, TSG,
-  TMC, TSP500, TFT…). Divergence silencieuse déjà visible (double TODO TSP500). **Fix** : une seule
-  source de vérité.
 
 ### Sécurité / backend
 
@@ -90,8 +55,8 @@ tous à `useZapSwap`.
   d'énumération.)
 - **`snapshot` POST** (`app/api/snapshot/route.ts`) : bien auth-gated, mais scan Base coûteux
   (`maxDuration=300`) sans rate-limit ni verrou « un à la fois ».
-- `BASE_TRUSTED_AGGREGATORS` == `TRUSTED_AGGREGATORS` (`contracts/contracts.ts:60-66`, valeurs
-  identiques, l'un non utilisé).
+- ~~`BASE_TRUSTED_AGGREGATORS` == `TRUSTED_AGGREGATORS` (valeurs identiques, l'un non utilisé).~~
+  ✅ `BASE_TRUSTED_AGGREGATORS` (0 usage) supprimé ; `TRUSTED_AGGREGATORS` = `AGGREGATORS` (source unique).
 - `isTggFirst` (`Swap.tsx`) pilote désormais tous les tokens → renommer `isTokenFirst`.
 - ~~`SwapQuoteParams` déclaré deux fois (`Swap.tsx:26` + `useSwapQuote.ts:22`).~~ ✅ Centralisé dans
   `hooks/swapQuote/types.ts`, importé partout.
@@ -123,11 +88,11 @@ tous à `useZapSwap`.
 | 3   | Corriger commentaire TSG + vérifier déploiement TSP500 (gater si besoin) | 🔴       | ✅     | Commentaires TSG corrigés (`contracts.ts`, `useContracts.ts`) ; TODO TSP500/ZAP_TSP500 retirés (déjà câblés en prod, confirmé)                                                                                                                                             |
 | 4   | Garde-fou solde insuffisant + bouton MAX + toast succès (Swap EVM)       | 🔴       | ✅     | Garde-fou solde + labels « Insufficient {token} balance » / « Enter an amount » (`Swap.tsx`) ; toast de succès + lien explorer à la confirmation (`notify.success` accepte un ReactNode). MAX déjà présent (`TradeWidget`) ; erreur brute déjà normalisée par `parseError` |
 | 5   | Bouton « Properties » mort + état wallet non connecté (portfolio)        | 🔴       | 🟡     | Bouton « Properties » corrigé (ancre `#properties` + `scroll-mt-24`, `real-estate/page.tsx`) ; état wallet non connecté (`user/dashboard`) reste à faire                                                                                                                   |
-| 6   | Supprimer hooks morts `useZapTmcFees`/`useZapTsp500Fees` (bug 100×)      | 🟠       | ✅     | Supprimés + import `useReadContract` orphelin ; ratios conservés (utilisés par le refacto quote)                                                                                                                                                                          |
+| 6   | Supprimer hooks morts `useZapTmcFees`/`useZapTsp500Fees` (bug 100×)      | 🟠       | ✅     | Supprimés + import `useReadContract` orphelin ; ratios conservés (utilisés par le refacto quote)                                                                                                                                                                           |
 | 7   | Factoriser la branche quote TSG↔TGG (`computeZapQuote`)                  | 🟠       | ✅     | Pattern stratégie (`hooks/swapQuote/`), `useSwapQuote` 290→83, comportement préservé + dedup `SwapQuoteParams`                                                                                                                                                             |
 | 8   | Rate-limit atomique (Lua) + garantie Redis en prod                       | 🟠       | ⏳     | `ratelimit.ts`, `redis.ts`                                                                                                                                                                                                                                                 |
 | 9   | Rate-limit + anti-stampede + whitelist IDs sur routes APIs payantes      | 🟠       | ⏳     | `cmc`, `cmc20/*`, `commodities/*`                                                                                                                                                                                                                                          |
-| 10  | Source unique pour les adresses de contrats                              | 🟠       | ⏳     | `contracts.ts` ⟷ `token.ts`                                                                                                                                                                                                                                                |
+| 10  | Source unique pour les adresses de contrats                              | 🟠       | ✅     | `contracts/addresses.ts` = registre unique (par chaîne) ; `contracts.ts` + `TOKENS` dérivent ; vérifié value-preserving vs git HEAD ; corrige le mislabel TFT (Polygon→Base)                                                                                               |
 | 11  | Skeleton/loader cohérents + états prix/quote indisponibles               | 🟠       | ⏳     | `ExchangeSkeleton`, `Exchange`, `Swap`                                                                                                                                                                                                                                     |
 | 12  | Précision `parseUnits` + constante troy-ounce partagée                   | 🟡       | ⏳     | `useTsgSwap.ts`, `constants.ts`                                                                                                                                                                                                                                            |
 | 13  | Headers de sécurité / CSP / X-Frame-Options                              | 🟢       | ⏳     | `next.config.ts` ou `middleware.ts`                                                                                                                                                                                                                                        |
