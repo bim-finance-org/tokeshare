@@ -18,6 +18,7 @@ describe('rateLimit (memory fallback)', () => {
 
     expect(r1.success).toBe(true);
     expect(r1.remaining).toBe(2);
+    expect(r2.remaining).toBe(1);
     expect(r3.success).toBe(true);
     expect(r3.remaining).toBe(0);
     expect(r4.success).toBe(false);
