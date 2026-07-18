@@ -9,7 +9,5 @@ datasource db {
 }
 
 model Emails {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  createdAt DateTime @default(now())
+  email String @id
 }
