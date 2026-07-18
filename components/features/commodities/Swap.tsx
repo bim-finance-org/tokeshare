@@ -14,7 +14,7 @@ import { Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 import { SwapDirection } from '@/enums/Directions';
 import { TokenInfo } from '@/config/token';
 import { Blockchain } from '@/enums/Blockchain';
-import { getTokenAddress } from '@/utils/token';
+import { getTokenAddress, getTokenBlockchains } from '@/utils/token';
 import { useTokenPrice } from '@/hooks/useTokenPrice';
 import { ExchangeSection } from '@/enums/ExchangeSection';
 import { useAutoSwitchNetwork } from '@/hooks/useAutoSwitchNetwork';
@@ -36,7 +36,14 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     updateSwapBlockchain: setSelectedBlockchain,
   } = useTokenContext();
 
-  const { isOnCorrectChain, isPending: isSwitchingNetwork, retry: retrySwitch } = useAutoSwitchNetwork(selectedBlockchain);
+  // The swap context defaults to Polygon, but a token may not support it (e.g.
+  // TSG is Ethereum-only). Target the token's actual chain so the auto-switch
+  // heads straight to the right network instead of briefly aiming at Polygon.
+  const availableBlockchains = useMemo(() => getTokenBlockchains(token.symbol), [token.symbol]);
+  const targetBlockchain = availableBlockchains.includes(selectedBlockchain)
+    ? selectedBlockchain
+    : (availableBlockchains[0] ?? selectedBlockchain);
+  const { isOnCorrectChain, isPending: isSwitchingNetwork, retry: retrySwitch } = useAutoSwitchNetwork(targetBlockchain);
 
   // Single source of truth: the value the user just typed into the editable
   // (top) widget. Direction (`isTggFirst`) decides which token it represents.
@@ -227,7 +234,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Wrong Network</AlertTitle>
             <AlertDescription className="flex flex-col gap-2">
-              <span>Please switch to {selectedBlockchain} network to continue.</span>
+              <span>Please switch to {targetBlockchain} network to continue.</span>
               {isSwitchingNetwork ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-3 w-3 animate-spin" />

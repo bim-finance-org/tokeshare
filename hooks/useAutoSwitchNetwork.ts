@@ -17,25 +17,27 @@ export function useAutoSwitchNetwork(blockchain: Blockchain) {
   const targetChainId = CHAIN_IDS[blockchain];
   const isOnCorrectChain = currentChainId === targetChainId;
 
-  // Tracks the chain we last auto-triggered a switch from. Using a ref means
-  // the de-dup logic does not require state and therefore can't cascade a
-  // render from inside the effect below.
-  const lastAttemptedFromChainRef = useRef<number | undefined>(undefined);
+  // Tracks the (from → to) pair we last auto-triggered a switch for. Using a ref
+  // means the de-dup logic does not require state and therefore can't cascade a
+  // render from inside the effect below. Keying on the target too means a change
+  // of desired chain (e.g. navigating to an Ethereum-only token) re-attempts.
+  const lastAttemptedKeyRef = useRef<string | undefined>(undefined);
 
   const attemptSwitch = useCallback(() => {
     if (!isConnected || !targetChainId || isOnCorrectChain) return;
     switchChain({ chainId: targetChainId });
   }, [isConnected, targetChainId, isOnCorrectChain, switchChain]);
 
-  // Auto-attempt the switch once per (wrong) chain. If the user dismisses
-  // the wallet prompt we won't loop; if they switch to a different wrong
-  // chain we will try again.
+  // Auto-attempt the switch once per (wrong) from→to pair. If the user dismisses
+  // the wallet prompt we won't loop; if they switch to a different wrong chain,
+  // or the target chain changes, we will try again.
   useEffect(() => {
     if (!isConnected || isOnCorrectChain || isPending) return;
-    if (lastAttemptedFromChainRef.current === currentChainId) return;
-    lastAttemptedFromChainRef.current = currentChainId;
+    const key = `${currentChainId}->${targetChainId}`;
+    if (lastAttemptedKeyRef.current === key) return;
+    lastAttemptedKeyRef.current = key;
     attemptSwitch();
-  }, [isConnected, isOnCorrectChain, isPending, currentChainId, attemptSwitch]);
+  }, [isConnected, isOnCorrectChain, isPending, currentChainId, targetChainId, attemptSwitch]);
 
   // Derived status — no state mirroring of wagmi inputs.
   const status: SwitchStatus = !isConnected
@@ -48,7 +50,7 @@ export function useAutoSwitchNetwork(blockchain: Blockchain) {
 
   // Manual retry resets the dedup gate so a click really re-attempts.
   const retry = () => {
-    lastAttemptedFromChainRef.current = undefined;
+    lastAttemptedKeyRef.current = undefined;
     attemptSwitch();
   };
 
