@@ -1,4 +1,5 @@
 import React from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TokenInputProps {
   label: string;
@@ -6,9 +7,10 @@ interface TokenInputProps {
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  loading?: boolean;
 }
 
-const TokenInput = ({ label, value, onChange, placeholder, disabled = false }: TokenInputProps) => {
+const TokenInput = ({ label, value, onChange, placeholder, disabled = false, loading = false }: TokenInputProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     // N'accepte que les chiffres et le point décimal
@@ -19,17 +21,23 @@ const TokenInput = ({ label, value, onChange, placeholder, disabled = false }: T
 
   return (
     <div className="w-26 sm:w-40">
-      <p className="text-color4 text-sm sm:text-lg font-medium">{label}</p>
-      <input
-        type="text"
-        value={value}
-        onChange={handleChange}
-        disabled={disabled}
-        placeholder={placeholder}
-        inputMode="decimal"
-        maxLength={12}
-        className="bg-transparent text-2xl text-color4 font-medium outline-none w-full px-2 py-1 transition-all duration-200"
-      />
+      <p className="text-gray-400 text-[11px] sm:text-xs font-semibold uppercase tracking-wider mb-0.5">{label}</p>
+      {loading ? (
+        <div className="py-1">
+          <Skeleton className="h-7 sm:h-9 w-24 sm:w-32 rounded-lg" />
+        </div>
+      ) : (
+        <input
+          type="text"
+          value={value}
+          onChange={handleChange}
+          disabled={disabled}
+          placeholder={placeholder}
+          inputMode="decimal"
+          maxLength={12}
+          className="bg-transparent text-2xl sm:text-3xl text-color4 font-titleSemibold outline-none w-full py-1 transition-all duration-200 placeholder:text-gray-300 disabled:cursor-default"
+        />
+      )}
     </div>
   );
 };

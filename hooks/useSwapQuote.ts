@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Blockchain } from '@/enums/Blockchain';
 import { useQuoteStrategies } from './swapQuote/useQuoteStrategies';
 import type { QuoteResult, SwapQuoteParams } from './swapQuote/types';
@@ -53,7 +53,14 @@ export const useSwapQuote = (
     !!params &&
     !!debouncedAmount &&
     !isNaN(Number(debouncedAmount)) &&
-    parseFloat(debouncedAmount) >= MINIMUM_AMOUNT_TO_GET_QUOTE;
+    parseFloat(debouncedAmount) >= MINIMUM_AMOUNT_TO_GET_QUOTE &&
+    // Only query once the amount has settled. The query key mixes instant params
+    // (tokens/direction) with the debounced amount, so flipping direction — which
+    // changes both at once — would otherwise fire a first quote with the new
+    // direction but the stale debounced amount, then a second once the debounce
+    // catches up (the "you receive" recalculating twice). Waiting for !isTyping
+    // keeps direction and amount consistent so a single quote runs.
+    !isTyping;
 
   const { data, isFetching, error } = useQuery<QuoteResult>({
     queryKey: [
@@ -66,6 +73,9 @@ export const useSwapQuote = (
       debouncedAmount,
     ],
     enabled,
+    // Keep the last quote visible during the debounce window instead of
+    // flashing the output back to "0" between a flip and the settled fetch.
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       if (!params) throw new Error('Missing swap params');
       const strategy = strategies[tokenSymbol];

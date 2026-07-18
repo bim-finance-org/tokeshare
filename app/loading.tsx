@@ -1,8 +1,8 @@
 export default function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-color3">
+    <div className="flex min-h-screen items-center justify-center bg-color1">
       <div
-        className="h-12 w-12 rounded-full border-4 border-color4 border-t-transparent animate-spin"
+        className="h-12 w-12 animate-spin rounded-full border-4 border-black/10 border-t-color4"
         aria-label="Loading"
         role="status"
       />

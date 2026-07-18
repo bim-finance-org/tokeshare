@@ -40,11 +40,15 @@ const HouseDetailPage = async ({ params }: PageProps) => {
   }
 
   return (
-    <div>
+    <div className="pb-12">
       <Head house={house} />
       <Info house={house} />
       <About />
-      <Map />
+      <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6">
+        <div className="overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5">
+          <Map />
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,56 +1,78 @@
 import React from 'react';
 import Image from 'next/image';
-import type { Route } from 'next';
-import { AssetData } from '@/interfaces/AssetData';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import type { Route } from 'next';
+import ChainIcon from '@/components/shared/ChainIcon';
 
-const AssetCard = ({ asset }: { asset: AssetData }) => {
+export interface PortfolioHolding {
+  name: string;
+  symbol: string;
+  amount: number;
+  totalPrice: number;
+  imageUrl?: string;
+  internalUrl?: string;
+  /** Chains this token is held on (aggregated). */
+  chains: string[];
+}
+
+interface AssetCardProps {
+  holding: PortfolioHolding;
+  share: number;
+  accent: string;
+  hidden?: boolean;
+}
+
+const AssetCard = ({ holding, share, accent, hidden }: AssetCardProps) => {
+  const blur = hidden ? 'select-none blur-[6px]' : '';
+
   return (
-    <div className="w-full bg-white/90 rounded-2xl shadow-lg flex items-center gap-2 md:gap-8 md:p-8 p-2">
-      {asset.imageUrl ? (
-        <div className="w-16 h-16 md:w-32 md:h-32 relative rounded-xl overflow-hidden border border-gray-100 shadow">
-          <Image src={asset.imageUrl} alt="Asset" fill className="object-contain p-3" />
+    <div className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-5">
+      {/* Logo */}
+      {holding.imageUrl ? (
+        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-color1 ring-1 ring-inset ring-black/5 sm:h-16 sm:w-16">
+          <Image src={holding.imageUrl} alt={holding.name} fill sizes="64px" className="object-contain p-2.5" />
         </div>
       ) : (
-        <div className="w-16 h-16 md:w-32 md:h-32 flex items-center justify-center bg-gray-100 text-gray-400 text-lg rounded-xl border">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-color1 text-xs text-gray-400 ring-1 ring-inset ring-black/5 sm:h-16 sm:w-16">
           No image
         </div>
       )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <p className="font-bold text-lg md:text-2xl text-gray-900 truncate">{asset.name}</p>
-            {asset.internalUrl && (
-              <Button
-                className="h-8 md:h-10 px-3 text-sm md:px-5 bg-indigo-100 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-200 font-semibold"
-                size="sm"
-                variant="outline"
+
+      {/* Name + meta */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+          <p className="truncate font-titleSemibold text-color4">{holding.name}</p>
+          <span className="flex shrink-0 items-center gap-1">
+            {holding.chains.map((chain) => (
+              <span
+                key={chain}
+                title={chain}
+                className="flex h-5 w-5 items-center justify-center rounded-full bg-color1 ring-1 ring-inset ring-black/5"
               >
-                <Link href={asset.internalUrl as Route} rel="noopener noreferrer" className="text-sm md:text-lg">
-                  View Asset
-                </Link>
-              </Button>
-            )}
-          </div>
-          <span className="bg-indigo-50 text-indigo-600 px-4 py-1 rounded-xl font-semibold text-sm md:text-lg shadow">
-            {asset.blockchain}
+                <ChainIcon chain={chain} size={13} />
+              </span>
+            ))}
           </span>
         </div>
-        <div className="flex gap-12 mt-6">
-          <div>
-            <span className="block text-gray-400 text-sm md:text-lg">Tokens</span>
-            <span className="font-semibold text-lg md:text-2xl text-gray-900">
-              {asset.amount.toFixed(4) + ' ' + asset.symbol}{' '}
-            </span>
-          </div>
-          <div>
-            <span className="block text-gray-400 text-sm md:text-lg">Total Value</span>
-            <span className="font-bold text-lg md:text-2xl text-indigo-700">
-              ${asset.totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-            </span>
-          </div>
+        <div className="mt-1.5 flex items-center gap-3 text-sm text-gray-500">
+          <span className={`tabular-nums ${blur}`}>
+            {holding.amount.toFixed(4)} {holding.symbol}
+          </span>
+          {holding.internalUrl && (
+            <Link href={holding.internalUrl as Route} className="font-medium text-color2 hover:underline">
+              View asset
+            </Link>
+          )}
         </div>
+      </div>
+
+      {/* Value */}
+      <div className="shrink-0 text-right">
+        <p className={`font-titleSemibold tabular-nums text-color4 ${blur}`}>
+          ${holding.totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+        </p>
+        <p className="text-xs tabular-nums text-gray-400">{share.toFixed(1)}%</p>
       </div>
     </div>
   );

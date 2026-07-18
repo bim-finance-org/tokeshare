@@ -24,11 +24,13 @@ const NAV_ITEMS = [
 
 const NavBar: React.FC<NavBarProps> = () => {
   const pathname = usePathname();
+  const isHome = pathname === '/';
 
-  const classNav =
-    pathname === '/'
-      ? 'bg-transparent text-color1 absolute top-10 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50'
-      : 'bg-color3 w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 z-50 transition-all duration-300 hover:shadow-lg';
+  // Home: transparent bar overlaying the hero. Everywhere else: a sticky navy
+  // bar consistent with the footer / cards.
+  const barClass = isHome
+    ? 'absolute top-6 sm:top-10 left-0 z-50 w-full'
+    : 'sticky top-0 z-50 w-full border-b border-white/10 bg-color4';
 
   return (
     <>
@@ -46,45 +48,48 @@ const NavBar: React.FC<NavBarProps> = () => {
         }}
       />
 
-      <nav role="navigation" aria-label="Main Navigation" className={classNav}>
-        {/* Logo */}
-        <div className="w-24 md:w-32">
-          <Link href="/" aria-label="Go to Home Page">
-            <Image
-              src="/logos/longs/tokeshare-07.webp"
-              alt="Tokeshare Logo"
-              width={128}
-              height={64}
-              className="w-full h-auto hover:scale-105 transition-transform"
-            />
-          </Link>
-        </div>
+      <nav role="navigation" aria-label="Main Navigation" className={barClass}>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 md:py-4 lg:px-10">
+          {/* Logo */}
+          <div className="w-24 shrink-0 md:w-28">
+            <Link href="/" aria-label="Go to Home Page">
+              <Image
+                src="/logos/longs/tokeshare-07.webp"
+                alt="Tokeshare Logo"
+                width={128}
+                height={64}
+                className="h-auto w-full transition-transform hover:scale-105"
+              />
+            </Link>
+          </div>
 
-        {/* Menu hamburger (mobile) */}
-        <MobileMenu />
-
-        {/* Menu Desktop */}
-        <div className="hidden custom-r:flex justify-center flex-1 max-w-screen-lg px-4 sm:px-6 md:px-8 lg:px-12">
-          <ul className="flex justify-between w-full space-x-4 md:space-x-6 lg:space-x-10">
-            {NAV_ITEMS.map(({ name, path }, index) => (
-              <li key={index} className="relative flex items-center">
-                <Link
-                  href={path}
-                  className={`
-                    whitespace-nowrap font-titleSemibold transition-transform transform hover:scale-105 text-shadow-lg
-                    ${pathname === path ? 'text-lg lg:text-2xl font-bold' : 'text-xl font-light'}
-                  `}
-                >
-                  {name}
-                </Link>
-              </li>
-            ))}
+          {/* Desktop menu */}
+          <ul className="hidden items-center gap-5 custom-r:flex lg:gap-8">
+            {NAV_ITEMS.map(({ name, path }) => {
+              const active = pathname === path;
+              return (
+                <li key={path}>
+                  <Link
+                    href={path}
+                    className={`relative whitespace-nowrap py-1 text-[15px] font-titleSemibold transition-colors ${
+                      active ? 'text-white' : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    {name}
+                    {active && (
+                      <span className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-color2" />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
-        </div>
 
-        {/* Bouton My Account */}
-        <div>
-          <ConnectButton isTransparent={true} navbarButton={true} />
+          {/* Right side: connect + mobile trigger */}
+          <div className="flex shrink-0 items-center gap-2">
+            <ConnectButton isTransparent={true} navbarButton={true} />
+            <MobileMenu />
+          </div>
         </div>
       </nav>
     </>

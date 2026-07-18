@@ -43,11 +43,11 @@ const MobileMenu: React.FC = () => {
 
       {isMenuOpen && (
         <div
-          className={`absolute top-14 left-1/2 w-full -translate-x-1/2 transform rounded-b-xl shadow-lg transition-all duration-300 custom-r:hidden ${
-            pathname === '/' ? 'border-t border-white/10 bg-black/70 backdrop-blur-md' : 'bg-color3'
+          className={`absolute left-1/2 top-14 w-full -translate-x-1/2 rounded-b-2xl border-t border-white/10 shadow-xl transition-all duration-300 custom-r:hidden ${
+            pathname === '/' ? 'bg-black/70 backdrop-blur-md' : 'bg-color4'
           }`}
         >
-          <ul className="flex flex-col items-start space-y-4 p-6">
+          <ul className="flex flex-col gap-1 p-3">
             {([
               { name: 'Home', path: '/' },
               { name: 'Real Estate', path: '/marketplace/real-estate' },
@@ -56,17 +56,23 @@ const MobileMenu: React.FC = () => {
               { name: 'Other', path: '/marketplace/other' },
               { name: 'Partners', path: '/partners' },
               { name: 'Dashboard', path: '/user/dashboard' },
-            ] as const).map(({ name, path }, index) => (
-              <li key={index} className="relative w-full">
-                <Link
-                  href={path}
-                  onClick={toggleMenu}
-                  className={`text-lg font-bold block w-full hover:text-gray-300 transition-colors [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] ${pathname === '/' ? 'text-color1' : 'text-color1'}`}
-                >
-                  <h3>{name}</h3>
-                </Link>
-              </li>
-            ))}
+            ] as const).map(({ name, path }) => {
+              const active = pathname === path;
+              return (
+                <li key={path} className="w-full">
+                  <Link
+                    href={path}
+                    onClick={toggleMenu}
+                    className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-base font-titleSemibold transition-colors ${
+                      active ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    {active && <span className="h-1.5 w-1.5 rounded-full bg-color2" />}
+                    {name}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

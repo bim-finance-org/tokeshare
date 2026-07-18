@@ -31,10 +31,10 @@ const MaxButton = ({ currency, blockchain, onMaxClick, className = '' }: MaxButt
     <button type="button"
       onClick={handleMaxClick}
       disabled={isDisabled}
-      className={`px-2 py-1 text-xs font-medium rounded transition-all duration-200 ${
+      className={`px-2.5 py-1 text-[11px] font-semibold tracking-wide rounded-lg transition-all duration-200 ${
         isDisabled
-          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          : 'bg-color4 text-white hover:bg-opacity-90 active:scale-95'
+          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          : 'bg-color4 text-white hover:bg-color2 active:scale-95'
       } ${className}`}
     >
       MAX

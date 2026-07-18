@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import ArrowIcon from '../../icons/arrows/ArrowIcon';
+import { ExternalLink } from 'lucide-react';
 import { Partner } from './partnersData';
 
 interface PartnerCardProps {
@@ -16,22 +16,23 @@ const PartnerCard: React.FC<PartnerCardProps> = ({ partner }) => {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`Visit ${name} website`}
-      className="group flex h-full flex-col rounded-2xl border border-black/5 bg-color7 p-6 shadow-sm
-                 transition-all duration-300 hover:-translate-y-1.5 hover:border-color2 hover:shadow-xl"
+      className="group flex h-full flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5 transition-shadow duration-300 hover:shadow-lg"
     >
       <div className="flex items-center justify-between gap-3">
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-black/5 bg-color1">
-          <Image src={logo} alt={`${name} logo`} fill sizes="64px" className="object-contain p-2.5" />
+        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-color1 ring-1 ring-inset ring-black/5">
+          <Image src={logo} alt={`${name} logo`} fill sizes="56px" className="object-contain p-2.5" />
         </div>
-        <span className="rounded-full bg-color5 px-3 py-1 text-xs text-color4">{category}</span>
+        <span className="rounded-full bg-color1 px-3 py-1 text-xs font-medium text-color4 ring-1 ring-inset ring-black/5">
+          {category}
+        </span>
       </div>
 
-      <h3 className="mt-5 text-xl text-color4">{name}</h3>
-      <p className="mt-2 flex-grow text-sm leading-relaxed text-color6 line-clamp-5">{description}</p>
+      <h3 className="mt-4 font-titleSemibold text-lg text-color4">{name}</h3>
+      <p className="mt-2 flex-grow text-sm leading-relaxed text-gray-500 line-clamp-5">{description}</p>
 
-      <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-color2">
+      <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-titleSemibold text-color2 transition-colors group-hover:text-color4">
         Visit website
-        <ArrowIcon size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+        <ExternalLink className="h-4 w-4" />
       </span>
     </a>
   );

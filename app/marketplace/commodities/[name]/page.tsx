@@ -1,12 +1,16 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 
 import commoditiesData from '@/data/commoditiesData.json';
 import Exchange from '@/components/features/commodities/ExchangeLazy';
-import Contracts from '@/components/shared/Contracts';
+import AssetPageHeader from '@/components/shared/AssetPageHeader';
 import CommoditiesInfos from '@/components/features/commodities/CommoditiesInfos';
 import { CONTRACTS, ETH_CONTRACTS, ETH_SILVER_CONTRACTS } from '@/contracts/contracts';
+import { Blockchain } from '@/enums/Blockchain';
+
+// Owner wallet is the same address on every chain (only the explorer link
+// differs), so it is stored once per token rather than per chain.
+const TOKESHARE_OWNER = '0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E';
 
 interface PageProps {
   params: Promise<{ name: string }>;
@@ -21,8 +25,9 @@ interface CommodityToken {
   tokenImage: string;
   polygonContract?: string;
   ethereumContract?: string;
-  proofOfReserveAddress: string;
-  proofOfReserveUrl: string;
+  ownerWallet?: string;
+  /** Proof-of-reserve address per chain (follows the network selector). */
+  proofOfReserve?: Partial<Record<Blockchain, string>>;
   onesheetUrl?: string;
 }
 
@@ -34,8 +39,12 @@ const COMMODITY_TOKENS: Record<string, CommodityToken> = {
     tokenImage: '/images/currencies/tgg.png',
     polygonContract: CONTRACTS.TGG,
     ethereumContract: ETH_CONTRACTS.TGG,
-    proofOfReserveAddress: CONTRACTS.TGG,
-    proofOfReserveUrl: `https://polygonscan.com/address/${CONTRACTS.TGG}`,
+    ownerWallet: TOKESHARE_OWNER,
+    // Proof of reserve is the TGG token contract on each chain.
+    proofOfReserve: {
+      [Blockchain.Polygon]: CONTRACTS.TGG,
+      [Blockchain.Ethereum]: ETH_CONTRACTS.TGG,
+    },
     onesheetUrl: '/TGG_Onesheet.pdf',
   },
   Silver: {
@@ -45,10 +54,12 @@ const COMMODITY_TOKENS: Record<string, CommodityToken> = {
     // TODO: replace with a dedicated TSG logo once available.
     tokenImage: '/images/img-silver.webp',
     ethereumContract: ETH_SILVER_CONTRACTS.TSG,
+    ownerWallet: TOKESHARE_OWNER,
     // Proof of reserve points to the XAGM underlying (the real silver reserve)
     // until the TSG token contract is deployed.
-    proofOfReserveAddress: ETH_SILVER_CONTRACTS.XAGM,
-    proofOfReserveUrl: `https://etherscan.io/address/${ETH_SILVER_CONTRACTS.XAGM}`,
+    proofOfReserve: {
+      [Blockchain.Ethereum]: ETH_SILVER_CONTRACTS.XAGM,
+    },
   },
 };
 
@@ -92,43 +103,30 @@ const CommodityPage = async ({ params }: PageProps) => {
   if (!tokenInfo) notFound();
 
   return (
-    <div className="max-w-6xl mx-auto py-6 sm:py-8 md:py-12 px-4 sm:px-6">
-      <div className="space-y-6 sm:space-y-8">
-        <div className="bg-white/5 rounded-2xl p-4 sm:p-6 backdrop-blur-sm">
-          <div className="flex flex-col items-center justify-between mb-4 sm:mb-6 md:flex-row gap-4">
-            <h1 className="text-2xl sm:text-3xl text-color4 font-semibold text-center md:text-left">
-              {tokenInfo.fullName}
-            </h1>
-            <Contracts polygonContract={tokenInfo.polygonContract} ethereumContract={tokenInfo.ethereumContract} />
-          </div>
+    <div className="max-w-6xl mx-auto py-6 sm:py-8 px-4 sm:px-6">
+      <div className="space-y-6">
+        <AssetPageHeader
+          symbol={tokenInfo.symbol}
+          title={tokenInfo.fullName}
+          logoSrc={tokenInfo.tokenImage}
+          image={commodity.image}
+          imageAlt={commodity.name}
+          polygonContract={tokenInfo.polygonContract}
+          ethereumContract={tokenInfo.ethereumContract}
+        />
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 p-4 sm:p-6">
-            <div className="relative">
-              <Image src={tokenInfo.tokenImage} alt={`${tokenInfo.symbol} Logo`} width={120} height={120} className="rounded-xl" />
-            </div>
-            <div className="relative mt-4 sm:mt-0">
-              <Image src={commodity.image} alt={commodity.name} width={200} height={200} className="rounded-xl" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/5 rounded-2xl backdrop-blur-sm p-4 sm:p-6">
-          <h2 className="text-center text-2xl sm:text-3xl text-color4 font-semibold mb-4 sm:mb-8">
-            Trade {tokenInfo.symbol}
-            <span className="block text-base sm:text-lg text-color4/80 mt-2 font-normal">
-              Swap {tokenInfo.tradeName}
-            </span>
-          </h2>
+        {/* Neutralize Exchange's built-in my-8/my-16 so the swap sits right under the header. */}
+        <div className="[&>*]:!my-0">
           <Exchange tokenSymbol={tokenInfo.symbol} />
         </div>
       </div>
-      <div className="pt-6 sm:pt-8 md:pt-12">
+      <div className="pt-6 sm:pt-8">
         <CommoditiesInfos
           tokenSymbol={tokenInfo.symbol}
           commodityName={commodity.name}
           fullName={tokenInfo.fullName}
-          proofOfReserveAddress={tokenInfo.proofOfReserveAddress}
-          proofOfReserveUrl={tokenInfo.proofOfReserveUrl}
+          ownerWallet={tokenInfo.ownerWallet}
+          proofOfReserve={tokenInfo.proofOfReserve}
           onesheetUrl={tokenInfo.onesheetUrl}
         />
       </div>

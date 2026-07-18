@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import TradeWidget from '@/components/shared/TradeWidget';
+import TradeWidget, { type TokenSelectorConfig } from '@/components/shared/TradeWidget';
+import TokenSelector from '@/components/shared/TokenSelector';
 import Image from 'next/image';
 import Blockchains from '@/components/shared/Blockchains';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
@@ -23,12 +24,8 @@ import { TokenType } from '@/enums/TokenType';
 import { useSwapHandlerByToken } from '@/hooks/swapHandlers/useSwapHandlerByToken';
 import { useRefreshBalancesOnConfirm } from '@/hooks/useRefreshBalancesOnConfirm';
 import { notify } from '@/lib/notify';
-
-const EXPLORERS: Record<Blockchain, string> = {
-  [Blockchain.Polygon]: 'https://polygonscan.com',
-  [Blockchain.Base]: 'https://basescan.org',
-  [Blockchain.Ethereum]: 'https://etherscan.io',
-};
+import { showSwapProgress, type SwapPhase } from '@/lib/swapToast';
+import { explorerTxUrl } from '@/utils/explorer';
 
 const Swap = ({ token }: { token: TokenInfo }) => {
   const {
@@ -52,6 +49,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   const [inputAmount, setInputAmount] = useState('10');
   const [isTokenFirst, setIsTokenFirst] = useState(false);
   const [isPreparingSwap, setIsPreparingSwap] = useState(false);
+  // Which widget (if any) asked to open the token list. Lifted here so the
+  // picker renders at the card level and covers the whole swap body.
+  const [tokenPicker, setTokenPicker] = useState<TokenSelectorConfig | null>(null);
 
   const { isConnected, address } = useAccount();
 
@@ -97,7 +97,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     notify.success(
       'Swap confirmed',
       <a
-        href={`${EXPLORERS[selectedBlockchain]}/tx/${hash}`}
+        href={explorerTxUrl(selectedBlockchain, hash)}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1 underline hover:no-underline"
@@ -107,6 +107,31 @@ const Swap = ({ token }: { token: TokenInfo }) => {
       </a>,
     );
   }, [isSwapConfirmed, hash, selectedBlockchain]);
+
+  // Derived swap phase. `isConfirming` keeps us in "processing" from the moment
+  // the tx hash exists until the receipt confirms — bridging the gap after
+  // signing where isPending is already false but the hash/receipt isn't in yet
+  // (in wagmi v2 hash lands as isPending flips, so the button never blinks back
+  // to "Swap"). Drives both the button and the progress toast.
+  const isConfirming = Boolean(hash) && !isSwapConfirmed;
+  const swapPhase: 'idle' | SwapPhase = isPending || isConfirming ? 'processing' : isPreparingSwap ? 'preparing' : 'idle';
+
+  // Mirror the phase into a single themed progress toast (preparing → processing
+  // with a progress bar). The success/error toasts replace it on settle. Calls
+  // the external toast store only — no component setState in the effect.
+  const swapProgressRef = useRef<ReturnType<typeof showSwapProgress> | null>(null);
+  useEffect(() => {
+    if (swapPhase === 'idle') {
+      // Flow ended: drop the handle so the next swap starts a fresh toast.
+      swapProgressRef.current = null;
+      return;
+    }
+    if (swapProgressRef.current) {
+      swapProgressRef.current.setPhase(swapPhase);
+    } else {
+      swapProgressRef.current = showSwapProgress(swapPhase);
+    }
+  }, [swapPhase]);
 
   const handleInputChange = (amount: string) => {
     if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
@@ -184,14 +209,12 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     } catch (error: unknown) {
       notify.error(error);
     } finally {
+      // The write is fire-and-forget, so this resolves before signing. That's
+      // fine: once it resolves, isPending (then the hash → isConfirming) keep
+      // swapPhase on "processing" until the tx settles.
       setIsPreparingSwap(false);
     }
   };
-
-  // While the wagmi tx is pending we display the 'Transaction Processing'
-  // alert instead of 'Preparing swap'. Deriving this in render lets us drop
-  // the effect that used to flip isPreparingSwap on isPending.
-  const showPreparingAlert = isPreparingSwap && !isPending;
 
   // Déterminer quel widget est en entrée (modifiable) et lequel est en sortie (lecture seule)
   const topWidgetProps = {
@@ -219,6 +242,8 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     showBalance: true,
     readOnly: true,
     lockedToken: isTftSellMode,
+    // Surface quote recomputation on the output field with a skeleton.
+    loading: isLoadingQuote,
   };
 
   // Vérifier si les prix sont disponibles pour permettre l'affichage
@@ -246,8 +271,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
       hasValidAmount &&
       !isBelowMinimum &&
       !isInsufficientBalance &&
-      !isPending &&
-      !isPreparingSwap &&
+      swapPhase === 'idle' &&
       isOnCorrectChain,
   );
 
@@ -261,42 +285,34 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   return (
     <div className="p-3 sm:p-6 w-full relative">
-      <div className="flex flex-col gap-4 sm:gap-6 relative">
-        <TradeWidget {...topWidgetProps} />
+      <div className="flex items-center justify-between mb-4 sm:mb-5">
+        <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-gray-400">Network</span>
+        <Blockchains section={ExchangeSection.Swap} onSelect={handleBlockchainSelect} tokenSymbol={token.symbol} />
+      </div>
 
-        <div className="z-10 pt-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <button type="button" onClick={handleSwap} className="relative w-10 h-10 sm:w-[60px] sm:h-[60px] hover:scale-110 active:scale-95 transition-transform duration-200">
-            <Image src="/images/switch.png" alt="Swap" fill className="object-contain" />
+      <div className="flex flex-col gap-4 sm:gap-6 relative">
+        <TradeWidget {...topWidgetProps} onOpenSelector={setTokenPicker} />
+
+        <div className="z-10 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <button
+            type="button"
+            onClick={handleSwap}
+            aria-label="Switch direction"
+            className="flex items-center justify-center w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white ring-1 ring-black/10 shadow-md hover:scale-110 hover:rotate-180 active:scale-95 transition-transform duration-300"
+          >
+            <span className="relative w-5 h-5 sm:w-7 sm:h-7">
+              <Image src="/images/switch.png" alt="Swap" fill className="object-contain" />
+            </span>
           </button>
         </div>
 
-        <TradeWidget {...bottomWidgetProps} />
+        <TradeWidget {...bottomWidgetProps} onOpenSelector={setTokenPicker} />
       </div>
 
       <div className="mb-4 sm:mb-6 mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-        <Blockchains section={ExchangeSection.Swap} onSelect={handleBlockchainSelect} tokenSymbol={token.symbol} />
-
-        {/* État de la transaction */}
-        {showPreparingAlert && (
-          <Alert className="bg-color1">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <AlertTitle>Preparing Swap</AlertTitle>
-            <AlertDescription>
-              Checking balances and allowances. Please approve any pending transactions in your wallet.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {isPending && (
-          <Alert className="bg-color1">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <AlertTitle>Transaction Processing</AlertTitle>
-            <AlertDescription>Your transaction is being processed. Please wait...</AlertDescription>
-          </Alert>
-        )}
-
+        {/* Swap progress is surfaced via a toast (see swapPhase effect). */}
         {isConnected && !isOnCorrectChain && (
-          <Alert className="bg-amber-500">
+          <Alert className="bg-amber-50 border-amber-200 text-amber-900 rounded-xl [&>svg]:text-amber-600">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Wrong Network</AlertTitle>
             <AlertDescription className="flex flex-col gap-2">
@@ -319,7 +335,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         )}
 
         {priceUnavailable && (
-          <Alert className="bg-amber-500">
+          <Alert className="bg-amber-50 border-amber-200 text-amber-900 rounded-xl [&>svg]:text-amber-600">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Price unavailable</AlertTitle>
             <AlertDescription className="flex flex-col gap-2">
@@ -336,44 +352,46 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         )}
 
         {/* Informations sur les prix */}
-        <div className="bg-color1 rounded-lg p-3 space-y-2 ">
+        <div className="bg-color1 rounded-2xl px-3.5 py-3 space-y-2.5 ring-1 ring-inset ring-black/5">
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">Delivery time:</span>
-            <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">Instant</Badge>
+            <span className="text-gray-500 text-xs sm:text-sm font-medium">Delivery time</span>
+            <span className="inline-flex items-center gap-1.5 text-color4 text-xs sm:text-sm font-semibold">
+              <span className="h-1.5 w-1.5 rounded-full bg-color3" />
+              Instant
+            </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-color4 text-xs sm:text-sm font-medium">{token.symbol} Price:</span>
+            <span className="text-gray-500 text-xs sm:text-sm font-medium">{token.symbol} Price</span>
             {isPriceLoading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <Skeleton className="h-4 w-16" />
               </div>
             ) : (
-              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">${tokenPrice?.toFixed(2)}</Badge>
+              <span className="text-color4 text-xs sm:text-sm font-semibold tabular-nums">${tokenPrice?.toFixed(2)}</span>
             )}
           </div>
 
-          <div className="flex items-center justify-between ">
-            <span className="text-color4 text-xs sm:text-sm font-medium">Exchange rate:</span>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-500 text-xs sm:text-sm font-medium">Exchange rate</span>
             {isPriceLoading || isLoadingQuote ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <Skeleton className="h-4 w-20" />
               </div>
             ) : (
-              <Badge className="text-xs sm:text-sm font-medium w-20 justify-center">{exchangeRateInfo()}</Badge>
+              <span className="text-color4 text-xs sm:text-sm font-semibold tabular-nums">{exchangeRateInfo()}</span>
             )}
           </div>
 
           {/* Afficher les erreurs de quote si il y en a */}
           {quoteError && (
-            <div className="flex items-center justify-between">
-              <span className="text-color4 text-xs sm:text-sm font-medium">Quote status:</span>
+            <div className="flex items-center justify-between pt-1 border-t border-black/5">
+              <span className="text-gray-500 text-xs sm:text-sm font-medium">Quote status</span>
               <Badge variant="destructive">Error loading quote</Badge>
             </div>
           )}
-
         </div>
       </div>
 
@@ -381,17 +399,19 @@ const Swap = ({ token }: { token: TokenInfo }) => {
         {isConnected ? (
           <button type="button"
             onClick={swaping}
-            className={`w-full py-2 sm:py-3 rounded-xl font-medium shadow-sm transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
-              canSwap ? 'bg-color4 text-white hover:bg-opacity-90' : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+            className={`w-full py-3 sm:py-3.5 rounded-2xl font-titleSemibold tracking-wide transition-all duration-200 text-sm sm:text-base flex items-center justify-center gap-2 ${
+              canSwap
+                ? 'bg-color4 text-white shadow-md hover:bg-color2 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
             disabled={!canSwap}
           >
-            {isPreparingSwap ? (
+            {swapPhase === 'preparing' ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Preparing swap...</span>
               </>
-            ) : isPending ? (
+            ) : swapPhase === 'processing' ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Processing transaction...</span>
@@ -404,6 +424,22 @@ const Swap = ({ token }: { token: TokenInfo }) => {
           <ConnectButton />
         )}
       </div>
+
+      {/* Token picker: rendered at the card root so it fills the whole swap body
+          (widgets + info panel + Swap button), not just a single widget. */}
+      {tokenPicker && (
+        <TokenSelector
+          isOpen
+          type={tokenPicker.type}
+          blockchain={tokenPicker.blockchain}
+          selected={tokenPicker.selected}
+          onSelect={(token) => {
+            tokenPicker.onSelect(token);
+            setTokenPicker(null);
+          }}
+          onClose={() => setTokenPicker(null)}
+        />
+      )}
     </div>
   );
 };

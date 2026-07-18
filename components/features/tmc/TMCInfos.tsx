@@ -1,178 +1,136 @@
 'use client';
 
 import React, { useState } from 'react';
+import {
+  Boxes,
+  CircleDollarSign,
+  FileCode2,
+  Fingerprint,
+  Info,
+  Layers,
+  PieChart,
+  ShieldCheck,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react';
+import { AddressLink, LinkPill, PanelHeader, StatTile } from '@/components/shared/InfoTile';
 import { useTMCData } from '@/hooks/useTMCData';
 import CMC20PieChart from './CMC20PieChart';
-import NewTabIcon from '@/components/icons/NewTabIcon';
+
+const ADDR = '0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4';
+const BASESCAN = `https://basescan.org/address/${ADDR}`;
+
+const TABS = [
+  { id: 'DETAILS', label: 'Details', icon: Info },
+  { id: 'COMPOSITION', label: 'Composition', icon: PieChart },
+  { id: 'BLOCKCHAIN', label: 'Blockchain', icon: Boxes },
+] as const;
+
+type TabId = (typeof TABS)[number]['id'];
 
 const TMCInfos = () => {
-  const [activeTab, setActiveTab] = useState('DETAILS');
+  const [tab, setTab] = useState<TabId>('DETAILS');
   const { price: tmcPrice, perf90d, isLoading } = useTMCData();
 
-  const handleOnesheetClick = () => {
-    window.open('/TMC_Onesheet.pdf', '_blank');
-  };
+  const hasPerf = typeof perf90d === 'number';
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      {/* Tabs */}
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4">
-        <button type="button"
-          onClick={() => setActiveTab('DETAILS')}
-          className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
-            activeTab === 'DETAILS'
-              ? 'bg-color4 text-white shadow-lg'
-              : 'bg-gray-200 shadow-lg text-gray-500 border border-color4 hover:text-gray-700'
-          }`}
-        >
-          DETAILS
-        </button>
-        <button type="button"
-          onClick={() => setActiveTab('COMPOSITION')}
-          className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
-            activeTab === 'COMPOSITION'
-              ? 'bg-color4 text-white shadow-lg'
-              : 'bg-gray-200 shadow-lg text-gray-500 border border-color4 hover:text-gray-700'
-          }`}
-        >
-          COMPOSITION
-        </button>
-        <button type="button"
-          onClick={() => setActiveTab('BLOCKCHAIN')}
-          className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
-            activeTab === 'BLOCKCHAIN'
-              ? 'bg-color4 text-white shadow-lg'
-              : 'bg-gray-200 shadow-lg text-gray-500 border border-color4 hover:text-gray-700'
-          }`}
-        >
-          BLOCKCHAIN
-        </button>
+    <div className="mx-auto w-full max-w-4xl">
+      {/* Segmented tabs */}
+      <div className="mb-5 flex justify-center">
+        <div className="inline-flex rounded-2xl bg-color1 p-1 ring-1 ring-inset ring-black/5">
+          {TABS.map(({ id, label, icon: Icon }) => {
+            const active = tab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setTab(id)}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-titleSemibold tracking-wide transition-all duration-200 sm:px-6 ${
+                  active ? 'bg-color4 text-white shadow-md' : 'text-gray-500 hover:text-color4'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Content */}
-      {activeTab === 'BLOCKCHAIN' && (
-        <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
-          {/* Header */}
-          <div className="bg-color4 text-white p-4 pl-6">
-            <h2 className="text-lg font-semibold">BLOCKCHAIN</h2>
-          </div>
+      {tab === 'DETAILS' && (
+        <div className="overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5">
+          <PanelHeader icon={Info} title="Details" subtitle="Tokeshare MarketCap 20 Index (TMC)" />
+          <div className="space-y-2.5 bg-color1 p-3 sm:p-4">
+            <StatTile icon={Layers} label="Token Type">
+              <span className="inline-flex items-center rounded-full bg-color1 px-3 py-1 text-sm font-medium text-color4 ring-1 ring-inset ring-black/5">
+                Crypto Index
+              </span>
+            </StatTile>
 
-          {/* Content */}
-          <div className="bg-color1 p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center pb-4">
-              <div className="flex flex-col md:flex-row justify-between w-full md:pr-9 mb-4 md:mb-0">
-                <h3 className="text-lg font-semibold">Identifier</h3>
-                <p className="text-base mt-2 md:mt-0">Tokeshare MarketCap 20</p>
-              </div>
-            </div>
+            <StatTile icon={TrendingUp} label="Performance over 90 days">
+              {hasPerf ? (
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-1 text-sm font-semibold tabular-nums ${
+                    perf90d > 0
+                      ? 'bg-green-50 text-green-600'
+                      : perf90d < 0
+                        ? 'bg-red-50 text-red-600'
+                        : 'bg-gray-100 text-gray-500'
+                  }`}
+                >
+                  {(perf90d > 0 ? '+' : '') + perf90d.toFixed(2)} %
+                </span>
+              ) : (
+                <span className="text-gray-400">N/A</span>
+              )}
+            </StatTile>
 
-            <div className="border-t-2 border-color4">
-              <div className="border-color4 md:pr-6">
-                <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
-                  <h3 className="text-lg font-semibold text-color2">Base Chain</h3>
-                  <p className="text-base mt-2 md:mt-0"></p>
-                </div>
+            <StatTile icon={CircleDollarSign} label="Token Price">
+              <span className="font-titleSemibold text-base tabular-nums text-color4">
+                {isLoading ? 'Loading…' : `${tmcPrice?.toFixed(2) ?? '—'} $`}
+              </span>
+            </StatTile>
 
-                <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
-                  <h3 className="text-lg font-semibold">Contract Address</h3>
-                  <a
-                    href="https://basescan.org/address/0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
-                  >
-                    0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4
-                  </a>
-                </div>
+            <StatTile icon={ShieldCheck} label="Proof of Reserve">
+              <AddressLink href={BASESCAN} value={ADDR} />
+            </StatTile>
 
-                <div className="py-4 flex flex-col md:flex-row justify-between">
-                  <h3 className="text-lg font-semibold">Owner Wallet</h3>
-                  <a
-                    href="https://basescan.org/address/0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
-                  >
-                    0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4
-                  </a>
-                </div>
-              </div>
-            </div>
+            <StatTile icon={FileCode2} label="Official document">
+              <LinkPill href="/TMC_Onesheet.pdf" label="Onesheet · PDF" />
+            </StatTile>
           </div>
         </div>
       )}
 
-      {activeTab === 'COMPOSITION' && (
-        <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
-          {/* Header */}
-          <div className="bg-color4 text-white p-3 sm:p-4 pl-4 sm:pl-6">
-            <h2 className="text-base sm:text-lg font-semibold">INDEX COMPOSITION</h2>
-          </div>
-
-          {/* Content */}
+      {tab === 'COMPOSITION' && (
+        <div className="overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5">
+          <PanelHeader icon={PieChart} title="Composition" subtitle="Index composition" />
           <div className="bg-color1 p-4 sm:p-6">
             <CMC20PieChart />
           </div>
         </div>
       )}
 
-      {activeTab === 'DETAILS' && (
-        <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
-          {/* Header */}
-          <div className="bg-color4 text-white p-3 sm:p-4 pl-4 sm:pl-6">
-            <h2 className="text-base sm:text-lg font-semibold">DETAILS</h2>
-          </div>
-
-          {/* Content */}
-          <div className="bg-color1 p-4 sm:p-6">
-            <div className="space-y-3 sm:space-y-4">
-              <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
-                <h3 className="text-base sm:text-lg font-semibold text-color2">Token Type</h3>
-                <p className="text-sm sm:text-base mt-1 sm:mt-0">Crypto Index</p>
-              </div>
-
-              <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
-                <h3 className="text-base sm:text-lg font-semibold text-color2">Performance over 90 days</h3>
-                {typeof perf90d === 'number' ? (
-                  <h6
-                    className={
-                      'font-medium ' + (perf90d > 0 ? 'text-green-500' : perf90d < 0 ? 'text-red-500' : 'text-gray-500')
-                    }
-                  >
-                    {(perf90d > 0 ? '+' : '') + perf90d.toFixed(2) + ' %'}
-                  </h6>
-                ) : (
-                  <h6 className="font-medium text-gray-500">N/A</h6>
-                )}
-              </div>
-
-              <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
-                <h3 className="text-base sm:text-lg font-semibold">Token Price</h3>
-                <p className="text-sm sm:text-base mt-1 sm:mt-0">
-                  {isLoading ? 'Loading...' : `${tmcPrice?.toFixed(2) || 'N/A'} $`}
-                </p>
-              </div>
-
-              <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between border-b-2 border-color5">
-                <h3 className="text-base sm:text-lg font-semibold">Proof of Reserve</h3>
-                <a
-                  href="https://basescan.org/address/0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
-                >
-                  0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4
-                </a>
-              </div>
-
-              <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between">
-                <h3 className="text-base sm:text-lg font-semibold">Tokeshare MarketCap 20 (TMC)</h3>
-                <div className="flex items-center gap-2 cursor-pointer mt-1 sm:mt-0" onClick={handleOnesheetClick}>
-                  <button type="button" className="text-sm sm:text-base text-blue-500 hover:text-blue-600">Onesheet</button>
-                  <NewTabIcon />
-                </div>
-              </div>
-            </div>
+      {tab === 'BLOCKCHAIN' && (
+        <div className="overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5">
+          <PanelHeader icon={Boxes} title="Blockchain" subtitle="On-chain identity" />
+          <div className="space-y-2.5 bg-color1 p-3 sm:p-4">
+            <StatTile icon={Boxes} label="Network">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-color1 px-3 py-1 text-sm font-medium text-color4 ring-1 ring-inset ring-black/5">
+                <span className="h-1.5 w-1.5 rounded-full bg-color2" />
+                Base
+              </span>
+            </StatTile>
+            <StatTile icon={Fingerprint} label="Identifier">
+              <span className="font-medium text-color4">Tokeshare MarketCap 20</span>
+            </StatTile>
+            <StatTile icon={FileCode2} label="Contract Address">
+              <AddressLink href={BASESCAN} value={ADDR} />
+            </StatTile>
+            <StatTile icon={Wallet} label="Owner Wallet">
+              <AddressLink href={BASESCAN} value={ADDR} />
+            </StatTile>
           </div>
         </div>
       )}

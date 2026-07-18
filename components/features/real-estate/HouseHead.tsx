@@ -1,144 +1,61 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import React from 'react';
+import { MapPin } from 'lucide-react';
 import { House } from '@/interfaces/House';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import ArrowIcon from '@/components/icons/arrows/ArrowIcon';
+import PhotoCarousel from '@/components/shared/PhotoCarousel';
 
 interface HouseHeadProps {
   house: House;
 }
 
+const Stat = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
+  <div className={`rounded-xl px-3 py-2 ${highlight ? 'bg-color1 ring-1 ring-inset ring-black/5' : 'bg-gray-50'}`}>
+    <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">{label}</p>
+    <p className={`font-titleSemibold ${highlight ? 'text-color2' : 'text-color4'}`}>{value}</p>
+  </div>
+);
+
 const HouseHead: React.FC<HouseHeadProps> = ({ house }) => {
-  const { general } = house;
-  const { name, images, price } = general;
-
-  // État pour détecter la largeur de l'écran
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768); // Mode mobile si < 768px
-    };
-
-    handleResize(); // Vérifier au chargement
-    window.addEventListener('resize', handleResize); // Écouteur de redimensionnement
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const { general, highlights } = house;
+  const { name, images, price, tokenPrice, expectedIncome } = general;
 
   return (
-    <section className="flex flex-col items-center justify-center pt-16 px-4 sm:px-8 lg:px-16 py-6 w-full">
-      {/* Titre et Actions */}
-      <div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center ">
-        <h1 className="w-2/3 md:w-1/2 text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-color4 mb-4">
-          {name}
-        </h1>
-        <div className="flex space-x-3">
-          <button type="button" className="text-xs sm:text-sm md:text-base lg:text-lg px-3 py-1 border rounded text-color4 border-color4 ">
-            View Smart Contracts
-          </button>
-          <button type="button" className="text-xs sm:text-sm md:text-base lg:text-lg bg-blue-500 text-white px-3 py-1 rounded transform hover:scale-105 transition">
-            POL
-          </button>
-          <button type="button" className="text-xs sm:text-sm md:text-base lg:text-lg bg-color4 text-white px-3 py-1 rounded transform hover:scale-105 transition">
-            BASE
-          </button>
+    <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+      {/* Header */}
+      <header className="mb-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-titleSemibold text-2xl text-color4 sm:text-3xl">{name}</h1>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-color1 px-3 py-1 text-xs font-semibold text-color4 ring-1 ring-inset ring-black/5">
+            <span className="h-1.5 w-1.5 rounded-full bg-color2" />
+            Coming soon
+          </span>
         </div>
-      </div>
+        <p className="mt-2 flex items-center gap-1.5 text-gray-500">
+          <MapPin className="h-4 w-4" />
+          {highlights.fullAddress}, {highlights.country}
+        </p>
+      </header>
 
-      {/* Sélection du carrousel en fonction de l'écran */}
-      <div className="relative w-full max-w-4xl mt-6">
-        {isMobile ? (
-          // 🟢 CARROUSEL MOBILE (1 image affichée)
-          <>
-            <button type="button" className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 prev-button">
-              <ArrowIcon size={24} className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180" />
-            </button>
-            <button type="button" className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 next-button">
-              <ArrowIcon size={24} className="text-color5 hover:scale-110 hover:text-color2 transition" />
-            </button>
+      {/* Hero: gallery + investment panel */}
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-start lg:gap-8">
+        <PhotoCarousel images={images} altPrefix="Property" navId="house-gallery" aspect="aspect-[16/10]" />
 
-            <Swiper
-              modules={[Navigation, Pagination]}
-              spaceBetween={10}
-              slidesPerView={1}
-              navigation={{
-                prevEl: '.prev-button',
-                nextEl: '.next-button',
-              }}
-              pagination={{ clickable: true }}
-              loop
-            >
-              {images.map((img, index) => (
-                <SwiperSlide key={index}>
-                  <div className="flex justify-center">
-                    <div className="relative w-1/2 h-48 sm:h-64">
-                      <Image
-                        src={img}
-                        alt={`House ${index + 1}`}
-                        layout="fill"
-                        objectFit="cover"
-                        className="rounded-lg shadow-lg"
-                      />
-                    </div>
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </>
-        ) : (
-          // 🔵 CARROUSEL PC (3 images affichées)
-          <>
-            <button type="button" className="absolute left-0 sm:-left-10 top-1/2 transform -translate-y-1/2 z-10 prev-button">
-              <ArrowIcon size={32} className="text-color5 hover:scale-110 hover:text-color2 transition rotate-180" />
-            </button>
-            <button type="button" className="absolute right-0 sm:-right-10 top-1/2 transform -translate-y-1/2 z-10 next-button">
-              <ArrowIcon size={32} className="text-color5 hover:scale-110 hover:text-color2 transition" />
-            </button>
-
-            <Swiper
-              modules={[Navigation, Pagination]}
-              spaceBetween={10}
-              slidesPerView={3}
-              navigation={{
-                prevEl: '.prev-button',
-                nextEl: '.next-button',
-              }}
-              pagination={{ clickable: true }}
-              loop
-            >
-              {images.map((img, index) => (
-                <SwiperSlide key={index}>
-                  <div className="relative w-full h-48 sm:h-72">
-                    <Image
-                      src={img}
-                      alt={`House ${index + 1}`}
-                      layout="fill"
-                      objectFit="cover"
-                      className="rounded-lg shadow-lg"
-                    />
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </>
-        )}
-      </div>
-
-      {/* Investissement */}
-      <div className="text-center w-full mt-6">
-        <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl font-bold text-color4">
-          TOTAL INVESTMENT: {price.toLocaleString()}
-        </h2>
-        <button type="button" className="text-sm sm:text-md md:text-lg lg:text-xl mt-4 px-10 sm:px-12 py-2 bg-color2 text-white rounded-full hover:bg-color4 transition">
-          SOON
-        </button>
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5 sm:p-6">
+          <h2 className="font-titleSemibold text-lg text-color4">Investment</h2>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <Stat label="Token price" value={tokenPrice} highlight />
+            <Stat label="Expected income" value={expectedIncome} />
+            <Stat label="Total price" value={price} />
+            <Stat label="Total tokens" value={highlights.totalTokens} />
+          </div>
+          <button
+            type="button"
+            disabled
+            className="mt-4 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-100 px-4 py-3 font-titleSemibold text-gray-400"
+          >
+            Coming soon
+          </button>
+          <p className="mt-2 text-center text-xs text-gray-400">Investing in this property will open shortly.</p>
+        </div>
       </div>
     </section>
   );
