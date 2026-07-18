@@ -7,6 +7,11 @@ import Exchange from '@/components/features/commodities/ExchangeLazy';
 import Contracts from '@/components/shared/Contracts';
 import CommoditiesInfos from '@/components/features/commodities/CommoditiesInfos';
 import { CONTRACTS, ETH_CONTRACTS, ETH_SILVER_CONTRACTS } from '@/contracts/contracts';
+import { Blockchain } from '@/enums/Blockchain';
+
+// Owner wallet is the same address on every chain (only the explorer link
+// differs), so it is stored once per token rather than per chain.
+const TOKESHARE_OWNER = '0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E';
 
 interface PageProps {
   params: Promise<{ name: string }>;
@@ -21,8 +26,9 @@ interface CommodityToken {
   tokenImage: string;
   polygonContract?: string;
   ethereumContract?: string;
-  proofOfReserveAddress: string;
-  proofOfReserveUrl: string;
+  ownerWallet?: string;
+  /** Proof-of-reserve address per chain (follows the network selector). */
+  proofOfReserve?: Partial<Record<Blockchain, string>>;
   onesheetUrl?: string;
 }
 
@@ -34,8 +40,12 @@ const COMMODITY_TOKENS: Record<string, CommodityToken> = {
     tokenImage: '/images/currencies/tgg.png',
     polygonContract: CONTRACTS.TGG,
     ethereumContract: ETH_CONTRACTS.TGG,
-    proofOfReserveAddress: CONTRACTS.TGG,
-    proofOfReserveUrl: `https://polygonscan.com/address/${CONTRACTS.TGG}`,
+    ownerWallet: TOKESHARE_OWNER,
+    // Proof of reserve is the TGG token contract on each chain.
+    proofOfReserve: {
+      [Blockchain.Polygon]: CONTRACTS.TGG,
+      [Blockchain.Ethereum]: ETH_CONTRACTS.TGG,
+    },
     onesheetUrl: '/TGG_Onesheet.pdf',
   },
   Silver: {
@@ -45,10 +55,12 @@ const COMMODITY_TOKENS: Record<string, CommodityToken> = {
     // TODO: replace with a dedicated TSG logo once available.
     tokenImage: '/images/img-silver.webp',
     ethereumContract: ETH_SILVER_CONTRACTS.TSG,
+    ownerWallet: TOKESHARE_OWNER,
     // Proof of reserve points to the XAGM underlying (the real silver reserve)
     // until the TSG token contract is deployed.
-    proofOfReserveAddress: ETH_SILVER_CONTRACTS.XAGM,
-    proofOfReserveUrl: `https://etherscan.io/address/${ETH_SILVER_CONTRACTS.XAGM}`,
+    proofOfReserve: {
+      [Blockchain.Ethereum]: ETH_SILVER_CONTRACTS.XAGM,
+    },
   },
 };
 
@@ -121,8 +133,8 @@ const CommodityPage = async ({ params }: PageProps) => {
           tokenSymbol={tokenInfo.symbol}
           commodityName={commodity.name}
           fullName={tokenInfo.fullName}
-          proofOfReserveAddress={tokenInfo.proofOfReserveAddress}
-          proofOfReserveUrl={tokenInfo.proofOfReserveUrl}
+          ownerWallet={tokenInfo.ownerWallet}
+          proofOfReserve={tokenInfo.proofOfReserve}
           onesheetUrl={tokenInfo.onesheetUrl}
         />
       </div>

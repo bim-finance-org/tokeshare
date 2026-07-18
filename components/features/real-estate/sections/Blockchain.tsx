@@ -1,78 +1,34 @@
 import React from 'react';
+import { Boxes, FileCode2, Fingerprint, Wallet } from 'lucide-react';
+import { AddressLink, PanelHeader, StatTile } from '@/components/shared/InfoTile';
+
+const CONTRACT_ADDRESS = '0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71';
+const OWNER_WALLET = '0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E';
 
 const Blockchain = () => {
   return (
-    <div className="w-full rounded-xl shadow-lg overflow-hidden text-color4 border-2 border-color4">
-      {/* Header sombre */}
-      <div className="bg-color4 text-white p-4 pl-6">
-        <h2 className="text-lg font-semibold">BLOCKCHAIN</h2>
-      </div>
+    <div className="overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5">
+      <PanelHeader icon={Boxes} title="Blockchain" subtitle="On-chain identity" />
 
-      {/* Contenu en fond clair */}
-      <div className="bg-color1 p-6">
-        {/* On sépare en deux colonnes, avec une bordure verticale au milieu */}
-        <div className="flex flex-col md:flex-row justify-between items-center pb-4">
-          <div className="flex flex-col md:flex-row justify-between w-full md:pr-9 mb-4 md:mb-0">
-            <h3 className="text-lg font-semibold">Identifier</h3>
-            <p className="text-base mt-2 md:mt-0">TokeShare Gold Gram</p>
-          </div>
-        </div>
+      <div className="space-y-2.5 bg-color1 p-3 sm:p-4">
+        <StatTile icon={Boxes} label="Network">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-color1 px-3 py-1 text-sm font-medium text-color4 ring-1 ring-inset ring-black/5">
+            <span className="h-1.5 w-1.5 rounded-full bg-color2" />
+            Polygon
+          </span>
+        </StatTile>
 
-        <div className=" md:grid-cols-2 gap-6 border-t-2 border-color4">
-          {/* Colonne de gauche */}
-          <div className=" border-color4 md:pr-6">
-            {/* Exemple : Token Type */}
-            <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
-              <h3 className="text-lg font-semibold text-color2">Polygon Chain</h3>
-              <p className="text-base mt-2 md:mt-0"></p>
-            </div>
+        <StatTile icon={Fingerprint} label="Identifier">
+          <span className="font-medium text-color4">TokeShare Gold Gram</span>
+        </StatTile>
 
-            {/* Income Start Date, Income per Token, Token Price, etc. */}
-            <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
-              <h3 className="text-lg font-semibold">Contract Address</h3>
-              <a
-                href="https://polygonscan.com/address/0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
-              >
-                0x3d4Df7BD7Ea3f305Ac3A4065019B96d382834B71
-              </a>
-            </div>
+        <StatTile icon={FileCode2} label="Contract Address">
+          <AddressLink href={`https://polygonscan.com/address/${CONTRACT_ADDRESS}`} value={CONTRACT_ADDRESS} />
+        </StatTile>
 
-            <div className="py-4 flex flex-col md:flex-row justify-between ">
-              <h3 className="text-lg font-semibold">Owner Wallet</h3>
-              <a
-                href="https://polygonscan.com/address/0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm sm:text-base mt-1 sm:mt-0 text-blue-600 hover:underline cursor-pointer break-all"
-              >
-                0xCFac885Fa38EeDf7AaffFa9F69A938d64453027E
-              </a>
-            </div>
-          </div>
-
-          {/* Colonne de droite */}
-          {/* <div className="md:pl-6"> */}
-          {/* Property Type */}
-          {/* <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
-              <h3 className="text-lg font-semibold text-color2">Base Chain</h3>
-              <p className="text-base mt-2 md:mt-0">...</p>
-            </div> */}
-
-          {/* <div className="py-4 flex flex-col md:flex-row justify-between border-b-2 border-color5">
-              <h3 className="text-lg font-semibold">Contract Address</h3>
-              <p className="text-base mt-2 md:mt-0">...</p>
-            </div> */}
-
-          {/* Full Address */}
-          {/* <div className="py-4 flex flex-col md:flex-row justify-between">
-              <h3 className="text-lg font-semibold">Owner Wallet</h3>
-              <p className="text-base mt-2 md:mt-0">...</p>
-            </div> */}
-          {/* </div> */}
-        </div>
+        <StatTile icon={Wallet} label="Owner Wallet">
+          <AddressLink href={`https://polygonscan.com/address/${OWNER_WALLET}`} value={OWNER_WALLET} />
+        </StatTile>
       </div>
     </div>
   );

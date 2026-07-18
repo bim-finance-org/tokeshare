@@ -25,12 +25,7 @@ import { useSwapHandlerByToken } from '@/hooks/swapHandlers/useSwapHandlerByToke
 import { useRefreshBalancesOnConfirm } from '@/hooks/useRefreshBalancesOnConfirm';
 import { notify } from '@/lib/notify';
 import { showSwapProgress, type SwapPhase } from '@/lib/swapToast';
-
-const EXPLORERS: Record<Blockchain, string> = {
-  [Blockchain.Polygon]: 'https://polygonscan.com',
-  [Blockchain.Base]: 'https://basescan.org',
-  [Blockchain.Ethereum]: 'https://etherscan.io',
-};
+import { explorerTxUrl } from '@/utils/explorer';
 
 const Swap = ({ token }: { token: TokenInfo }) => {
   const {
@@ -102,7 +97,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     notify.success(
       'Swap confirmed',
       <a
-        href={`${EXPLORERS[selectedBlockchain]}/tx/${hash}`}
+        href={explorerTxUrl(selectedBlockchain, hash)}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1 underline hover:no-underline"
