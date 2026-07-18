@@ -17,7 +17,9 @@ export default function DashboardLogin() {
     setIsLoading(false);
 
     if (result?.error) {
-      setError('Mot de passe incorrect');
+      // NextAuth returns 'CredentialsSignin' for a rejected password; a custom
+      // thrown message (e.g. the rate-limit notice) comes through verbatim.
+      setError(result.error === 'CredentialsSignin' ? 'Mot de passe incorrect' : result.error);
     }
   };
 
