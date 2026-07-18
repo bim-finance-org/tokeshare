@@ -14,11 +14,10 @@ const CryptoBalance = ({ currency, blockchain }: { currency: string; blockchain:
     return numBalance.toFixed(4).replace(/\.?0+$/, ''); // Supprime les zéros inutiles
   };
 
-  // Nothing to show until a wallet is connected.
-  if (!isConnected) return null;
-
+  // Keep the block (and its height) mounted so the card doesn't resize on
+  // connect/disconnect — just hide it visually until a wallet is connected.
   return (
-    <div className="flex gap-1 sm:gap-2 whitespace-nowrap">
+    <div className={`flex gap-1 sm:gap-2 whitespace-nowrap ${isConnected ? '' : 'invisible'}`}>
       <p className="text-color4 text-xs sm:text-sm font-medium">Balance:</p>
       <p className="text-color4 text-xs sm:text-sm font-medium">{formatBalance(balance)}</p>
     </div>
