@@ -2,32 +2,31 @@
 
 import React from 'react';
 import Exchange from '@/components/features/commodities/ExchangeLazy';
-import Contracts from '@/components/shared/Contracts';
+import AssetPageHeader from '@/components/shared/AssetPageHeader';
 import TSP500Infos from '@/components/features/tsp500/TSP500Infos';
 import { BASE_CONTRACTS } from '@/contracts/contracts';
 
 const TSP500Page = () => {
   return (
-    <div className="max-w-6xl mx-auto py-6 sm:py-8 md:py-12 px-4 sm:px-6">
-      <div className="space-y-6 sm:space-y-8">
-        {/* Header Section */}
-        <div className="bg-white/5 rounded-2xl p-4 sm:p-6 backdrop-blur-sm">
-          <div className="flex flex-col items-center justify-between md:flex-row gap-4">
-            <h1 className="text-2xl sm:text-3xl text-color4 font-semibold text-center md:text-left">
-              Tokeshare S&amp;P500 (TSP500)
-            </h1>
-            <Contracts baseContract={BASE_CONTRACTS.TSP500} />
-          </div>
-        </div>
+    <div className="max-w-6xl mx-auto py-6 sm:py-8 px-4 sm:px-6">
+      <div className="space-y-6">
+        <AssetPageHeader
+          symbol="TSP500"
+          title="Tokeshare S&P500 (TSP500)"
+          logoSrc="/images/image_TSP500.png"
+          image="/images/image_TSP500.webp"
+          imageAlt="Tokeshare S&P500"
+          baseContract={BASE_CONTRACTS.TSP500}
+        />
 
-        {/* Trading Section */}
-        <div className="bg-white/5 rounded-2xl backdrop-blur-sm p-4 sm:p-6">
+        {/* Swap */}
+        <div className="[&>*]:!my-0">
           <Exchange tokenSymbol="TSP500" />
         </div>
       </div>
 
       {/* Info Section */}
-      <div className="pt-6 sm:pt-8 md:pt-12">
+      <div className="pt-6 sm:pt-8">
         <TSP500Infos />
       </div>
     </div>

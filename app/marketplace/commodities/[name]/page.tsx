@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 
 import commoditiesData from '@/data/commoditiesData.json';
 import Exchange from '@/components/features/commodities/ExchangeLazy';
-import Contracts from '@/components/shared/Contracts';
+import AssetPageHeader from '@/components/shared/AssetPageHeader';
 import CommoditiesInfos from '@/components/features/commodities/CommoditiesInfos';
 import { CONTRACTS, ETH_CONTRACTS, ETH_SILVER_CONTRACTS } from '@/contracts/contracts';
 import { Blockchain } from '@/enums/Blockchain';
@@ -104,31 +103,24 @@ const CommodityPage = async ({ params }: PageProps) => {
   if (!tokenInfo) notFound();
 
   return (
-    <div className="max-w-6xl mx-auto py-6 sm:py-8 md:py-12 px-4 sm:px-6">
-      <div className="space-y-6 sm:space-y-8">
-        <div className="bg-white/5 rounded-2xl p-4 sm:p-6 backdrop-blur-sm">
-          <div className="flex flex-col items-center justify-between mb-4 sm:mb-6 md:flex-row gap-4">
-            <h1 className="text-2xl sm:text-3xl text-color4 font-semibold text-center md:text-left">
-              {tokenInfo.fullName}
-            </h1>
-            <Contracts polygonContract={tokenInfo.polygonContract} ethereumContract={tokenInfo.ethereumContract} />
-          </div>
+    <div className="max-w-6xl mx-auto py-6 sm:py-8 px-4 sm:px-6">
+      <div className="space-y-6">
+        <AssetPageHeader
+          symbol={tokenInfo.symbol}
+          title={tokenInfo.fullName}
+          logoSrc={tokenInfo.tokenImage}
+          image={commodity.image}
+          imageAlt={commodity.name}
+          polygonContract={tokenInfo.polygonContract}
+          ethereumContract={tokenInfo.ethereumContract}
+        />
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 p-4 sm:p-6">
-            <div className="relative">
-              <Image src={tokenInfo.tokenImage} alt={`${tokenInfo.symbol} Logo`} width={120} height={120} className="rounded-xl" />
-            </div>
-            <div className="relative mt-4 sm:mt-0">
-              <Image src={commodity.image} alt={commodity.name} width={200} height={200} className="rounded-xl" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/5 rounded-2xl backdrop-blur-sm p-4 sm:p-6">
+        {/* Neutralize Exchange's built-in my-8/my-16 so the swap sits right under the header. */}
+        <div className="[&>*]:!my-0">
           <Exchange tokenSymbol={tokenInfo.symbol} />
         </div>
       </div>
-      <div className="pt-6 sm:pt-8 md:pt-12">
+      <div className="pt-6 sm:pt-8">
         <CommoditiesInfos
           tokenSymbol={tokenInfo.symbol}
           commodityName={commodity.name}
