@@ -23,6 +23,9 @@ interface TradeWidgetProps {
   showBalance?: boolean;
   readOnly?: boolean;
   lockedToken?: boolean;
+  // Shows a skeleton in place of the amount while a quote is being computed
+  // (used by the read-only "you receive" widget so the recalculation is visible).
+  loading?: boolean;
   // Opening the token list is delegated to the parent so the picker can render
   // at the swap-card level and cover the whole body (widgets + info + CTA)
   // instead of being trapped inside this widget's box.
@@ -40,6 +43,7 @@ const TradeWidget = ({
   showBalance = false,
   readOnly = false,
   lockedToken = false,
+  loading = false,
   onOpenSelector,
 }: TradeWidgetProps) => {
   // The selected token is fully controlled by the parent via `defaultToken`.
@@ -72,6 +76,7 @@ const TradeWidget = ({
             onChange={onValueChange}
             placeholder={isTGG ? '1' : '50'}
             disabled={readOnly}
+            loading={loading}
           />
         </div>
 

@@ -223,6 +223,8 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     showBalance: true,
     readOnly: true,
     lockedToken: isTftSellMode,
+    // Surface quote recomputation on the output field with a skeleton.
+    loading: isLoadingQuote,
   };
 
   // Vérifier si les prix sont disponibles pour permettre l'affichage
