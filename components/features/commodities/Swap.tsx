@@ -20,6 +20,7 @@ import { ExchangeSection } from '@/enums/ExchangeSection';
 import { useAutoSwitchNetwork } from '@/hooks/useAutoSwitchNetwork';
 import { TokenType } from '@/enums/TokenType';
 import { useSwapHandlerByToken } from '@/hooks/swapHandlers/useSwapHandlerByToken';
+import { useRefreshBalancesOnConfirm } from '@/hooks/useRefreshBalancesOnConfirm';
 import { notify } from '@/lib/notify';
 
 export type SwapQuoteParams = {
@@ -56,6 +57,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   const { price: tokenPrice, isLoading: isPriceLoading } = useTokenPrice(token.symbol);
   const { swapIn, swapOut, isPending, error, hash } = useSwapHandlerByToken(token.symbol);
+
+  // Once the swap tx confirms, refresh balances so the widgets reflect the new
+  // amounts immediately. Works for every token (targets shared wagmi keys).
+  useRefreshBalancesOnConfirm(hash as `0x${string}` | undefined);
 
   const swapQuoteParams = useMemo<SwapQuoteParams | null>(() => {
     const inputToken = getTokenAddress(isTggFirst ? token.symbol : stablecoin, selectedBlockchain);
