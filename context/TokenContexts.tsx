@@ -11,21 +11,15 @@ import React, {
 import { Blockchain } from '@/enums/Blockchain';
 
 type TokenState = { token: string; blockchain: Blockchain };
-type Prefs = { swap: TokenState; buy: TokenState; sell: TokenState };
+type Prefs = { swap: TokenState };
 
 export interface TokenContextValue extends Prefs {
   updateSwapToken: (token: string) => void;
   updateSwapBlockchain: (blockchain: Blockchain) => void;
-  updateBuyToken: (token: string) => void;
-  updateBuyBlockchain: (blockchain: Blockchain) => void;
-  updateSellToken: (token: string) => void;
-  updateSellBlockchain: (blockchain: Blockchain) => void;
 }
 
 const DEFAULTS: Prefs = {
   swap: { token: 'USDC', blockchain: Blockchain.Polygon },
-  buy: { token: 'EUR', blockchain: Blockchain.Polygon },
-  sell: { token: 'USD', blockchain: Blockchain.Polygon },
 };
 
 const STORAGE_KEY = 'tokeshare:token-prefs';
@@ -42,8 +36,6 @@ function readFromStorage(): Prefs {
       const parsed = JSON.parse(raw) as Partial<Prefs>;
       return {
         swap: { ...DEFAULTS.swap, ...parsed.swap },
-        buy: { ...DEFAULTS.buy, ...parsed.buy },
-        sell: { ...DEFAULTS.sell, ...parsed.sell },
       };
     }
   } catch {
@@ -121,46 +113,14 @@ export const TokenProvider = ({ children }: { children: ReactNode }) => {
     (blockchain: Blockchain) => updatePrefs((p) => ({ ...p, swap: { ...p.swap, blockchain } })),
     [],
   );
-  const updateBuyToken = useCallback(
-    (token: string) => updatePrefs((p) => ({ ...p, buy: { ...p.buy, token } })),
-    [],
-  );
-  const updateBuyBlockchain = useCallback(
-    (blockchain: Blockchain) => updatePrefs((p) => ({ ...p, buy: { ...p.buy, blockchain } })),
-    [],
-  );
-  const updateSellToken = useCallback(
-    (token: string) => updatePrefs((p) => ({ ...p, sell: { ...p.sell, token } })),
-    [],
-  );
-  const updateSellBlockchain = useCallback(
-    (blockchain: Blockchain) => updatePrefs((p) => ({ ...p, sell: { ...p.sell, blockchain } })),
-    [],
-  );
 
   const value = useMemo<TokenContextValue>(
     () => ({
       swap: prefs.swap,
-      buy: prefs.buy,
-      sell: prefs.sell,
       updateSwapToken,
       updateSwapBlockchain,
-      updateBuyToken,
-      updateBuyBlockchain,
-      updateSellToken,
-      updateSellBlockchain,
     }),
-    [
-      prefs.swap,
-      prefs.buy,
-      prefs.sell,
-      updateSwapToken,
-      updateSwapBlockchain,
-      updateBuyToken,
-      updateBuyBlockchain,
-      updateSellToken,
-      updateSellBlockchain,
-    ],
+    [prefs.swap, updateSwapToken, updateSwapBlockchain],
   );
 
   return <TokenContext.Provider value={value}>{children}</TokenContext.Provider>;

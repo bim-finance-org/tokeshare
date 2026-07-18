@@ -64,7 +64,7 @@ const TSP500Card = () => {
           <Link href="/marketplace/stock-etf/tsp500">
             <button type="button" className="bg-color2 text-white rounded-full text-sm font-bold hover:scale-105 transition">
               <div className="flex w-full justify-between items-center px-8">
-                <h6 className="whitespace-nowrap pr-10">Buy TSP500</h6>
+                <h6 className="whitespace-nowrap pr-10">Swap TSP500</h6>
                 <ArrowIcon size={24} />
               </div>
             </button>
