@@ -36,7 +36,7 @@ interface SwapQuoteResult {
 type QuoteResult = { outputAmount: string; exchangeRate: string };
 
 const DEBOUNCE_DELAY_MS = 500;
-const MINIMUM_AMOUNT_TO_GET_QUOTE = 0.01;
+export const MINIMUM_AMOUNT_TO_GET_QUOTE = 0.01;
 const TFT_PRICE_USD = 31.25;
 const TFT_SELL_FEE = 0.05;
 

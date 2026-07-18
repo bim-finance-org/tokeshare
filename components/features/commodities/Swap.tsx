@@ -5,7 +5,7 @@ import Blockchains from '@/components/shared/Blockchains';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { useTokenContext } from '@/context/TokenContexts';
-import { useSwapQuote } from '@/hooks/useSwapQuote';
+import { useSwapQuote, MINIMUM_AMOUNT_TO_GET_QUOTE } from '@/hooks/useSwapQuote';
 import { Address } from 'viem';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -243,17 +243,28 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   const inputBalance = useTokenBalance(inputTokenSymbol, selectedBlockchain);
   const parsedAmount = parseFloat(inputAmount);
   const hasValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
+  // Below this the quote query stays disabled (output would read "0"): tell the
+  // user why instead of leaving a mute widget.
+  const isBelowMinimum = hasValidAmount && parsedAmount < MINIMUM_AMOUNT_TO_GET_QUOTE;
   const isInsufficientBalance = isConnected && hasValidAmount && parseFloat(inputBalance) < parsedAmount;
 
   const canSwap = Boolean(
-    arePricesAvailable && hasValidAmount && !isInsufficientBalance && !isPending && !isPreparingSwap && isOnCorrectChain,
+    arePricesAvailable &&
+      hasValidAmount &&
+      !isBelowMinimum &&
+      !isInsufficientBalance &&
+      !isPending &&
+      !isPreparingSwap &&
+      isOnCorrectChain,
   );
 
   const swapButtonLabel = !hasValidAmount
     ? 'Enter an amount'
-    : isInsufficientBalance
-      ? `Insufficient ${inputTokenSymbol} balance`
-      : 'Swap';
+    : isBelowMinimum
+      ? `Minimum ${MINIMUM_AMOUNT_TO_GET_QUOTE} ${inputTokenSymbol}`
+      : isInsufficientBalance
+        ? `Insufficient ${inputTokenSymbol} balance`
+        : 'Swap';
 
   return (
     <div className="p-3 sm:p-6 w-full relative">
