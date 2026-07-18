@@ -49,17 +49,28 @@ function memoryHit(fullKey: string, limit: number, windowSec: number): RateLimit
   return { success: entry.count <= limit, limit, remaining, reset: entry.expiresAt };
 }
 
+// Atomic fixed-window counter: INCR, set the TTL on first hit, and read the TTL
+// back — all in one server-side script so a crash between INCR and EXPIRE can
+// never leave a key without a TTL (which would ban the IP forever). Also cuts
+// the 3 round-trips down to 1.
+const RATE_LIMIT_LUA = `
+local current = redis.call('INCR', KEYS[1])
+if current == 1 then
+  redis.call('EXPIRE', KEYS[1], ARGV[1])
+end
+return {current, redis.call('TTL', KEYS[1])}
+`;
+
 export async function rateLimit(request: Request, options: RateLimitOptions): Promise<RateLimitResult> {
   const identifier = options.identifier ?? getClientIp(request);
   const fullKey = `ratelimit:${options.key}:${identifier}`;
 
   if (redisClient) {
     try {
-      const count = await redisClient.incr(fullKey);
-      if (count === 1) {
-        await redisClient.expire(fullKey, options.windowSec);
-      }
-      const ttl = await redisClient.ttl(fullKey);
+      const [count, ttl] = (await redisClient.eval(RATE_LIMIT_LUA, 1, fullKey, options.windowSec)) as [
+        number,
+        number,
+      ];
       const reset = Date.now() + (ttl > 0 ? ttl * 1000 : options.windowSec * 1000);
       const remaining = Math.max(0, options.limit - count);
       return { success: count <= options.limit, limit: options.limit, remaining, reset };
