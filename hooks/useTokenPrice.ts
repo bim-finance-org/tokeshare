@@ -9,45 +9,63 @@ import { useMarketplaceContract } from './useMarketplaceContracts';
 export type TokenPriceResult = {
   price: number | null;
   isLoading: boolean;
+  isError: boolean;
+  /** Re-run the underlying price query (used by the UI's retry action). */
+  refetch: () => void;
 };
 
 export function useTGGPrice(enabled = true): TokenPriceResult {
-  const { data: paxgPrice, isLoading } = usePaxgPrice({ enabled });
+  const { data: paxgPrice, isLoading, isError, refetch } = usePaxgPrice({ enabled });
   return {
     price: paxgPrice !== undefined ? calculateTGGPrice(paxgPrice) : null,
     isLoading,
+    isError,
+    refetch,
   };
 }
 
 export function useTSGPrice(enabled = true): TokenPriceResult {
-  const { data: xagmPrice, isLoading } = useXagmPrice({ enabled });
+  const { data: xagmPrice, isLoading, isError, refetch } = useXagmPrice({ enabled });
   return {
     price: xagmPrice !== undefined ? calculateTSGPrice(xagmPrice) : null,
     isLoading,
+    isError,
+    refetch,
   };
 }
 
 export function useTMCPrice(enabled = true): TokenPriceResult {
-  const { data: cmc20Price, isLoading } = useCmc20Price({ enabled });
+  const { data: cmc20Price, isLoading, isError, refetch } = useCmc20Price({ enabled });
   return {
     price: cmc20Price !== undefined ? calculateTMCPrice(cmc20Price) : null,
     isLoading,
+    isError,
+    refetch,
   };
 }
 
 export function useTSP500Price(enabled = true): TokenPriceResult {
-  const { data: despxaPrice, isLoading } = useDeSPXAPrice({ enabled });
+  const { data: despxaPrice, isLoading, isError, refetch } = useDeSPXAPrice({ enabled });
   return {
     price: despxaPrice !== undefined ? calculateTSP500Price(despxaPrice) : null,
     isLoading,
+    isError,
+    refetch,
   };
 }
 
 export function useTFTPrice(): TokenPriceResult {
-  const { tftTokenInfo, tftTokenInfoLoading } = useMarketplaceContract();
+  const { tftTokenInfo, tftTokenInfoLoading, tftTokenInfoError, tftTokenInfoRefetch } = useMarketplaceContract();
   const [pricePerToken] = (tftTokenInfo ?? []) as [bigint];
   const price = Number(pricePerToken) / 10 ** 18;
-  return { price: price || null, isLoading: tftTokenInfoLoading };
+  return {
+    price: price || null,
+    isLoading: tftTokenInfoLoading,
+    isError: tftTokenInfoError,
+    refetch: () => {
+      tftTokenInfoRefetch();
+    },
+  };
 }
 
 /**
@@ -78,7 +96,7 @@ export function useTokenPrice(symbol: string): TokenPriceResult {
       case 'TFT_001':
         return tft;
       default:
-        return { price: null, isLoading: false };
+        return { price: null, isLoading: false, isError: false, refetch: () => {} };
     }
   }, [symbol, tgg, tsg, tmc, tsp500, tft]);
 }

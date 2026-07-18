@@ -62,7 +62,9 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   const { isConnected, address } = useAccount();
 
-  const { price: tokenPrice, isLoading: isPriceLoading } = useTokenPrice(token.symbol);
+  const { price: tokenPrice, isLoading: isPriceLoading, isError: isPriceError, refetch: refetchPrice } = useTokenPrice(
+    token.symbol,
+  );
   const { swapIn, swapOut, isPending, error, hash } = useSwapHandlerByToken(token.symbol);
 
   // Once the swap tx confirms, refresh balances so the widgets reflect the new
@@ -230,6 +232,10 @@ const Swap = ({ token }: { token: TokenInfo }) => {
   let arePricesAvailable;
   if (tokenPrice) arePricesAvailable = tokenPrice > 0 && !isLoadingQuote;
 
+  // Price feed failed / returned nothing (and not just still loading): surface a
+  // retry instead of leaving the Swap button silently disabled.
+  const priceUnavailable = !isPriceLoading && (isPriceError || !tokenPrice);
+
   // Garde-fou de solde : le widget du haut est ce que l'utilisateur envoie.
   // On compare le montant saisi au solde on-chain de ce token pour bloquer le
   // swap AVANT qu'il ne revert (évite une approbation + du gas gaspillés).
@@ -304,6 +310,23 @@ const Swap = ({ token }: { token: TokenInfo }) => {
                   Click here to switch automatically
                 </button>
               )}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {priceUnavailable && (
+          <Alert className="bg-amber-500">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Price unavailable</AlertTitle>
+            <AlertDescription className="flex flex-col gap-2">
+              <span>{token.symbol} price could not be loaded. Please try again.</span>
+              <button
+                type="button"
+                onClick={() => refetchPrice()}
+                className="text-sm underline hover:no-underline self-start"
+              >
+                Retry
+              </button>
             </AlertDescription>
           </Alert>
         )}
