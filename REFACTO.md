@@ -21,17 +21,18 @@ tous à `useZapSwap`.
 
 ### Produit / UX
 
-- **Skeleton incohérent** : `components/features/commodities/ExchangeSkeleton.tsx:6-10` affiche
-  3 onglets, mais `Exchange.tsx:24-28` n'en a plus qu'un → flash + layout shift.
-- **Double chargement** : skeleton puis texte brut « Loading… » (`Exchange.tsx:31-35`).
-- **Prix indisponible = bouton bloqué en silence** (`Swap.tsx:201-202`) : si `useTokenPrice` échoue,
-  bouton grisé indéfiniment sans explication ni retry.
-- **Quote muet sous 0.01** (`hooks/useSwapQuote.ts:39`, `enabled=false`) : « 0 » en sortie sans
-  message « montant minimum 0.01 ».
-- **POC Stellar** : pas de vérification du solde USDC avant l'achat (`app/poc-stellar/page.tsx:49-50`),
-  solde de paiement non affiché → échec on-chain après signature.
-- **Input plafonné à 8 caractères** (`components/shared/TokenInput.tsx:29`) : blocage silencieux
-  au-delà de 7 chiffres.
+- ~~**Skeleton incohérent** : `ExchangeSkeleton` affiche 3 onglets, mais le widget n'en a plus
+  qu'un.~~ ✅ Skeleton à un seul onglet.
+- ~~**Double chargement** : skeleton puis texte brut « Loading… ».~~ ✅ `SwapFormSkeleton` partagé
+  entre la frontière lazy et l'état de chargement d'`Exchange`.
+- ~~**Prix indisponible = bouton bloqué en silence** (`Swap.tsx`) : si `useTokenPrice` échoue, bouton
+  grisé sans explication.~~ ✅ Alerte « Price unavailable » + bouton Retry (`isError`/`refetch`
+  remontés dans les hooks de prix).
+- ~~**Quote muet sous 0.01** (`useSwapQuote.ts`) : « 0 » en sortie sans message.~~ ✅ Label bouton
+  « Minimum 0.01 {token} » + désactivation (seuil exporté).
+- ~~**POC Stellar** : pas de vérification du solde USDC avant l'achat.~~ ✅ Solde USDC affiché +
+  garde-fou « Not enough USDC ».
+- ~~**Input plafonné à 8 caractères** (`TokenInput.tsx`).~~ ✅ `maxLength` 8 → 12 + `inputMode=decimal`.
 
 ### Code / SRP
 
