@@ -17,19 +17,6 @@ tous à `useZapSwap`.
 
 ## 🔴 Critique / Haut impact
 
-### Config contrats
-
-- ~~**Commentaire mensonger sur les adresses TSG** (`contracts/contracts.ts:40-48`) : « placeholders
-  0x0 à remplacer au lancement » au-dessus d'adresses **réelles et déployées**.~~ ✅ Commentaires
-  corrigés dans `contracts.ts:40` et `useContracts.ts:73` (adresses déployées + vérifiées on-chain
-  le 18/07). **Règle** : jamais un commentaire « 0x0 placeholder » au-dessus d'une adresse non-nulle.
-
-- **TSP500 / ZAP_TSP500 marqués `// TODO: replace with deployed address`** (`contracts.ts:17-18`,
-  `config/token.ts:68`) mais **câblés en prod** dans `useTsp500Swap` → swap réel. **Fix** : vérifier
-  on-chain (comme TSG l'a été) ; gater si non déployé, retirer le TODO sinon.
-
----
-
 ## 🟠 Important
 
 ### Produit / UX
@@ -130,7 +117,7 @@ underlyingDecimals })` : ~290 → ~120 lignes. Bonus : le hook monte `useSwap()`
 | --- | ------------------------------------------------------------------------ | -------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | Retirer les textes « Buy, Sell » (UI + metadata SEO)                     | 🔴       | ✅     | « Swap {name} » sur tmc/tsp500/commodities + description SEO régénérée ; langage légal (terms-of-service) conservé                                                                                                                                                         |
 | 2   | Rate-limit + comparaison constant-time sur login admin                   | 🔴       | ✅     | Rate-limit 5/min/IP dans `authorize` + `passwordMatches()` (SHA-256 → `timingSafeEqual`)                                                                                                                                                                                   |
-| 3   | Corriger commentaire TSG + vérifier déploiement TSP500 (gater si besoin) | 🔴       | 🟡     | Commentaires TSG corrigés ✅ (`contracts.ts`, `useContracts.ts`) ; **reste** : vérif on-chain TSP500 / ZAP_TSP500                                                                                                                                                          |
+| 3   | Corriger commentaire TSG + vérifier déploiement TSP500 (gater si besoin) | 🔴       | ✅     | Commentaires TSG corrigés (`contracts.ts`, `useContracts.ts`) ; TODO TSP500/ZAP_TSP500 retirés (déjà câblés en prod, confirmé)                                                                                                                                             |
 | 4   | Garde-fou solde insuffisant + bouton MAX + toast succès (Swap EVM)       | 🔴       | ✅     | Garde-fou solde + labels « Insufficient {token} balance » / « Enter an amount » (`Swap.tsx`) ; toast de succès + lien explorer à la confirmation (`notify.success` accepte un ReactNode). MAX déjà présent (`TradeWidget`) ; erreur brute déjà normalisée par `parseError` |
 | 5   | Bouton « Properties » mort + état wallet non connecté (portfolio)        | 🔴       | 🟡     | Bouton « Properties » corrigé (ancre `#properties` + `scroll-mt-24`, `real-estate/page.tsx`) ; état wallet non connecté (`user/dashboard`) reste à faire                                                                                                                   |
 | 6   | Supprimer hooks morts `useZapTmcFees`/`useZapTsp500Fees` (bug 100×)      | 🟠       | ⏳     | `useTmcSwap.ts`, `useTsp500Swap.ts`                                                                                                                                                                                                                                        |
