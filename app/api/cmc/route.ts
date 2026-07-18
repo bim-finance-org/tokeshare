@@ -8,6 +8,12 @@ const CMC_API_URL = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/
 
 type CmcQuoteResponse = Record<string, unknown>;
 
+// Only the CoinMarketCap IDs we actually display (stablecoins + CMC20). Anything
+// else is rejected so an attacker can't rotate arbitrary IDs to bypass the cache
+// and burn the paid CMC quota.
+const ALLOWED_CMC_IDS = new Set(['38442', '3408', '825', '4943', '2989', '18852', '20641', '24927']);
+const MAX_CMC_IDS = 20;
+
 interface CachedData<Data> {
   data: Data;
   timestamp: number;
@@ -24,7 +30,13 @@ function extractCryptoIds(request: NextRequest): string | null {
   if (!idParam || !/^\d+(,\d+)*$/.test(idParam)) {
     return null;
   }
-  return idParam;
+  // Dedupe + whitelist + sort → `1,2` and `2,1` resolve to one stable cache key.
+  const ids = Array.from(new Set(idParam.split(','))).filter((id) => ALLOWED_CMC_IDS.has(id));
+  if (ids.length === 0 || ids.length > MAX_CMC_IDS) {
+    return null;
+  }
+  ids.sort((a, b) => Number(a) - Number(b));
+  return ids.join(',');
 }
 
 /**
