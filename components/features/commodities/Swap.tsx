@@ -5,7 +5,7 @@ import Blockchains from '@/components/shared/Blockchains';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { useTokenContext } from '@/context/TokenContexts';
-import { useSwapQuote, MINIMUM_AMOUNT_TO_GET_QUOTE } from '@/hooks/useSwapQuote';
+import { useSwapQuote, MINIMUM_AMOUNT_TO_GET_QUOTE, type SwapQuoteParams } from '@/hooks/useSwapQuote';
 import { Address } from 'viem';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,13 +23,6 @@ import { TokenType } from '@/enums/TokenType';
 import { useSwapHandlerByToken } from '@/hooks/swapHandlers/useSwapHandlerByToken';
 import { useRefreshBalancesOnConfirm } from '@/hooks/useRefreshBalancesOnConfirm';
 import { notify } from '@/lib/notify';
-
-export type SwapQuoteParams = {
-  inputToken: Address;
-  outputToken: Address;
-  inputAmount: string;
-  direction: SwapDirection;
-};
 
 const EXPLORERS: Record<Blockchain, string> = {
   [Blockchain.Polygon]: 'https://polygonscan.com',
