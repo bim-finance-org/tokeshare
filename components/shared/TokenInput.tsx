@@ -26,7 +26,8 @@ const TokenInput = ({ label, value, onChange, placeholder, disabled = false }: T
         onChange={handleChange}
         disabled={disabled}
         placeholder={placeholder}
-        maxLength={8}
+        inputMode="decimal"
+        maxLength={12}
         className="bg-transparent text-2xl text-color4 font-medium outline-none w-full px-2 py-1 transition-all duration-200"
       />
     </div>
