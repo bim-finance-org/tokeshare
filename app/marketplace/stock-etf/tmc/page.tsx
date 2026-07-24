@@ -16,6 +16,7 @@ const TMCPage = () => {
           logoSrc="/images/currencies/tmc.png"
           image="/images/tmc/tmc.webp"
           imageAlt="Tokeshare MarketCap 20"
+          imagePriority
           baseContract={BASE_CONTRACTS.TMC}
         />
 

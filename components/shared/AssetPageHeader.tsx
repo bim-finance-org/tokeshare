@@ -8,6 +8,8 @@ interface AssetPageHeaderProps {
   logoSrc: string;
   image: string;
   imageAlt: string;
+  /** Prioritize the product image when the header is the page's LCP element. */
+  imagePriority?: boolean;
   polygonContract?: string;
   baseContract?: string;
   ethereumContract?: string;
@@ -20,6 +22,7 @@ const AssetPageHeader = ({
   logoSrc,
   image,
   imageAlt,
+  imagePriority = false,
   polygonContract,
   baseContract,
   ethereumContract,
@@ -32,7 +35,7 @@ const AssetPageHeader = ({
         <div className="min-w-0">
           <div className="flex items-center gap-3">
             <span className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/10 ring-1 ring-inset ring-white/15">
-              <Image src={logoSrc} alt="" fill className="object-contain p-2" />
+              <Image src={logoSrc} alt="" fill sizes="56px" className="object-contain p-2" />
             </span>
             <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white ring-1 ring-inset ring-white/15">
               {symbol}
@@ -50,7 +53,14 @@ const AssetPageHeader = ({
 
         {/* Product image */}
         <div className="relative h-44 w-full shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/10 sm:h-52 md:w-72">
-          <Image src={image} alt={imageAlt} fill sizes="(max-width: 768px) 100vw, 288px" className="object-cover" />
+          <Image
+            src={image}
+            alt={imageAlt}
+            fill
+            sizes="(max-width: 768px) 100vw, 288px"
+            priority={imagePriority}
+            className="object-cover"
+          />
         </div>
       </div>
     </div>

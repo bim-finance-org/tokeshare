@@ -111,6 +111,7 @@ const CommodityPage = async ({ params }: PageProps) => {
           logoSrc={tokenInfo.tokenImage}
           image={commodity.image}
           imageAlt={commodity.name}
+          imagePriority
           polygonContract={tokenInfo.polygonContract}
           ethereumContract={tokenInfo.ethereumContract}
         />

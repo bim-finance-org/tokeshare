@@ -17,6 +17,9 @@ const nextConfig: NextConfig = {
   images: {
     qualities: [75, 90],
     formats: ['image/avif', 'image/webp'],
+    // All image sources are static, immutable assets in /public — cache the
+    // optimized variants aggressively so they aren't re-transcoded every 60s.
+    minimumCacheTTL: 2592000, // 30 days
   },
   experimental: {
     optimizePackageImports: ['lucide-react'],
