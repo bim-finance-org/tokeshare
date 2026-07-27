@@ -11,9 +11,11 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { STELLAR_ASSETS, type StellarAsset } from '@/config/stellar-assets';
 import { stellarConfig } from '@/config/stellar';
+import { isPrivyEnabled } from '@/config/privy';
 import { useStellarAccount } from '@/context/StellarContext';
 import { useAssetBalance, useClassicBalances, useSaleInfo } from '@/hooks/useStellarAsset';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
+import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
 
 const PAY_SYMBOL = stellarConfig.pay.code;
 const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
@@ -93,6 +95,9 @@ export default function StellarPortfolioPage() {
               <StellarIcon size={20} />
               Connect
             </button>
+            {isPrivyEnabled && (
+              <PrivyLoginButton className="mx-auto mt-3 rounded-lg border border-color4 px-4 py-2 text-sm font-medium text-color4 transition hover:bg-color1" />
+            )}
           </div>
         ) : (
           <>

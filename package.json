@@ -19,6 +19,7 @@
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^1.9.5",
     "@prisma/client": "^6.6.0",
+    "@privy-io/react-auth": "^3.35.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-toast": "^1.2.14",

@@ -12,13 +12,30 @@ import { stellarConfig } from '@/config/stellar';
 
 const log = getLogger('stellar');
 
+/**
+ * An account contributed by an alternative onboarding path (e.g. a Privy embedded
+ * wallet). When registered, it takes precedence over the Wallets Kit account, so
+ * every consumer of useStellarAccount() works with either path unchanged.
+ */
+export type ExternalStellarAccount = {
+  address: string;
+  source: 'privy';
+  signTransaction: (xdr: string) => Promise<string>;
+  disconnect: () => Promise<void>;
+};
+
+type StellarSource = 'wallet-kit' | 'privy';
+
 type StellarContextValue = {
   address: string | undefined;
   walletId: string | undefined;
+  source: StellarSource | undefined;
   isConnected: boolean;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   signTransaction: (xdr: string) => Promise<string>;
+  /** Registers (or clears with null) an external account such as Privy. */
+  registerExternalAccount: (account: ExternalStellarAccount | null) => void;
 };
 
 const StellarContext = createContext<StellarContextValue | undefined>(undefined);
@@ -27,7 +44,12 @@ const STORAGE_KEY = 'tokeshare:stellar-wallet-id';
 export function StellarProvider({ children }: { children: React.ReactNode }) {
   const [address, setAddress] = useState<string | undefined>();
   const [walletId, setWalletId] = useState<string | undefined>();
+  const [external, setExternal] = useState<ExternalStellarAccount | null>(null);
   const kitRef = useRef<StellarWalletsKit | null>(null);
+
+  const registerExternalAccount = useCallback((account: ExternalStellarAccount | null) => {
+    setExternal(account);
+  }, []);
 
   useEffect(() => {
     if (kitRef.current) return;
@@ -79,16 +101,23 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const disconnect = useCallback(async () => {
+    // An external account (e.g. Privy) takes precedence — tear it down first.
+    if (external) {
+      await external.disconnect();
+      setExternal(null);
+      return;
+    }
     const kit = kitRef.current;
     if (!kit) return;
     await kit.disconnect();
     localStorage.removeItem(STORAGE_KEY);
     setAddress(undefined);
     setWalletId(undefined);
-  }, []);
+  }, [external]);
 
   const signTransaction = useCallback(
     async (xdr: string): Promise<string> => {
+      if (external) return external.signTransaction(xdr);
       const kit = kitRef.current;
       if (!kit || !address) throw new Error('Wallet not connected');
       const { signedTxXdr } = await kit.signTransaction(xdr, {
@@ -97,19 +126,23 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
       });
       return signedTxXdr;
     },
-    [address],
+    [address, external],
   );
+
+  const activeAddress = external?.address ?? address;
 
   const value = useMemo<StellarContextValue>(
     () => ({
-      address,
+      address: activeAddress,
       walletId,
-      isConnected: !!address,
+      source: external ? 'privy' : activeAddress ? 'wallet-kit' : undefined,
+      isConnected: !!activeAddress,
       connect,
       disconnect,
       signTransaction,
+      registerExternalAccount,
     }),
-    [address, walletId, connect, disconnect, signTransaction],
+    [activeAddress, walletId, external, connect, disconnect, signTransaction, registerExternalAccount],
   );
 
   return <StellarContext.Provider value={value}>{children}</StellarContext.Provider>;

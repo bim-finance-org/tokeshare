@@ -8,10 +8,12 @@
 import { useState } from 'react';
 import { type StellarAsset, isAssetConfigured } from '@/config/stellar-assets';
 import { stellarConfig } from '@/config/stellar';
+import { isPrivyEnabled } from '@/config/privy';
 import { useStellarAccount } from '@/context/StellarContext';
 import { useAssetBalance, useBuyAsset, useClassicBalances, useSaleInfo } from '@/hooks/useStellarAsset';
 import { explorerTxUrl } from '@/lib/stellar';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
+import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
 import { Badge } from '@/components/ui/badge';
 
 const PAY_SYMBOL = stellarConfig.pay.code;
@@ -96,6 +98,10 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
           This asset is not on-chain yet. Its token and sale contracts still need to be deployed and their ids pasted
           into the config.
         </div>
+      )}
+
+      {!isConnected && isPrivyEnabled && (
+        <PrivyLoginButton className="w-full rounded-lg border border-color4 py-2 text-sm font-medium text-color4 transition hover:bg-color1" />
       )}
 
       {isConnected && (
