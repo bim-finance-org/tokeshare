@@ -12,6 +12,7 @@ import { stroopsToUnits, submitSignedXdr, unitsToStroops } from '@/lib/stellar';
 import {
   buildBuyXdr,
   getClassicBalances,
+  readIsAllowed,
   readSaleAvailable,
   readSalePrice,
   readTokenBalance,
@@ -49,6 +50,21 @@ export function useAssetBalance(asset: StellarAsset) {
       const stroops = await readTokenBalance(asset.tokenId, address!);
       return { stroops, units: stroopsToUnits(stroops) };
     },
+  });
+}
+
+/**
+ * Whether the connected wallet is allowlisted for this asset. `undefined` while
+ * loading / when not applicable; a `false` result means the buy must be blocked
+ * (the on-chain transfer would be rejected with Error #113).
+ */
+export function useIsAllowed(asset: StellarAsset) {
+  const { address } = useStellarAccount();
+  return useQuery({
+    queryKey: ['stellar-is-allowed', asset.slug, address],
+    enabled: !!address && Boolean(asset.tokenId),
+    staleTime: 60_000,
+    queryFn: () => readIsAllowed(asset.tokenId, address!),
   });
 }
 

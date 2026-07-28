@@ -1,22 +1,11 @@
-// Soroban / Stellar helpers for the TRES sale. Build-and-return-XDR functions
-// are signed by the wallet kit (in StellarContext) and submitted via RPC.
+// Shared Stellar/Soroban primitives used across the multi-asset RWA layer
+// (config-driven contracts live in config/stellar-assets.ts; the per-asset data
+// layer is lib/stellar-assets.ts).
 
-import {
-  Account,
-  Address,
-  Asset,
-  BASE_FEE,
-  Contract,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-  nativeToScVal,
-  scValToNative,
-  rpc,
-} from '@stellar/stellar-sdk';
-import { STROOPS_PER_UNIT, horizonUrl, stellarConfig } from '@/config/stellar';
+import { TransactionBuilder, rpc } from '@stellar/stellar-sdk';
+import { STROOPS_PER_UNIT, stellarConfig } from '@/config/stellar';
 
-const { networkPassphrase, rpcUrl, saleContractId, tres } = stellarConfig;
+const { networkPassphrase, rpcUrl } = stellarConfig;
 
 export const getServer = () => new rpc.Server(rpcUrl);
 
@@ -37,90 +26,6 @@ export function stroopsToUnits(stroops: bigint): string {
   const int = abs.slice(0, -7);
   const frac = abs.slice(-7).replace(/0+$/, '');
   return `${negative ? '-' : ''}${int}${frac ? `.${frac}` : ''}`;
-}
-
-// ---- read-only contract views (via simulation) ----------------------------
-
-async function simulateView(method: string): Promise<bigint> {
-  const server = getServer();
-  const source = new Account(Keypair.random().publicKey(), '0');
-  const contract = new Contract(saleContractId);
-  const tx = new TransactionBuilder(source, { fee: BASE_FEE, networkPassphrase })
-    .addOperation(contract.call(method))
-    .setTimeout(30)
-    .build();
-
-  const sim = await server.simulateTransaction(tx);
-  if (rpc.Api.isSimulationError(sim)) throw new Error(sim.error);
-  if (!sim.result) throw new Error(`no result for ${method}`);
-  return scValToNative(sim.result.retval) as bigint;
-}
-
-export const readPrice = () => simulateView('price'); // pay stroops per 1 TRES
-export const readAvailable = () => simulateView('available'); // TRES base units
-
-// ---- trustline (classic) ---------------------------------------------------
-
-export async function hasTresTrustline(address: string): Promise<boolean> {
-  const res = await fetch(`${horizonUrl}/accounts/${address}`);
-  if (res.status === 404) return false; // unfunded account has no trustlines
-  if (!res.ok) throw new Error('failed to load account');
-  const data = await res.json();
-  return (data.balances ?? []).some(
-    (b: { asset_code?: string; asset_issuer?: string }) =>
-      b.asset_code === tres.code && b.asset_issuer === tres.issuer,
-  );
-}
-
-export async function buildTrustlineXdr(address: string): Promise<string> {
-  const server = getServer();
-  const account = await server.getAccount(address);
-  const tx = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase })
-    .addOperation(Operation.changeTrust({ asset: new Asset(tres.code, tres.issuer) }))
-    .setTimeout(180)
-    .build();
-  return tx.toXDR();
-}
-
-// ---- wallet balances (classic trustline balances via Horizon) -------------
-
-export type WalletBalances = { tres: string; usdc: string; xlm: string };
-
-export async function getBalances(address: string): Promise<WalletBalances> {
-  const res = await fetch(`${horizonUrl}/accounts/${address}`);
-  if (res.status === 404) return { tres: '0', usdc: '0', xlm: '0' }; // unfunded
-  if (!res.ok) throw new Error('failed to load account');
-  const data = await res.json();
-  const balances: Array<{ asset_type: string; asset_code?: string; asset_issuer?: string; balance: string }> =
-    data.balances ?? [];
-  const find = (code: string, issuer: string) =>
-    balances.find((b) => b.asset_code === code && b.asset_issuer === issuer)?.balance ?? '0';
-  return {
-    tres: find(stellarConfig.tres.code, stellarConfig.tres.issuer),
-    usdc: find(stellarConfig.pay.code, stellarConfig.pay.issuer),
-    xlm: balances.find((b) => b.asset_type === 'native')?.balance ?? '0',
-  };
-}
-
-// ---- buy (Soroban invoke) --------------------------------------------------
-
-export async function buildBuyXdr(buyer: string, tresStroops: bigint): Promise<string> {
-  const server = getServer();
-  const account = await server.getAccount(buyer);
-  const contract = new Contract(saleContractId);
-  const op = contract.call(
-    'buy',
-    new Address(buyer).toScVal(),
-    nativeToScVal(tresStroops, { type: 'i128' }),
-  );
-  const tx = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase })
-    .addOperation(op)
-    .setTimeout(180)
-    .build();
-  // prepareTransaction simulates, then attaches the Soroban footprint, auth and
-  // resource fees the network requires.
-  const prepared = await server.prepareTransaction(tx);
-  return prepared.toXDR();
 }
 
 // ---- submit a signed XDR and wait for confirmation -------------------------

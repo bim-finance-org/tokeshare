@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { ArrowRight, Building2, Gem, LineChart, Store } from 'lucide-react';
 import PopularCards from '@/components/features/home/PopularCards';
 import Schema from '@/components/features/home/Schema';
@@ -150,10 +151,10 @@ export default function Home() {
 
               <div className="mt-8">
                 <Link
-                  href="/poc-stellar"
+                  href={'/stellar' as Route}
                   className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-titleSemibold text-color4 transition-colors hover:bg-color2 hover:text-white"
                 >
-                  Discover our Stellar POC
+                  Discover our Stellar marketplace
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>

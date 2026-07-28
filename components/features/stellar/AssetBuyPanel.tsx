@@ -10,8 +10,9 @@ import { type StellarAsset, isAssetConfigured } from '@/config/stellar-assets';
 import { stellarConfig } from '@/config/stellar';
 import { isPrivyEnabled } from '@/config/privy';
 import { useStellarAccount } from '@/context/StellarContext';
-import { useAssetBalance, useBuyAsset, useClassicBalances, useSaleInfo } from '@/hooks/useStellarAsset';
+import { useAssetBalance, useBuyAsset, useClassicBalances, useIsAllowed, useSaleInfo } from '@/hooks/useStellarAsset';
 import { explorerTxUrl } from '@/lib/stellar';
+import { toReadableStellarError } from '@/lib/stellar-errors';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
 import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
   const { data: saleInfo, isLoading: isSaleLoading } = useSaleInfo(asset);
   const { data: holdings } = useAssetBalance(asset);
   const { data: balances } = useClassicBalances();
+  const { data: allowed, isLoading: isAllowedLoading } = useIsAllowed(asset);
   const buy = useBuyAsset(asset);
 
   const [amount, setAmount] = useState('');
@@ -42,7 +44,10 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
   const payBalance = parseFloat(balances?.usdc ?? '0');
   const exceedsInventory = available > 0 && shareNum > available;
   const insufficientPay = isConnected && cost > 0 && cost > payBalance;
-  const isInvalid = shareNum <= 0 || exceedsInventory || insufficientPay;
+  // allowed === false means the on-chain transfer would be rejected (Error #113):
+  // block the buy up front rather than letting the buyer sign a doomed tx.
+  const notAllowed = isConnected && allowed === false;
+  const isInvalid = shareNum <= 0 || exceedsInventory || insufficientPay || notAllowed;
 
   const handleBuy = () => {
     if (!isConnected) {
@@ -57,13 +62,15 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
     ? 'Connect Stellar wallet'
     : buy.isPending
       ? 'Processing…'
-      : exceedsInventory
-        ? 'Not enough inventory'
-        : shareNum <= 0
-          ? 'Enter an amount'
-          : insufficientPay
-            ? `Not enough ${PAY_SYMBOL}`
-            : `Buy ${amount} ${asset.symbol}`;
+      : notAllowed
+        ? 'Address not authorized'
+        : exceedsInventory
+          ? 'Not enough inventory'
+          : shareNum <= 0
+            ? 'Enter an amount'
+            : insufficientPay
+              ? `Not enough ${PAY_SYMBOL}`
+              : `Buy ${amount} ${asset.symbol}`;
 
   return (
     <section className="bg-white rounded-2xl shadow-md p-6 space-y-5">
@@ -102,6 +109,24 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
 
       {!isConnected && isPrivyEnabled && (
         <PrivyLoginButton className="w-full rounded-lg border border-color4 py-2 text-sm font-medium text-color4 transition hover:bg-color1" />
+      )}
+
+      {isConnected && configured && (
+        <div
+          className={
+            allowed === false
+              ? 'rounded-xl border border-red-400 bg-red-50 p-3 text-sm text-red-800'
+              : 'rounded-xl border border-green-500 bg-green-50 p-3 text-sm text-green-800'
+          }
+        >
+          {isAllowedLoading
+            ? 'Checking compliance…'
+            : allowed === false
+              ? 'Your address is not yet allowlisted for this asset, so purchases are blocked. Contact the issuer to be added to the allowlist.'
+              : allowed
+                ? '✓ Your address is allowlisted for this asset.'
+                : null}
+        </div>
       )}
 
       {isConnected && (
@@ -188,7 +213,7 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
       {buy.isError && (
         <div className="rounded-xl border border-red-400 bg-red-50 p-4 text-sm text-red-800">
           <p className="font-semibold">Purchase failed</p>
-          <p className="break-words">{buy.error instanceof Error ? buy.error.message : 'Unknown error'}</p>
+          <p className="break-words">{toReadableStellarError(buy.error)}</p>
         </div>
       )}
 

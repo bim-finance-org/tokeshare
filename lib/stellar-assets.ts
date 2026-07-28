@@ -58,6 +58,18 @@ export async function readTokenBalance(tokenId: string, address: string): Promis
   return balance as bigint;
 }
 
+// ---- compliance (allowlist) ------------------------------------------------
+
+/**
+ * Whether `address` is allowlisted on the RWA token, i.e. may receive/hold it.
+ * Read-only view (`allowed(account) -> bool`); a non-allowlisted buyer's purchase
+ * is rejected on-chain (Error #113), so we check this before enabling the buy.
+ */
+export async function readIsAllowed(tokenId: string, address: string): Promise<boolean> {
+  const allowed = await simulateCall(tokenId, 'allowed', new Address(address).toScVal());
+  return Boolean(allowed);
+}
+
 // ---- payment-asset + XLM balances (classic, via Horizon) -------------------
 
 export type ClassicBalances = { usdc: string; xlm: string };

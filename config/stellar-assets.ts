@@ -41,8 +41,9 @@ export interface StellarAsset {
   priceHintUsdc?: number;
 }
 
-// ⚠️ tokenId / saleId are placeholders until the contracts are deployed on
-// testnet. Paste the ids from the token-repo deploy output + the sale deploy.
+// ⚠️ TRES is deployed on TESTNET, TFW_001 targets MAINNET — the ids below are
+// not interchangeable between networks. Paste the ids from the token-repo
+// deploy output + the sale deploy.
 export const STELLAR_ASSETS: StellarAsset[] = [
   {
     slug: 'tres',
@@ -50,9 +51,13 @@ export const STELLAR_ASSETS: StellarAsset[] = [
     symbol: 'TRES',
     kind: 'real-estate',
     decimals: STELLAR_DECIMALS,
-    totalShares: 23_000, // TODO confirm against the existing TRES supply
-    tokenId: '', // TODO paste after RWA token deploy
-    saleId: '', // TODO paste after sale deploy
+    // Matches the existing classic TRES supply exactly (22 996.8 in its SAC
+    // + 3.2 on trustlines, per Horizon /assets), so the re-issue keeps the
+    // token count unchanged.
+    totalShares: 23_000,
+    // TESTNET. Deployed 2026-07-28 from the RWA token repo (stellar/).
+    tokenId: 'CCZERUHBBFK2TIMOGYMTROUMKPLTMFQ3KRFDASGKV3IZCAZHBFEI6J6Q',
+    saleId: 'CCCDPOYCHMAVCISAQVHCNKJNIMWFISOGQWLAMQAEFOIZW76EGP77CJHF',
     image: '/images/stellar/steallr_poc.jpeg',
     location: 'Las Terrenas, Dominican Republic',
     description: 'Tokenized real-estate share in a Caribbean property.',
