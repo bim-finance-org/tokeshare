@@ -8,7 +8,6 @@ import {
   type ISupportedWallet,
 } from '@creit.tech/stellar-wallets-kit';
 import { getLogger } from '@/lib/logger';
-import { stellarConfig } from '@/config/stellar';
 
 const log = getLogger('stellar');
 
@@ -20,7 +19,7 @@ const log = getLogger('stellar');
 export type ExternalStellarAccount = {
   address: string;
   source: 'privy';
-  signTransaction: (xdr: string) => Promise<string>;
+  signTransaction: (xdr: string, networkPassphrase: string) => Promise<string>;
   disconnect: () => Promise<void>;
 };
 
@@ -33,7 +32,8 @@ type StellarContextValue = {
   isConnected: boolean;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
-  signTransaction: (xdr: string) => Promise<string>;
+  /** Signs on the given network (assets can be on testnet or mainnet). */
+  signTransaction: (xdr: string, networkPassphrase: string) => Promise<string>;
   /** Registers (or clears with null) an external account such as Privy. */
   registerExternalAccount: (account: ExternalStellarAccount | null) => void;
 };
@@ -56,8 +56,11 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
 
     const storedWalletId = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) ?? undefined : undefined;
 
+    // The kit needs a default network; per-asset signing overrides it per call
+    // (assets can be on testnet or mainnet). A wallet's address is the same across
+    // networks, so this default only affects the initial address request.
     const kit = new StellarWalletsKit({
-      network: stellarConfig.networkPassphrase as WalletNetwork,
+      network: WalletNetwork.PUBLIC,
       selectedWalletId: storedWalletId,
       modules: allowAllModules(),
     });
@@ -116,13 +119,13 @@ export function StellarProvider({ children }: { children: React.ReactNode }) {
   }, [external]);
 
   const signTransaction = useCallback(
-    async (xdr: string): Promise<string> => {
-      if (external) return external.signTransaction(xdr);
+    async (xdr: string, networkPassphrase: string): Promise<string> => {
+      if (external) return external.signTransaction(xdr, networkPassphrase);
       const kit = kitRef.current;
       if (!kit || !address) throw new Error('Wallet not connected');
       const { signedTxXdr } = await kit.signTransaction(xdr, {
         address,
-        networkPassphrase: stellarConfig.networkPassphrase as WalletNetwork,
+        networkPassphrase: networkPassphrase as WalletNetwork,
       });
       return signedTxXdr;
     },

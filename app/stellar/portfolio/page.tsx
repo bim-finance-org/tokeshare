@@ -10,14 +10,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { STELLAR_ASSETS, type StellarAsset } from '@/config/stellar-assets';
-import { stellarConfig } from '@/config/stellar';
 import { isPrivyEnabled } from '@/config/privy';
 import { useStellarAccount } from '@/context/StellarContext';
-import { useAssetBalance, useClassicBalances, useSaleInfo } from '@/hooks/useStellarAsset';
+import { useAssetBalance, useSaleInfo } from '@/hooks/useStellarAsset';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
 import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
 
-const PAY_SYMBOL = stellarConfig.pay.code;
+// Assets can span testnet + mainnet; both settle in USDC.
+const PAY_SYMBOL = 'USDC';
 const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
 
 function PortfolioRow({
@@ -48,7 +48,9 @@ function PortfolioRow({
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-semibold text-color4">{asset.name}</p>
-        <p className="font-mono text-xs text-color6">{asset.symbol}</p>
+        <p className="font-mono text-xs text-color6">
+          {asset.symbol} · {asset.network}
+        </p>
       </div>
       <div className="text-right">
         <p className="font-semibold text-color4">
@@ -64,7 +66,6 @@ function PortfolioRow({
 
 export default function StellarPortfolioPage() {
   const { address, isConnected, connect } = useStellarAccount();
-  const { data: balances } = useClassicBalances();
   const [values, setValues] = useState<Record<string, number>>({});
 
   const handleValue = useCallback((slug: string, value: number) => {
@@ -101,16 +102,12 @@ export default function StellarPortfolioPage() {
           </div>
         ) : (
           <>
-            <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-xl bg-white p-4 shadow-sm sm:col-span-2">
+            <div className="mt-6">
+              <div className="rounded-xl bg-white p-4 shadow-sm">
                 <p className="text-xs uppercase text-color6">Estimated total value</p>
                 <p className="mt-1 text-2xl font-bold text-color4">
                   {fmt(totalValue)} {PAY_SYMBOL}
                 </p>
-              </div>
-              <div className="rounded-xl bg-white p-4 shadow-sm">
-                <p className="text-xs uppercase text-color6">{PAY_SYMBOL} balance</p>
-                <p className="mt-1 text-2xl font-bold text-color4">{fmt(parseFloat(balances?.usdc ?? '0'))}</p>
               </div>
             </div>
 

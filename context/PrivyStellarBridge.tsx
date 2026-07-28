@@ -10,7 +10,6 @@ import { useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useCreateWallet, useSignRawHash } from '@privy-io/react-auth/extended-chains';
 import { useStellarAccount } from './StellarContext';
-import { stellarConfig } from '@/config/stellar';
 import { signStellarXdrWithPrivy } from '@/lib/privy-stellar';
 import { getLogger } from '@/lib/logger';
 
@@ -45,8 +44,8 @@ export default function PrivyStellarBridge() {
       registerExternalAccount({
         address: stellarAddress,
         source: 'privy',
-        signTransaction: (xdr) =>
-          signStellarXdrWithPrivy(signRawHash, stellarAddress, xdr, stellarConfig.networkPassphrase),
+        signTransaction: (xdr, networkPassphrase) =>
+          signStellarXdrWithPrivy(signRawHash, stellarAddress, xdr, networkPassphrase),
         disconnect: async () => {
           await logout();
         },

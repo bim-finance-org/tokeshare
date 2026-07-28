@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import { type StellarAsset, isAssetConfigured } from '@/config/stellar-assets';
-import { stellarConfig } from '@/config/stellar';
+import { getNetworkProfile } from '@/config/stellar';
 import { isPrivyEnabled } from '@/config/privy';
 import { useStellarAccount } from '@/context/StellarContext';
 import { useAssetBalance, useBuyAsset, useClassicBalances, useIsAllowed, useSaleInfo } from '@/hooks/useStellarAsset';
@@ -17,15 +17,15 @@ import StellarIcon from '@/components/icons/blockchains/StellarIcon';
 import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
 import { Badge } from '@/components/ui/badge';
 
-const PAY_SYMBOL = stellarConfig.pay.code;
 const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-6)}`;
 const fmt = (value?: string) => parseFloat(value ?? '0').toLocaleString('en-US', { maximumFractionDigits: 2 });
 
 export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
+  const PAY_SYMBOL = getNetworkProfile(asset.network).pay.code;
   const { address, isConnected, connect, disconnect } = useStellarAccount();
   const { data: saleInfo, isLoading: isSaleLoading } = useSaleInfo(asset);
   const { data: holdings } = useAssetBalance(asset);
-  const { data: balances } = useClassicBalances();
+  const { data: balances } = useClassicBalances(asset);
   const { data: allowed, isLoading: isAllowedLoading } = useIsAllowed(asset);
   const buy = useBuyAsset(asset);
 
@@ -221,7 +221,7 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
         <div className="rounded-xl border border-green-500 bg-green-50 p-4 text-sm text-green-800">
           <p className="font-semibold">Purchase confirmed</p>
           <a
-            href={explorerTxUrl(buy.data)}
+            href={explorerTxUrl(asset.network, buy.data)}
             target="_blank"
             rel="noopener noreferrer"
             className="underline break-all"

@@ -1,13 +1,12 @@
-// Shared Stellar/Soroban primitives used across the multi-asset RWA layer
-// (config-driven contracts live in config/stellar-assets.ts; the per-asset data
-// layer is lib/stellar-assets.ts).
+// Shared Stellar/Soroban primitives for the multi-asset RWA layer. Every network-
+// dependent call takes a StellarNetworkProfile so testnet and mainnet assets can
+// be served side by side (config-driven contracts live in config/stellar-assets.ts;
+// the per-asset data layer is lib/stellar-assets.ts).
 
 import { TransactionBuilder, rpc } from '@stellar/stellar-sdk';
-import { STROOPS_PER_UNIT, stellarConfig } from '@/config/stellar';
+import { STROOPS_PER_UNIT, type StellarNetwork, type StellarNetworkProfile } from '@/config/stellar';
 
-const { networkPassphrase, rpcUrl } = stellarConfig;
-
-export const getServer = () => new rpc.Server(rpcUrl);
+export const getServer = (rpcUrl: string) => new rpc.Server(rpcUrl);
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -30,9 +29,9 @@ export function stroopsToUnits(stroops: bigint): string {
 
 // ---- submit a signed XDR and wait for confirmation -------------------------
 
-export async function submitSignedXdr(signedXdr: string): Promise<string> {
-  const server = getServer();
-  const tx = TransactionBuilder.fromXDR(signedXdr, networkPassphrase);
+export async function submitSignedXdr(profile: StellarNetworkProfile, signedXdr: string): Promise<string> {
+  const server = getServer(profile.rpcUrl);
+  const tx = TransactionBuilder.fromXDR(signedXdr, profile.networkPassphrase);
   const sent = await server.sendTransaction(tx);
 
   if (sent.status === 'ERROR') {
@@ -53,8 +52,8 @@ export async function submitSignedXdr(signedXdr: string): Promise<string> {
   return sent.hash;
 }
 
-export function explorerTxUrl(hash: string): string {
-  const net = networkPassphrase === 'Public Global Stellar Network ; September 2015' ? 'public' : 'testnet';
+export function explorerTxUrl(network: StellarNetwork, hash: string): string {
+  const net = network === 'mainnet' ? 'public' : 'testnet';
   return `https://stellar.expert/explorer/${net}/tx/${hash}`;
 }
 

@@ -9,7 +9,7 @@
 // balances are read via the token contract (see lib/stellar-assets.ts), not via
 // Horizon trustlines. Only the payment asset (USDC) + XLM stay classic.
 
-import { STELLAR_DECIMALS } from './stellar';
+import { STELLAR_DECIMALS, type StellarNetwork } from './stellar';
 
 export type StellarAssetKind = 'real-estate' | 'vehicle';
 
@@ -21,6 +21,8 @@ export interface StellarAsset {
   /** Token symbol (SEP-41). */
   symbol: string;
   kind: StellarAssetKind;
+  /** Which Stellar network this asset's contracts live on. */
+  network: StellarNetwork;
   decimals: number;
   /** Total number of whole shares = the token cap. */
   totalShares: number;
@@ -50,6 +52,7 @@ export const STELLAR_ASSETS: StellarAsset[] = [
     name: 'Angel Cœur Caribe',
     symbol: 'TRES',
     kind: 'real-estate',
+    network: 'testnet',
     decimals: STELLAR_DECIMALS,
     // Matches the existing classic TRES supply exactly (22 996.8 in its SAC
     // + 3.2 on trustlines, per Horizon /assets), so the re-issue keeps the
@@ -68,6 +71,7 @@ export const STELLAR_ASSETS: StellarAsset[] = [
     name: 'Tokeshare forwill001',
     symbol: 'TFW_001',
     kind: 'vehicle',
+    network: 'mainnet',
     decimals: STELLAR_DECIMALS,
     totalShares: 100,
     tokenId: '', // TODO paste after RWA token deploy
