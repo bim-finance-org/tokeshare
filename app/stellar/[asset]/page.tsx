@@ -57,6 +57,15 @@ export default async function StellarAssetPage({ params }: { params: Promise<{ a
                 {asset.location && <p className="text-sm text-color6">{asset.location}</p>}
               </div>
               {asset.description && <p className="text-sm text-color6">{asset.description}</p>}
+              {asset.gallery && asset.gallery.length > 1 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {asset.gallery.map((src) => (
+                    <div key={src} className="relative aspect-square overflow-hidden rounded-lg">
+                      <Image src={src} alt={asset.name} fill sizes="(max-width: 1024px) 33vw, 160px" className="object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="space-y-2 border-t border-color1 pt-4 text-sm">
                 <div className="flex justify-between">
                   <span className="text-color6">Symbol</span>

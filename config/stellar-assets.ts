@@ -32,6 +32,8 @@ export interface StellarAsset {
   saleId: string;
   /** Card / hero image (public/ path). */
   image: string;
+  /** Optional extra photos shown on the asset detail page. */
+  gallery?: string[];
   /** Optional display metadata. */
   location?: string;
   description?: string;
@@ -77,7 +79,8 @@ export const STELLAR_ASSETS: StellarAsset[] = [
     // MAINNET. Token deployed 2026-07-28; sale v2 (buyback + auto-allowlist).
     tokenId: 'CC2MTI3REEQUMDJYOLQHK4D6GPGSTGPZOWH3G75SECSOTOH7L7GGLG5O',
     saleId: 'CAFYUWC2U7GX4DNG6JRZLPYDNXDOLJNHP5RWVAMOTOA5QO75N4B56X45',
-    image: '/images/stellar/steallr_poc.jpeg', // TODO replace with the TFW_001 visual
+    image: '/images/stellar/tfw001-1.jpg',
+    gallery: ['/images/stellar/tfw001-1.jpg', '/images/stellar/tfw001-2.jpg'],
     description: 'Tokenized share in a quad (transport vehicle).',
     priceHintUsdc: 50,
   },
