@@ -15,6 +15,7 @@ import { useStellarAccount } from '@/context/StellarContext';
 import { useAssetBalance, useSaleInfo } from '@/hooks/useStellarAsset';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
 import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
+import SellPanel from '@/components/features/stellar/SellPanel';
 
 // Assets can span testnet + mainnet; both settle in USDC.
 const PAY_SYMBOL = 'USDC';
@@ -39,28 +40,32 @@ function PortfolioRow({
   }, [asset.slug, value, onValue]);
 
   return (
-    <Link
-      href={`/stellar/${asset.slug}` as Route}
-      className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm transition hover:shadow-md"
-    >
-      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
-        <Image src={asset.image} alt={asset.name} fill sizes="56px" className="object-cover" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-color4">{asset.name}</p>
-        <p className="font-mono text-xs text-color6">
-          {asset.symbol} · {asset.network}
-        </p>
-      </div>
-      <div className="text-right">
-        <p className="font-semibold text-color4">
-          {fmt(units)} {asset.symbol}
-        </p>
-        <p className="text-xs text-color6">
-          ≈ {fmt(value)} {PAY_SYMBOL}
-        </p>
-      </div>
-    </Link>
+    <div className="space-y-3">
+      <Link
+        href={`/stellar/${asset.slug}` as Route}
+        className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm transition hover:shadow-md"
+      >
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
+          <Image src={asset.image} alt={asset.name} fill sizes="56px" className="object-cover" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold text-color4">{asset.name}</p>
+          <p className="font-mono text-xs text-color6">
+            {asset.symbol} · {asset.network}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="font-semibold text-color4">
+            {fmt(units)} {asset.symbol}
+          </p>
+          <p className="text-xs text-color6">
+            ≈ {fmt(value)} {PAY_SYMBOL}
+          </p>
+        </div>
+      </Link>
+      {/* Buyback panel — self-hides unless this wallet holds shares of the asset. */}
+      <SellPanel asset={asset} />
+    </div>
   );
 }
 

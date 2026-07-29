@@ -74,9 +74,9 @@ export const STELLAR_ASSETS: StellarAsset[] = [
     network: 'mainnet',
     decimals: STELLAR_DECIMALS,
     totalShares: 100,
-    // MAINNET. Deployed 2026-07-28 from the RWA token repo (tokeshare-contrats).
+    // MAINNET. Token deployed 2026-07-28; sale v2 (buyback + auto-allowlist).
     tokenId: 'CC2MTI3REEQUMDJYOLQHK4D6GPGSTGPZOWH3G75SECSOTOH7L7GGLG5O',
-    saleId: 'CDF7YM4PHBXCKCSCIRFZM42ZYPDGC5QCUA4DRUFDPVSHIQILXHE7OS6C',
+    saleId: 'CAFYUWC2U7GX4DNG6JRZLPYDNXDOLJNHP5RWVAMOTOA5QO75N4B56X45',
     image: '/images/stellar/steallr_poc.jpeg', // TODO replace with the TFW_001 visual
     description: 'Tokenized share in a quad (transport vehicle).',
     priceHintUsdc: 50,

@@ -13,7 +13,12 @@ import { getNetworkProfile } from '@/config/stellar';
 import { stroopsToUnits, submitSignedXdr, unitsToStroops } from '@/lib/stellar';
 import {
   buildBuyXdr,
+  buildSellXdr,
   getClassicBalances,
+  quoteSell,
+  readBuybackAvailable,
+  readBuybackPrice,
+  readFeeBps,
   readIsAllowed,
   readSaleAvailable,
   readSalePrice,
@@ -82,6 +87,83 @@ export function useClassicBalances(asset: StellarAsset) {
     enabled: !!address,
     staleTime: 30_000,
     queryFn: () => getClassicBalances(profile, address!),
+  });
+}
+
+/**
+ * Buyback desk state for this asset: price (0 = closed), how many shares the
+ * contract can currently buy back (limited by its USDC float), and the fee in
+ * basis points. Read on-chain so the fee is never hardcoded.
+ */
+export function useBuybackInfo(asset: StellarAsset) {
+  const profile = getNetworkProfile(asset.network);
+  return useQuery({
+    queryKey: ['stellar-buyback-info', asset.slug],
+    enabled: isAssetConfigured(asset),
+    staleTime: 30_000,
+    queryFn: async () => {
+      const [priceStroops, availableStroops, feeBps] = await Promise.all([
+        readBuybackPrice(profile, asset.saleId),
+        readBuybackAvailable(profile, asset.saleId),
+        readFeeBps(profile, asset.saleId),
+      ]);
+      return {
+        priceStroops,
+        availableStroops,
+        feeBps,
+        isOpen: priceStroops > 0n,
+        priceUnits: stroopsToUnits(priceStroops),
+        availableUnits: stroopsToUnits(availableStroops),
+      };
+    },
+  });
+}
+
+/**
+ * Authoritative net USDC payout for selling `shareUnits`, straight from the
+ * contract's quote_sell (fees + rounding included). Enabled only for a positive
+ * amount on a configured asset.
+ */
+export function useSellQuote(asset: StellarAsset, shareUnits: string) {
+  const profile = getNetworkProfile(asset.network);
+  const shareStroops = unitsToStroops(shareUnits || '0');
+  return useQuery({
+    queryKey: ['stellar-sell-quote', asset.slug, shareStroops.toString()],
+    enabled: isAssetConfigured(asset) && shareStroops > 0n,
+    staleTime: 30_000,
+    queryFn: async () => {
+      const netStroops = await quoteSell(profile, asset.saleId, shareStroops);
+      return { netStroops, netUnits: stroopsToUnits(netStroops) };
+    },
+  });
+}
+
+/**
+ * Sells (buys back) `shareUnits` shares to Tokeshare for net USDC. A seller who
+ * was removed from the allowlist is rejected on-chain (Error #113). Callers must
+ * gate on useBuybackInfo (closed / insufficient float) before enabling this.
+ */
+export function useSellAsset(asset: StellarAsset) {
+  const { address, signTransaction } = useStellarAccount();
+  const queryClient = useQueryClient();
+  const profile = getNetworkProfile(asset.network);
+
+  return useMutation({
+    mutationFn: async (shareUnits: string): Promise<string> => {
+      if (!address) throw new Error('Wallet not connected');
+      const shareStroops = unitsToStroops(shareUnits);
+      if (shareStroops <= 0n) throw new Error('Enter an amount');
+
+      const sellXdr = await buildSellXdr(profile, asset.saleId, address, shareStroops);
+      const signedSell = await signTransaction(sellXdr, profile.networkPassphrase);
+      return submitSignedXdr(profile, signedSell);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stellar-sale-info', asset.slug] });
+      queryClient.invalidateQueries({ queryKey: ['stellar-buyback-info', asset.slug] });
+      queryClient.invalidateQueries({ queryKey: ['stellar-asset-balance', asset.slug] });
+      queryClient.invalidateQueries({ queryKey: ['stellar-classic-balances', asset.network] });
+    },
   });
 }
 

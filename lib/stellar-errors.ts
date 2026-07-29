@@ -2,9 +2,17 @@
 // non-compliant transfers with typed errors that surface in the thrown message as
 // `Error(Contract, #NNN)`; we translate the codes we know about.
 
+// Sale contract uses codes 1-7; the token uses 100+. No overlap, so a single map
+// keyed by the numeric code is unambiguous.
 const CONTRACT_ERROR_MESSAGES: Record<number, string> = {
-  113: 'Your address is not yet allowlisted for this asset.',
-  114: 'Your address is blocked by the issuer for this asset.',
+  // sale contract
+  2: 'Invalid amount.',
+  3: 'Not enough inventory for this purchase.',
+  5: 'The buyback desk is currently closed.',
+  6: 'Insufficient buyback funds — please contact us.',
+  // RWA token
+  113: 'Address not authorized for this asset.',
+  114: 'Address blocked by the issuer.',
   302: 'Your holdings are frozen.',
   303: 'Some of your shares are frozen.',
   1000: 'Trading is currently paused by the issuer.',

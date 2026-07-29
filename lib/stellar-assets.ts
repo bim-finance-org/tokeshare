@@ -54,6 +54,32 @@ export const readSalePrice = (profile: StellarNetworkProfile, saleId: string) =>
 export const readSaleAvailable = (profile: StellarNetworkProfile, saleId: string) =>
   simulateCall(profile, saleId, 'available') as Promise<bigint>;
 
+// ---- buyback (Tokeshare re-purchase) views ---------------------------------
+
+/** Buyback price in payment stroops per whole share; 0 means the desk is closed. */
+export const readBuybackPrice = (profile: StellarNetworkProfile, saleId: string) =>
+  simulateCall(profile, saleId, 'buyback_price') as Promise<bigint>;
+
+/** Shares the contract can currently buy back given its USDC float (base units). */
+export const readBuybackAvailable = (profile: StellarNetworkProfile, saleId: string) =>
+  simulateCall(profile, saleId, 'buyback_available') as Promise<bigint>;
+
+/** Fee taken on a buyback, in basis points (500 = 5%). */
+export const readFeeBps = (profile: StellarNetworkProfile, saleId: string) =>
+  simulateCall(profile, saleId, 'fee_bps') as Promise<number>;
+
+/** USDC float currently held by the sale contract (payment stroops). */
+export const readPayBalance = (profile: StellarNetworkProfile, saleId: string) =>
+  simulateCall(profile, saleId, 'pay_balance') as Promise<bigint>;
+
+/**
+ * Net USDC (payment stroops) a seller receives for `shareStroops`, fees already
+ * deducted. This is the authoritative figure — the exact amount `sell` pays out,
+ * rounding included — so the UI must show it rather than recomputing the fee.
+ */
+export const quoteSell = (profile: StellarNetworkProfile, saleId: string, shareStroops: bigint) =>
+  simulateCall(profile, saleId, 'quote_sell', nativeToScVal(shareStroops, { type: 'i128' })) as Promise<bigint>;
+
 // ---- RWA token balance (custom SEP-41 Soroban token) -----------------------
 
 /** Balance of `address` in the RWA token contract, in base units. */
@@ -117,6 +143,28 @@ export async function buildBuyXdr(
     .build();
   // prepareTransaction simulates, then attaches the Soroban footprint, auth and
   // resource fees the network requires.
+  const prepared = await server.prepareTransaction(tx);
+  return prepared.toXDR();
+}
+
+/**
+ * Builds the `sell` (buyback) invocation: the seller returns `shareStroops`
+ * shares and receives net USDC (fee deducted) from the contract's float.
+ */
+export async function buildSellXdr(
+  profile: StellarNetworkProfile,
+  saleId: string,
+  seller: string,
+  shareStroops: bigint,
+): Promise<string> {
+  const server = getServer(profile.rpcUrl);
+  const account = await server.getAccount(seller);
+  const contract = new Contract(saleId);
+  const op = contract.call('sell', new Address(seller).toScVal(), nativeToScVal(shareStroops, { type: 'i128' }));
+  const tx = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase: profile.networkPassphrase })
+    .addOperation(op)
+    .setTimeout(180)
+    .build();
   const prepared = await server.prepareTransaction(tx);
   return prepared.toXDR();
 }
