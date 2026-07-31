@@ -7,6 +7,8 @@ import AssetCard, { type PortfolioHolding } from '@/components/features/user/das
 import ChainIcon from '@/components/shared/ChainIcon';
 import ConnectButton from '@/components/shared/ConnectButton';
 import { useUserTokenAssets } from '@/hooks/useUserTokenAssets';
+import { useStellarUserAssets } from '@/hooks/useStellarUserAssets';
+import { useStellarAccount } from '@/context/StellarContext';
 import type { AssetData } from '@/interfaces/AssetData';
 
 // Allocation colours, assigned to holdings by descending value.
@@ -39,8 +41,15 @@ const groupBySymbol = (assets: AssetData[]): PortfolioHolding[] => {
 };
 
 export default function Page() {
-  const { isConnected } = useAccount();
-  const { assets, isLoading } = useUserTokenAssets();
+  const { isConnected: isEvmConnected } = useAccount();
+  const { isConnected: isStellarConnected } = useStellarAccount();
+  const { assets: evmAssets, isLoading: evmLoading } = useUserTokenAssets();
+  const { assets: stellarAssets, isLoading: stellarLoading } = useStellarUserAssets();
+
+  // One portfolio, all chains mixed together (EVM + Stellar).
+  const isConnected = isEvmConnected || isStellarConnected;
+  const assets = [...evmAssets, ...stellarAssets];
+  const isLoading = evmLoading || stellarLoading;
 
   const [chainFilter, setChainFilter] = useState<'ALL' | string>('ALL');
   const [hidden, setHidden] = useState(false);

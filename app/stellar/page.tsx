@@ -24,7 +24,7 @@ export default function StellarMarketplacePage() {
             <p className="mt-1 text-sm text-color6">Tokenized real-world assets, buyable with USDC on Stellar.</p>
           </div>
           <Link
-            href={'/stellar/portfolio' as Route}
+            href={'/user/dashboard' as Route}
             className="rounded-lg bg-color4 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90"
           >
             My portfolio
