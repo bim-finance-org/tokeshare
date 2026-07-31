@@ -13,8 +13,10 @@ import { getNetworkProfile } from '@/config/stellar';
 import { stroopsToUnits, submitSignedXdr, unitsToStroops } from '@/lib/stellar';
 import {
   buildBuyXdr,
+  buildPaymentTrustlineXdr,
   buildSellXdr,
   getClassicBalances,
+  hasPaymentTrustline,
   quoteSell,
   readBuybackAvailable,
   readBuybackPrice,
@@ -75,6 +77,42 @@ export function useIsAllowed(asset: StellarAsset) {
     enabled: !!address && Boolean(asset.tokenId),
     staleTime: 60_000,
     queryFn: () => readIsAllowed(profile, asset.tokenId, address!),
+  });
+}
+
+/**
+ * Whether the connected wallet trusts the payment asset (USDC). A brand-new
+ * wallet (e.g. a fresh Privy embedded wallet) has no trustline, so it cannot
+ * receive USDC until one is added — see useAddPaymentTrustline.
+ */
+export function usePaymentTrustline(asset: StellarAsset) {
+  const { address } = useStellarAccount();
+  const profile = getNetworkProfile(asset.network);
+  return useQuery({
+    queryKey: ['stellar-pay-trustline', asset.network, address],
+    enabled: !!address,
+    staleTime: 30_000,
+    queryFn: () => hasPaymentTrustline(profile, address!),
+  });
+}
+
+/** Adds the payment-asset (USDC) trustline so the wallet can receive/hold it. */
+export function useAddPaymentTrustline(asset: StellarAsset) {
+  const { address, signTransaction } = useStellarAccount();
+  const queryClient = useQueryClient();
+  const profile = getNetworkProfile(asset.network);
+
+  return useMutation({
+    mutationFn: async (): Promise<string> => {
+      if (!address) throw new Error('Wallet not connected');
+      const xdr = await buildPaymentTrustlineXdr(profile, address);
+      const signed = await signTransaction(xdr, profile.networkPassphrase);
+      return submitSignedXdr(profile, signed);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stellar-pay-trustline', asset.network] });
+      queryClient.invalidateQueries({ queryKey: ['stellar-classic-balances', asset.network] });
+    },
   });
 }
 

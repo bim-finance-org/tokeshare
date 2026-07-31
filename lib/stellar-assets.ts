@@ -10,9 +10,11 @@
 import {
   Account,
   Address,
+  Asset,
   BASE_FEE,
   Contract,
   Keypair,
+  Operation,
   TransactionBuilder,
   nativeToScVal,
   scValToNative,
@@ -123,6 +125,32 @@ export async function getClassicBalances(profile: StellarNetworkProfile, address
     balances.find((b) => b.asset_code === profile.pay.code && b.asset_issuer === profile.pay.issuer)?.balance ?? '0';
   const xlm = balances.find((b) => b.asset_type === 'native')?.balance ?? '0';
   return { usdc, xlm };
+}
+
+// ---- payment-asset trustline (classic changeTrust) -------------------------
+
+/** True if `address` already trusts the payment asset (USDC). Native XLM never needs one. */
+export async function hasPaymentTrustline(profile: StellarNetworkProfile, address: string): Promise<boolean> {
+  if (!profile.pay.issuer) return true; // native asset — no trustline required
+  const res = await fetch(`${profile.horizonUrl}/accounts/${address}`);
+  if (res.status === 404) return false; // unfunded account has no trustlines
+  if (!res.ok) throw new Error('failed to load account');
+  const data = await res.json();
+  return (data.balances ?? []).some(
+    (b: { asset_code?: string; asset_issuer?: string }) =>
+      b.asset_code === profile.pay.code && b.asset_issuer === profile.pay.issuer,
+  );
+}
+
+/** Builds the classic changeTrust XDR so `address` can hold/receive the payment asset. */
+export async function buildPaymentTrustlineXdr(profile: StellarNetworkProfile, address: string): Promise<string> {
+  const server = getServer(profile.rpcUrl);
+  const account = await server.getAccount(address);
+  const tx = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase: profile.networkPassphrase })
+    .addOperation(Operation.changeTrust({ asset: new Asset(profile.pay.code, profile.pay.issuer) }))
+    .setTimeout(180)
+    .build();
+  return tx.toXDR();
 }
 
 // ---- buy (Soroban invoke on the sale contract) -----------------------------

@@ -10,7 +10,14 @@ import { type StellarAsset, isAssetConfigured } from '@/config/stellar-assets';
 import { getNetworkProfile } from '@/config/stellar';
 import { isPrivyEnabled } from '@/config/privy';
 import { useStellarAccount } from '@/context/StellarContext';
-import { useAssetBalance, useBuyAsset, useClassicBalances, useSaleInfo } from '@/hooks/useStellarAsset';
+import {
+  useAddPaymentTrustline,
+  useAssetBalance,
+  useBuyAsset,
+  useClassicBalances,
+  usePaymentTrustline,
+  useSaleInfo,
+} from '@/hooks/useStellarAsset';
 import { explorerTxUrl } from '@/lib/stellar';
 import { toReadableStellarError } from '@/lib/stellar-errors';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
@@ -26,6 +33,8 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
   const { data: saleInfo, isLoading: isSaleLoading } = useSaleInfo(asset);
   const { data: holdings } = useAssetBalance(asset);
   const { data: balances } = useClassicBalances(asset);
+  const { data: hasTrustline } = usePaymentTrustline(asset);
+  const addTrustline = useAddPaymentTrustline(asset);
   const buy = useBuyAsset(asset);
 
   const [amount, setAmount] = useState('');
@@ -121,6 +130,27 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
               {fmt(balances?.usdc)} {PAY_SYMBOL}
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Payment-asset trustline: a fresh wallet must trust USDC before it can
+          receive or spend it. */}
+      {isConnected && hasTrustline === false && (
+        <div className="space-y-2 rounded-xl border border-blue-300 bg-blue-50 p-4 text-sm text-blue-900">
+          <p>
+            Your wallet doesn&apos;t trust {PAY_SYMBOL} yet. Enable it once so you can receive and spend {PAY_SYMBOL}.
+          </p>
+          <button
+            type="button"
+            onClick={() => addTrustline.mutate()}
+            disabled={addTrustline.isPending}
+            className="rounded-lg bg-color4 px-3 py-1.5 text-white disabled:opacity-50"
+          >
+            {addTrustline.isPending ? 'Enabling…' : `Enable ${PAY_SYMBOL}`}
+          </button>
+          {addTrustline.isError && (
+            <p className="break-words text-red-700">{toReadableStellarError(addTrustline.error)}</p>
+          )}
         </div>
       )}
 
