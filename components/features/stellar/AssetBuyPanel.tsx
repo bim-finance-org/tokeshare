@@ -211,7 +211,6 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
         </button>
       ) : (
         <StellarConnectButton
-          block
           label="Connect to buy"
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-color4 py-3 font-medium text-white shadow-sm transition hover:bg-opacity-90"
         />
