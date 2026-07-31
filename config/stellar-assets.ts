@@ -60,9 +60,9 @@ export const STELLAR_ASSETS: StellarAsset[] = [
     // + 3.2 on trustlines, per Horizon /assets), so the re-issue keeps the
     // token count unchanged.
     totalShares: 23_000,
-    // TESTNET. Deployed 2026-07-28 from the RWA token repo (stellar/).
+    // TESTNET. Token deployed 2026-07-28; sale v2 (buyback + auto-allowlist).
     tokenId: 'CCZERUHBBFK2TIMOGYMTROUMKPLTMFQ3KRFDASGKV3IZCAZHBFEI6J6Q',
-    saleId: 'CCCDPOYCHMAVCISAQVHCNKJNIMWFISOGQWLAMQAEFOIZW76EGP77CJHF',
+    saleId: 'CABTGCTADH5BXW7C2KPNNJLMHPJUHHBMENIX4LUHVEYOMTDIGDUWYA7C',
     image: '/images/stellar/steallr_poc.jpeg',
     location: 'Las Terrenas, Dominican Republic',
     description: 'Tokenized real-estate share in a Caribbean property.',
