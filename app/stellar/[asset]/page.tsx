@@ -3,8 +3,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound } from 'next/navigation';
 import { STELLAR_ASSETS, getStellarAsset } from '@/config/stellar-assets';
-import AssetBuyPanel from '@/components/features/stellar/AssetBuyPanel';
-import SellPanel from '@/components/features/stellar/SellPanel';
+import StellarSwap from '@/components/features/stellar/StellarSwap';
 import { Badge } from '@/components/ui/badge';
 
 const KIND_LABEL: Record<string, string> = {
@@ -85,11 +84,8 @@ export default async function StellarAssetPage({ params }: { params: Promise<{ a
             </div>
           </section>
 
-          {/* Buy + sell (sell self-hides unless the wallet holds shares) */}
-          <div className="space-y-8">
-            <AssetBuyPanel asset={asset} />
-            <SellPanel asset={asset} />
-          </div>
+          {/* Buy / sell in one swap widget (switch flips direction) */}
+          <StellarSwap asset={asset} />
         </div>
       </div>
     </div>
