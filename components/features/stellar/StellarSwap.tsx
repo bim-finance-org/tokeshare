@@ -39,6 +39,7 @@ function Field({
   onChange,
   symbol,
   balance,
+  max,
   readOnly,
   loading,
 }: {
@@ -47,14 +48,28 @@ function Field({
   onChange?: (v: string) => void;
   symbol: string;
   balance?: string;
+  /** When set (>0) and editable, shows a MAX button that fills this amount. */
+  max?: string;
   readOnly?: boolean;
   loading?: boolean;
 }) {
+  const showMax = !readOnly && max != null && num(max) > 0;
   return (
     <div className="rounded-2xl bg-color1 p-4 ring-1 ring-inset ring-black/5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">{label}</label>
-        {balance != null && <span className="text-xs text-gray-500">Balance: {fmt(num(balance))}</span>}
+        <div className="flex items-center gap-2">
+          {showMax && (
+            <button
+              type="button"
+              onClick={() => onChange?.(max!)}
+              className="rounded-lg bg-color4 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white transition-all hover:bg-color2 active:scale-95"
+            >
+              MAX
+            </button>
+          )}
+          {balance != null && <span className="text-xs text-gray-500">Balance: {fmt(num(balance))}</span>}
+        </div>
       </div>
       <div className="mt-1 flex items-center justify-between gap-3">
         {readOnly ? (
@@ -118,6 +133,11 @@ export default function StellarSwap({ asset }: { asset: StellarAsset }) {
   const sendBalance = isSell ? holdings?.units : balances?.usdc;
   const receiveBalance = isSell ? balances?.usdc : holdings?.units;
   const outputValue = isSell ? String(netUsdcOut) : String(sharesOut);
+
+  // MAX = what you can actually send: all USDC to buy, or the most sellable shares
+  // (capped by the contract's buyback float).
+  const maxSend = isSell ? Math.min(heldUnits, buybackAvailable) : usdcBalance;
+  const maxSendStr = maxSend > 0 ? String(maxSend) : undefined;
 
   const handleSwitch = () => {
     setInput(outputValue && num(outputValue) > 0 ? outputValue : '');
@@ -195,6 +215,7 @@ export default function StellarSwap({ asset }: { asset: StellarAsset }) {
           onChange={setInput}
           symbol={sendSymbol}
           balance={isConnected ? sendBalance : undefined}
+          max={isConnected ? maxSendStr : undefined}
         />
 
         <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
@@ -202,10 +223,10 @@ export default function StellarSwap({ asset }: { asset: StellarAsset }) {
             type="button"
             onClick={handleSwitch}
             aria-label="Switch direction"
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-black/10 transition-transform duration-300 hover:rotate-180 hover:scale-110 active:scale-95"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-black/10 transition-transform duration-300 hover:rotate-180 hover:scale-110 active:scale-95"
           >
-            <span className="relative h-5 w-5">
-              <Image src="/images/switch.png" alt="Switch" fill sizes="20px" className="object-contain" />
+            <span className="relative h-7 w-7">
+              <Image src="/images/switch.png" alt="Switch" fill sizes="28px" className="object-contain" />
             </span>
           </button>
         </div>
