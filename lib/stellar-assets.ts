@@ -24,6 +24,11 @@ import {
 import { type StellarNetworkProfile } from '@/config/stellar';
 import { getServer } from '@/lib/stellar';
 
+// Inclusion fee (stroops) for write transactions. Well above BASE_FEE (100) so
+// txs aren't rejected by the mempool under mainnet load; prepareTransaction adds
+// the Soroban resource fee on top. 0.01 XLM is negligible.
+const INCLUSION_FEE = '100000';
+
 // ---- generic read-only contract call (via simulation) ----------------------
 
 async function simulateCall(
@@ -146,7 +151,7 @@ export async function hasPaymentTrustline(profile: StellarNetworkProfile, addres
 export async function buildPaymentTrustlineXdr(profile: StellarNetworkProfile, address: string): Promise<string> {
   const server = getServer(profile.rpcUrl);
   const account = await server.getAccount(address);
-  const tx = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase: profile.networkPassphrase })
+  const tx = new TransactionBuilder(account, { fee: INCLUSION_FEE, networkPassphrase: profile.networkPassphrase })
     .addOperation(Operation.changeTrust({ asset: new Asset(profile.pay.code, profile.pay.issuer) }))
     .setTimeout(180)
     .build();
@@ -165,7 +170,7 @@ export async function buildBuyXdr(
   const account = await server.getAccount(buyer);
   const contract = new Contract(saleId);
   const op = contract.call('buy', new Address(buyer).toScVal(), nativeToScVal(shareStroops, { type: 'i128' }));
-  const tx = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase: profile.networkPassphrase })
+  const tx = new TransactionBuilder(account, { fee: INCLUSION_FEE, networkPassphrase: profile.networkPassphrase })
     .addOperation(op)
     .setTimeout(180)
     .build();
@@ -189,7 +194,7 @@ export async function buildSellXdr(
   const account = await server.getAccount(seller);
   const contract = new Contract(saleId);
   const op = contract.call('sell', new Address(seller).toScVal(), nativeToScVal(shareStroops, { type: 'i128' }));
-  const tx = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase: profile.networkPassphrase })
+  const tx = new TransactionBuilder(account, { fee: INCLUSION_FEE, networkPassphrase: profile.networkPassphrase })
     .addOperation(op)
     .setTimeout(180)
     .build();
