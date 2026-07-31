@@ -231,6 +231,11 @@ export function useBuyAsset(asset: StellarAsset) {
       queryClient.invalidateQueries({ queryKey: ['stellar-sale-info', asset.slug] });
       queryClient.invalidateQueries({ queryKey: ['stellar-asset-balance', asset.slug] });
       queryClient.invalidateQueries({ queryKey: ['stellar-classic-balances', asset.network] });
+      // The sale auto-allowlists the buyer, so the cached allowlist result is now
+      // stale — refetch it (and buyback state) so the sell panel updates without a
+      // manual refresh.
+      queryClient.invalidateQueries({ queryKey: ['stellar-is-allowed', asset.slug] });
+      queryClient.invalidateQueries({ queryKey: ['stellar-buyback-info', asset.slug] });
     },
   });
 }
