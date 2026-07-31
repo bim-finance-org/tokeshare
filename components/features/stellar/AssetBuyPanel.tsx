@@ -8,7 +8,6 @@
 import { useState } from 'react';
 import { type StellarAsset, isAssetConfigured } from '@/config/stellar-assets';
 import { getNetworkProfile } from '@/config/stellar';
-import { isPrivyEnabled } from '@/config/privy';
 import { useStellarAccount } from '@/context/StellarContext';
 import {
   useAddPaymentTrustline,
@@ -21,7 +20,7 @@ import {
 import { explorerTxUrl } from '@/lib/stellar';
 import { toReadableStellarError } from '@/lib/stellar-errors';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
-import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
+import StellarConnectButton from '@/components/features/stellar/StellarConnectButton';
 import CopyAddress from '@/components/features/stellar/CopyAddress';
 import { Badge } from '@/components/ui/badge';
 
@@ -94,14 +93,10 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
             </button>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => connect()}
+          <StellarConnectButton
+            label="Connect"
             className="flex items-center gap-2 rounded-lg bg-color4 px-3 py-1.5 text-sm text-white"
-          >
-            <StellarIcon size={20} />
-            Connect
-          </button>
+          />
         )}
       </div>
 
@@ -110,10 +105,6 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
           This asset is not on-chain yet. Its token and sale contracts still need to be deployed and their ids pasted
           into the config.
         </div>
-      )}
-
-      {!isConnected && isPrivyEnabled && (
-        <PrivyLoginButton className="w-full rounded-lg border border-color4 py-2 text-sm font-medium text-color4 transition hover:bg-color1" />
       )}
 
       {isConnected && (
@@ -209,14 +200,22 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={handleBuy}
-        disabled={!configured || (isConnected && (isInvalid || buy.isPending))}
-        className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {buttonLabel}
-      </button>
+      {isConnected ? (
+        <button
+          type="button"
+          onClick={handleBuy}
+          disabled={!configured || isInvalid || buy.isPending}
+          className="w-full bg-color4 text-white py-3 rounded-xl font-medium shadow-sm hover:bg-opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {buttonLabel}
+        </button>
+      ) : (
+        <StellarConnectButton
+          block
+          label="Connect to buy"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-color4 py-3 font-medium text-white shadow-sm transition hover:bg-opacity-90"
+        />
+      )}
 
       {buy.isError && (
         <div className="rounded-xl border border-red-400 bg-red-50 p-4 text-sm text-red-800">

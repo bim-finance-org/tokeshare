@@ -10,11 +10,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { STELLAR_ASSETS, type StellarAsset } from '@/config/stellar-assets';
-import { isPrivyEnabled } from '@/config/privy';
 import { useStellarAccount } from '@/context/StellarContext';
 import { useAssetBalance, useSaleInfo } from '@/hooks/useStellarAsset';
-import StellarIcon from '@/components/icons/blockchains/StellarIcon';
-import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
+import StellarConnectButton from '@/components/features/stellar/StellarConnectButton';
 import SellPanel from '@/components/features/stellar/SellPanel';
 import CopyAddress from '@/components/features/stellar/CopyAddress';
 
@@ -71,7 +69,7 @@ function PortfolioRow({
 }
 
 export default function StellarPortfolioPage() {
-  const { address, isConnected, connect } = useStellarAccount();
+  const { address, isConnected } = useStellarAccount();
   const [values, setValues] = useState<Record<string, number>>({});
 
   const handleValue = useCallback((slug: string, value: number) => {
@@ -93,18 +91,13 @@ export default function StellarPortfolioPage() {
 
         {!isConnected ? (
           <div className="mt-8 rounded-2xl bg-white p-8 text-center shadow-md">
-            <p className="text-color6">Connect your Stellar wallet to see your holdings.</p>
-            <button
-              type="button"
-              onClick={() => connect()}
-              className="mx-auto mt-4 flex items-center gap-2 rounded-lg bg-color4 px-4 py-2 text-sm text-white"
-            >
-              <StellarIcon size={20} />
-              Connect
-            </button>
-            {isPrivyEnabled && (
-              <PrivyLoginButton className="mx-auto mt-3 rounded-lg border border-color4 px-4 py-2 text-sm font-medium text-color4 transition hover:bg-color1" />
-            )}
+            <p className="text-color6">Connect to see your holdings.</p>
+            <div className="mt-4 flex justify-center">
+              <StellarConnectButton
+                label="Connect"
+                className="flex items-center gap-2 rounded-lg bg-color4 px-4 py-2 text-sm text-white"
+              />
+            </div>
           </div>
         ) : (
           <>
