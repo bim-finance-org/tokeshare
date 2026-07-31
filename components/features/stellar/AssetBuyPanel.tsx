@@ -15,9 +15,9 @@ import { explorerTxUrl } from '@/lib/stellar';
 import { toReadableStellarError } from '@/lib/stellar-errors';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
 import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
+import CopyAddress from '@/components/features/stellar/CopyAddress';
 import { Badge } from '@/components/ui/badge';
 
-const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-6)}`;
 const fmt = (value?: string) => parseFloat(value ?? '0').toLocaleString('en-US', { maximumFractionDigits: 2 });
 
 export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
@@ -75,7 +75,7 @@ export default function AssetBuyPanel({ asset }: { asset: StellarAsset }) {
         {isConnected ? (
           <div className="flex items-center gap-2">
             <StellarIcon size={28} />
-            <span className="font-mono text-sm text-color4">{formatAddress(address!)}</span>
+            <CopyAddress address={address!} />
             <button
               type="button"
               onClick={() => disconnect()}

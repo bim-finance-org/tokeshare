@@ -16,6 +16,7 @@ import { useAssetBalance, useSaleInfo } from '@/hooks/useStellarAsset';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
 import PrivyLoginButton from '@/components/features/stellar/PrivyLoginButton';
 import SellPanel from '@/components/features/stellar/SellPanel';
+import CopyAddress from '@/components/features/stellar/CopyAddress';
 
 // Assets can span testnet + mainnet; both settle in USDC.
 const PAY_SYMBOL = 'USDC';
@@ -122,7 +123,11 @@ export default function StellarPortfolioPage() {
               ))}
             </div>
 
-            <p className="mt-4 break-all text-center font-mono text-xs text-color6">{address}</p>
+            {address && (
+              <div className="mt-4 flex justify-center">
+                <CopyAddress address={address} />
+              </div>
+            )}
           </>
         )}
       </div>
