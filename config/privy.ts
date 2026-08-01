@@ -12,4 +12,4 @@ export const isPrivyEnabled = Boolean(privyAppId);
 // Login methods offered to mainstream investors. Email + the common social
 // providers; no wallet setup required (an embedded Stellar wallet is created for
 // them). Crypto-native users keep using Stellar Wallets Kit.
-export const PRIVY_LOGIN_METHODS = ['email', 'google', 'apple'] as const;
+export const PRIVY_LOGIN_METHODS = ['email', 'google'] as const;
