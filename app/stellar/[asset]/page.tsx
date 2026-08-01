@@ -1,15 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
+import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { STELLAR_ASSETS, getStellarAsset } from '@/config/stellar-assets';
 import StellarSwap from '@/components/features/stellar/StellarSwap';
-import { Badge } from '@/components/ui/badge';
-
-const KIND_LABEL: Record<string, string> = {
-  'real-estate': 'Real estate',
-  vehicle: 'Vehicle',
-};
+import StellarAssetHeader from '@/components/features/stellar/StellarAssetHeader';
 
 export function generateStaticParams() {
   return STELLAR_ASSETS.map((a) => ({ asset: a.slug }));
@@ -18,9 +14,16 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ asset: string }> }) {
   const { asset: slug } = await params;
   const asset = getStellarAsset(slug);
-  if (!asset) return { title: 'Asset not found — Tokeshare' };
-  return { title: `${asset.name} — Tokeshare`, description: asset.description };
+  if (!asset) return { title: 'Asset not found · Tokeshare' };
+  return { title: `${asset.name} · Tokeshare`, description: asset.description };
 }
+
+const Fact = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-2xl bg-color1 p-4 ring-1 ring-inset ring-black/5">
+    <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">{label}</p>
+    <p className="mt-0.5 font-titleSemibold text-color4">{value}</p>
+  </div>
+);
 
 export default async function StellarAssetPage({ params }: { params: Promise<{ asset: string }> }) {
   const { asset: slug } = await params;
@@ -28,65 +31,43 @@ export default async function StellarAssetPage({ params }: { params: Promise<{ a
   if (!asset) notFound();
 
   return (
-    <div className="min-h-screen bg-color1">
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center gap-3">
-          <Link href={'/stellar' as Route} className="text-sm text-color6 underline hover:text-color4">
-            ← Marketplace
-          </Link>
-          <Badge className="bg-color3 text-color4">{KIND_LABEL[asset.kind] ?? asset.kind}</Badge>
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <Link
+        href={'/stellar' as Route}
+        className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-sm font-medium text-gray-500 shadow-sm ring-1 ring-black/5 transition-colors hover:text-color4"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Marketplace
+      </Link>
+
+      <div className="mt-4 space-y-6">
+        <StellarAssetHeader asset={asset} />
+
+        {/* Swap sits right under the header, like the token pages. */}
+        <StellarSwap asset={asset} />
+      </div>
+
+      {/* Asset details */}
+      <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 sm:mt-8 sm:p-8">
+        <h2 className="font-titleSemibold text-lg text-color4">About this asset</h2>
+        {asset.description && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-500">{asset.description}</p>}
+
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Fact label="Symbol" value={asset.symbol} />
+          <Fact label="Total shares" value={asset.totalShares.toLocaleString('en-US')} />
+          <Fact label="Network" value={`Stellar ${asset.network}`} />
+          {asset.priceHintUsdc != null && <Fact label="Indicative price" value={`${asset.priceHintUsdc} USDC / share`} />}
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Asset card */}
-          <section className="overflow-hidden rounded-2xl bg-white shadow-md">
-            <div className="relative aspect-[3/2] w-full">
-              <Image
-                src={asset.image}
-                alt={asset.name}
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-                priority
-              />
-            </div>
-            <div className="space-y-4 p-6">
-              <div>
-                <h1 className="text-2xl font-bold text-color4">{asset.name}</h1>
-                {asset.location && <p className="text-sm text-color6">{asset.location}</p>}
+        {asset.gallery && asset.gallery.length > 1 && (
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {asset.gallery.map((src) => (
+              <div key={src} className="relative aspect-[4/3] overflow-hidden rounded-2xl ring-1 ring-black/5">
+                <Image src={src} alt={asset.name} fill sizes="(max-width: 640px) 50vw, 260px" className="object-cover" />
               </div>
-              {asset.description && <p className="text-sm text-color6">{asset.description}</p>}
-              {asset.gallery && asset.gallery.length > 1 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {asset.gallery.map((src) => (
-                    <div key={src} className="relative aspect-square overflow-hidden rounded-lg">
-                      <Image src={src} alt={asset.name} fill sizes="(max-width: 1024px) 33vw, 160px" className="object-cover" />
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="space-y-2 border-t border-color1 pt-4 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-color6">Symbol</span>
-                  <span className="font-mono font-semibold text-color4">{asset.symbol}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-color6">Total shares</span>
-                  <span className="font-semibold text-color4">{asset.totalShares.toLocaleString('en-US')}</span>
-                </div>
-                {asset.priceHintUsdc != null && (
-                  <div className="flex justify-between">
-                    <span className="text-color6">Indicative price</span>
-                    <span className="font-semibold text-color4">≈ {asset.priceHintUsdc} USDC / share</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* Buy / sell in one swap widget (switch flips direction) */}
-          <StellarSwap asset={asset} />
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

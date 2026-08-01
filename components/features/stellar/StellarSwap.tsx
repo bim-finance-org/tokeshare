@@ -195,12 +195,16 @@ export default function StellarSwap({ asset }: { asset: StellarAsset }) {
   const active = isSell ? sell : buy;
 
   return (
-    <section className="rounded-2xl bg-white p-3 shadow-md sm:p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-color4">{isSell ? 'Sell' : 'Buy'} on Stellar</h2>
-        <span className="text-xs text-gray-500">{isSell ? 'Buyback by Tokeshare' : 'Fixed price'}</span>
+    <section className="mx-auto w-full max-w-md overflow-hidden rounded-3xl bg-white ring-1 ring-black/5 shadow-[0_24px_60px_-24px_rgba(20,20,45,0.28)] sm:max-w-lg">
+      <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 pb-3 pt-4 sm:px-6 sm:pt-5">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-base font-titleSemibold text-color4 sm:text-lg">Swap {asset.name}</span>
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-color2" />
+        </div>
+        <span className="shrink-0 text-[11px] font-medium tracking-wide text-gray-400 sm:text-xs">Instant · On-chain</span>
       </div>
 
+      <div className="p-4 sm:p-6">
       {!configured && (
         <div className="mb-4 rounded-xl border border-amber-400 bg-amber-50 p-4 text-sm text-amber-800">
           This asset is not on-chain yet.
@@ -338,6 +342,7 @@ export default function StellarSwap({ asset }: { asset: StellarAsset }) {
           </a>
         </div>
       )}
+      </div>
     </section>
   );
 }
