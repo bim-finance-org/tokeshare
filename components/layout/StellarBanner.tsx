@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import StellarIcon from '@/components/icons/blockchains/StellarIcon';
 
@@ -16,8 +17,8 @@ const StellarBanner: React.FC = () => {
 
   return (
     <Link
-      href="/poc-stellar"
-      aria-label="Discover the Tokeshare Stellar POC"
+      href={'/stellar' as Route}
+      aria-label="Discover the Tokeshare Stellar marketplace"
       className={`group z-[60] flex h-10 items-center justify-center gap-2 overflow-hidden bg-gradient-to-r from-color4 via-[#1b1f3b] to-color2 px-4 text-color7 transition-colors hover:via-[#232a55] ${positionClass}`}
     >
       <StellarIcon size={22} className="shrink-0 ring-1 ring-white/20" />
@@ -25,8 +26,8 @@ const StellarBanner: React.FC = () => {
         New
       </span>
       <span className="truncate text-xs font-titleSemibold sm:text-sm">
-        <span className="hidden sm:inline">Try our </span>Stellar POC
-        <span className="hidden md:inline"> — buy tokenized real estate on Stellar</span>
+        <span className="hidden sm:inline">Discover our </span>Stellar marketplace
+        <span className="hidden md:inline"> — buy tokenized real-world assets on Stellar</span>
       </span>
       <span aria-hidden="true" className="shrink-0 transition-transform duration-300 group-hover:translate-x-1">
         →
