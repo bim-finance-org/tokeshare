@@ -34,8 +34,8 @@ function toAsset(
     token.symbol === 'TGG'
       ? '/images/currencies/tgg.png'
       : token.symbol === 'TSG'
-        ? '/images/img-silver.webp'
-        : '/images/currencies/tft.png';
+        ? '/images/currencies/tsg.webp'
+        : '/images/currencies/tft.webp';
 
   return {
     name: token.name,

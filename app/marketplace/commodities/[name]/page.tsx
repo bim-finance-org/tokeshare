@@ -51,15 +51,17 @@ const COMMODITY_TOKENS: Record<string, CommodityToken> = {
     symbol: 'TSG',
     fullName: 'Tokeshare Silver Gram (TSG)',
     tradeName: 'Tokeshare Silver Gram',
-    // TODO: replace with a dedicated TSG logo once available.
-    tokenImage: '/images/img-silver.webp',
+    tokenImage: '/images/currencies/tsg.webp',
     ethereumContract: ETH_SILVER_CONTRACTS.TSG,
     ownerWallet: TOKESHARE_OWNER,
-    // Proof of reserve points to the XAGM underlying (the real silver reserve)
-    // until the TSG token contract is deployed.
+    // Proof of reserve is the TSG token contract, which custodies the XAGM
+    // backing — same model as TGG holding the PAXG. Verified on-chain: its XAGM
+    // balance covers the TSG supply 1:1 in grams. The XAGM token address must NOT
+    // be used here; it shows Matrixdock's whole token, not Tokeshare's reserve.
     proofOfReserve: {
-      [Blockchain.Ethereum]: ETH_SILVER_CONTRACTS.XAGM,
+      [Blockchain.Ethereum]: ETH_SILVER_CONTRACTS.TSG,
     },
+    onesheetUrl: '/Onesheet_TSG.pdf',
   },
 };
 
