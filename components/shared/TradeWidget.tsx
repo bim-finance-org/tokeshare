@@ -4,6 +4,8 @@ import TokenDisplay from '@/components/shared/TokenDisplay';
 import CryptoBalance from './CryptoBalance';
 import MaxButton from './MaxButton';
 import { Blockchain } from '@/enums/Blockchain';
+import { TOKENS } from '@/config/token';
+import { TokenType } from '@/enums/TokenType';
 
 export interface TokenSelectorConfig {
   type: 'fiat' | 'crypto' | 'stablecoin';
@@ -49,9 +51,12 @@ const TradeWidget = ({
   // The selected token is fully controlled by the parent via `defaultToken`.
   const selectedToken = defaultToken || 'USDC';
 
-  // Vérifie si le token est un crypto token fixe (non-stablecoin)
-  const isTGG =
-    selectedToken === 'TGG' || selectedToken === 'TSG' || selectedToken === 'TFT_001' || selectedToken === 'TMC';
+  // A Tokeshare asset token (TGG, TSG, TMC, TSP500, TFT_001) is imposed by the
+  // page it is traded on, so that side of the swap must stay fixed. Derived from
+  // the token registry — where every asset token is TokenType.Crypto and every
+  // counter-token is a stablecoin — so a newly listed asset is covered without
+  // having to remember this spot.
+  const isAssetToken = TOKENS[selectedToken]?.type === TokenType.Crypto;
 
   const handleMaxClick = (maxValue: string) => {
     // Formater la valeur max pour enlever les zéros inutiles
@@ -61,7 +66,7 @@ const TradeWidget = ({
     }
   };
 
-  const canOpen = !isTGG && !lockedToken;
+  const canOpen = !isAssetToken && !lockedToken;
   const openSelector = () => {
     if (canOpen) onOpenSelector({ type, blockchain, selected: selectedToken, onSelect: onTokenChange });
   };
@@ -74,14 +79,14 @@ const TradeWidget = ({
             label={label}
             value={value || ''}
             onChange={onValueChange}
-            placeholder={isTGG ? '1' : '50'}
+            placeholder={isAssetToken ? '1' : '50'}
             disabled={readOnly}
             loading={loading}
           />
         </div>
 
         {/* Bouton MAX - placé entre l'input et l'icône */}
-        {!readOnly && showBalance && !(isTGG && type === 'stablecoin') && (
+        {!readOnly && showBalance && !(isAssetToken && type === 'stablecoin') && (
           <div className="flex items-end pb-3">
             <MaxButton currency={selectedToken} blockchain={blockchain} onMaxClick={handleMaxClick} />
           </div>
