@@ -61,6 +61,7 @@ const COMMODITY_TOKENS: Record<string, CommodityToken> = {
     proofOfReserve: {
       [Blockchain.Ethereum]: ETH_SILVER_CONTRACTS.TSG,
     },
+    onesheetUrl: '/Onesheet_TSG.pdf',
   },
 };
 
