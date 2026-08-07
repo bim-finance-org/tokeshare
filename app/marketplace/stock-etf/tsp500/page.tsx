@@ -13,7 +13,7 @@ const TSP500Page = () => {
         <AssetPageHeader
           symbol="TSP500"
           title="Tokeshare S&P500 (TSP500)"
-          logoSrc="/images/image_TSP500.png"
+          logoSrc="/images/currencies/tsp500.webp"
           image="/images/image_TSP500.webp"
           imageAlt="Tokeshare S&P500"
           imagePriority

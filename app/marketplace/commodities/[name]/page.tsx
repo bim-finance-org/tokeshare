@@ -51,8 +51,7 @@ const COMMODITY_TOKENS: Record<string, CommodityToken> = {
     symbol: 'TSG',
     fullName: 'Tokeshare Silver Gram (TSG)',
     tradeName: 'Tokeshare Silver Gram',
-    // TODO: replace with a dedicated TSG logo once available.
-    tokenImage: '/images/img-silver.webp',
+    tokenImage: '/images/currencies/tsg.webp',
     ethereumContract: ETH_SILVER_CONTRACTS.TSG,
     ownerWallet: TOKESHARE_OWNER,
     // Proof of reserve points to the XAGM underlying (the real silver reserve)

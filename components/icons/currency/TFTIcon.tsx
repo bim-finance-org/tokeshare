@@ -1,16 +1,16 @@
 import React from 'react';
 import Image from 'next/image';
 
-interface TSP500IconProps {
+interface TFTIconProps {
   size?: number;
   className?: string;
 }
 
-const TSP500Icon = ({ className = '' }: TSP500IconProps) => {
+const TFTIcon = ({ className = '' }: TFTIconProps) => {
   return (
     <Image
-      src="/images/currencies/tsp500.webp"
-      alt="TSP500"
+      src="/images/currencies/tft.webp"
+      alt="TFT_001"
       width={26}
       height={26}
       className={` ${className} rounded-full`}
@@ -18,4 +18,4 @@ const TSP500Icon = ({ className = '' }: TSP500IconProps) => {
   );
 };
 
-export default TSP500Icon;
+export default TFTIcon;

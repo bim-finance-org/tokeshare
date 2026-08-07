@@ -3,6 +3,7 @@ import CRVIcon from '@/components/icons/currency/CRVIcon';
 import DAIIcon from '@/components/icons/currency/DAIIcon';
 import EURCIcon from '@/components/icons/currency/EURCIcon';
 import EURSIcon from '@/components/icons/currency/EURSIcon';
+import TFTIcon from '@/components/icons/currency/TFTIcon';
 import TGGIcon from '@/components/icons/currency/TGGIcon';
 import TMCIcon from '@/components/icons/currency/TMCIcon';
 import TSGIcon from '@/components/icons/currency/TSGIcon';
@@ -85,6 +86,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     },
     decimals: 18,
     type: TokenType.Crypto,
+    icon: TFTIcon,
     internalUrl: '/marketplace/other/french-tacos',
   },
   USDC: {

@@ -6,10 +6,15 @@ interface TSGIconProps {
   className?: string;
 }
 
-// TODO: replace with a dedicated TSG logo (currently reuses the silver commodity image).
 const TSGIcon = ({ className = '' }: TSGIconProps) => {
   return (
-    <Image src="/images/img-silver.webp" alt="TSG" width={17} height={17} className={` ${className} rounded-full`} />
+    <Image
+      src="/images/currencies/tsg.webp"
+      alt="TSG"
+      width={17}
+      height={17}
+      className={` ${className} rounded-full`}
+    />
   );
 };
 
