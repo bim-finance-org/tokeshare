@@ -13,6 +13,24 @@ import { STELLAR_DECIMALS, type StellarNetwork } from './stellar';
 
 export type StellarAssetKind = 'real-estate' | 'vehicle';
 
+/**
+ * Off-chain revenue figures for an asset, provided by the operator. Purely
+ * informational: nothing here is read from or enforced by the contracts.
+ * Amounts are expressed in the network's payment asset (USDC).
+ */
+export interface StellarAssetEconomics {
+  /** Valuation of the whole underlying asset. */
+  totalValuation: number;
+  /** Platform fee taken on gross revenues, in percent. */
+  platformFeePercent: number;
+  /** Net annual yield, in percent. */
+  netYieldPercent: number;
+  /** Net monthly distribution for the whole asset. */
+  netMonthlyDistribution: number;
+  /** Net monthly distribution per token. */
+  netMonthlyDistributionPerToken: number;
+}
+
 export interface StellarAsset {
   /** URL segment + stable key. */
   slug: string;
@@ -43,6 +61,8 @@ export interface StellarAsset {
    * the sale contract.
    */
   priceHintUsdc?: number;
+  /** Optional revenue / yield figures shown alongside the on-chain data. */
+  economics?: StellarAssetEconomics;
 }
 
 // ⚠️ TRES is deployed on TESTNET, TFW_001 targets MAINNET — the ids below are
@@ -83,11 +103,17 @@ export const STELLAR_ASSETS: StellarAsset[] = [
     gallery: ['/images/stellar/tfw001-1.jpg', '/images/stellar/tfw001-2.jpg'],
     description: 'Tokenized share in a quad (transport vehicle).',
     priceHintUsdc: 50,
+    economics: {
+      totalValuation: 5_000,
+      platformFeePercent: 2,
+      netYieldPercent: 16.46,
+      netMonthlyDistribution: 68.6,
+      netMonthlyDistributionPerToken: 0.686,
+    },
   },
 ];
 
-export const getStellarAsset = (slug: string): StellarAsset | undefined =>
-  STELLAR_ASSETS.find((a) => a.slug === slug);
+export const getStellarAsset = (slug: string): StellarAsset | undefined => STELLAR_ASSETS.find((a) => a.slug === slug);
 
 /** An asset is buyable only once both its token and sale contracts are set. */
 export const isAssetConfigured = (asset: StellarAsset): boolean => Boolean(asset.tokenId && asset.saleId);
