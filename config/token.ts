@@ -31,6 +31,16 @@ export type TokenInfo = {
   internalUrl?: string;
 };
 
+/**
+ * The EVM tokens Tokeshare actually sells — the perimeter of the public
+ * `/api/tokens` catalog. Stablecoins listed in TOKENS are payment legs, not
+ * products, so they stay out. Stellar RWA assets have their own registry in
+ * `config/stellar-assets.ts`.
+ */
+export const SELLABLE_TOKEN_SYMBOLS = ['TGG', 'TSG', 'TMC', 'TSP500', 'TFT_001'] as const;
+
+export type SellableTokenSymbol = (typeof SELLABLE_TOKEN_SYMBOLS)[number];
+
 export const TOKENS: Record<string, TokenInfo> = {
   TGG: {
     symbol: 'TGG',

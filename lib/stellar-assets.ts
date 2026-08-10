@@ -87,7 +87,15 @@ export const readPayBalance = (profile: StellarNetworkProfile, saleId: string) =
 export const quoteSell = (profile: StellarNetworkProfile, saleId: string, shareStroops: bigint) =>
   simulateCall(profile, saleId, 'quote_sell', nativeToScVal(shareStroops, { type: 'i128' })) as Promise<bigint>;
 
-// ---- RWA token balance (custom SEP-41 Soroban token) -----------------------
+// ---- RWA token supply / balance (custom SEP-41 Soroban token) --------------
+
+/**
+ * Tokens actually minted on-chain by the RWA token contract, in base units.
+ * This is the issued supply, not the cap: `cap()` is the ceiling declared at
+ * deploy time, `total_supply()` is what exists today.
+ */
+export const readTotalSupply = (profile: StellarNetworkProfile, tokenId: string) =>
+  simulateCall(profile, tokenId, 'total_supply') as Promise<bigint>;
 
 /** Balance of `address` in the RWA token contract, in base units. */
 export async function readTokenBalance(
