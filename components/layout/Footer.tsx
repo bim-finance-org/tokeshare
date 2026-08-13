@@ -87,12 +87,8 @@ const Footer = () => {
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-5 text-xs text-white/45 sm:flex-row">
+        <div className="mx-auto flex max-w-6xl items-center justify-center px-6 py-5 text-xs text-white/45">
           <p>© {new Date().getFullYear()} Tokeshare™. All rights reserved.</p>
-          <p className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-color2" />
-            Built on Polygon &amp; Base
-          </p>
         </div>
       </div>
     </footer>
