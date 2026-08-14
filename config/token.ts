@@ -41,6 +41,59 @@ export const SELLABLE_TOKEN_SYMBOLS = ['TGG', 'TSG', 'TMC', 'TSP500', 'TFT_001']
 
 export type SellableTokenSymbol = (typeof SELLABLE_TOKEN_SYMBOLS)[number];
 
+/**
+ * The asset backing a sellable token. Addresses are keyed by chain because the
+ * same collateral is deployed at a different address on each network (PAXG on
+ * Polygon vs Ethereum), so a single flat address could never be correct for TGG.
+ */
+export type CollateralInfo = {
+  symbol: string;
+  name: string;
+  decimals: number;
+  addresses: Partial<Record<Blockchain, string>>;
+};
+
+/**
+ * Collateral per sellable token. A missing entry means the token is backed by a
+ * real-world asset with no on-chain representation (TFT_001, the Stellar RWAs),
+ * not that the backing is unknown.
+ */
+export const COLLATERALS: Partial<Record<SellableTokenSymbol, CollateralInfo>> = {
+  TGG: {
+    symbol: 'PAXG',
+    name: 'Paxos Gold',
+    decimals: 18,
+    addresses: {
+      Polygon: POLY.PAXG,
+      Ethereum: ETH.PAXG,
+    },
+  },
+  TSG: {
+    symbol: 'XAGM',
+    name: 'Matrixdock Silver',
+    decimals: 9,
+    addresses: {
+      Ethereum: ETH.XAGM,
+    },
+  },
+  TMC: {
+    symbol: 'CMC20',
+    name: 'CoinMarketCap Top 20 Index',
+    decimals: 18,
+    addresses: {
+      Base: BASE.CMC20,
+    },
+  },
+  TSP500: {
+    symbol: 'DESPXA',
+    name: 'deSPXA',
+    decimals: 18,
+    addresses: {
+      Base: BASE.DESPXA,
+    },
+  },
+};
+
 export const TOKENS: Record<string, TokenInfo> = {
   TGG: {
     symbol: 'TGG',

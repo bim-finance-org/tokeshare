@@ -9,7 +9,7 @@
 import { formatUnits } from 'viem';
 import { getNetworkProfile } from '@/config/stellar';
 import { STELLAR_ASSETS, isAssetConfigured, type StellarAsset } from '@/config/stellar-assets';
-import { SELLABLE_TOKEN_SYMBOLS, TOKENS, type SellableTokenSymbol } from '@/config/token';
+import { COLLATERALS, SELLABLE_TOKEN_SYMBOLS, TOKENS, type SellableTokenSymbol } from '@/config/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { getCmc20Price, getDeSPXAPrice, getPaxgPrice, getTftPrice, getXagmPrice } from '@/lib/prices';
 import { readSalePrice, readTotalSupply } from '@/lib/stellar-assets';
@@ -40,6 +40,14 @@ export interface PublicTokenPrice {
   source: string;
 }
 
+export interface PublicTokenCollateral {
+  symbol: string;
+  name: string;
+  decimals: number;
+  /** Collateral address per chain, keyed the same way as `deployments[].chain`. */
+  addresses: Record<string, string>;
+}
+
 export interface PublicToken {
   symbol: string;
   name: string;
@@ -50,6 +58,11 @@ export interface PublicToken {
    * exposes it (the Stellar SEP-41 tokens); null for the EVM tokens.
    */
   totalSupply: string | null;
+  /**
+   * The asset backing the token, or null when the backing is a real-world asset
+   * with no on-chain representation (TFT_001, the Stellar RWAs).
+   */
+  collateralToken: PublicTokenCollateral | null;
   deployments: PublicTokenDeployment[];
 }
 
@@ -101,6 +114,22 @@ function evmDeployments(symbol: SellableTokenSymbol): PublicTokenDeployment[] {
     }));
 }
 
+function evmCollateral(symbol: SellableTokenSymbol): PublicTokenCollateral | null {
+  const collateral = COLLATERALS[symbol];
+  if (!collateral) return null;
+
+  const addresses = Object.fromEntries(
+    Object.entries(collateral.addresses).filter(([, address]) => Boolean(address)),
+  ) as Record<string, string>;
+
+  return {
+    symbol: collateral.symbol,
+    name: collateral.name,
+    decimals: collateral.decimals,
+    addresses,
+  };
+}
+
 async function buildEvmToken(symbol: SellableTokenSymbol): Promise<PublicToken> {
   const token = TOKENS[symbol];
   const feed = EVM_PRICE_FEEDS[symbol];
@@ -115,6 +144,7 @@ async function buildEvmToken(symbol: SellableTokenSymbol): Promise<PublicToken> 
     decimals: token.decimals,
     price: { value, currency: feed.currency, source: feed.source },
     totalSupply: null,
+    collateralToken: evmCollateral(symbol),
     deployments: evmDeployments(symbol),
   };
 }
@@ -144,6 +174,9 @@ async function buildStellarToken(asset: StellarAsset): Promise<PublicToken> {
     decimals: asset.decimals,
     price: { value: price, currency: 'USDC', source: 'sale-contract' },
     totalSupply,
+    // Stellar assets are backed by the underlying real-world asset itself, which
+    // has no on-chain representation.
+    collateralToken: null,
     deployments: [
       {
         chain: 'Stellar',

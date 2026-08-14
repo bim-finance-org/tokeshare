@@ -9,7 +9,7 @@ import {
   getTSGContracts,
   TRUSTED_AGGREGATORS,
 } from './contracts';
-import { TOKENS } from '@/config/token';
+import { COLLATERALS, TOKENS } from '@/config/token';
 import { Blockchain } from '@/enums/Blockchain';
 
 const HEX_ADDRESS = /^0x[0-9a-fA-F]{40}$/;
@@ -57,6 +57,14 @@ describe('contract addresses (single source of truth)', () => {
     expect(TOKENS.TSG.addresses.Ethereum).toBe(ETH_SILVER_CONTRACTS.TSG);
     expect(TOKENS.TMC.addresses.Base).toBe(BASE_CONTRACTS.TMC);
     expect(TOKENS.TSP500.addresses.Base).toBe(BASE_CONTRACTS.TSP500);
+  });
+
+  it('COLLATERALS derive from the same registry (no drift)', () => {
+    expect(COLLATERALS.TGG?.addresses.Polygon).toBe(CONTRACTS.PAXG);
+    expect(COLLATERALS.TGG?.addresses.Ethereum).toBe(ETH_CONTRACTS.PAXG);
+    expect(COLLATERALS.TSG?.addresses.Ethereum).toBe(ETH_SILVER_CONTRACTS.XAGM);
+    expect(COLLATERALS.TMC?.addresses.Base).toBe(BASE_CONTRACTS.CMC20);
+    expect(COLLATERALS.TSP500?.addresses.Base).toBe(BASE_CONTRACTS.DESPXA);
   });
 
   it('keeps TFT on Base (the historical Polygon mislabel is fixed)', () => {
