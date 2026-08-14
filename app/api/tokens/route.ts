@@ -1,5 +1,6 @@
-// Public, unauthenticated catalog of every token Tokeshare sells: address,
-// chain, price, and on-chain issued supply where the contract reports it.
+// Public, unauthenticated catalog of every token Tokeshare sells: per-chain
+// contract + collateral, price, and on-chain issued supply where the contract
+// reports it.
 // Consumed by third parties, hence the permissive CORS headers.
 
 import { publicJson, publicPreflight } from '@/lib/cors';
