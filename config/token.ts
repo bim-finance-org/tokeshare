@@ -42,6 +42,18 @@ export const SELLABLE_TOKEN_SYMBOLS = ['TGG', 'TSG', 'TMC', 'TSP500', 'TFT_001']
 export type SellableTokenSymbol = (typeof SELLABLE_TOKEN_SYMBOLS)[number];
 
 /**
+ * Tokens representing a share of a physical, off-chain asset — a restaurant, a
+ * property, a vehicle. Distinct from the commodity and index tokens, which
+ * track a price feed through an on-chain collateral (see COLLATERALS).
+ *
+ * Only EVM tokens are listed here: every asset in `config/stellar-assets.ts` is
+ * an RWA by construction, so it is flagged at its own source.
+ */
+export const RWA_TOKEN_SYMBOLS: readonly SellableTokenSymbol[] = ['TFT_001'];
+
+export const isRwaToken = (symbol: SellableTokenSymbol): boolean => RWA_TOKEN_SYMBOLS.includes(symbol);
+
+/**
  * The asset backing a sellable token. Addresses are keyed by chain because the
  * same collateral is deployed at a different address on each network (PAXG on
  * Polygon vs Ethereum), so a single flat address could never be correct for TGG.

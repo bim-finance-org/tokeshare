@@ -9,17 +9,12 @@
 import { formatUnits } from 'viem';
 import { getNetworkProfile } from '@/config/stellar';
 import { STELLAR_ASSETS, isAssetConfigured, type StellarAsset } from '@/config/stellar-assets';
-import { COLLATERALS, SELLABLE_TOKEN_SYMBOLS, TOKENS, type SellableTokenSymbol } from '@/config/token';
+import { COLLATERALS, SELLABLE_TOKEN_SYMBOLS, TOKENS, isRwaToken, type SellableTokenSymbol } from '@/config/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { getCmc20Price, getDeSPXAPrice, getPaxgPrice, getTftPrice, getXagmPrice } from '@/lib/prices';
 import { readSalePrice, readTotalSupply } from '@/lib/stellar-assets';
 import { getChainIdFromBlockchain } from '@/utils/getChainIdFromBlockchain';
-import {
-  calculateTGGPrice,
-  calculateTMCPrice,
-  calculateTSGPrice,
-  calculateTSP500Price,
-} from '@/utils/priceUtils';
+import { calculateTGGPrice, calculateTMCPrice, calculateTSGPrice, calculateTSP500Price } from '@/utils/priceUtils';
 
 export interface PublicTokenCollateral {
   symbol: string;
@@ -59,6 +54,12 @@ export interface PublicToken {
   symbol: string;
   name: string;
   decimals: number;
+  /**
+   * True when the token represents a share of a physical, off-chain asset
+   * (a restaurant, a property, a vehicle) rather than tracking a price feed
+   * through an on-chain collateral.
+   */
+  isRWA: boolean;
   price: PublicTokenPrice;
   /**
    * Tokens minted on-chain, in whole units. Only reported where the contract
@@ -144,6 +145,7 @@ async function buildEvmToken(symbol: SellableTokenSymbol): Promise<PublicToken> 
     symbol: token.symbol,
     name: token.name,
     decimals: token.decimals,
+    isRWA: isRwaToken(symbol),
     price: { value, currency: feed.currency, source: feed.source },
     totalSupply: null,
     contracts: evmContracts(symbol),
@@ -173,6 +175,8 @@ async function buildStellarToken(asset: StellarAsset): Promise<PublicToken> {
     symbol: asset.symbol,
     name: asset.name,
     decimals: asset.decimals,
+    // Every Stellar asset in the registry is a tokenized real-world asset.
+    isRWA: true,
     price: { value: price, currency: 'USDC', source: 'sale-contract' },
     totalSupply,
     contracts: [

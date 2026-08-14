@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { COLLATERALS, SELLABLE_TOKEN_SYMBOLS, TOKENS, type SellableTokenSymbol } from './token';
+import {
+  COLLATERALS,
+  RWA_TOKEN_SYMBOLS,
+  SELLABLE_TOKEN_SYMBOLS,
+  TOKENS,
+  isRwaToken,
+  type SellableTokenSymbol,
+} from './token';
 import { TokenType } from '@/enums/TokenType';
 
 const HEX_ADDRESS = /^0x[0-9a-fA-F]{40}$/;
@@ -69,6 +76,14 @@ describe('COLLATERALS config invariants', () => {
     }
   });
 
+  // The two registries are complementary today: a token either tracks a feed
+  // through an on-chain collateral, or represents an off-chain asset.
+  it('no token is both collateralized and flagged RWA', () => {
+    for (const symbol of RWA_TOKEN_SYMBOLS) {
+      expect(COLLATERALS[symbol], symbol).toBeUndefined();
+    }
+  });
+
   it('pins the underlying of each backed token (regression guard)', () => {
     expect(COLLATERALS.TGG?.symbol).toBe('PAXG');
     expect(COLLATERALS.TSG?.symbol).toBe('XAGM');
@@ -76,5 +91,22 @@ describe('COLLATERALS config invariants', () => {
     expect(COLLATERALS.TSP500?.symbol).toBe('DESPXA');
     // Real-world backed: no on-chain collateral.
     expect(COLLATERALS.TFT_001).toBeUndefined();
+  });
+});
+
+describe('RWA_TOKEN_SYMBOLS', () => {
+  it('only lists sellable tokens', () => {
+    for (const symbol of RWA_TOKEN_SYMBOLS) {
+      expect(SELLABLE_TOKEN_SYMBOLS, symbol).toContain(symbol);
+    }
+  });
+
+  it('flags the tokenized physical assets and nothing else', () => {
+    expect(isRwaToken('TFT_001')).toBe(true);
+    // Commodity and index tokens track a feed, they are not RWAs.
+    expect(isRwaToken('TGG')).toBe(false);
+    expect(isRwaToken('TSG')).toBe(false);
+    expect(isRwaToken('TMC')).toBe(false);
+    expect(isRwaToken('TSP500')).toBe(false);
   });
 });
