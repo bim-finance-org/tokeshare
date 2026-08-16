@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { STELLAR_ASSETS, getStellarAsset } from '@/config/stellar-assets';
 import StellarSwap from '@/components/features/stellar/StellarSwap';
 import StellarAssetHeader from '@/components/features/stellar/StellarAssetHeader';
+import StellarAssetDistributions from '@/components/features/stellar/StellarAssetDistributions';
 
 export function generateStaticParams() {
   return STELLAR_ASSETS.map((a) => ({ asset: a.slug }));
@@ -69,6 +70,9 @@ export default async function StellarAssetPage({ params }: { params: Promise<{ a
           </div>
         )}
       </div>
+
+      {/* Realized distributions — renders only once cycles exist */}
+      <StellarAssetDistributions asset={asset} />
     </div>
   );
 }

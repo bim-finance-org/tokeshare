@@ -129,6 +129,38 @@ export async function readIsAllowed(
 export const readDistributorCycleCount = (profile: StellarNetworkProfile, distributorId: string) =>
   simulateCall(profile, distributorId, 'cycle_count') as Promise<number>;
 
+/**
+ * Builds the `claim` invocation on the distributor: the holder collects one
+ * payout line, proving it against the cycle's Merkle root. The holder signs;
+ * the platform may fee-bump the signed result (the signature stays valid — a
+ * fee bump wraps the inner transaction without altering it).
+ */
+export async function buildClaimXdr(
+  profile: StellarNetworkProfile,
+  distributorId: string,
+  holder: string,
+  cycleId: number,
+  amountStroops: bigint,
+  proofHex: string[],
+): Promise<string> {
+  const server = getServer(profile.rpcUrl);
+  const account = await server.getAccount(holder);
+  const contract = new Contract(distributorId);
+  const op = contract.call(
+    'claim',
+    nativeToScVal(cycleId, { type: 'u32' }),
+    new Address(holder).toScVal(),
+    nativeToScVal(amountStroops, { type: 'i128' }),
+    xdr.ScVal.scvVec(proofHex.map((h) => xdr.ScVal.scvBytes(Buffer.from(h, 'hex')))),
+  );
+  const tx = new TransactionBuilder(account, { fee: INCLUSION_FEE, networkPassphrase: profile.networkPassphrase })
+    .addOperation(op)
+    .setTimeout(180)
+    .build();
+  const prepared = await server.prepareTransaction(tx);
+  return prepared.toXDR();
+}
+
 // ---- payment-asset + XLM balances (classic, via Horizon) -------------------
 
 export type ClassicBalances = { usdc: string; xlm: string };
