@@ -14,7 +14,9 @@
     "prisma": "prisma generate && prisma migrate deploy",
     "snapshot": "tsx ./lib/snapshot.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "indexer": "tsx workers/stellar-indexer/index.ts",
+    "indexer:seed": "tsx workers/stellar-indexer/seed.ts"
   },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^1.9.5",
