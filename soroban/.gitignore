@@ -1,4 +1,0 @@
-/target
-**/*.rs.bk
-**/test_snapshots/
-.stellar/
