@@ -123,6 +123,12 @@ export async function readIsAllowed(
   return Boolean(allowed);
 }
 
+// ---- distributor views -----------------------------------------------------
+
+/** Cycles ever created on the distributor — the next cycle id (dense from 0). */
+export const readDistributorCycleCount = (profile: StellarNetworkProfile, distributorId: string) =>
+  simulateCall(profile, distributorId, 'cycle_count') as Promise<number>;
+
 // ---- payment-asset + XLM balances (classic, via Horizon) -------------------
 
 export type ClassicBalances = { usdc: string; xlm: string };
