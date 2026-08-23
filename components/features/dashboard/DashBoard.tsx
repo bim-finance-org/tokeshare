@@ -2,6 +2,7 @@
 
 import React from 'react';
 import SnapshotModal from './SnapshotModal';
+import StellarDistributions from './StellarDistributions';
 
 const DashBoard = () => {
   return (
@@ -10,6 +11,7 @@ const DashBoard = () => {
         <h1 className="text-2xl text-black font-bold pt-4">Dashboard</h1>
       </div>
       <SnapshotModal />
+      <StellarDistributions />
     </div>
   );
 };

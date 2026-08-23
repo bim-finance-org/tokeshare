@@ -11,3 +11,117 @@ datasource db {
 model Emails {
   email String @id
 }
+
+// ---------------------------------------------------------------------------
+// Stellar tranche 2 — on-chain derived state (indexer + distributions).
+//
+// The registry (which assets/contracts exist) stays in config/stellar-assets.ts;
+// these tables only hold state DERIVED from the chain, plus the distribution
+// plans authored by the operator console (entries + proofs, which only the
+// off-chain side knows). Amounts are stroops (7 decimals) in BigInt columns.
+// ---------------------------------------------------------------------------
+
+/// One row per network: the last ledger fully ingested. The worker resumes
+/// from here after a restart; a gap beyond RPC retention (~24h) is logged as
+/// permanently lost, not silently skipped.
+model StellarIndexCursor {
+  network    String   @id
+  lastLedger Int
+  updatedAt  DateTime @updatedAt
+}
+
+/// Raw normalized contract events, exactly as ingested. `id` is the RPC event
+/// id (globally unique), which makes ingestion idempotent; `processed` drives
+/// the derivation pass (holders/trades/distributions), so re-runs never
+/// double-apply an event.
+model StellarEvent {
+  id             String   @id
+  network        String
+  ledger         Int
+  ledgerClosedAt DateTime
+  contractId     String
+  txHash         String
+  kind           String // transfer | mint | burn | cycle_created | paid | swept | other
+  topics         Json
+  data           Json
+  processed      Boolean  @default(false)
+
+  @@index([network, processed])
+  @@index([txHash])
+  @@index([network, contractId, ledger])
+}
+
+/// Every address that ever touched an RWA token, with its last known balance.
+/// The address SET comes from events (the only way to enumerate holders of a
+/// Soroban token); the BALANCE is re-read from the token contract by
+/// simulation — the reconstructed history is never trusted for payouts.
+model StellarHolder {
+  assetSlug String
+  address   String
+  balance   BigInt
+  updatedAt DateTime @updatedAt
+
+  @@id([assetSlug, address])
+}
+
+/// Buys/sells inferred from token transfers where the sale contract is one
+/// leg, with the USDC leg matched by transaction hash (D7: the sale contract
+/// emits no events of its own).
+model StellarTrade {
+  eventId   String   @id
+  network   String
+  assetSlug String
+  kind      String // buy | sell
+  address   String
+  shares    BigInt
+  usdc      BigInt?
+  txHash    String
+  ledger    Int
+  at        DateTime
+
+  @@index([assetSlug, at])
+  @@index([address])
+}
+
+/// One distribution round, mirrored from the distributor contract. Created by
+/// the operator console at cycle creation (with its entries), then kept in
+/// sync by the indexer from CycleCreated/Paid/Swept events.
+model DistributionCycle {
+  network        String
+  cycleId        Int
+  assetSlug      String
+  tokenId        String
+  total          BigInt
+  claimed        BigInt              @default(0)
+  root           String
+  snapshotLedger Int
+  expiresAt      DateTime
+  sweptAt        DateTime?
+  createdTx      String?
+  createdAt      DateTime            @default(now())
+  entries        DistributionEntry[]
+
+  @@id([network, cycleId])
+  @@index([assetSlug])
+}
+
+/// One payout line of a cycle, with its Merkle proof. Authored by the console
+/// (the chain only knows the root); `excluded` marks holders left out of the
+/// push batch (no USDC trustline) — the ones the claim path serves. Payment
+/// status comes from the indexer via Paid events.
+model DistributionEntry {
+  network  String
+  cycleId  Int
+  address  String
+  amount   BigInt
+  proof    Json
+  excluded Boolean   @default(false)
+  paidAt   DateTime?
+  paidTx   String?
+  pushed   Boolean?
+
+  cycle DistributionCycle @relation(fields: [network, cycleId], references: [network, cycleId])
+
+  @@id([network, cycleId, address])
+  @@index([address])
+}

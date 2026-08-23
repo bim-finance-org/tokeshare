@@ -13,6 +13,11 @@ export interface StellarNetworkProfile {
   horizonUrl: string;
   /** Payment asset (USDC) for this network — classic asset + its SAC. */
   pay: { code: string; issuer: string; sacId: string };
+  /**
+   * Revenue distributor contract (tranche 2) — one global contract per
+   * network, serving every asset. Empty until deployed.
+   */
+  distributorId: string;
 }
 
 const TESTNET: StellarNetworkProfile = {
@@ -25,6 +30,7 @@ const TESTNET: StellarNetworkProfile = {
     issuer: 'GCYG5OOZY4O2EZOY7OPT4FYY2XWZQ3WCX6M24CVWWHTV67ATKAVK77QC',
     sacId: 'CAW2SVC7HTEFP64JVQSHIZNOYCOKPE54IPCSAD3AKG2ZYMUWQFQB7KVH',
   },
+  distributorId: process.env.NEXT_PUBLIC_STELLAR_TESTNET_DISTRIBUTOR_ID ?? '',
 };
 
 const MAINNET: StellarNetworkProfile = {
@@ -37,6 +43,7 @@ const MAINNET: StellarNetworkProfile = {
     issuer: 'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN',
     sacId: 'CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75',
   },
+  distributorId: process.env.NEXT_PUBLIC_STELLAR_MAINNET_DISTRIBUTOR_ID ?? '',
 };
 
 export const STELLAR_NETWORKS: Record<StellarNetwork, StellarNetworkProfile> = {

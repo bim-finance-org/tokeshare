@@ -9,6 +9,7 @@ import ConnectButton from '@/components/shared/ConnectButton';
 import { useUserTokenAssets } from '@/hooks/useUserTokenAssets';
 import { useStellarUserAssets } from '@/hooks/useStellarUserAssets';
 import { useStellarAccount } from '@/context/StellarContext';
+import StellarDistributionsPanel from '@/components/features/stellar/StellarDistributionsPanel';
 import type { AssetData } from '@/interfaces/AssetData';
 
 // Allocation colours, assigned to holdings by descending value.
@@ -202,6 +203,9 @@ export default function Page() {
             </div>
           </>
         )}
+
+        {/* Stellar revenue distributions (renders only when there is data) */}
+        <StellarDistributionsPanel />
       </div>
     </div>
   );
