@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Camera } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Input } from '@/components/ui/input'; // si tu n'as pas ce composant, remplace par <input ... />
+import ConsoleCard, { FieldLabel } from './ConsoleCard';
 import DistributeFromWallet from './DistributeFromWallet';
 import { notify } from '@/lib/notify';
 
@@ -50,63 +51,82 @@ const SnapshotPanel = () => {
   const hasUSDC = rows.length > 0 && 'usdc' in rows[0];
 
   return (
-    <div className="w-1/2 space-y-6 m-16">
-      <div className="flex gap-6 items-start">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="block text-sm text-black font-medium">USDC to distribute (optional)</label>
-            <Input
-              type="number"
-              inputMode="decimal"
-              placeholder="ex: 1000"
-              value={totalUsdc}
-              onChange={(e) => setTotalUsdc(e.target.value)}
-              min="0"
-              className="w-64 text-black bg-white"
-            />
-          </div>
+    <ConsoleCard
+      icon={Camera}
+      title="TFT_001 · Base"
+      subtitle="Holder snapshot & USDC distribution from the operator wallet"
+    >
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1.5">
+          <FieldLabel>USDC to distribute (optional)</FieldLabel>
+          <Input
+            type="number"
+            inputMode="decimal"
+            placeholder="ex: 1000"
+            value={totalUsdc}
+            onChange={(e) => setTotalUsdc(e.target.value)}
+            min="0"
+            className="h-11 w-48 rounded-xl border-0 bg-color1 text-color4 ring-1 ring-inset ring-black/5 focus-visible:ring-2 focus-visible:ring-color4"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={handleSnapshot}
+          disabled={running}
+          className="h-11 rounded-full bg-color4 px-6 font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {running ? 'Snapshotting…' : 'Run snapshot'}
+        </button>
+      </div>
 
-          <Button onClick={handleSnapshot} disabled={running}>
-            {running ? 'Generation…' : 'Snapshot'}
-          </Button>
-
-          {rows.length === 0 && <p className="text-sm text-gray-800">Run snapshot to get holders.</p>}
-
-          {rows.length > 0 && (
-            <div className="pt-4">
-              <DistributeFromWallet />
-            </div>
-          )}
-        </div>
-
-        <div className="md:col-span-2 rounded-lg border shadow-sm overflow-x-auto">
-          {rows.length > 0 ? (
+      {rows.length === 0 ? (
+        <p className="mt-6 rounded-2xl border border-dashed border-black/10 px-5 py-6 text-center text-sm text-gray-400">
+          Run a snapshot to list the current TFT_001 holders.
+        </p>
+      ) : (
+        <>
+          <div className="mt-6 overflow-x-auto rounded-2xl ring-1 ring-black/5">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-100">
-                  <TableHead className="text-black">Addresse</TableHead>
-                  <TableHead className="text-right text-black">Balance TFT_001</TableHead>
-                  <TableHead className="text-right text-black">Part (%)</TableHead>
-                  {hasUSDC && <TableHead className="text-right text-black">USDC (approx.)</TableHead>}
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                    Address
+                  </TableHead>
+                  <TableHead className="text-right text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                    Balance TFT_001
+                  </TableHead>
+                  <TableHead className="text-right text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                    Share
+                  </TableHead>
+                  {hasUSDC && (
+                    <TableHead className="text-right text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                      USDC
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((r, i) => (
-                  <TableRow key={r.address} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50 hover:bg-gray-100'}>
-                    <TableCell className="font-mono text-black">{r.address}</TableCell>
-                    <TableCell className="text-right text-black">{r.balance}</TableCell>
-                    <TableCell className="text-right text-black">{r.percent}</TableCell>
-                    {hasUSDC && <TableCell className="text-right text-black">{(r as FrontRowWithUsdc).usdc}</TableCell>}
+                {rows.map((r) => (
+                  <TableRow key={r.address} className="hover:bg-color1/60">
+                    <TableCell className="font-mono text-xs text-gray-600">{r.address}</TableCell>
+                    <TableCell className="text-right tabular-nums text-color4">{r.balance}</TableCell>
+                    <TableCell className="text-right tabular-nums text-gray-500">{r.percent}%</TableCell>
+                    {hasUSDC && (
+                      <TableCell className="text-right font-medium tabular-nums text-color4">
+                        {(r as FrontRowWithUsdc).usdc}
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          ) : (
-            <div />
-          )}
-        </div>
-      </div>
-    </div>
+          </div>
+          <div className="mt-5">
+            <DistributeFromWallet />
+          </div>
+        </>
+      )}
+    </ConsoleCard>
   );
 };
 

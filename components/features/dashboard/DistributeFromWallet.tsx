@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
-import { Button } from '@/components/ui/button';
 import { parseAbi, type Address } from 'viem';
 import { CONTRACTS } from '@/contracts/contracts';
 import { base } from 'viem/chains';
@@ -131,12 +130,27 @@ export default function DistributeFromWallet() {
   }
 
   return (
-    <div className="space-y-2">
-      <Button onClick={handleDistribute} disabled={!isConnected || busy}>
-        {busy ? 'Distribution…' : 'Distribuer depuis mon wallet'}
-      </Button>
-      {msg && <p className="text-sm text-color4">{msg}</p>}
+    <div className="flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        onClick={handleDistribute}
+        disabled={!isConnected || busy}
+        className="h-11 rounded-full bg-color4 px-6 font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {busy ? 'Distributing…' : 'Distribute from my wallet'}
+      </button>
       {!isConnected && <ConnectWalletButton />}
+      {msg && (
+        <p
+          className={`rounded-xl px-4 py-2.5 text-sm ring-1 ring-inset ${
+            msg.startsWith('✅')
+              ? 'bg-emerald-50 text-emerald-700 ring-emerald-100'
+              : 'bg-red-50 text-red-600 ring-red-100'
+          }`}
+        >
+          {msg}
+        </p>
+      )}
     </div>
   );
 }
