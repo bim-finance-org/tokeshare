@@ -14,6 +14,7 @@ import {
   BASE_FEE,
   Contract,
   Keypair,
+  Memo,
   Operation,
   TransactionBuilder,
   nativeToScVal,
@@ -178,30 +179,90 @@ export async function getClassicBalances(profile: StellarNetworkProfile, address
   return { usdc, xlm };
 }
 
-// ---- payment-asset trustline (classic changeTrust) -------------------------
+// ---- classic-asset trustlines (changeTrust) --------------------------------
 
-/** True if `address` already trusts the payment asset (USDC). Native XLM never needs one. */
-export async function hasPaymentTrustline(profile: StellarNetworkProfile, address: string): Promise<boolean> {
-  if (!profile.pay.issuer) return true; // native asset — no trustline required
+/** True if `address` already trusts the given classic asset. */
+export async function hasTrustline(
+  profile: StellarNetworkProfile,
+  address: string,
+  code: string,
+  issuer: string,
+): Promise<boolean> {
+  if (!issuer) return true; // native asset — no trustline required
   const res = await fetch(`${profile.horizonUrl}/accounts/${address}`);
   if (res.status === 404) return false; // unfunded account has no trustlines
   if (!res.ok) throw new Error('failed to load account');
   const data = await res.json();
   return (data.balances ?? []).some(
-    (b: { asset_code?: string; asset_issuer?: string }) =>
-      b.asset_code === profile.pay.code && b.asset_issuer === profile.pay.issuer,
+    (b: { asset_code?: string; asset_issuer?: string }) => b.asset_code === code && b.asset_issuer === issuer,
   );
 }
 
-/** Builds the classic changeTrust XDR so `address` can hold/receive the payment asset. */
-export async function buildPaymentTrustlineXdr(profile: StellarNetworkProfile, address: string): Promise<string> {
+/** Builds the classic changeTrust XDR so `address` can hold/receive the asset. */
+export async function buildTrustlineXdr(
+  profile: StellarNetworkProfile,
+  address: string,
+  code: string,
+  issuer: string,
+): Promise<string> {
   const server = getServer(profile.rpcUrl);
   const account = await server.getAccount(address);
   const tx = new TransactionBuilder(account, { fee: INCLUSION_FEE, networkPassphrase: profile.networkPassphrase })
-    .addOperation(Operation.changeTrust({ asset: new Asset(profile.pay.code, profile.pay.issuer) }))
+    .addOperation(Operation.changeTrust({ asset: new Asset(code, issuer) }))
     .setTimeout(180)
     .build();
   return tx.toXDR();
+}
+
+/** True if `address` already trusts the payment asset (USDC). Native XLM never needs one. */
+export const hasPaymentTrustline = (profile: StellarNetworkProfile, address: string): Promise<boolean> =>
+  hasTrustline(profile, address, profile.pay.code, profile.pay.issuer);
+
+/** Builds the classic changeTrust XDR so `address` can hold/receive the payment asset. */
+export const buildPaymentTrustlineXdr = (profile: StellarNetworkProfile, address: string): Promise<string> =>
+  buildTrustlineXdr(profile, address, profile.pay.code, profile.pay.issuer);
+
+// ---- classic payment (SEP-24 withdrawals send USDC to the anchor) ----------
+
+export interface ClassicPaymentOptions {
+  from: string;
+  to: string;
+  code: string;
+  issuer: string;
+  /** Decimal amount, e.g. "25.5" (classic payments take decimal strings). */
+  amount: string;
+  /** SEP-24 withdrawal memo — routes the payment to the anchor transaction. */
+  memo?: { type: 'text' | 'id' | 'hash'; value: string } | null;
+}
+
+/** Builds a classic payment XDR (used to send USDC to an anchor's account). */
+export async function buildClassicPaymentXdr(
+  profile: StellarNetworkProfile,
+  options: ClassicPaymentOptions,
+): Promise<string> {
+  const server = getServer(profile.rpcUrl);
+  const account = await server.getAccount(options.from);
+  const builder = new TransactionBuilder(account, {
+    fee: INCLUSION_FEE,
+    networkPassphrase: profile.networkPassphrase,
+  })
+    .addOperation(
+      Operation.payment({
+        destination: options.to,
+        asset: new Asset(options.code, options.issuer),
+        amount: options.amount,
+      }),
+    )
+    .setTimeout(180);
+
+  if (options.memo) {
+    if (options.memo.type === 'text') builder.addMemo(Memo.text(options.memo.value));
+    else if (options.memo.type === 'id') builder.addMemo(Memo.id(options.memo.value));
+    // Anchors send hash memos as base64.
+    else builder.addMemo(new Memo('hash', Buffer.from(options.memo.value, 'base64')));
+  }
+
+  return builder.build().toXDR();
 }
 
 // ---- buy (Soroban invoke on the sale contract) -----------------------------
