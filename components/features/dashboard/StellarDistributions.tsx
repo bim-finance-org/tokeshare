@@ -10,9 +10,10 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
+import { ExternalLink, HandCoins } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import ConsoleCard, { FieldLabel, Stat } from './ConsoleCard';
 import { STELLAR_ASSETS, isAssetConfigured } from '@/config/stellar-assets';
 import { explorerTxUrl, stroopsToUnits } from '@/lib/stellar';
 import { notify } from '@/lib/notify';
@@ -69,6 +70,19 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   if (!res.ok) throw new Error(payload.error || 'Request failed');
   return payload;
 }
+
+const inputClass =
+  'h-11 rounded-xl border-0 bg-color1 text-color4 ring-1 ring-inset ring-black/5 focus-visible:ring-2 focus-visible:ring-color4';
+
+const headClass = 'text-[11px] font-medium uppercase tracking-wide text-gray-400';
+
+const cycleStatus = (c: CycleRow): { label: string; tone: string } => {
+  if (c.sweptAt) return { label: 'swept', tone: 'bg-gray-100 text-gray-500 ring-gray-200' };
+  if (c.expired) return { label: 'expired', tone: 'bg-amber-50 text-amber-600 ring-amber-100' };
+  if (c.claimableCount > 0)
+    return { label: `${c.claimableCount} claimable`, tone: 'bg-blue-50 text-blue-600 ring-blue-100' };
+  return { label: 'settled', tone: 'bg-emerald-50 text-emerald-600 ring-emerald-100' };
+};
 
 const StellarDistributions = () => {
   const [slug, setSlug] = useState(ASSETS[0]?.slug ?? '');
@@ -133,20 +147,23 @@ const StellarDistributions = () => {
   const asset = ASSETS.find((a) => a.slug === slug);
 
   return (
-    <div className="mx-auto mt-10 w-full max-w-4xl rounded-lg border p-6 text-black">
-      <h2 className="text-xl font-bold">Stellar — revenue distributions</h2>
-      <p className="mt-1 text-sm text-gray-600">
-        Snapshot the holders, preview the split, then distribute the month&apos;s USDC in one go.
-      </p>
-
-      <div className="mt-4 flex flex-wrap items-end gap-3">
-        <label className="flex flex-col text-sm">
-          Asset
-          <select
-            className="mt-1 h-9 rounded-md border px-2"
-            value={slug}
-            onChange={(e) => selectAsset(e.target.value)}
-          >
+    <ConsoleCard
+      icon={HandCoins}
+      title="Stellar · Revenue distributions"
+      subtitle="Snapshot the holders, preview the split, distribute the month's USDC in one go"
+      aside={
+        asset && (
+          <span className="rounded-full bg-color1 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-color4 ring-1 ring-inset ring-black/5">
+            {asset.network}
+          </span>
+        )
+      }
+    >
+      {/* Controls */}
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1.5">
+          <FieldLabel>Asset</FieldLabel>
+          <select className={`${inputClass} px-3`} value={slug} onChange={(e) => selectAsset(e.target.value)}>
             {ASSETS.map((a) => (
               <option key={a.slug} value={a.slug}>
                 {a.symbol} · {a.network}
@@ -154,138 +171,172 @@ const StellarDistributions = () => {
             ))}
           </select>
         </label>
-        <label className="flex flex-col text-sm">
-          Total USDC
+        <label className="flex flex-col gap-1.5">
+          <FieldLabel>Total USDC</FieldLabel>
           <Input
-            className="mt-1 w-36"
+            className={`${inputClass} w-36`}
             placeholder="68.60"
             value={totalUsdc}
             onChange={(e) => setTotalUsdc(e.target.value)}
           />
         </label>
-        <label className="flex flex-col text-sm">
-          Claim window (days)
-          <Input className="mt-1 w-28" value={expiresDays} onChange={(e) => setExpiresDays(e.target.value)} />
+        <label className="flex flex-col gap-1.5">
+          <FieldLabel>Claim window (days)</FieldLabel>
+          <Input className={`${inputClass} w-32`} value={expiresDays} onChange={(e) => setExpiresDays(e.target.value)} />
         </label>
-        <Button onClick={handlePreview} disabled={busy !== null || !totalUsdc}>
+        <button
+          type="button"
+          onClick={handlePreview}
+          disabled={busy !== null || !totalUsdc}
+          className="h-11 rounded-full bg-color4 px-6 font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
           {busy === 'preview' ? 'Snapshotting…' : 'Preview snapshot'}
-        </Button>
+        </button>
       </div>
 
+      {/* Preview */}
       {preview && (
         <div className="mt-6">
-          <div className="text-sm text-gray-600">
-            Ledger {preview.snapshotLedger} · {preview.lines.length} holders ·{' '}
-            {stroopsToUnits(BigInt(preview.eligibleShares))} eligible shares · dust{' '}
-            {stroopsToUnits(BigInt(preview.dust))} USDC
-            {preview.excluded.length > 0 && <> · excluded: {preview.excluded.map(short).join(', ')}</>}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Stat label="Holders" value={preview.lines.length} />
+            <Stat label="Eligible shares" value={stroopsToUnits(BigInt(preview.eligibleShares))} />
+            <Stat label="Rounding dust" value={`${stroopsToUnits(BigInt(preview.dust))} USDC`} />
+            <Stat label="Snapshot ledger" value={preview.snapshotLedger.toLocaleString('en-US')} />
           </div>
-          <Table className="mt-2">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Address</TableHead>
-                <TableHead className="text-right">Shares</TableHead>
-                <TableHead className="text-right">USDC</TableHead>
-                <TableHead>Payout</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {preview.lines.map((line) => (
-                <TableRow key={line.address}>
-                  <TableCell className="font-mono text-xs">{short(line.address)}</TableCell>
-                  <TableCell className="text-right">{stroopsToUnits(BigInt(line.shares))}</TableCell>
-                  <TableCell className="text-right">{stroopsToUnits(BigInt(line.amount))}</TableCell>
-                  <TableCell>
-                    {line.push ? (
-                      <span className="text-green-700">push</span>
-                    ) : (
-                      <span className="text-amber-600">no trustline → claim</span>
-                    )}
-                  </TableCell>
+          {preview.excluded.length > 0 && (
+            <p className="mt-3 text-xs text-gray-400">
+              Excluded from the tree (inventory / operator): {preview.excluded.map(short).join(' · ')}
+            </p>
+          )}
+
+          <div className="mt-4 overflow-x-auto rounded-2xl ring-1 ring-black/5">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className={headClass}>Address</TableHead>
+                  <TableHead className={`${headClass} text-right`}>Shares</TableHead>
+                  <TableHead className={`${headClass} text-right`}>USDC</TableHead>
+                  <TableHead className={headClass}>Payout</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Button className="mt-4" onClick={handleExecute} disabled={busy !== null}>
-            {busy === 'execute'
-              ? 'Distributing…'
-              : `Distribute ${totalUsdc} USDC to ${preview.lines.length} holders`}
-          </Button>
-          <p className="mt-1 text-xs text-amber-700">
-            Publishing this split on-chain is irreversible — check the table first.
-          </p>
+              </TableHeader>
+              <TableBody>
+                {preview.lines.map((line) => (
+                  <TableRow key={line.address} className="hover:bg-color1/60">
+                    <TableCell className="font-mono text-xs text-gray-600">{short(line.address)}</TableCell>
+                    <TableCell className="text-right tabular-nums text-gray-500">
+                      {stroopsToUnits(BigInt(line.shares))}
+                    </TableCell>
+                    <TableCell className="text-right font-medium tabular-nums text-color4">
+                      {stroopsToUnits(BigInt(line.amount))}
+                    </TableCell>
+                    <TableCell>
+                      {line.push ? (
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-600 ring-1 ring-inset ring-emerald-100">
+                          push
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-600 ring-1 ring-inset ring-amber-100">
+                          no trustline → claim
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleExecute}
+              disabled={busy !== null}
+              className="h-11 rounded-full bg-color4 px-6 font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {busy === 'execute'
+                ? 'Distributing…'
+                : `Distribute ${totalUsdc} USDC to ${preview.lines.length} holders`}
+            </button>
+            <p className="text-xs text-amber-600">
+              Publishing this split on-chain is irreversible — check the table first.
+            </p>
+          </div>
         </div>
       )}
 
+      {/* Result */}
       {result && asset && (
-        <div className="mt-6 rounded-md border border-green-300 bg-green-50 p-4 text-sm">
-          <div className="font-semibold">Cycle #{result.cycleId} executed</div>
-          <div>
+        <div className="mt-6 rounded-2xl bg-emerald-50 p-5 ring-1 ring-inset ring-emerald-100">
+          <p className="font-titleSemibold text-emerald-800">Cycle #{result.cycleId} executed</p>
+          <p className="mt-0.5 text-sm text-emerald-700">
             {result.pushedCount} holders paid · {result.claimableCount} left to claim · window closes{' '}
             {new Date(result.expiresAt).toLocaleDateString()}
-          </div>
-          <div className="mt-1 flex flex-wrap gap-3">
-            <a
-              className="text-blue-700 underline"
-              href={explorerTxUrl(asset.network, result.createTx)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              create_cycle
-            </a>
-            {result.pushTxs.map((hash, i) => (
-              <a
-                key={hash}
-                className="text-blue-700 underline"
-                href={explorerTxUrl(asset.network, hash)}
-                target="_blank"
-                rel="noreferrer"
-              >
-                batch {i + 1}
-              </a>
-            ))}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[{ label: 'create_cycle', hash: result.createTx }, ...result.pushTxs.map((hash, i) => ({ label: `batch ${i + 1}`, hash }))].map(
+              ({ label, hash }) => (
+                <a
+                  key={hash}
+                  href={explorerTxUrl(asset.network, hash)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200 transition-colors hover:bg-emerald-100"
+                >
+                  {label}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              ),
+            )}
           </div>
         </div>
       )}
 
+      {/* Past cycles */}
       {cycles.length > 0 && (
         <div className="mt-8">
-          <h3 className="font-semibold">Past cycles</h3>
-          <Table className="mt-2">
-            <TableHeader>
-              <TableRow>
-                <TableHead>#</TableHead>
-                <TableHead className="text-right">Total USDC</TableHead>
-                <TableHead className="text-right">Paid out</TableHead>
-                <TableHead className="text-right">Holders</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {cycles.map((c) => (
-                <TableRow key={`${c.network}-${c.cycleId}`}>
-                  <TableCell>{c.cycleId}</TableCell>
-                  <TableCell className="text-right">{stroopsToUnits(BigInt(c.total))}</TableCell>
-                  <TableCell className="text-right">{stroopsToUnits(BigInt(c.claimed))}</TableCell>
-                  <TableCell className="text-right">
-                    {c.paidCount}/{c.entryCount}
-                  </TableCell>
-                  <TableCell>
-                    {c.sweptAt
-                      ? 'swept'
-                      : c.expired
-                        ? 'expired'
-                        : c.claimableCount > 0
-                          ? `${c.claimableCount} claimable`
-                          : 'settled'}
-                  </TableCell>
+          <FieldLabel>Past cycles</FieldLabel>
+          <div className="mt-2 overflow-x-auto rounded-2xl ring-1 ring-black/5">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className={headClass}>#</TableHead>
+                  <TableHead className={`${headClass} text-right`}>Total USDC</TableHead>
+                  <TableHead className={`${headClass} text-right`}>Paid out</TableHead>
+                  <TableHead className={`${headClass} text-right`}>Holders</TableHead>
+                  <TableHead className={headClass}>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {cycles.map((c) => {
+                  const status = cycleStatus(c);
+                  return (
+                    <TableRow key={`${c.network}-${c.cycleId}`} className="hover:bg-color1/60">
+                      <TableCell className="font-medium text-color4">{c.cycleId}</TableCell>
+                      <TableCell className="text-right tabular-nums text-color4">
+                        {stroopsToUnits(BigInt(c.total))}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-gray-500">
+                        {stroopsToUnits(BigInt(c.claimed))}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-gray-500">
+                        {c.paidCount}/{c.entryCount}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${status.tone}`}
+                        >
+                          {status.label}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
-    </div>
+    </ConsoleCard>
   );
 };
 

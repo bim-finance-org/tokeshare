@@ -105,6 +105,36 @@ model DistributionCycle {
   @@index([assetSlug])
 }
 
+/// One SEP-24 ramp flow (deposit or withdrawal) started from the app against
+/// an anchor (MoneyGram, or the SDF test anchor during development). The
+/// anchor owns the state machine — rows mirror its /transaction record so the
+/// app can render history without an anchor JWT, and reconcile later. Amounts
+/// are the anchor's decimal strings, not stroops.
+model RampTransaction {
+  id            String    @id @default(cuid())
+  network       String
+  provider      String // moneygram | testanchor
+  direction     String // deposit | withdrawal
+  address       String
+  anchorTxId    String
+  assetCode     String
+  amountIn      String?
+  amountOut     String?
+  amountFee     String?
+  status        String
+  moreInfoUrl   String?
+  /// Reference code the user presents at a MoneyGram agent location.
+  externalRef   String?
+  stellarTxHash String?
+  message       String?
+  startedAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  completedAt   DateTime?
+
+  @@unique([network, provider, anchorTxId])
+  @@index([address])
+}
+
 /// One payout line of a cycle, with its Merkle proof. Authored by the console
 /// (the chain only knows the root); `excluded` marks holders left out of the
 /// push batch (no USDC trustline) — the ones the claim path serves. Payment

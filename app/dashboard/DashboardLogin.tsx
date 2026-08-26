@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { KeyRound } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 
 export default function DashboardLogin() {
@@ -24,39 +25,43 @@ export default function DashboardLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Connexion au Dashboard</h2>
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Mot de passe
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Mot de passe"
-              />
-            </div>
-          </div>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-color1 to-white px-4">
+      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm ring-1 ring-black/5 sm:p-10">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-color1 text-color4">
+          <KeyRound className="h-5 w-5" />
+        </span>
+        <h1 className="mt-5 font-titleSemibold text-2xl text-color4">Console opérateur</h1>
+        <p className="mt-1 text-sm text-gray-500">Accès réservé à l&apos;équipe Tokeshare.</p>
 
-          {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+        <form className="mt-8 space-y-4" onSubmit={handleLogin}>
+          <label className="block">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Mot de passe</span>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              autoFocus
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1.5 block h-11 w-full rounded-xl border-0 bg-color1 px-4 text-color4 ring-1 ring-inset ring-black/5 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-color4"
+              placeholder="••••••••••••"
+            />
+          </label>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {isLoading ? 'Connexion...' : 'Se connecter'}
-            </button>
-          </div>
+          {error && (
+            <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600 ring-1 ring-inset ring-red-100">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="h-11 w-full rounded-full bg-color4 font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isLoading ? 'Connexion…' : 'Se connecter'}
+          </button>
         </form>
       </div>
     </div>

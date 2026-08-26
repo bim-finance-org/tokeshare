@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
+  async rewrites() {
+    // SEP-1: anchors (MoneyGram) fetch our client-domain signing key from
+    // /.well-known/stellar.toml; dot-folders aren't routable in the app dir.
+    return [{ source: '/.well-known/stellar.toml', destination: '/api/stellar/toml' }];
+  },
 };
 
 export default nextConfig;
