@@ -61,6 +61,30 @@ function assertValidChallenge(tx: Transaction, opts: Sep10Options): void {
   if (!signedByServer) throw new Error('Invalid challenge: not signed by the anchor');
 }
 
+/**
+ * Wallet extensions pinned to another network (e.g. Freighter on "Public")
+ * sign against that network's passphrase, producing a signature the anchor
+ * cannot verify — MoneyGram answers with an opaque 500. Catch it here with a
+ * message the user can act on.
+ */
+function assertSignedByAccount(signedXdr: string, opts: Sep10Options): void {
+  const tx = TransactionBuilder.fromXDR(signedXdr, opts.networkPassphrase);
+  if (tx instanceof FeeBumpTransaction) throw new Error('Invalid signed challenge');
+  const account = Keypair.fromPublicKey(opts.account);
+  const hash = tx.hash();
+  const ok = tx.signatures.some((sig) => {
+    try {
+      return account.verify(hash, sig.signature());
+    } catch {
+      return false;
+    }
+  });
+  if (!ok) {
+    const network = opts.networkPassphrase.startsWith('Test') ? 'Testnet' : 'Public network (mainnet)';
+    throw new Error(`Your wallet signed for a different network. Switch it to ${network} and try again.`);
+  }
+}
+
 /** Runs the full SEP-10 handshake and returns the anchor's session JWT. */
 export async function authenticateSep10(opts: Sep10Options): Promise<string> {
   const url = new URL(opts.webAuthEndpoint);
@@ -86,6 +110,7 @@ export async function authenticateSep10(opts: Sep10Options): Promise<string> {
   assertValidChallenge(parsed, opts);
 
   let signedXdr = await opts.signTransaction(challengeBody.transaction, opts.networkPassphrase);
+  assertSignedByAccount(signedXdr, opts);
   if (opts.clientDomain && opts.coSignChallenge) {
     signedXdr = await opts.coSignChallenge(signedXdr);
   }
