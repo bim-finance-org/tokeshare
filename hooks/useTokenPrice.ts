@@ -5,6 +5,7 @@ import { useCmc20Price } from '@/hooks/useCmc20Price';
 import { useDeSPXAPrice } from '@/hooks/useDeSPXAPrice';
 import { calculateTGGPrice, calculateTSGPrice, calculateTMCPrice, calculateTSP500Price } from '@/utils/priceUtils';
 import { useMarketplaceContract } from './useMarketplaceContracts';
+import type { MarketplaceTokenSymbol } from '@/config/token';
 
 export type TokenPriceResult = {
   price: number | null;
@@ -54,19 +55,23 @@ export function useTSP500Price(enabled = true): TokenPriceResult {
   };
 }
 
-export function useTFTPrice(): TokenPriceResult {
-  const { tftTokenInfo, tftTokenInfoLoading, tftTokenInfoError, tftTokenInfoRefetch } = useMarketplaceContract();
-  const [pricePerToken] = (tftTokenInfo ?? []) as [bigint];
+/** Price of a fixed-price RWA, read off the Base Marketplace listing (`getTokenInfo`). */
+export function useMarketplacePrice(symbol: MarketplaceTokenSymbol): TokenPriceResult {
+  const { tokenInfo, tokenInfoLoading, tokenInfoError, tokenInfoRefetch } = useMarketplaceContract(symbol);
+  const [pricePerToken] = (tokenInfo ?? []) as [bigint];
   const price = Number(pricePerToken) / 10 ** 18;
   return {
     price: price || null,
-    isLoading: tftTokenInfoLoading,
-    isError: tftTokenInfoError,
+    isLoading: tokenInfoLoading,
+    isError: tokenInfoError,
     refetch: () => {
-      tftTokenInfoRefetch();
+      tokenInfoRefetch();
     },
   };
 }
+
+export const useTFTPrice = (): TokenPriceResult => useMarketplacePrice('TFT_001');
+export const useTLTPrice = (): TokenPriceResult => useMarketplacePrice('TLT_001');
 
 /**
  * Generic dispatcher kept for components that don't know the symbol at compile time
@@ -82,6 +87,7 @@ export function useTokenPrice(symbol: string): TokenPriceResult {
   const tmc = useTMCPrice(symbol === 'TMC');
   const tsp500 = useTSP500Price(symbol === 'TSP500');
   const tft = useTFTPrice();
+  const tlt = useTLTPrice();
 
   return useMemo(() => {
     switch (symbol) {
@@ -95,8 +101,10 @@ export function useTokenPrice(symbol: string): TokenPriceResult {
         return tsp500;
       case 'TFT_001':
         return tft;
+      case 'TLT_001':
+        return tlt;
       default:
         return { price: null, isLoading: false, isError: false, refetch: () => {} };
     }
-  }, [symbol, tgg, tsg, tmc, tsp500, tft]);
+  }, [symbol, tgg, tsg, tmc, tsp500, tft, tlt]);
 }

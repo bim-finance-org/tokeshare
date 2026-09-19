@@ -13,6 +13,7 @@ const STATIC_ROUTES = [
   '/marketplace/stock-etf/tsp500',
   '/marketplace/other',
   '/marketplace/other/french-tacos',
+  '/marketplace/other/la-tienda',
   '/partners',
   '/general-disclaimer',
   '/privacy-policy',

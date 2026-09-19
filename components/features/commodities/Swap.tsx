@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 import { SwapDirection } from '@/enums/Directions';
-import { TokenInfo } from '@/config/token';
+import { TokenInfo, isMarketplaceToken } from '@/config/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { getTokenAddress, getTokenBlockchains } from '@/utils/token';
 import { useTokenBalance } from '@/utils/blockchainUtils';
@@ -152,7 +152,7 @@ const Swap = ({ token }: { token: TokenInfo }) => {
 
   const handleSwap = () => {
     const newIsTggFirst = !isTokenFirst;
-    if (newIsTggFirst && token.symbol === 'TFT_001') {
+    if (newIsTggFirst && isMarketplaceToken(token.symbol)) {
       setStablecoin('USDC');
     }
     // Carry over the calculated output as the new input so the visible amount
@@ -229,19 +229,20 @@ const Swap = ({ token }: { token: TokenInfo }) => {
     readOnly: false,
   };
 
-  const isTftSellMode = isTokenFirst && token.symbol === 'TFT_001';
+  // Marketplace tokens (TFT, TLT) only pay out in USDC on sells.
+  const isMarketplaceSellMode = isTokenFirst && isMarketplaceToken(token.symbol);
 
   const bottomWidgetProps = {
     type: (isTokenFirst ? TokenType.Stablecoin : TokenType.Crypto) as TokenType,
     label: 'YOU RECEIVE',
-    defaultToken: isTokenFirst ? (isTftSellMode ? 'USDC' : stablecoin) : token.symbol,
+    defaultToken: isTokenFirst ? (isMarketplaceSellMode ? 'USDC' : stablecoin) : token.symbol,
     value: outputAmount,
     onValueChange: () => {},
     onTokenChange: handleTokenChange,
     blockchain: selectedBlockchain,
     showBalance: true,
     readOnly: true,
-    lockedToken: isTftSellMode,
+    lockedToken: isMarketplaceSellMode,
     // Surface quote recomputation on the output field with a skeleton.
     loading: isLoadingQuote,
   };

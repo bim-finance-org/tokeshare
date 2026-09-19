@@ -7,8 +7,14 @@ import { getTokenAddress, getTokenDecimals } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { PUBLIC_CLIENTS } from '@/lib/clients';
 import { useCallback, useMemo } from 'react';
+import type { MarketplaceTokenSymbol } from '@/config/token';
 
-export function useMarketplaceContract() {
+/**
+ * Buy/sell/read helpers for one token listed on the Base Marketplace contract.
+ * Every RWA sold at a fixed price (TFT_001, TLT_001) goes through the same
+ * contract, so the token is a parameter rather than a hardcoded symbol.
+ */
+export function useMarketplaceContract(tokenSymbol: MarketplaceTokenSymbol = 'TFT_001') {
   const wagmiClient = usePublicClient();
   const publicClient = wagmiClient?.chain?.id === 8453 ? wagmiClient : PUBLIC_CLIENTS.Base;
 
@@ -16,9 +22,9 @@ export function useMarketplaceContract() {
   const { address: userAddress } = useAccount();
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
-  const tokenAddress = getTokenAddress('TFT_001', Blockchain.Base) as Address;
+  const tokenAddress = getTokenAddress(tokenSymbol, Blockchain.Base) as Address;
 
-  const tftTokenInfoResult = useReadContract({
+  const tokenInfoResult = useReadContract({
     address: CONTRACTS.MARKETPLACE as Address,
     abi: MARKETPLACE_ABI,
     functionName: 'getTokenInfo',
@@ -26,7 +32,7 @@ export function useMarketplaceContract() {
     chainId: 8453,
   });
 
-  const tokenInfo = tftTokenInfoResult.data;
+  const tokenInfo = tokenInfoResult.data;
 
   const checkTokenBalance = useCallback(
     async (tokenAddr: Address, owner: Address): Promise<bigint> => {
@@ -155,10 +161,10 @@ export function useMarketplaceContract() {
     () => ({
       buyTokenOnMarketplace,
       sellTokenOnMarketplace,
-      tftTokenInfo: tftTokenInfoResult.data,
-      tftTokenInfoLoading: tftTokenInfoResult.isLoading,
-      tftTokenInfoError: tftTokenInfoResult.isError,
-      tftTokenInfoRefetch: tftTokenInfoResult.refetch,
+      tokenInfo: tokenInfoResult.data,
+      tokenInfoLoading: tokenInfoResult.isLoading,
+      tokenInfoError: tokenInfoResult.isError,
+      tokenInfoRefetch: tokenInfoResult.refetch,
       isPending,
       error,
       hash,
@@ -170,10 +176,10 @@ export function useMarketplaceContract() {
     [
       buyTokenOnMarketplace,
       sellTokenOnMarketplace,
-      tftTokenInfoResult.data,
-      tftTokenInfoResult.isLoading,
-      tftTokenInfoResult.isError,
-      tftTokenInfoResult.refetch,
+      tokenInfoResult.data,
+      tokenInfoResult.isLoading,
+      tokenInfoResult.isError,
+      tokenInfoResult.refetch,
       isPending,
       error,
       hash,

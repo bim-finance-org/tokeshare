@@ -12,6 +12,7 @@
 import type { Address } from 'viem';
 import { MARKETPLACE_ABI } from '@/contracts/abis/marketplace_abi';
 import { ADDRESSES } from '@/contracts/addresses';
+import type { MarketplaceTokenSymbol } from '@/config/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { PUBLIC_CLIENTS } from '@/lib/clients';
 import { getFromCache, setCache } from '@/lib/redis';
@@ -181,31 +182,40 @@ async function fetchDeSPXAPrice(): Promise<SpotPriceWithChanges> {
 export const getDeSPXAPrice = (): Promise<PriceResult<SpotPriceWithChanges>> =>
   getCachedOrFetch('tsp500:price', 'coingecko-api', fetchDeSPXAPrice);
 
-// ---- TFT (read straight off the Base marketplace) --------------------------
+// ---- Marketplace tokens (read straight off the Base marketplace) ----------
 
 // The marketplace address is grouped under Polygon in `addresses.ts` for
-// historical reasons, but TFT is listed on the Base deployment — same address,
-// and that's the chain `useMarketplaceContract` reads from.
+// historical reasons, but the fixed-price RWAs (TFT, TLT) are listed on the
+// Base deployment — same address, and that's the chain `useMarketplaceContract`
+// reads from.
 const MARKETPLACE_ON_BASE = ADDRESSES[Blockchain.Polygon].MARKETPLACE as Address;
-const TFT_ADDRESS = ADDRESSES[Blockchain.Base].TFT_001 as Address;
-const TFT_PRICE_DECIMALS = 18;
+const MARKETPLACE_PRICE_DECIMALS = 18;
+const MARKETPLACE_PRICE_CACHE_KEYS: Record<MarketplaceTokenSymbol, string> = {
+  TFT_001: 'tft:price',
+  TLT_001: 'tlt:price',
+};
 
-async function fetchTftPrice(): Promise<SpotPrice> {
+async function fetchMarketplacePrice(symbol: MarketplaceTokenSymbol): Promise<SpotPrice> {
+  const tokenAddress = ADDRESSES[Blockchain.Base][symbol] as Address;
   const [pricePerToken] = (await PUBLIC_CLIENTS[Blockchain.Base].readContract({
     address: MARKETPLACE_ON_BASE,
     abi: MARKETPLACE_ABI,
     functionName: 'getTokenInfo',
-    args: [TFT_ADDRESS],
+    args: [tokenAddress],
   })) as [bigint, number, boolean];
 
-  const price = Number(pricePerToken) / 10 ** TFT_PRICE_DECIMALS;
-  if (!price) throw new Error('TFT is not listed on the marketplace');
+  const price = Number(pricePerToken) / 10 ** MARKETPLACE_PRICE_DECIMALS;
+  if (!price) throw new Error(`${symbol} is not listed on the marketplace`);
   return { price, timestamp: Date.now() };
 }
 
 /**
- * TFT price in USD, as listed on the marketplace contract. Read on-chain rather
- * than hardcoded so a re-listing at a new price propagates on its own.
+ * Price in USD of a Marketplace token, as listed on the contract. Read on-chain
+ * rather than hardcoded so a re-listing at a new price propagates on its own.
  */
-export const getTftPrice = (): Promise<PriceResult<SpotPrice>> =>
-  getCachedOrFetch('tft:price', 'base-marketplace', fetchTftPrice);
+export const getMarketplacePrice = (symbol: MarketplaceTokenSymbol): Promise<PriceResult<SpotPrice>> =>
+  getCachedOrFetch(MARKETPLACE_PRICE_CACHE_KEYS[symbol], 'base-marketplace', () => fetchMarketplacePrice(symbol));
+
+export const getTftPrice = (): Promise<PriceResult<SpotPrice>> => getMarketplacePrice('TFT_001');
+
+export const getTltPrice = (): Promise<PriceResult<SpotPrice>> => getMarketplacePrice('TLT_001');

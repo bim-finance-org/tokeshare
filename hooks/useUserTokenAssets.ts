@@ -10,32 +10,31 @@ import { TokenType } from '@/enums/TokenType';
 import { Blockchain } from '@/enums/Blockchain';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { AssetData } from '@/interfaces/AssetData';
-import { useTGGPrice, useTSGPrice, useTFTPrice } from '@/hooks/useTokenPrice';
+import { useTGGPrice, useTSGPrice, useTMCPrice, useTSP500Price, useTFTPrice, useTLTPrice } from '@/hooks/useTokenPrice';
 import { getLogger } from '@/lib/logger';
 
 const log = getLogger('user-assets');
 
 type BalanceCall = { token: TokenInfo; address: Address };
 
-function toAsset(
-  token: TokenInfo,
-  chain: Blockchain,
-  rawBalance: bigint,
-  tggPrice: number,
-  tsgPrice: number,
-  tftPrice: number,
-): AssetData | null {
+/** USD unit price per held symbol; a missing symbol values the position at 0. */
+type UnitPrices = Record<string, number>;
+
+const ASSET_IMAGES: Record<string, string> = {
+  TGG: '/images/currencies/tgg.png',
+  TSG: '/images/currencies/tsg.webp',
+  TMC: '/images/currencies/tmc.png',
+  TSP500: '/images/currencies/tsp500.webp',
+  TFT_001: '/images/currencies/tft.webp',
+  TLT_001: '/images/currencies/tlt.webp',
+};
+
+function toAsset(token: TokenInfo, chain: Blockchain, rawBalance: bigint, prices: UnitPrices): AssetData | null {
   const balance = Number(rawBalance) / 10 ** token.decimals;
   if (balance <= 0) return null;
 
-  const unitPrice = token.symbol === 'TGG' ? tggPrice : token.symbol === 'TSG' ? tsgPrice : tftPrice;
-
-  const imageUrl =
-    token.symbol === 'TGG'
-      ? '/images/currencies/tgg.png'
-      : token.symbol === 'TSG'
-        ? '/images/currencies/tsg.webp'
-        : '/images/currencies/tft.webp';
+  const unitPrice = prices[token.symbol] ?? 0;
+  const imageUrl = ASSET_IMAGES[token.symbol] ?? '/images/currencies/tft.webp';
 
   return {
     name: token.name,
@@ -48,12 +47,7 @@ function toAsset(
   };
 }
 
-async function fetchUserTokenAssets(
-  address: Address,
-  tggPrice: number,
-  tsgPrice: number,
-  tftPrice: number,
-): Promise<AssetData[]> {
+async function fetchUserTokenAssets(address: Address, prices: UnitPrices): Promise<AssetData[]> {
   const cryptos = Object.values(TOKENS).filter((t) => t.type === TokenType.Crypto);
 
   // Group one balanceOf call per (token, chain) so each chain resolves in a
@@ -89,7 +83,7 @@ async function fetchUserTokenAssets(
             log.warn(`failed to fetch ${token.symbol} on ${chain}`, res.error);
             return [];
           }
-          const asset = toAsset(token, chain, res.result as bigint, tggPrice, tsgPrice, tftPrice);
+          const asset = toAsset(token, chain, res.result as bigint, prices);
           return asset ? [asset] : [];
         });
       } catch (e) {
@@ -109,13 +103,24 @@ export function useUserTokenAssets(): {
   const { address } = useAccount();
   const { price: tggPrice, isLoading: tggLoading } = useTGGPrice();
   const { price: tsgPrice, isLoading: tsgLoading } = useTSGPrice();
+  const { price: tmcPrice, isLoading: tmcLoading } = useTMCPrice();
+  const { price: tsp500Price, isLoading: tsp500Loading } = useTSP500Price();
   const { price: tftPrice, isLoading: tftLoading } = useTFTPrice();
+  const { price: tltPrice, isLoading: tltLoading } = useTLTPrice();
 
-  const pricesReady = !tggLoading && !tsgLoading && !tftLoading;
+  const pricesReady = !tggLoading && !tsgLoading && !tmcLoading && !tsp500Loading && !tftLoading && !tltLoading;
 
   const { data: assets, isLoading: assetsLoading } = useQuery({
-    queryKey: ['user-token-assets', address, tggPrice, tsgPrice, tftPrice],
-    queryFn: () => fetchUserTokenAssets(address as Address, tggPrice ?? 0, tsgPrice ?? 0, tftPrice ?? 0),
+    queryKey: ['user-token-assets', address, tggPrice, tsgPrice, tmcPrice, tsp500Price, tftPrice, tltPrice],
+    queryFn: () =>
+      fetchUserTokenAssets(address as Address, {
+        TGG: tggPrice ?? 0,
+        TSG: tsgPrice ?? 0,
+        TMC: tmcPrice ?? 0,
+        TSP500: tsp500Price ?? 0,
+        TFT_001: tftPrice ?? 0,
+        TLT_001: tltPrice ?? 0,
+      }),
     enabled: !!address && pricesReady,
   });
 

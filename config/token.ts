@@ -5,6 +5,7 @@ import EURCIcon from '@/components/icons/currency/EURCIcon';
 import EURSIcon from '@/components/icons/currency/EURSIcon';
 import TFTIcon from '@/components/icons/currency/TFTIcon';
 import TGGIcon from '@/components/icons/currency/TGGIcon';
+import TLTIcon from '@/components/icons/currency/TLTIcon';
 import TMCIcon from '@/components/icons/currency/TMCIcon';
 import TSGIcon from '@/components/icons/currency/TSGIcon';
 import TSP500Icon from '@/components/icons/currency/TSP500Icon';
@@ -37,7 +38,7 @@ export type TokenInfo = {
  * products, so they stay out. Stellar RWA assets have their own registry in
  * `config/stellar-assets.ts`.
  */
-export const SELLABLE_TOKEN_SYMBOLS = ['TGG', 'TSG', 'TMC', 'TSP500', 'TFT_001'] as const;
+export const SELLABLE_TOKEN_SYMBOLS = ['TGG', 'TSG', 'TMC', 'TSP500', 'TFT_001', 'TLT_001'] as const;
 
 export type SellableTokenSymbol = (typeof SELLABLE_TOKEN_SYMBOLS)[number];
 
@@ -49,9 +50,21 @@ export type SellableTokenSymbol = (typeof SELLABLE_TOKEN_SYMBOLS)[number];
  * Only EVM tokens are listed here: every asset in `config/stellar-assets.ts` is
  * an RWA by construction, so it is flagged at its own source.
  */
-export const RWA_TOKEN_SYMBOLS: readonly SellableTokenSymbol[] = ['TFT_001'];
+export const RWA_TOKEN_SYMBOLS: readonly SellableTokenSymbol[] = ['TFT_001', 'TLT_001'];
 
 export const isRwaToken = (symbol: SellableTokenSymbol): boolean => RWA_TOKEN_SYMBOLS.includes(symbol);
+
+/**
+ * RWA tokens sold through the fixed-price Marketplace contract on Base rather
+ * than a Zap/aggregator route. They share one swap handler, one quote strategy
+ * (a fixed USD price) and one on-chain price source (`getTokenInfo`).
+ */
+export const MARKETPLACE_TOKEN_SYMBOLS = ['TFT_001', 'TLT_001'] as const;
+
+export type MarketplaceTokenSymbol = (typeof MARKETPLACE_TOKEN_SYMBOLS)[number];
+
+export const isMarketplaceToken = (symbol: string): symbol is MarketplaceTokenSymbol =>
+  (MARKETPLACE_TOKEN_SYMBOLS as readonly string[]).includes(symbol);
 
 /**
  * The asset backing a sellable token. Addresses are keyed by chain because the
@@ -67,7 +80,7 @@ export type CollateralInfo = {
 
 /**
  * Collateral per sellable token. A missing entry means the token is backed by a
- * real-world asset with no on-chain representation (TFT_001, the Stellar RWAs),
+ * real-world asset with no on-chain representation (TFT_001, TLT_001, the Stellar RWAs),
  * not that the backing is unknown.
  */
 export const COLLATERALS: Partial<Record<SellableTokenSymbol, CollateralInfo>> = {
@@ -163,6 +176,17 @@ export const TOKENS: Record<string, TokenInfo> = {
     type: TokenType.Crypto,
     icon: TFTIcon,
     internalUrl: '/marketplace/other/french-tacos',
+  },
+  TLT_001: {
+    symbol: 'TLT_001',
+    name: 'Tokeshare La Tienda',
+    addresses: {
+      Base: BASE.TLT_001,
+    },
+    decimals: 18,
+    type: TokenType.Crypto,
+    icon: TLTIcon,
+    internalUrl: '/marketplace/other/la-tienda',
   },
   USDC: {
     symbol: 'USDC',

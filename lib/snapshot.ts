@@ -1,9 +1,10 @@
-// lib/snapshot.ts — holder snapshot of the TFT token on Base.
+// lib/snapshot.ts — holder snapshot of a Marketplace token (TFT, TLT) on Base.
 import { formatUnits, parseUnits, parseAbiItem, type AbiEvent, type Address } from 'viem';
 import { PUBLIC_CLIENTS } from '@/lib/clients';
 import { ADDRESSES } from '@/contracts/addresses';
 import { ERC20_ABI } from '@/contracts/abis/erc20_abi';
 import { Blockchain } from '@/enums/Blockchain';
+import { MARKETPLACE_TOKEN_SYMBOLS, type MarketplaceTokenSymbol } from '@/config/token';
 
 type BalanceRow = { address: Address; balance: bigint };
 
@@ -19,16 +20,45 @@ type FrontRow = FrontRowBase | FrontRowWithUsdc;
 
 type TransferLog = { args: { from: Address; to: Address; value: bigint } };
 
-const TFT_001 = ADDRESSES[Blockchain.Base].TFT_001 as Address;
-const FROM_BLOCK: bigint = 33201495n;
 const SNAPSHOT_BLOCK: bigint | null = null; // null => latest
 
 const MARKETPLACE_OLD: Address = '0x93A696619723a0269BDC2F1532cc1ec7D3a5c854';
 const MARKETPLACE_NEW: Address = '0xe0F632423a6bf824d7E4463470549b73048C3f4e';
-const EXCLUDE = new Set<Address>([MARKETPLACE_OLD, MARKETPLACE_NEW]);
+
+/**
+ * Per-token scan parameters. `fromBlock` is the token's deployment block: the
+ * Transfer scan starts there, so it must not be later than the first mint.
+ * Unsold tokens sitting in the Marketplace are excluded from the distribution.
+ */
+type SnapshotTokenConfig = {
+  address: Address;
+  fromBlock: bigint;
+  exclude: Set<Address>;
+  /** Fixed supply the shares are computed against (whole tokens). */
+  totalSupplyTokens: string;
+};
+
+const SNAPSHOT_TOKENS: Record<MarketplaceTokenSymbol, SnapshotTokenConfig> = {
+  TFT_001: {
+    address: ADDRESSES[Blockchain.Base].TFT_001 as Address,
+    fromBlock: 33201495n,
+    exclude: new Set<Address>([MARKETPLACE_OLD, MARKETPLACE_NEW]),
+    totalSupplyTokens: '1000',
+  },
+  TLT_001: {
+    address: ADDRESSES[Blockchain.Base].TLT_001 as Address,
+    fromBlock: 51518246n,
+    exclude: new Set<Address>([MARKETPLACE_NEW]),
+    totalSupplyTokens: '1000',
+  },
+};
+
+export const SNAPSHOT_TOKEN_SYMBOLS = MARKETPLACE_TOKEN_SYMBOLS;
+
+export const isSnapshotToken = (value: unknown): value is MarketplaceTokenSymbol =>
+  typeof value === 'string' && (SNAPSHOT_TOKEN_SYMBOLS as readonly string[]).includes(value);
 
 const PERCENT_DECIMALS = 4;
-const FIXED_TOTAL_SUPPLY_TOKENS = '1000';
 
 const TRANSFER_EVENT = parseAbiItem('event Transfer(address indexed from, address indexed to, uint256 value)');
 const ZERO_ADDR: Address = '0x0000000000000000000000000000000000000000';
@@ -122,7 +152,7 @@ function uniqAddressesFromTransfers(logs: TransferLog[], exclude: Set<Address>):
 }
 
 /** --- Multicall balances in fast batches (parallel) --- */
-async function readBalancesMulticall(addresses: Address[], blockNumber: bigint): Promise<BalanceRow[]> {
+async function readBalancesMulticall(token: Address, addresses: Address[], blockNumber: bigint): Promise<BalanceRow[]> {
   const BATCH_SIZE = 250;     // safe for most RPCs
   const CONCURRENCY = 6;      // number of parallel multicalls
   const batches: Address[][] = [];
@@ -132,7 +162,7 @@ async function readBalancesMulticall(addresses: Address[], blockNumber: bigint):
 
   const results = await mapPool(batches, CONCURRENCY, async (batch) => {
     const contracts = batch.map((a) => ({
-      address: TFT_001,
+      address: token,
       abi: ERC20_ABI,
       functionName: 'balanceOf' as const,
       args: [a] as const,
@@ -189,30 +219,35 @@ function computeFrontReady(
 }
 
 /** --- Public API --- */
-export async function generateSnapshot(opts?: { totalUsdc?: string | null }): Promise<FrontRow[]> {
+export async function generateSnapshot(opts?: {
+  token?: MarketplaceTokenSymbol;
+  totalUsdc?: string | null;
+}): Promise<FrontRow[]> {
+  const { address: token, fromBlock, exclude, totalSupplyTokens } = SNAPSHOT_TOKENS[opts?.token ?? 'TFT_001'];
+
   // 1) Pin atomic block
   const blockNumber = await getSnapshotBlock();
 
   // 2) Read decimals once (cheap)
   const tokenDecimals = (await publicClient.readContract({
-    address: TFT_001,
+    address: token,
     abi: ERC20_ABI,
     functionName: 'decimals',
     blockNumber,
   })) as number;
 
-  // 3) Fast & robust transfer scan (FROM_BLOCK..blockNumber)
-  const logs: TransferLog[] = await getAllTransferLogsFast(TFT_001, FROM_BLOCK, blockNumber);
+  // 3) Fast & robust transfer scan (fromBlock..blockNumber)
+  const logs: TransferLog[] = await getAllTransferLogsFast(token, fromBlock, blockNumber);
 
   // 4) Unique addresses (minus excludes)
-  const addresses: Address[] = uniqAddressesFromTransfers(logs, EXCLUDE);
+  const addresses: Address[] = uniqAddressesFromTransfers(logs, exclude);
   if (addresses.length === 0) return [];
 
   // 5) Multicall balances at the SAME block (atomic)
-  const balances: BalanceRow[] = await readBalancesMulticall(addresses, blockNumber);
+  const balances: BalanceRow[] = await readBalancesMulticall(token, addresses, blockNumber);
 
   // 6) Compute totals and rows
-  const totalSupplyRaw = parseUnits(FIXED_TOTAL_SUPPLY_TOKENS, tokenDecimals);
+  const totalSupplyRaw = parseUnits(totalSupplyTokens, tokenDecimals);
   const totalUsdc6: bigint | null =
     opts?.totalUsdc && opts.totalUsdc.trim() !== '' ? parseUnits(opts.totalUsdc, 6) : null;
 

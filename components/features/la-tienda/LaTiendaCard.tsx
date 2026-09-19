@@ -10,7 +10,7 @@ import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { Address } from 'viem';
 
-const log = getLogger('french-tacos:card');
+const log = getLogger('la-tienda:card');
 
 const Stat = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
   <div className={`rounded-xl px-3 py-2 ${highlight ? 'bg-color1 ring-1 ring-inset ring-black/5' : 'bg-gray-50'}`}>
@@ -19,18 +19,17 @@ const Stat = ({ label, value, highlight }: { label: string; value: string; highl
   </div>
 );
 
-const TacosCard = () => {
+const LaTiendaCard = () => {
   const [balance, setBalance] = useState<number | null>(null);
   const [hasError, setHasError] = useState(false);
-  const { getMarketplaceBalance } = useMarketplaceContract('TFT_001');
+  const { getMarketplaceBalance } = useMarketplaceContract('TLT_001');
 
   useEffect(() => {
     const fetchBalance = async () => {
-      const tftTokenAddress = getTokenAddress('TFT_001', Blockchain.Base) as Address;
+      const tltTokenAddress = getTokenAddress('TLT_001', Blockchain.Base) as Address;
       try {
-        const rawBalance = await getMarketplaceBalance(tftTokenAddress);
-        const formattedBalance = Number(rawBalance) / 10 ** 18;
-        setBalance(formattedBalance);
+        const rawBalance = await getMarketplaceBalance(tltTokenAddress);
+        setBalance(Number(rawBalance) / 10 ** 18);
       } catch (err) {
         log.error('balance fetch failed', err);
         setHasError(true);
@@ -49,8 +48,8 @@ const TacosCard = () => {
       {/* Media */}
       <div className="relative aspect-[3/2] w-full overflow-hidden">
         <Image
-          src="/images/frenchTacos/TFT_principal.png"
-          alt="French Tacos Las Terrenas"
+          src="/images/laTienda/TLT_principal.jpg"
+          alt="La Tienda, Dominican Republic"
           fill
           sizes="(max-width: 640px) 100vw, 448px"
           className="object-cover object-center"
@@ -64,28 +63,28 @@ const TacosCard = () => {
             }`}
           >
             <span className={`h-1.5 w-1.5 rounded-full ${soldOut ? 'bg-white/60' : 'bg-color3'}`} />
-            {soldOut ? 'Sold out' : `${balance.toFixed(2)} TFT left`}
+            {soldOut ? 'Sold out' : `${balance.toFixed(2)} TLT left`}
           </span>
         )}
 
-        <h3 className="absolute bottom-3 left-4 font-titleSemibold text-xl text-white drop-shadow">French Tacos</h3>
+        <h3 className="absolute bottom-3 left-4 font-titleSemibold text-xl text-white drop-shadow">La Tienda</h3>
       </div>
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         <p className="flex items-center gap-1.5 text-sm text-gray-500">
           <LocationIcon size={16} />
-          Las Terrenas, Dominican Republic
+          Dominican Republic
         </p>
 
         {/* Key figures */}
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <Stat label="Token price" value="$31.25" highlight />
-          <Stat label="Total valuation" value="$31,250" />
+          <Stat label="Token price" value="$25" highlight />
+          <Stat label="Total valuation" value="$25,000" />
           <Stat label="Total tokens" value="1,000" />
           <Stat label="Platform fees" value="2%/year (incl.)" />
           <Stat label="Blockchain" value="Base" />
-          <Stat label="Company" value="French Tacos" />
+          <Stat label="Company" value="La Tienda" />
         </div>
 
         {/* Net yield */}
@@ -100,9 +99,9 @@ const TacosCard = () => {
 
         {/* CTA */}
         <div className="mt-auto pt-4">
-          <Link href="/marketplace/other/french-tacos" className="block">
+          <Link href="/marketplace/other/la-tienda" className="block">
             <span className="flex items-center justify-center rounded-xl bg-color4 px-4 py-2.5 text-sm font-titleSemibold text-white transition-colors hover:bg-color2">
-              Trade TFT
+              Trade TLT
             </span>
           </Link>
         </div>
@@ -111,4 +110,4 @@ const TacosCard = () => {
   );
 };
 
-export default TacosCard;
+export default LaTiendaCard;

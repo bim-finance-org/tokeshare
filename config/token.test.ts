@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import {
   COLLATERALS,
+  MARKETPLACE_TOKEN_SYMBOLS,
   RWA_TOKEN_SYMBOLS,
   SELLABLE_TOKEN_SYMBOLS,
   TOKENS,
+  isMarketplaceToken,
   isRwaToken,
   type SellableTokenSymbol,
 } from './token';
@@ -91,6 +93,7 @@ describe('COLLATERALS config invariants', () => {
     expect(COLLATERALS.TSP500?.symbol).toBe('DESPXA');
     // Real-world backed: no on-chain collateral.
     expect(COLLATERALS.TFT_001).toBeUndefined();
+    expect(COLLATERALS.TLT_001).toBeUndefined();
   });
 });
 
@@ -103,10 +106,27 @@ describe('RWA_TOKEN_SYMBOLS', () => {
 
   it('flags the tokenized physical assets and nothing else', () => {
     expect(isRwaToken('TFT_001')).toBe(true);
+    expect(isRwaToken('TLT_001')).toBe(true);
     // Commodity and index tokens track a feed, they are not RWAs.
     expect(isRwaToken('TGG')).toBe(false);
     expect(isRwaToken('TSG')).toBe(false);
     expect(isRwaToken('TMC')).toBe(false);
     expect(isRwaToken('TSP500')).toBe(false);
+  });
+});
+
+describe('MARKETPLACE_TOKEN_SYMBOLS', () => {
+  it('only lists RWA tokens sold on Base', () => {
+    for (const symbol of MARKETPLACE_TOKEN_SYMBOLS) {
+      expect(RWA_TOKEN_SYMBOLS, symbol).toContain(symbol);
+      expect(TOKENS[symbol].addresses.Base, symbol).toBeDefined();
+    }
+  });
+
+  it('flags the fixed-price tokens and nothing else', () => {
+    expect(isMarketplaceToken('TFT_001')).toBe(true);
+    expect(isMarketplaceToken('TLT_001')).toBe(true);
+    expect(isMarketplaceToken('TGG')).toBe(false);
+    expect(isMarketplaceToken('USDC')).toBe(false);
   });
 });

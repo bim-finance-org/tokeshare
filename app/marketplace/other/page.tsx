@@ -1,5 +1,6 @@
 import React from 'react';
 import TacosCard from '@/components/features/french-tacos/TacosCard';
+import LaTiendaCard from '@/components/features/la-tienda/LaTiendaCard';
 import StellarAssetCard from '@/components/features/stellar/StellarAssetCard';
 import MarketplaceHero from '@/components/shared/MarketplaceHero';
 import { getStellarAsset } from '@/config/stellar-assets';
@@ -16,6 +17,7 @@ const page = () => {
 
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <TacosCard />
+        <LaTiendaCard />
         {tfw001 && <StellarAssetCard asset={tfw001} />}
       </div>
     </div>

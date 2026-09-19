@@ -39,7 +39,7 @@ describe('token helpers', () => {
 
   it('getTokensByTypeAndByBlockchain filters by type and chain', () => {
     const cryptoOnBase = getTokensByTypeAndByBlockchain(Blockchain.Base, TokenType.Crypto).map((t) => t.symbol);
-    expect(cryptoOnBase).toEqual(expect.arrayContaining(['TMC', 'TSP500', 'TFT_001']));
+    expect(cryptoOnBase).toEqual(expect.arrayContaining(['TMC', 'TSP500', 'TFT_001', 'TLT_001']));
     expect(cryptoOnBase).not.toContain('USDC'); // USDC is a stablecoin
   });
 

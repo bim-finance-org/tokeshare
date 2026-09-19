@@ -7,3 +7,4 @@ export const INTERVAL_PRICE_UPDATE = 30000;
 export const ONCE_DIVISION = 31.1034768;
 export const FEES_COEF = 0.025;
 export const TFT_001_PRICE_USD = 31.25;
+export const TLT_001_PRICE_USD = 25;

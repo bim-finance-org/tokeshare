@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { TokenSwapHandler } from '@/interfaces/TokenSwapHandler';
-import { useTftSwapHandler } from './useTftSwapHandler';
+import { useMarketplaceSwapHandler } from './useMarketplaceSwapHandler';
 import { useTggSwapHandler } from './useTggSwapHandler';
 import { useTsgSwapHandler } from './useTsgSwapHandler';
 import { useTmcSwapHandler } from './useTmcSwapHandler';
@@ -10,7 +10,8 @@ export const useSwapHandlerByToken = (tokenSymbol: string): TokenSwapHandler => 
   // Call ALL hooks unconditionally to respect React hooks rules
   const tggHandler = useTggSwapHandler();
   const tsgHandler = useTsgSwapHandler();
-  const tftHandler = useTftSwapHandler();
+  const tftHandler = useMarketplaceSwapHandler('TFT_001');
+  const tltHandler = useMarketplaceSwapHandler('TLT_001');
   const tmcHandler = useTmcSwapHandler();
   const tsp500Handler = useTsp500SwapHandler();
 
@@ -23,6 +24,8 @@ export const useSwapHandlerByToken = (tokenSymbol: string): TokenSwapHandler => 
         return tsgHandler;
       case 'TFT_001':
         return tftHandler;
+      case 'TLT_001':
+        return tltHandler;
       case 'TMC':
         return tmcHandler;
       case 'TSP500':
@@ -30,5 +33,5 @@ export const useSwapHandlerByToken = (tokenSymbol: string): TokenSwapHandler => 
       default:
         throw new Error(`No swap handler found for token: ${tokenSymbol}`);
     }
-  }, [tokenSymbol, tggHandler, tsgHandler, tftHandler, tmcHandler, tsp500Handler]);
+  }, [tokenSymbol, tggHandler, tsgHandler, tftHandler, tltHandler, tmcHandler, tsp500Handler]);
 };

@@ -72,4 +72,10 @@ describe('contract addresses (single source of truth)', () => {
     expect(TOKENS.TFT_001.addresses.Base).toBe(ADDRESSES[Blockchain.Base].TFT_001);
     expect(TOKENS.TFT_001.addresses.Polygon).toBeUndefined();
   });
+
+  it('lists TLT on Base only', () => {
+    expect(ADDRESSES[Blockchain.Base].TLT_001).toBe('0xE62B14EDEA1Db8219CAd1bd4e15755E50E58413d');
+    expect(TOKENS.TLT_001.addresses.Base).toBe(ADDRESSES[Blockchain.Base].TLT_001);
+    expect(Object.keys(TOKENS.TLT_001.addresses)).toEqual([Blockchain.Base]);
+  });
 });

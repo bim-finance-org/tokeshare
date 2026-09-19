@@ -6,6 +6,7 @@ import { parseAbi, type Address } from 'viem';
 import { CONTRACTS } from '@/contracts/contracts';
 import { base } from 'viem/chains';
 import ConnectWalletButton from '@/components/shared/ConnectButton';
+import type { MarketplaceTokenSymbol } from '@/config/token';
 
 type FrontRowBase = { address: Address; balance_raw: string; balance: string; percent: string };
 type FrontRowWithUsdc = FrontRowBase & { usdc_raw: string; usdc: string };
@@ -36,7 +37,12 @@ function chunk<T>(arr: T[], size: number) {
   return out;
 }
 
-export default function DistributeFromWallet() {
+interface DistributeFromWalletProps {
+  /** Token whose latest snapshot is distributed. */
+  token: MarketplaceTokenSymbol;
+}
+
+export default function DistributeFromWallet({ token }: DistributeFromWalletProps) {
   const { address, chainId, isConnected } = useAccount();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -56,7 +62,7 @@ export default function DistributeFromWallet() {
         throw new Error(`Change de réseau : ${CHAIN.name}.`);
       }
 
-      const res = await fetch('/api/snapshot', { cache: 'no-store' });
+      const res = await fetch(`/api/snapshot?token=${token}`, { cache: 'no-store' });
       if (!res.ok) throw new Error('No Snapshot');
       const payload = (await res.json()) as { rows: FrontRow[] };
       const rows = payload.rows;

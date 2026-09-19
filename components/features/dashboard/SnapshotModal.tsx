@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import ConsoleCard, { FieldLabel } from './ConsoleCard';
 import DistributeFromWallet from './DistributeFromWallet';
 import { notify } from '@/lib/notify';
+import { MARKETPLACE_TOKEN_SYMBOLS, TOKENS, type MarketplaceTokenSymbol } from '@/config/token';
 
 type FrontRowBase = {
   address: string;
@@ -18,9 +19,17 @@ type FrontRowWithUsdc = FrontRowBase & { usdc_raw: string; usdc: string };
 type FrontRow = FrontRowBase | FrontRowWithUsdc;
 
 const SnapshotPanel = () => {
+  const [token, setToken] = useState<MarketplaceTokenSymbol>('TFT_001');
   const [running, setRunning] = useState(false);
   const [rows, setRows] = useState<FrontRow[]>([]);
   const [totalUsdc, setTotalUsdc] = useState<string>('');
+
+  // A snapshot only makes sense for the token it was taken for.
+  const selectToken = (next: MarketplaceTokenSymbol) => {
+    if (next === token) return;
+    setToken(next);
+    setRows([]);
+  };
 
   const handleSnapshot = async () => {
     setRunning(true);
@@ -29,6 +38,7 @@ const SnapshotPanel = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          token,
           totalUsdc: totalUsdc.trim() || null,
         }),
       });
@@ -53,8 +63,29 @@ const SnapshotPanel = () => {
   return (
     <ConsoleCard
       icon={Camera}
-      title="TFT_001 · Base"
+      title={`${token} · Base`}
       subtitle="Holder snapshot & USDC distribution from the operator wallet"
+      aside={
+        <div className="flex gap-1 rounded-full bg-color1 p-1 ring-1 ring-inset ring-black/5">
+          {MARKETPLACE_TOKEN_SYMBOLS.map((symbol) => {
+            const active = symbol === token;
+            return (
+              <button
+                key={symbol}
+                type="button"
+                onClick={() => selectToken(symbol)}
+                disabled={running}
+                title={TOKENS[symbol]?.name}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                  active ? 'bg-color4 text-white shadow-sm' : 'text-gray-500 hover:text-color4'
+                }`}
+              >
+                {symbol}
+              </button>
+            );
+          })}
+        </div>
+      }
     >
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1.5">
@@ -81,7 +112,7 @@ const SnapshotPanel = () => {
 
       {rows.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-dashed border-black/10 px-5 py-6 text-center text-sm text-gray-400">
-          Run a snapshot to list the current TFT_001 holders.
+          Run a snapshot to list the current {token} holders.
         </p>
       ) : (
         <>
@@ -93,7 +124,7 @@ const SnapshotPanel = () => {
                     Address
                   </TableHead>
                   <TableHead className="text-right text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                    Balance TFT_001
+                    Balance {token}
                   </TableHead>
                   <TableHead className="text-right text-[11px] font-medium uppercase tracking-wide text-gray-400">
                     Share
@@ -122,7 +153,7 @@ const SnapshotPanel = () => {
             </Table>
           </div>
           <div className="mt-5">
-            <DistributeFromWallet />
+            <DistributeFromWallet token={token} />
           </div>
         </>
       )}

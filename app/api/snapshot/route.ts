@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { generateSnapshot, type FrontRow } from '@/lib/snapshot';
+import { generateSnapshot, isSnapshotToken, type FrontRow } from '@/lib/snapshot';
+import type { MarketplaceTokenSymbol } from '@/config/token';
 import { requireAuth } from '@/lib/api-utils';
 import { getFromCache, setCache } from '@/lib/redis';
 import { rateLimit } from '@/lib/ratelimit';
@@ -11,8 +12,11 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-const SNAPSHOT_CACHE_KEY = 'snapshot:holders:latest';
 const SNAPSHOT_TTL_SECONDS = 24 * 60 * 60;
+
+// TFT keeps its historical key so a snapshot taken before TLT existed stays readable.
+const snapshotCacheKey = (token: MarketplaceTokenSymbol) =>
+  token === 'TFT_001' ? 'snapshot:holders:latest' : `snapshot:holders:${token.toLowerCase()}:latest`;
 
 // Guard the expensive full-chain scan: a global budget plus an in-process lock
 // so two admins can't kick off overlapping scans at once.
@@ -35,14 +39,19 @@ export async function POST(request: Request) {
   snapshotInProgress = true;
 
   try {
-    const { totalUsdc } = (await request.json().catch(() => ({}))) as {
+    const { totalUsdc, token: rawToken } = (await request.json().catch(() => ({}))) as {
       totalUsdc?: string | null;
+      token?: string;
     };
+    const token = rawToken ?? 'TFT_001';
+    if (!isSnapshotToken(token)) {
+      return NextResponse.json({ error: `Unknown token: ${token}` }, { status: 400 });
+    }
 
-    const rows = await generateSnapshot({ totalUsdc: totalUsdc ?? null });
-    await setCache(SNAPSHOT_CACHE_KEY, rows, SNAPSHOT_TTL_SECONDS);
+    const rows = await generateSnapshot({ token, totalUsdc: totalUsdc ?? null });
+    await setCache(snapshotCacheKey(token), rows, SNAPSHOT_TTL_SECONDS);
 
-    return NextResponse.json({ ok: true, count: rows.length, rows });
+    return NextResponse.json({ ok: true, token, count: rows.length, rows });
   } catch (e) {
     log.error('generation failed', e);
     return NextResponse.json({ error: 'Snapshot failed' }, { status: 500 });
@@ -51,15 +60,20 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await requireAuth();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized. Please log in.' }, { status: 401 });
   }
 
-  const rows = await getFromCache<FrontRow[]>(SNAPSHOT_CACHE_KEY);
+  const rawToken = new URL(request.url).searchParams.get('token') ?? 'TFT_001';
+  if (!isSnapshotToken(rawToken)) {
+    return NextResponse.json({ error: `Unknown token: ${rawToken}` }, { status: 400 });
+  }
+
+  const rows = await getFromCache<FrontRow[]>(snapshotCacheKey(rawToken));
   if (!rows) {
     return NextResponse.json({ error: 'No snapshot available. Generate one first.' }, { status: 404 });
   }
-  return NextResponse.json({ rows });
+  return NextResponse.json({ token: rawToken, rows });
 }

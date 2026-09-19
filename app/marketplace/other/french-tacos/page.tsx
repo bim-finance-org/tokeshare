@@ -47,7 +47,7 @@ const page = () => {
           <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-600">
             11.76%/yr net yield
           </span>
-          <MarketplaceAvailability />
+          <MarketplaceAvailability symbol="TFT_001" ticker="TFT" />
         </div>
         <p className="mt-2 flex items-center gap-1.5 text-gray-500">
           <MapPin className="h-4 w-4" />

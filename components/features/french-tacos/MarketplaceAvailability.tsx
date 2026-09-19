@@ -6,19 +6,27 @@ import { useMarketplaceContract } from '@/hooks/useMarketplaceContracts';
 import { getTokenAddress } from '@/utils/token';
 import { Blockchain } from '@/enums/Blockchain';
 import { getLogger } from '@/lib/logger';
+import type { MarketplaceTokenSymbol } from '@/config/token';
 
-const log = getLogger('french-tacos:availability');
+const log = getLogger('marketplace:availability');
 
-const MarketplaceAvailability = () => {
+interface MarketplaceAvailabilityProps {
+  /** Token whose Marketplace stock is shown; defaults to TFT for the historical call site. */
+  symbol?: MarketplaceTokenSymbol;
+  /** Short ticker shown next to the balance (e.g. "TFT"). */
+  ticker?: string;
+}
+
+const MarketplaceAvailability = ({ symbol = 'TFT_001', ticker = 'TFT' }: MarketplaceAvailabilityProps) => {
   const [balance, setBalance] = useState<number | null>(null);
   const [hasError, setHasError] = useState(false);
-  const { getMarketplaceBalance } = useMarketplaceContract();
+  const { getMarketplaceBalance } = useMarketplaceContract(symbol);
 
   useEffect(() => {
     const fetchBalance = async () => {
-      const tftTokenAddress = getTokenAddress('TFT_001', Blockchain.Base) as Address;
+      const tokenAddress = getTokenAddress(symbol, Blockchain.Base) as Address;
       try {
-        const rawBalance = await getMarketplaceBalance(tftTokenAddress);
+        const rawBalance = await getMarketplaceBalance(tokenAddress);
         setBalance(Number(rawBalance) / 10 ** 18);
       } catch (err) {
         log.error('balance fetch failed', err);
@@ -28,7 +36,7 @@ const MarketplaceAvailability = () => {
     };
 
     fetchBalance();
-  }, []);
+  }, [symbol]);
 
   if (balance === null || hasError) return null;
 
@@ -41,7 +49,7 @@ const MarketplaceAvailability = () => {
       }`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${soldOut ? 'bg-gray-400' : 'bg-color3'}`} />
-      {soldOut ? 'Sold out' : `${balance.toFixed(2)} TFT on marketplace`}
+      {soldOut ? 'Sold out' : `${balance.toFixed(2)} ${ticker} on marketplace`}
     </span>
   );
 };

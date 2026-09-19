@@ -11,7 +11,7 @@ import { getNetworkProfile } from '@/config/stellar';
 import { STELLAR_ASSETS, isAssetConfigured, type StellarAsset } from '@/config/stellar-assets';
 import { COLLATERALS, SELLABLE_TOKEN_SYMBOLS, TOKENS, isRwaToken, type SellableTokenSymbol } from '@/config/token';
 import { Blockchain } from '@/enums/Blockchain';
-import { getCmc20Price, getDeSPXAPrice, getPaxgPrice, getTftPrice, getXagmPrice } from '@/lib/prices';
+import { getCmc20Price, getDeSPXAPrice, getPaxgPrice, getTftPrice, getTltPrice, getXagmPrice } from '@/lib/prices';
 import { readSalePrice, readTotalSupply } from '@/lib/stellar-assets';
 import { getChainIdFromBlockchain } from '@/utils/getChainIdFromBlockchain';
 import { calculateTGGPrice, calculateTMCPrice, calculateTSGPrice, calculateTSP500Price } from '@/utils/priceUtils';
@@ -35,7 +35,7 @@ export interface PublicTokenContract {
   address: string;
   /**
    * The asset backing the token on this chain, or null when the backing is a
-   * real-world asset with no on-chain representation (TFT_001, Stellar RWAs).
+   * real-world asset with no on-chain representation (TFT_001, TLT_001, Stellar RWAs).
    * Per-contract rather than per-token: the same collateral lives at a
    * different address on each chain (PAXG on Polygon vs Ethereum).
    */
@@ -104,6 +104,11 @@ const EVM_PRICE_FEEDS: Record<SellableTokenSymbol, EvmPriceFeed> = {
     currency: 'USD',
     source: 'marketplace',
     load: async () => (await getTftPrice()).data.price,
+  },
+  TLT_001: {
+    currency: 'USD',
+    source: 'marketplace',
+    load: async () => (await getTltPrice()).data.price,
   },
 };
 

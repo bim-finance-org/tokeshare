@@ -20,6 +20,7 @@ import USDSIcon from '@/components/icons/currency/USDSIcon';
 import TMCIcon from '@/components/icons/currency/TMCIcon';
 import TSP500Icon from '@/components/icons/currency/TSP500Icon';
 import TFTIcon from '@/components/icons/currency/TFTIcon';
+import TLTIcon from '@/components/icons/currency/TLTIcon';
 const TokenDisplay = ({
   token,
   isOpenable,
@@ -56,6 +57,7 @@ const TokenDisplay = ({
       {token === 'TMC' && <TMCIcon />}
       {token === 'TSP500' && <TSP500Icon />}
       {token === 'TFT_001' && <TFTIcon />}
+      {token === 'TLT_001' && <TLTIcon />}
       <span className="font-titleSemibold text-color4 text-sm sm:text-base">{token}</span>
       {isOpenable && <ArrowDownIcon strokeColor="#4F5B76" className="w-4 h-4" />}
     </div>

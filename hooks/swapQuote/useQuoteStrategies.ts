@@ -9,7 +9,7 @@ import { getTokenDecimals } from '@/utils/tokenUtils';
 import { Blockchain } from '@/enums/Blockchain';
 import { ONCE_DIVISION } from '@/constants/constants';
 import { computeZapQuote } from './computeZapQuote';
-import { computeTftQuote } from './computeTftQuote';
+import { computeTftQuote, computeTltQuote } from './computeMarketplaceQuote';
 import { getBaseSwapRoute } from './getBaseSwapRoute';
 import type { QuoteStrategy } from './types';
 
@@ -21,7 +21,8 @@ const XAGM_DECIMALS = 9;
  * unconditionally (Rules of Hooks) even though a given quote uses only one —
  * they return memoized callbacks, so mounting both fires no network by itself.
  * Each token's route/conversion callbacks are injected into the shared
- * `computeZapQuote` algorithm; TFT is the one fixed-price exception.
+ * `computeZapQuote` algorithm; the Marketplace tokens (TFT, TLT) are the
+ * fixed-price exceptions.
  */
 export function useQuoteStrategies(blockchain: Blockchain): Record<string, QuoteStrategy> {
   const { getSwapRoute, getConversion } = useSwap();
@@ -65,6 +66,7 @@ export function useQuoteStrategies(blockchain: Blockchain): Record<string, Quote
           tokenToUnderlying: async (amount) => amount / TSP500_DESPXA_RATIO,
         }),
       TFT_001: computeTftQuote,
+      TLT_001: computeTltQuote,
     };
   }, [blockchain, getSwapRoute, getConversion, getSilverRoute, getSilverConversion]);
 }
