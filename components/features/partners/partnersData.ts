@@ -71,4 +71,73 @@ export const partners: Partner[] = [
     url: 'https://stellar.org/',
     logo: '/images/partners/stellar.png',
   },
+  {
+    name: 'Altemis',
+    category: 'Blockchain Advisory',
+    description:
+      'Accelerate your blockchain expansion. From strategy to funding to delivery, we support your expansion across the most relevant blockchain ecosystems for your business.',
+    url: 'https://www.altemis.xyz/',
+    logo: '/images/partners/altemis.png',
+  },
+  {
+    name: 'Privy',
+    category: 'Wallet Infrastructure',
+    description: 'Digital asset infrastructure for global financial products.',
+    url: 'https://www.privy.io/',
+    logo: '/images/partners/privy.png',
+  },
+  {
+    name: 'MoneyGram',
+    category: 'Cash Ramp',
+    description:
+      'Send or receive money your way. Trusted by millions worldwide. Get great exchange rates, low transfer fees, and many ways to send and receive money.',
+    url: 'https://www.moneygram.com/',
+    logo: '/images/partners/moneygram.png',
+  },
+  {
+    name: 'Alfred Pay',
+    category: 'Fiat Ramp',
+    description: 'Move money across Latin America in seconds, not days.',
+    url: 'https://alfredpay.io/',
+    logo: '/images/partners/alfredpay.png',
+  },
+  {
+    name: 'Stellar Disbursement Platform',
+    category: 'Payouts',
+    description:
+      'The Stellar Disbursement Platform is a blockchain-based solution that makes sending cross-border payouts at scale easier, faster, and cheaper.',
+    url: 'https://stellar.org/products-and-tools/disbursement-platform',
+    logo: '/images/partners/stellar.png',
+  },
+  {
+    name: 'CCTP (Circle)',
+    category: 'Cross-chain Bridge',
+    description:
+      'CCTP enables USDC to flow natively 1:1 between blockchains, unifying liquidity and simplifying user experience.',
+    url: 'https://www.circle.com/cross-chain-transfer-protocol',
+    logo: '/images/partners/circle.png',
+  },
+  {
+    name: 'Soroswap',
+    category: 'DEX Aggregator',
+    description: 'The first DEX aggregator on Stellar.',
+    url: 'https://soroswap.finance/',
+    logo: '/images/partners/soroswap.png',
+  },
+  {
+    name: 'Aquarius',
+    category: 'DeFi Hub',
+    description:
+      "Aquarius is Stellar's DeFi hub. Swap instantly, provide liquidity, earn rewards, and take part in governance.",
+    url: 'https://aqua.network/',
+    logo: '/images/partners/aquarius.png',
+  },
+  {
+    name: 'DefiLlama',
+    category: 'Analytics',
+    description:
+      'Track Total Value Locked (TVL), revenue, fees, volume, and yields across 7000+ DeFi protocols on 500+ chains.',
+    url: 'https://defillama.com/protocol/tokeshare',
+    logo: '/images/partners/defillama.png',
+  },
 ];
