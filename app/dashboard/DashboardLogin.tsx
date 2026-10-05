@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { KeyRound } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 
@@ -8,6 +9,9 @@ export default function DashboardLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, startRefresh] = useTransition();
+  const router = useRouter();
+  const busy = isLoading || isRefreshing;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +25,11 @@ export default function DashboardLogin() {
       // NextAuth returns 'CredentialsSignin' for a rejected password; a custom
       // thrown message (e.g. the rate-limit notice) comes through verbatim.
       setError(result.error === 'CredentialsSignin' ? 'Mot de passe incorrect' : result.error);
+      return;
     }
+    // redirect:false leaves us on /dashboard with the session cookie set, but
+    // the server component above still holds the logged-out render — re-run it.
+    startRefresh(() => router.refresh());
   };
 
   return (
@@ -57,10 +65,10 @@ export default function DashboardLogin() {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={busy}
             className="h-11 w-full rounded-full bg-color4 font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isLoading ? 'Connexion…' : 'Se connecter'}
+            {busy ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>
       </div>
