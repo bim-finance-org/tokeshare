@@ -17,6 +17,7 @@ const RENOVATION_IMAGES = [
 ];
 
 const REPORTS = [
+  { title: 'Official Investor Report — Q3 2026', href: '/French_Tacos_LT_SRL_Official_Investor_Report_Q3_2026_EN.pdf' },
   { title: 'Official Investor Report — Q2 2026', href: '/French_Tacos_LT_SRL_Official_Investor_Report_Q2_2026_EN.pdf' },
   { title: 'Official Investor Report — Q1 2026', href: '/French_Tacos_LT_SRL_Official_Investor_Report_Q1_2026_EN.pdf' },
 ];
