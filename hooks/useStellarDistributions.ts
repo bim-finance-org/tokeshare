@@ -14,14 +14,19 @@ import { buildPaymentTrustlineXdr } from '@/lib/stellar-assets';
 
 export interface DistributionLine {
   network: StellarNetwork;
-  cycleId: number;
+  /** `sdp`: paid by the Stellar Disbursement Platform; `distributor`: on-chain cycle (push or claim). */
+  channel: 'sdp' | 'distributor';
+  roundId: string | null;
+  /** Distributor lines only — what the claim flow needs. */
+  cycleId: number | null;
   assetSlug: string;
   amount: string;
-  status: 'paid' | 'claimable' | 'pending';
+  status: 'paid' | 'claimable' | 'pending' | 'failed';
   pushed: boolean | null;
   paidAt: string | null;
   paidTx: string | null;
-  expiresAt: string;
+  /** Claim deadline (distributor lines). */
+  expiresAt: string | null;
   expired: boolean;
 }
 

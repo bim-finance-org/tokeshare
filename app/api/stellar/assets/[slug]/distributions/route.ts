@@ -1,4 +1,5 @@
-// Distribution history of one asset: every cycle with its settlement state.
+// Distribution history of one asset: every round (one payout) with its
+// delivery state across channels (SDP payments + distributor cycles).
 // Served from the indexer's tables; public, like the token catalog.
 
 import { publicJson, publicPreflight } from '@/lib/cors';
@@ -26,8 +27,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   }
 
   try {
-    const cycles = await getAssetDistributions(slug);
-    return publicJson({ cycles }, { headers: { 'Cache-Control': CDN_CACHE_HEADER, ...rateLimitHeaders(limit) } });
+    const rounds = await getAssetDistributions(slug);
+    return publicJson({ rounds }, { headers: { 'Cache-Control': CDN_CACHE_HEADER, ...rateLimitHeaders(limit) } });
   } catch (error) {
     log.error('asset distributions failed', error);
     return publicJson({ error: 'Error retrieving distributions' }, { status: 500 });
