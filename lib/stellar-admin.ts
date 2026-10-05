@@ -1,18 +1,27 @@
-// Server-side operator logic for distribution cycles (dashboard console).
+// Server-side operator primitives for revenue distributions: the snapshot,
+// distributor cycles (create_cycle + distribute_for) and the funding of the
+// SDP distribution account. The round state machine that sequences them lives
+// in lib/stellar-rounds.ts.
 //
 // The distributor admin key lives in STELLAR_DISTRIBUTOR_ADMIN_SECRET and
-// never leaves the server: the console's "one click" signs create_cycle and
-// the distribute_for batches here, with the admin account as transaction
-// source (source-account auth covers the whole invocation tree, including the
-// USDC deposit pulled from the admin).
+// never leaves the server: it signs create_cycle, the distribute_for batches
+// and the SDP top-ups, with the admin account as transaction source
+// (source-account auth covers the whole invocation tree, including the USDC
+// deposit pulled from the admin).
 //
 // Never import from client components.
 
 import { Address, Contract, Keypair, TransactionBuilder, nativeToScVal, xdr } from '@stellar/stellar-sdk';
-import { getNetworkProfile } from '@/config/stellar';
+import { getNetworkProfile, type StellarNetwork } from '@/config/stellar';
 import { type StellarAsset } from '@/config/stellar-assets';
-import { getServer, submitSignedXdr } from '@/lib/stellar';
-import { hasPaymentTrustline, readDistributorCycleCount, readTokenBalance } from '@/lib/stellar-assets';
+import { getServer, stroopsToUnits, submitSignedXdr, unitsToStroops } from '@/lib/stellar';
+import {
+  buildClassicPaymentXdr,
+  getClassicBalances,
+  hasPaymentTrustline,
+  readDistributorCycleCount,
+  readTokenBalance,
+} from '@/lib/stellar-assets';
 import { buildDistribution, type ProvenEntry } from '@/lib/stellar-merkle';
 import { prisma } from '@/lib/prisma';
 
@@ -176,57 +185,95 @@ async function pushInBatches(
   return hashes;
 }
 
-// ---- the one click ---------------------------------------------------------
+// ---- distributor cycles ----------------------------------------------------
 
-export interface CycleResult {
+export interface CycleLine {
+  address: string;
+  amount: bigint;
+  /** In the distribute_for push — false = left for the claim path. */
+  push: boolean;
+}
+
+export interface CreatedCycle {
   cycleId: number;
-  root: string;
-  snapshotLedger: number;
-  expiresAt: string;
   createTx: string;
-  pushTxs: string[];
-  pushedCount: number;
-  claimableCount: number;
-  dust: string;
+  entries: ProvenEntry[];
 }
 
 /**
- * Runs a full distribution cycle: snapshot → Merkle tree → persist the plan →
- * create_cycle (deposits the USDC) → distribute_for batches.
- *
- * The plan (entries + proofs) is persisted BEFORE the on-chain calls: proofs
- * exist nowhere else, and a crash after create_cycle must never leave a funded
- * cycle whose list is lost. If create_cycle itself fails, the cycle id was
- * never consumed and re-running simply overwrites the plan.
+ * Settles cycle plans a crash left behind (row persisted, createdTx unknown)
+ * on one network, before any new cycle id is read:
+ * - the on-chain count moved past the plan → create_cycle landed; the row is
+ *   kept and the indexer fills createdTx from the cycle_created event;
+ * - it did not → the id was never consumed; the plan is dropped (and any SDP
+ *   line re-routed to it goes back to `failed`) so the id can be reused.
  */
-export async function executeCycle(asset: StellarAsset, totalStroops: bigint, expiresDays: number): Promise<CycleResult> {
+export async function resolvePendingCycles(network: StellarNetwork): Promise<void> {
+  const profile = getNetworkProfile(network);
+  if (!profile.distributorId) return;
+  const pending = await prisma.distributionCycle.findMany({ where: { network, createdTx: null } });
+  if (pending.length === 0) return;
+  const count = Number(await readDistributorCycleCount(profile, profile.distributorId));
+  for (const cycle of pending) {
+    if (count > cycle.cycleId) continue;
+    await prisma.$transaction([
+      prisma.distributionPayout.updateMany({
+        where: { roundId: cycle.roundId ?? '', reroutedCycleId: cycle.cycleId, status: 'rerouted' },
+        data: { status: 'failed', reroutedCycleId: null },
+      }),
+      prisma.distributionEntry.deleteMany({ where: { network, cycleId: cycle.cycleId } }),
+      prisma.distributionCycle.delete({ where: { network_cycleId: { network, cycleId: cycle.cycleId } } }),
+    ]);
+  }
+}
+
+/**
+ * Creates one distributor cycle over `lines` for a round: Merkle tree →
+ * persist the plan (entries + proofs exist nowhere else) → create_cycle,
+ * which pulls `deposit` USDC from the admin account.
+ *
+ * `beforeCreate` runs inside the plan's DB transaction — callers use it to
+ * tie their own rows to the cycle id atomically (e.g. marking SDP lines as
+ * re-routed), so a crash can never leave the two out of step.
+ * Callers MUST run resolvePendingCycles(network) first.
+ */
+export async function createDistributorCycle(
+  asset: StellarAsset,
+  input: {
+    roundId: string;
+    lines: CycleLine[];
+    deposit: bigint;
+    snapshotLedger: number;
+    expiresAt: Date;
+    beforeCreate?: (cycleId: number) => ReturnType<typeof prisma.distributionPayout.updateMany>[];
+  },
+): Promise<CreatedCycle> {
   const profile = getNetworkProfile(asset.network);
   if (!profile.distributorId) throw new Error(`no distributor deployed on ${profile.network}`);
+  if (input.lines.length === 0) throw new Error('empty cycle');
+  const lineSum = input.lines.reduce((a, l) => a + l.amount, 0n);
+  if (input.deposit < lineSum) throw new Error('cycle deposit below the sum of its lines');
 
-  const snapshot = await computeSnapshot(asset, totalStroops);
   const cycleId = Number(await readDistributorCycleCount(profile, profile.distributorId));
   const { root, entries } = buildDistribution(
     cycleId,
-    snapshot.lines.map(({ address, amount }) => ({ address, amount })),
+    input.lines.map(({ address, amount }) => ({ address, amount })),
   );
-  const pushByAddress = new Map(snapshot.lines.map((l) => [l.address, l.push]));
-  const expiresAt = new Date(Date.now() + expiresDays * 86_400_000);
-
+  const pushByAddress = new Map(input.lines.map((l) => [l.address, l.push]));
   const network = profile.network;
+
   await prisma.$transaction([
-    prisma.distributionEntry.deleteMany({ where: { network, cycleId } }),
-    prisma.distributionCycle.upsert({
-      where: { network_cycleId: { network, cycleId } },
-      update: { total: totalStroops, root, snapshotLedger: snapshot.snapshotLedger, expiresAt },
-      create: {
+    prisma.distributionCycle.create({
+      data: {
         network,
         cycleId,
+        roundId: input.roundId,
         assetSlug: asset.slug,
         tokenId: asset.tokenId,
-        total: totalStroops,
+        total: input.deposit,
         root,
-        snapshotLedger: snapshot.snapshotLedger,
-        expiresAt,
+        snapshotLedger: input.snapshotLedger,
+        expiresAt: input.expiresAt,
       },
     }),
     prisma.distributionEntry.createMany({
@@ -239,45 +286,88 @@ export async function executeCycle(asset: StellarAsset, totalStroops: bigint, ex
         excluded: !pushByAddress.get(entry.address),
       })),
     }),
+    ...(input.beforeCreate?.(cycleId) ?? []),
   ]);
 
   const createTx = await invokeAsAdmin(asset, profile.distributorId, 'create_cycle', [
     new Address(asset.tokenId).toScVal(),
-    nativeToScVal(totalStroops, { type: 'i128' }),
-    nativeToScVal(snapshot.snapshotLedger, { type: 'u32' }),
+    nativeToScVal(input.deposit, { type: 'i128' }),
+    nativeToScVal(input.snapshotLedger, { type: 'u32' }),
     xdr.ScVal.scvBytes(Buffer.from(root, 'hex')),
-    nativeToScVal(BigInt(Math.floor(expiresAt.getTime() / 1000)), { type: 'u64' }),
+    nativeToScVal(BigInt(Math.floor(input.expiresAt.getTime() / 1000)), { type: 'u64' }),
   ]);
   await prisma.distributionCycle.update({
     where: { network_cycleId: { network, cycleId } },
     data: { createdTx: createTx },
   });
+  return { cycleId, createTx, entries };
+}
 
-  const pushEntries = entries.filter((e) => pushByAddress.get(e.address));
-  const pushTxs = await pushInBatches(asset, profile.distributorId, cycleId, pushEntries);
+/**
+ * Pushes every unpaid, non-excluded entry of the given cycles. Safe to re-run:
+ * distribute_for skips already-paid lines on-chain. Settlement is recorded
+ * optimistically for immediate operator feedback; the indexer re-confirms the
+ * same facts from the Paid events.
+ */
+export async function pushCycleEntries(asset: StellarAsset, cycleIds: number[]): Promise<string[]> {
+  const profile = getNetworkProfile(asset.network);
+  if (!profile.distributorId) throw new Error(`no distributor deployed on ${profile.network}`);
+  const network = profile.network;
+  const hashes: string[] = [];
+  for (const cycleId of cycleIds) {
+    const rows = await prisma.distributionEntry.findMany({
+      where: { network, cycleId, excluded: false, paidAt: null },
+    });
+    if (rows.length === 0) continue;
+    const entries: ProvenEntry[] = rows.map((r) => ({
+      address: r.address,
+      amount: r.amount,
+      proof: r.proof as string[],
+    }));
+    hashes.push(...(await pushInBatches(asset, profile.distributorId, cycleId, entries)));
+    await prisma.$transaction([
+      prisma.distributionEntry.updateMany({
+        where: { network, cycleId, address: { in: entries.map((e) => e.address) } },
+        data: { paidAt: new Date(), pushed: true },
+      }),
+      prisma.distributionCycle.update({
+        where: { network_cycleId: { network, cycleId } },
+        data: { claimed: { increment: entries.reduce((a, e) => a + e.amount, 0n) } },
+      }),
+    ]);
+  }
+  return hashes;
+}
 
-  // Optimistic settlement for immediate operator feedback; the indexer
-  // re-confirms the same facts from the Paid events.
-  await prisma.$transaction([
-    prisma.distributionEntry.updateMany({
-      where: { network, cycleId, address: { in: pushEntries.map((e) => e.address) } },
-      data: { paidAt: new Date(), pushed: true },
-    }),
-    prisma.distributionCycle.update({
-      where: { network_cycleId: { network, cycleId } },
-      data: { claimed: pushEntries.reduce((a, e) => a + e.amount, 0n) },
-    }),
-  ]);
+// ---- SDP distribution account top-up ----------------------------------------
 
-  return {
-    cycleId,
-    root,
-    snapshotLedger: snapshot.snapshotLedger,
-    expiresAt: expiresAt.toISOString(),
-    createTx,
-    pushTxs,
-    pushedCount: pushEntries.length,
-    claimableCount: entries.length - pushEntries.length,
-    dust: snapshot.dust.toString(),
-  };
+/**
+ * Tops up the SDP distribution account so it covers `required` stroops of
+ * USDC on top of what it already holds. Returns the payment hash, or null
+ * when the balance already suffices. The memo carries the round id, so every
+ * top-up is traceable on Stellar Expert.
+ */
+export async function topUpSdpAccount(
+  network: StellarNetwork,
+  sdpAddress: string,
+  required: bigint,
+  memo: string,
+): Promise<{ hash: string | null; sent: bigint }> {
+  const profile = getNetworkProfile(network);
+  const balance = unitsToStroops((await getClassicBalances(profile, sdpAddress)).usdc);
+  const missing = required - balance;
+  if (missing <= 0n) return { hash: null, sent: 0n };
+
+  const keypair = adminKeypair();
+  const unsigned = await buildClassicPaymentXdr(profile, {
+    from: keypair.publicKey(),
+    to: sdpAddress,
+    code: profile.pay.code,
+    issuer: profile.pay.issuer,
+    amount: stroopsToUnits(missing),
+    memo: { type: 'text', value: memo.slice(0, 28) },
+  });
+  const tx = TransactionBuilder.fromXDR(unsigned, profile.networkPassphrase);
+  tx.sign(keypair);
+  return { hash: await submitSignedXdr(profile, tx.toXDR()), sent: missing };
 }
