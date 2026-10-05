@@ -1,0 +1,143 @@
+# Stellar Disbursement Platform (SDP) 7.0.0 — the push channel of Tokeshare
+# revenue distributions (docs/stellar/sdp.md).
+#
+# ONE stack per Stellar network: the SDP's network passphrase is global, so
+# testnet (TRES) and mainnet (TFW_001) are two separate Coolify resources
+# built from this same file, each with its own .env (see .env.example).
+#
+# Public: sdp-api (port 8000) and sdp-frontend (port 80) — assign their
+# domains in Coolify. Never expose 8003 (tenant admin API): nothing here
+# publishes it, keep it that way.
+
+services:
+  sdp-db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${SDP_DB_PASSWORD:?set SDP_DB_PASSWORD}
+      POSTGRES_DB: sdp
+    volumes:
+      - sdp-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d sdp']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  sdp-api:
+    image: stellar/stellar-disbursement-platform-backend:7.0.0
+    restart: always
+    depends_on:
+      sdp-db:
+        condition: service_healthy
+    expose:
+      - '8000'
+    environment: &sdp-env
+      DATABASE_URL: postgres://postgres:${SDP_DB_PASSWORD}@sdp-db:5432/sdp?sslmode=disable
+      BASE_URL: ${SDP_API_URL:?set SDP_API_URL}
+      SDP_UI_BASE_URL: ${SDP_UI_URL:?set SDP_UI_URL}
+      ENVIRONMENT: ${SDP_ENVIRONMENT:-production}
+      LOG_LEVEL: ${SDP_LOG_LEVEL:-INFO}
+      PORT: '8000'
+      METRICS_PORT: '8002'
+      ADMIN_PORT: '8003'
+      INSTANCE_NAME: Tokeshare SDP (${NETWORK_TYPE:-testnet})
+      NETWORK_PASSPHRASE: ${NETWORK_PASSPHRASE:?set NETWORK_PASSPHRASE}
+      HORIZON_URL: ${HORIZON_URL:?set HORIZON_URL}
+      # Needed to pay C... (contract) addresses and to restore archived entries.
+      RPC_URL: ${RPC_URL:?set RPC_URL}
+      SINGLE_TENANT_MODE: 'true'
+      TENANT_XLM_BOOTSTRAP_AMOUNT: '5'
+      # Known-wallet disbursements send nothing to receivers; admin emails are
+      # not needed either (users are created from the CLI). No Twilio/SES.
+      EMAIL_SENDER_TYPE: DRY_RUN
+      SMS_SENDER_TYPE: DRY_RUN
+      DISABLE_MFA: ${SDP_DISABLE_MFA:-true}
+      DISABLE_RECAPTCHA: 'true'
+      CORS_ALLOWED_ORIGINS: ${SDP_UI_URL}
+      DISTRIBUTION_PUBLIC_KEY: ${DISTRIBUTION_PUBLIC_KEY:?set DISTRIBUTION_PUBLIC_KEY}
+      DISTRIBUTION_SEED: ${DISTRIBUTION_SEED:?set DISTRIBUTION_SEED}
+      DISTRIBUTION_ACCOUNT_ENCRYPTION_PASSPHRASE: ${DISTRIBUTION_ACCOUNT_ENCRYPTION_PASSPHRASE:?set it}
+      CHANNEL_ACCOUNT_ENCRYPTION_PASSPHRASE: ${CHANNEL_ACCOUNT_ENCRYPTION_PASSPHRASE:?set it}
+      SEP10_SIGNING_PUBLIC_KEY: ${SEP10_SIGNING_PUBLIC_KEY:?set SEP10_SIGNING_PUBLIC_KEY}
+      SEP10_SIGNING_PRIVATE_KEY: ${SEP10_SIGNING_PRIVATE_KEY:?set SEP10_SIGNING_PRIVATE_KEY}
+      EC256_PRIVATE_KEY: ${EC256_PRIVATE_KEY:?set EC256_PRIVATE_KEY}
+      SEP24_JWT_SECRET: ${SEP24_JWT_SECRET:?set SEP24_JWT_SECRET}
+      ADMIN_ACCOUNT: ${ADMIN_ACCOUNT:-tokeshare-admin}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:?set ADMIN_API_KEY}
+    entrypoint: ''
+    # Migrations and the default tenant are idempotent: safe on every boot.
+    # ensure-default creates a placeholder owner with no usable password; the
+    # real login is added once with `auth add-user` (docs/stellar/sdp.md).
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        ./stellar-disbursement-platform db admin migrate up
+        ./stellar-disbursement-platform db tss migrate up
+        ./stellar-disbursement-platform db auth migrate up --all
+        ./stellar-disbursement-platform db sdp migrate up --all
+        ./stellar-disbursement-platform db setup-for-network --all
+        ./stellar-disbursement-platform tenants ensure-default \
+          --default-tenant-owner-email default-owner@holders.tokeshare.co \
+          --default-tenant-owner-first-name Ops \
+          --default-tenant-owner-last-name Tokeshare \
+          --default-tenant-distribution-account-type DISTRIBUTION_ACCOUNT.STELLAR.ENV \
+          --disable-mfa="${SDP_DISABLE_MFA:-true}" \
+          --disable-recaptcha=true
+        exec ./stellar-disbursement-platform serve
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8000/health >/dev/null || exit 1']
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 10
+
+  sdp-tss:
+    image: stellar/stellar-disbursement-platform-backend:7.0.0
+    restart: always
+    depends_on:
+      sdp-api:
+        condition: service_healthy
+    environment:
+      <<: *sdp-env
+      NUM_CHANNEL_ACCOUNTS: '2'
+      MAX_BASE_FEE: '1000000'
+      TSS_METRICS_PORT: '9002'
+    entrypoint: ''
+    # Channel accounts are created at 0 XLM, their reserves sponsored by the
+    # distribution account (~1 XLM each).
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        ./stellar-disbursement-platform channel-accounts ensure 2
+        exec ./stellar-disbursement-platform tss
+
+  sdp-frontend:
+    image: stellar/stellar-disbursement-platform-frontend:7.0.0
+    restart: always
+    depends_on:
+      - sdp-api
+    expose:
+      - '80'
+    environment:
+      SDP_API_URL: ${SDP_API_URL}
+      STELLAR_EXPERT_URL: ${STELLAR_EXPERT_URL:?set STELLAR_EXPERT_URL}
+      HORIZON_URL: ${HORIZON_URL}
+    entrypoint: ''
+    # The dashboard reads its config from a JS file — generated at boot from
+    # the env so no file has to be mounted.
+    command:
+      - sh
+      - -c
+      - |
+        printf 'window._env_ = {\n  API_URL: "%s",\n  STELLAR_EXPERT_URL: "%s",\n  HORIZON_URL: "%s",\n  RPC_ENABLED: true,\n  RECAPTCHA_SITE_KEY: "",\n  SINGLE_TENANT_MODE: true\n};\n' \
+          "$$SDP_API_URL" "$$STELLAR_EXPERT_URL" "$$HORIZON_URL" > /usr/share/nginx/html/settings/env-config.js
+        exec nginx -g 'daemon off;'
+
+volumes:
+  sdp-db:
