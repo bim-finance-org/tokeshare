@@ -8,15 +8,22 @@
 // events permanently, and a missed transfer means an address the payout
 // snapshot cannot see. The /health endpoint reports per-network lag so Coolify
 // restarts a stuck worker long before that cliff.
+//
+// It also follows SDP distribution rounds: every SDP_SYNC_SECONDS (default
+// 60) it pulls the payment states of rounds still in flight from the SDP
+// (lib/stellar-rounds.ts → syncActiveRounds). An SDP outage is reported on
+// /health but never fails it — restarting the indexer would not help.
 
 import { createServer } from 'node:http';
 import { prisma } from '@/lib/prisma';
+import { syncActiveRounds } from '@/lib/stellar-rounds';
 import { buildWatched, pollNetwork, type PollStats } from './ingest';
 
 const POLL_MS = (Number(process.env.STELLAR_INDEXER_POLL_MINUTES) || 30) * 60_000;
 const PORT = Number(process.env.PORT) || 8080;
 /** Lag above which /health flips to 503 (Coolify restarts the app). */
 const MAX_LAG_MS = (Number(process.env.STELLAR_INDEXER_MAX_LAG_MINUTES) || 120) * 60_000;
+const SDP_SYNC_MS = (Number(process.env.SDP_SYNC_SECONDS) || 60) * 1000;
 
 interface NetworkHealth extends PollStats {
   at: string;
@@ -27,6 +34,7 @@ const state = {
   startedAt: new Date().toISOString(),
   lastPollAt: null as string | null,
   networks: {} as Record<string, NetworkHealth>,
+  sdpSync: null as { at: string; synced: number; errors: string[] } | null,
 };
 
 async function pollAll(): Promise<void> {
@@ -44,7 +52,14 @@ async function pollAll(): Promise<void> {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       state.networks[name] = {
-        ...(state.networks[name] ?? { network: name, fetched: 0, processed: 0, lastLedger: 0, latestLedger: 0, gapLedgers: 0 }),
+        ...(state.networks[name] ?? {
+          network: name,
+          fetched: 0,
+          processed: 0,
+          lastLedger: 0,
+          latestLedger: 0,
+          gapLedgers: 0,
+        }),
         at: new Date().toISOString(),
         error: message,
       };
@@ -52,6 +67,18 @@ async function pollAll(): Promise<void> {
     }
   }
   state.lastPollAt = new Date().toISOString();
+}
+
+async function syncRounds(): Promise<void> {
+  try {
+    const { synced, errors } = await syncActiveRounds();
+    state.sdpSync = { at: new Date().toISOString(), synced, errors };
+    for (const error of errors) console.error('[indexer][rounds] sync failed:', error);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    state.sdpSync = { at: new Date().toISOString(), synced: 0, errors: [message] };
+    console.error('[indexer][rounds] sync failed:', message);
+  }
 }
 
 /** Healthy = every network polled successfully within the lag budget. */
@@ -86,6 +113,15 @@ async function main(): Promise<void> {
   };
   process.on('SIGTERM', stop);
   process.on('SIGINT', stop);
+
+  // Two independent cadences: chain events (slow, retention-bound) and SDP
+  // payment states (fast, so the console follows a disbursement live).
+  void (async () => {
+    for (;;) {
+      await syncRounds();
+      await new Promise((resolve) => setTimeout(resolve, SDP_SYNC_MS));
+    }
+  })();
 
   for (;;) {
     await pollAll();
