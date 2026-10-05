@@ -16,7 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "indexer": "tsx workers/stellar-indexer/index.ts",
-    "indexer:seed": "tsx workers/stellar-indexer/seed.ts"
+    "indexer:seed": "tsx workers/stellar-indexer/seed.ts",
+    "alfred": "tsx --env-file=.env.local scripts/alfred.ts"
   },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^1.9.5",
