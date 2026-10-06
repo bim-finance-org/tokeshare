@@ -16,7 +16,9 @@ export interface RampAnchorConfig {
 }
 
 const TESTNET_HOME = process.env.NEXT_PUBLIC_STELLAR_TESTNET_RAMP_HOME_DOMAIN || 'testanchor.stellar.org';
-const MAINNET_HOME = process.env.NEXT_PUBLIC_STELLAR_MAINNET_RAMP_HOME_DOMAIN || 'stellar.moneygram.com';
+// MoneyGram moved to its Anchor Platform hosts (mgxanchor / extmgxanchor); the
+// legacy stellar.moneygram.com / extstellar.moneygram.com endpoints are deprecated.
+const MAINNET_HOME = process.env.NEXT_PUBLIC_STELLAR_MAINNET_RAMP_HOME_DOMAIN || 'mgxanchor.moneygram.com';
 
 const providerOf = (homeDomain: string): RampProvider =>
   homeDomain.includes('moneygram') ? 'moneygram' : 'testanchor';
