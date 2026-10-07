@@ -25,10 +25,12 @@ const TESTNET: StellarNetworkProfile = {
   networkPassphrase: 'Test SDF Network ; September 2015',
   rpcUrl: process.env.NEXT_PUBLIC_STELLAR_TESTNET_RPC_URL ?? 'https://soroban-testnet.stellar.org',
   horizonUrl: 'https://horizon-testnet.stellar.org',
+  // Circle testnet USDC — the one MoneyGram's test anchor and the SDP use, so
+  // a testnet deposit can buy shares and receive distributions end to end.
   pay: {
     code: 'USDC',
-    issuer: 'GCYG5OOZY4O2EZOY7OPT4FYY2XWZQ3WCX6M24CVWWHTV67ATKAVK77QC',
-    sacId: 'CAW2SVC7HTEFP64JVQSHIZNOYCOKPE54IPCSAD3AKG2ZYMUWQFQB7KVH',
+    issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+    sacId: 'CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA',
   },
   distributorId: process.env.NEXT_PUBLIC_STELLAR_TESTNET_DISTRIBUTOR_ID ?? '',
 };

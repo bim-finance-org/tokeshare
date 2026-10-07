@@ -80,9 +80,11 @@ export const STELLAR_ASSETS: StellarAsset[] = [
     // + 3.2 on trustlines, per Horizon /assets), so the re-issue keeps the
     // token count unchanged.
     totalShares: 23_000,
-    // TESTNET. Token deployed 2026-07-28; sale v2 (buyback + auto-allowlist).
+    // TESTNET. Token deployed 2026-07-28; sale v2 (buyback + auto-allowlist),
+    // redeployed 2026-10-07 on Circle testnet USDC (was the self-issued test
+    // USDC CABTGCTA…YA7C) — the USDC MoneyGram and the SDP use.
     tokenId: 'CCZERUHBBFK2TIMOGYMTROUMKPLTMFQ3KRFDASGKV3IZCAZHBFEI6J6Q',
-    saleId: 'CABTGCTADH5BXW7C2KPNNJLMHPJUHHBMENIX4LUHVEYOMTDIGDUWYA7C',
+    saleId: 'CB66VJSLUWXYITFD23LLY2FRRJZXXD6HWHMQUFCZ5WDOZKASFQHTEIRX',
     image: '/images/stellar/steallr_poc.jpeg',
     location: 'Las Terrenas, Dominican Republic',
     description: 'Tokenized real-estate share in a Caribbean property.',
