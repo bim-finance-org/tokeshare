@@ -38,6 +38,8 @@ export interface RampRecord {
   amountOut: string | null;
   amountFee: string | null;
   status: string;
+  /** Fiat currency paid out (Alfred corridors); null for SEP-24 anchors. */
+  payoutCurrency: string | null;
   moreInfoUrl: string | null;
   externalRef: string | null;
   stellarTxHash: string | null;

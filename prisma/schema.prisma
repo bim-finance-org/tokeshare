@@ -111,25 +111,27 @@ model DistributionCycle {
 /// app can render history without an anchor JWT, and reconcile later. Amounts
 /// are the anchor's decimal strings, not stroops.
 model RampTransaction {
-  id            String    @id @default(cuid())
-  network       String
-  provider      String // moneygram | testanchor
-  direction     String // deposit | withdrawal
-  address       String
-  anchorTxId    String
-  assetCode     String
-  amountIn      String?
-  amountOut     String?
-  amountFee     String?
-  status        String
-  moreInfoUrl   String?
+  id             String    @id @default(cuid())
+  network        String
+  provider       String // moneygram | testanchor | alfred
+  direction      String // deposit | withdrawal
+  address        String
+  anchorTxId     String
+  assetCode      String
+  amountIn       String?
+  amountOut      String?
+  amountFee      String?
+  status         String
+  moreInfoUrl    String?
   /// Reference code the user presents at a MoneyGram agent location.
-  externalRef   String?
-  stellarTxHash String?
-  message       String?
-  startedAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  completedAt   DateTime?
+  externalRef    String?
+  /// Fiat currency actually paid out (Alfred corridors: MXN, BRL…).
+  payoutCurrency String?
+  stellarTxHash  String?
+  message        String?
+  startedAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  completedAt    DateTime?
 
   @@unique([network, provider, anchorTxId])
   @@index([address])
@@ -154,4 +156,38 @@ model DistributionEntry {
 
   @@id([network, cycleId, address])
   @@index([address])
+}
+
+/// Alfred Pay onboarding state for one wallet, on one payout corridor.
+///
+/// Alfred is a REST API, not a SEP anchor: the end user is a `customer` we
+/// create there, and this row is the pointer to it. Identity data and ID
+/// documents are collected on Alfred's hosted onboarding link and never stored
+/// here — what the app keeps is the customer id, the contact email, the
+/// customer status re-read from Alfred, and the payout destination id (with
+/// only the last digits of the account number, for display).
+///
+/// Keyed per corridor because the customer's residency country is declared in
+/// its profile, and verification is performed against that country.
+model AlfredCustomer {
+  network             String
+  address             String
+  /// config/alfred.ts corridor key (MX_SPEI, BR_PIX…).
+  corridor            String
+  customerId          String
+  email               String
+  /// Alfred customer status; only ACTIVE can move money.
+  status              String   @default("NOT_STARTED")
+  /// Every required endorsement APPROVED, provider side included.
+  endorsementsReady   Boolean  @default(false)
+  linkedAccountId     String?
+  linkedAccountLast4  String?
+  /// Alfred relationship_status; payouts need VERIFIED.
+  linkedAccountStatus String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@id([network, address, corridor])
+  @@index([customerId])
+  @@index([linkedAccountId])
 }
