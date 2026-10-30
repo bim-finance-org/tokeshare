@@ -12,6 +12,8 @@ import {
 import { TokenType } from '@/enums/TokenType';
 
 const HEX_ADDRESS = /^0x[0-9a-fA-F]{40}$/;
+// Tokens whose contract is still live but whose asset page was taken off the site.
+const DELISTED_SYMBOLS: string[] = ['TLT_001'];
 
 describe('TOKENS config invariants', () => {
   it('each entry key matches its symbol', () => {
@@ -33,9 +35,15 @@ describe('TOKENS config invariants', () => {
 
   it('crypto tokens expose an internalUrl to their page', () => {
     for (const token of Object.values(TOKENS)) {
-      if (token.type === TokenType.Crypto) {
+      if (token.type === TokenType.Crypto && !DELISTED_SYMBOLS.includes(token.symbol)) {
         expect(token.internalUrl, token.symbol).toBeTruthy();
       }
+    }
+  });
+
+  it('delisted tokens have no page to link to', () => {
+    for (const symbol of DELISTED_SYMBOLS) {
+      expect(TOKENS[symbol as keyof typeof TOKENS].internalUrl, symbol).toBeUndefined();
     }
   });
 
