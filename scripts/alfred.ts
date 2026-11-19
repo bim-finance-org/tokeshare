@@ -11,8 +11,18 @@
 import { ALFRED_CORRIDORS } from '@/config/alfred';
 import { AlfredError, createWebhookEndpoint, getCountry, isAlfredSandbox } from '@/lib/alfred/client';
 
-/** What the receiver acts on; Alfred adds types without notice and they are ignored. */
-const EVENT_TYPES = ['customer.*', 'linked_account.*', 'deposit.*', 'payout.*'];
+/**
+ * What the receiver acts on (lib/alfred/offramp.ts applyEvent). Exact names:
+ * production rejects the wildcards (`customer.*`) its own docs show.
+ */
+const EVENT_TYPES = [
+  'customer.updated',
+  'customer.verification.updated',
+  'customer.endorsement.updated',
+  'linked_account.updated',
+  'deposit.credited',
+  'payout.fiat.updated',
+];
 
 async function check(country: string): Promise<void> {
   console.log(`Alfred ${isAlfredSandbox() ? 'sandbox' : 'production'} — reading ${country} routes`);
