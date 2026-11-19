@@ -186,7 +186,8 @@ export const TOKENS: Record<string, TokenInfo> = {
     decimals: 18,
     type: TokenType.Crypto,
     icon: TLTIcon,
-    internalUrl: '/marketplace/other/la-tienda',
+    // Delisted from the site: the contract is still live and holders keep seeing their balance,
+    // but the asset has no page anymore.
   },
   USDC: {
     symbol: 'USDC',
