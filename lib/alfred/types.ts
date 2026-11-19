@@ -71,12 +71,6 @@ export interface AlfredCustomerProfile {
   ownFundsVsClientFunds: 'OWN_FUNDS';
 }
 
-export interface AlfredOnboardingLink {
-  sessionId: string;
-  url: string;
-  expiresAt: string;
-}
-
 export interface AlfredEndorsement {
   endorsement: string;
   endorsement_status: AlfredEndorsementStatus;

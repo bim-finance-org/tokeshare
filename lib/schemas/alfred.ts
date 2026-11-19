@@ -46,3 +46,16 @@ export const AlfredWithdrawSchema = z.object({
   corridor: CorridorKeySchema,
   quoteId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/, 'Invalid quote id'),
 });
+
+/** Operator console: the verification link copied from Alfred's dashboard. */
+export const AlfredKycLinkSchema = z.object({
+  network: z.enum(['testnet', 'mainnet']),
+  address: StellarAddressSchema,
+  corridor: CorridorKeySchema,
+  url: z
+    .string()
+    .trim()
+    .url('Paste the full link, starting with https://')
+    .max(2048)
+    .refine((value) => value.startsWith('https://'), 'The link must start with https://'),
+});

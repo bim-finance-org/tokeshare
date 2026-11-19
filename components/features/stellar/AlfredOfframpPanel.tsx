@@ -3,7 +3,7 @@
 // Alfred cash-out panel: USDC on Stellar → local bank account (SPEI, PIX…).
 //
 // A checklist the user walks once — prove the wallet, give an email, verify
-// identity on Alfred's own page, register a payout account — then two money
+// identity on Alfred's own page (link relayed by an operator), register a payout account — then two money
 // steps, as Alfred models them: fund the Alfred balance from the wallet, and
 // once the USDC is available, quote and pay it out to the bank. Identity
 // documents are never handled here: verification opens Alfred's hosted page.
@@ -16,7 +16,6 @@ import { ALFRED_ENABLED, ALFRED_SANDBOX, enabledCorridors, type AlfredCorridor }
 import { useStellarAccount } from '@/context/StellarContext';
 import {
   useAlfredBalance,
-  useAlfredKycUrl,
   useAlfredOnboarding,
   useAlfredQuote,
   useAlfredWithdraw,
@@ -147,7 +146,6 @@ const CorridorPanel = ({ corridor }: { corridor: AlfredCorridor }) => {
   const { onboarding, isLoading, needsProof } = useAlfredOnboarding(corridor);
   const prove = useWalletProof();
   const start = useStartAlfredOnboarding(corridor);
-  const kyc = useAlfredKycUrl(corridor);
   const bank = useRegisterBankAccount(corridor);
   const balance = useAlfredBalance(corridor, !!onboarding?.ready);
   const fund = useFundAlfred(corridor);
@@ -188,21 +186,6 @@ const CorridorPanel = ({ corridor }: { corridor: AlfredCorridor }) => {
   const destinationStatus = onboarding?.linkedAccountStatus ?? null;
   const needsDestination = active && (!destinationStatus || DESTINATION_DEAD.has(destinationStatus));
 
-  // Opened synchronously in the click handler so popup blockers let it through.
-  const openVerification = () => {
-    const popup = window.open('', '_blank');
-    kyc
-      .mutateAsync()
-      .then((link) => {
-        if (popup) popup.location.href = link.url;
-        else window.location.href = link.url;
-      })
-      .catch((err) => {
-        popup?.close();
-        notify.error(err);
-      });
-  };
-
   return (
     <div className="divide-y divide-gray-100">
       <Step done={!!onboarding} title="Contact email">
@@ -235,14 +218,22 @@ const CorridorPanel = ({ corridor }: { corridor: AlfredCorridor }) => {
         <p className="text-xs text-gray-500">
           {CUSTOMER_LABELS[onboarding?.status ?? 'NOT_STARTED'] ?? onboarding?.status}
         </p>
-        {onboarding && KYC_ACTIONABLE.has(onboarding.status) && (
+        {onboarding && KYC_ACTIONABLE.has(onboarding.status) && !onboarding.kycUrl && (
+          <p className="mt-1 text-xs text-gray-400">
+            We are preparing your verification link with Alfred. It will be sent to {onboarding.email} and appear here,
+            usually within one business day.
+          </p>
+        )}
+        {onboarding && KYC_ACTIONABLE.has(onboarding.status) && onboarding.kycUrl && (
           <>
             <p className="mt-1 text-xs text-gray-400">
               Opens Alfred&apos;s own page: your documents are sent to them, never to Tokeshare.
             </p>
-            <Button size="sm" variant="outline" className="mt-2" disabled={kyc.isPending} onClick={openVerification}>
-              <BadgeCheck className="mr-1.5 h-4 w-4" />
-              {onboarding.status === 'NOT_STARTED' ? 'Start verification' : 'Resume verification'}
+            <Button size="sm" variant="outline" className="mt-2" asChild>
+              <a href={onboarding.kycUrl} target="_blank" rel="noopener noreferrer">
+                <BadgeCheck className="mr-1.5 h-4 w-4" />
+                {onboarding.status === 'NOT_STARTED' ? 'Start verification' : 'Resume verification'}
+              </a>
             </Button>
           </>
         )}

@@ -23,7 +23,6 @@ import type {
   AlfredEvent,
   AlfredFiatPayout,
   AlfredLinkedAccount,
-  AlfredOnboardingLink,
   AlfredQuote,
   CreateFiatPayoutRequest,
   CreateLinkedAccountRequest,
@@ -157,13 +156,6 @@ export const updateCustomer = (customerId: string, profile: AlfredCustomerProfil
   alfredFetch<AlfredCustomer>(`/v1/customers/${enc(customerId)}`, { method: 'PUT', body: profile });
 
 export const getCustomer = (customerId: string) => alfredFetch<AlfredCustomer>(`/v1/customers/${enc(customerId)}`);
-
-/**
- * Hosted onboarding: identity capture, documents and selfie happen on Alfred's
- * page. A new link supersedes the previous one.
- */
-export const createOnboardingLink = (customerId: string) =>
-  alfredFetch<AlfredOnboardingLink>(`/v1/customers/${enc(customerId)}/onboarding-link`, { method: 'POST' });
 
 // ---- endorsements ----------------------------------------------------------
 

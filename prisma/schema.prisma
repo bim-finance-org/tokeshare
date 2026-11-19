@@ -184,6 +184,12 @@ model AlfredCustomer {
   linkedAccountLast4  String?
   /// Alfred relationship_status; payouts need VERIFIED.
   linkedAccountStatus String?
+  /// Alfred-hosted verification link, pasted by an operator from Alfred's
+  /// dashboard (Alfred exposes no API to mint it).
+  kycUrl              String?
+  kycUrlSetAt         DateTime?
+  /// When the operator alert for this new customer went out; null = not sent.
+  adminNotifiedAt     DateTime?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 

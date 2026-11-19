@@ -32,6 +32,8 @@ export interface AlfredOnboarding {
   endorsementsReady: boolean;
   linkedAccountLast4: string | null;
   linkedAccountStatus: string | null;
+  /** Alfred-hosted verification page, relayed by an operator; null until then. */
+  kycUrl: string | null;
   ready: boolean;
 }
 
@@ -100,7 +102,7 @@ export function useWalletProof() {
 
 /**
  * Onboarding state for a corridor; `needsProof` when the session expired.
- * Polls while a verification or a destination review is pending.
+ * Polls while the verification link, a verification or a destination review is pending.
  */
 export function useAlfredOnboarding(corridor: AlfredCorridor) {
   const { address } = useStellarAccount();
@@ -112,7 +114,9 @@ export function useAlfredOnboarding(corridor: AlfredCorridor) {
     staleTime: 10_000,
     refetchInterval: (q) => {
       const onboarding = q.state.data;
-      return onboarding && !onboarding.ready && onboarding.status !== 'NOT_STARTED' ? 20_000 : false;
+      if (!onboarding || onboarding.ready) return false;
+      // Waiting on a human to relay the verification link: no need to poll fast.
+      return onboarding.status === 'NOT_STARTED' ? 60_000 : 20_000;
     },
     queryFn: async (): Promise<AlfredOnboarding | null> => {
       const body = await call<{ onboarding: AlfredOnboarding | null }>(`/customer?corridor=${corridor.key}`);
@@ -140,14 +144,6 @@ export function useStartAlfredOnboarding(corridor: AlfredCorridor) {
     mutationFn: (email: string) =>
       call<{ onboarding: AlfredOnboarding }>('/customer', json({ corridor: corridor.key, email })),
     onSuccess: invalidate,
-  });
-}
-
-/** Mints Alfred's hosted onboarding link. */
-export function useAlfredKycUrl(corridor: AlfredCorridor) {
-  return useMutation({
-    mutationFn: () =>
-      call<{ url: string; expiresAt: string | null }>(`/kyc?corridor=${corridor.key}`, { method: 'POST' }),
   });
 }
 

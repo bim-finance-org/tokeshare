@@ -2,7 +2,8 @@
 // "pesos on a bank account", and the state we keep for each.
 //
 //   1. customer   POST /v1/customers + PUT profile       → customerId
-//   2. KYC        POST /v1/customers/{id}/onboarding-link → Alfred-hosted page
+//   2. KYC        Alfred-hosted page; the link is relayed by an operator
+//                 (Alfred has no API to mint it — see setKycLink)
 //   3. endorse    POST /v1/customers/{id}/endorsements    once ACTIVE
 //   4. bank       POST /v1/customers/{id}/linked_accounts → wait VERIFIED
 //   5. fund       wallet pays USDC to GET …/deposit_address?chain=XLM (+ memo)
@@ -22,6 +23,7 @@
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { getLogger } from '@/lib/logger';
+import { sendAdminNewCustomerAlert, sendUserKycLink } from './notifications';
 import {
   ALFRED_CHAIN,
   ALFRED_CRYPTO_CURRENCY,
@@ -33,7 +35,6 @@ import {
   createCustomer,
   createFiatPayout,
   createLinkedAccount,
-  createOnboardingLink,
   createQuote,
   getBalances,
   getCustomer,
@@ -74,6 +75,8 @@ export interface OnboardingState {
   /** Only the last digits — the full account number is never echoed back. */
   linkedAccountLast4: string | null;
   linkedAccountStatus: string | null;
+  /** Alfred-hosted verification page, once an operator relayed it. */
+  kycUrl: string | null;
   /** Everything Alfred needs before USDC can be received and paid out. */
   ready: boolean;
 }
@@ -86,6 +89,7 @@ const toState = (row: Row): OnboardingState => ({
   endorsementsReady: row.endorsementsReady,
   linkedAccountLast4: row.linkedAccountLast4,
   linkedAccountStatus: row.linkedAccountStatus,
+  kycUrl: row.kycUrl,
   ready: row.status === 'ACTIVE' && row.endorsementsReady && row.linkedAccountStatus === 'VERIFIED',
 });
 
@@ -148,21 +152,105 @@ export async function startOnboarding(opts: {
       status: customer.status,
     },
   });
+  await notifyAdmins(row);
   return toState(row);
 }
 
-// ---- 2. hosted KYC ---------------------------------------------------------
+// ---- 2. hosted KYC (manual relay) ------------------------------------------
+//
+// Alfred dropped the API that minted hosted onboarding links and does not plan
+// to bring it back. The link exists in Alfred's dashboard though, so the relay
+// is human: new customer → operators alerted by email → an operator pastes the
+// link in our console → the user gets it by email and in the panel. Identity
+// data still never reaches us; only the URL does.
 
-/** Alfred-hosted onboarding URL; identity data and documents never touch us. */
-export async function startKyc(
-  network: string,
-  address: string,
-  corridor: AlfredCorridor,
-): Promise<{ url: string; expiresAt: string | null }> {
-  const row = await requireRow(network, address, corridor);
-  if (row.status === 'ACTIVE') throw new AlfredError('Identity is already verified', 400);
-  const link = await createOnboardingLink(row.customerId);
-  return { url: link.url, expiresAt: link.expiresAt ?? null };
+/**
+ * Alerts the operators. Never fatal to the user: a failed send is logged and
+ * the customer still shows in the console, flagged as "alert not sent".
+ */
+async function notifyAdmins(row: Row): Promise<void> {
+  try {
+    await sendAdminNewCustomerAlert(row);
+    await prisma.alfredCustomer.update({ where: rowKey(row), data: { adminNotifiedAt: new Date() } });
+  } catch (error) {
+    log.error(`operator alert failed for Alfred customer ${row.customerId}`, error);
+  }
+}
+
+/** Customer statuses past the point where a verification link is useful. */
+const KYC_DONE = new Set(['ACTIVE', 'REJECTED', 'OFFBOARDED']);
+
+export interface AdminCustomer {
+  network: string;
+  address: string;
+  corridor: string;
+  customerId: string;
+  email: string;
+  status: string;
+  kycUrl: string | null;
+  kycUrlSetAt: string | null;
+  adminNotifiedAt: string | null;
+  createdAt: string;
+}
+
+const toAdmin = (row: Row): AdminCustomer => ({
+  network: row.network,
+  address: row.address,
+  corridor: row.corridor,
+  customerId: row.customerId,
+  email: row.email,
+  status: row.status,
+  kycUrl: row.kycUrl,
+  kycUrlSetAt: row.kycUrlSetAt?.toISOString() ?? null,
+  adminNotifiedAt: row.adminNotifiedAt?.toISOString() ?? null,
+  createdAt: row.createdAt.toISOString(),
+});
+
+/** Console list: customers still going through verification first, then the latest others. */
+export async function listCustomersForAdmin(): Promise<{ pending: AdminCustomer[]; recent: AdminCustomer[] }> {
+  const [pending, recent] = await Promise.all([
+    prisma.alfredCustomer.findMany({
+      where: { status: { notIn: [...KYC_DONE] } },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+    }),
+    prisma.alfredCustomer.findMany({
+      where: { status: { in: [...KYC_DONE] } },
+      orderBy: { updatedAt: 'desc' },
+      take: 20,
+    }),
+  ]);
+  return { pending: pending.map(toAdmin), recent: recent.map(toAdmin) };
+}
+
+/**
+ * Stores the verification link an operator copied from Alfred's dashboard and
+ * emails it to the user. The link is saved first: if the email fails, the user
+ * still finds it in the panel and the operator can resend.
+ */
+export async function setKycLink(opts: {
+  network: string;
+  address: string;
+  corridor: string;
+  url: string;
+}): Promise<{ customer: AdminCustomer; emailed: boolean }> {
+  const where = key(opts.network, opts.address, opts.corridor);
+  const existing = await prisma.alfredCustomer.findUnique({ where });
+  if (!existing) throw new AlfredError('Unknown Alfred customer', 404);
+  if (existing.status === 'ACTIVE') throw new AlfredError('This customer is already verified', 400);
+
+  const row = await prisma.alfredCustomer.update({
+    where,
+    data: { kycUrl: opts.url, kycUrlSetAt: new Date() },
+  });
+
+  try {
+    await sendUserKycLink(row, opts.url);
+    return { customer: toAdmin(row), emailed: true };
+  } catch (error) {
+    log.error(`verification link email failed for Alfred customer ${row.customerId}`, error);
+    return { customer: toAdmin(row), emailed: false };
+  }
 }
 
 // ---- 3. endorsements -------------------------------------------------------
