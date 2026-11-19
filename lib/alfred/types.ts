@@ -61,14 +61,18 @@ export interface AlfredCustomer {
 }
 
 /** The subset of `PUT /v1/customers/{id}` an individual off-ramp user needs. */
+/**
+ * The profile production accepts for an individual under our partner account,
+ * found by trial against api.alfredpay.io (2026-11-19): `customerType` must be
+ * SUB_CUSTOMER (CUSTOMER → 400), and `actsOnOwnBehalf` / `ownFundsVsClientFunds`
+ * are refused with 422 although the reference documents them.
+ */
 export interface AlfredCustomerProfile {
-  customerType: 'CUSTOMER';
+  customerType: 'SUB_CUSTOMER';
   customerArchetypes: string[];
   useCases: string[];
   residencyCountry: string;
   email?: string;
-  actsOnOwnBehalf: boolean;
-  ownFundsVsClientFunds: 'OWN_FUNDS';
 }
 
 export interface AlfredEndorsement {

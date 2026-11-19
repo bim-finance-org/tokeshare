@@ -116,7 +116,7 @@ export function useAlfredOnboarding(corridor: AlfredCorridor) {
       const onboarding = q.state.data;
       if (!onboarding || onboarding.ready) return false;
       // Waiting on a human to relay the verification link: no need to poll fast.
-      return onboarding.status === 'NOT_STARTED' ? 60_000 : 20_000;
+      return onboarding.kycUrl ? 20_000 : 60_000;
     },
     queryFn: async (): Promise<AlfredOnboarding | null> => {
       const body = await call<{ onboarding: AlfredOnboarding | null }>(`/customer?corridor=${corridor.key}`);
