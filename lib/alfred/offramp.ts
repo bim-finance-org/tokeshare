@@ -133,13 +133,11 @@ export async function startOnboarding(opts: {
 
   const customer = await createCustomer({ email: opts.email }, `${opts.network}:${opts.address}:${opts.corridor.key}`);
   await updateCustomer(customer.id, {
-    customerType: 'CUSTOMER',
+    customerType: 'SUB_CUSTOMER',
     customerArchetypes: ['RETAIL_INDIVIDUAL'],
     useCases: ['on_off_ramp'],
     residencyCountry: opts.corridor.country,
     email: opts.email,
-    actsOnOwnBehalf: true,
-    ownFundsVsClientFunds: 'OWN_FUNDS',
   });
 
   const row = await prisma.alfredCustomer.create({
