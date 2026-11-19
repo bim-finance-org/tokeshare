@@ -18,6 +18,9 @@ const PROVIDER_LABELS: Record<string, string> = {
   testanchor: 'Test anchor (sandbox)',
 };
 
+// Rows from non-SEP providers (Alfred) have their own state machine and panel.
+const SEP24_PROVIDERS = new Set(['moneygram', 'testanchor']);
+
 function statusLabel(record: RampRecord): string {
   switch (record.status) {
     case 'incomplete':
@@ -42,15 +45,16 @@ function statusLabel(record: RampRecord): string {
 const StellarRampPanel = () => {
   const { isConnected } = useStellarAccount();
   const anchor = getRampAnchor(RAMP_NETWORK);
-  const { data: records } = useRampHistory();
-  const polling = useRampPolling(records ?? []);
+  const { data: allRecords } = useRampHistory();
+  const records = (allRecords ?? []).filter((r) => SEP24_PROVIDERS.has(r.provider));
+  const polling = useRampPolling(records);
   const start = useStartRamp();
   const send = useSendWithdrawal();
 
   if (!isConnected) return null;
 
-  const active = (records ?? []).filter((r) => !TERMINAL_SEP24_STATUSES.has(r.status));
-  const history = (records ?? []).filter((r) => TERMINAL_SEP24_STATUSES.has(r.status)).slice(0, 5);
+  const active = records.filter((r) => !TERMINAL_SEP24_STATUSES.has(r.status));
+  const history = records.filter((r) => TERMINAL_SEP24_STATUSES.has(r.status)).slice(0, 5);
 
   const handleStart = (direction: 'deposit' | 'withdrawal') => {
     // The popup must open synchronously in the click (popup blockers); the

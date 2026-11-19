@@ -11,6 +11,7 @@ import { useStellarUserAssets } from '@/hooks/useStellarUserAssets';
 import { useStellarAccount } from '@/context/StellarContext';
 import StellarDistributionsPanel from '@/components/features/stellar/StellarDistributionsPanel';
 import StellarRampPanel from '@/components/features/stellar/StellarRampPanel';
+import AlfredOfframpPanel from '@/components/features/stellar/AlfredOfframpPanel';
 import type { AssetData } from '@/interfaces/AssetData';
 
 // Allocation colours, assigned to holdings by descending value.
@@ -210,6 +211,7 @@ export default function Page() {
 
         {/* Cash-in / cash-out via the SEP-24 ramp anchor (MoneyGram) */}
         <StellarRampPanel />
+        <AlfredOfframpPanel />
       </div>
     </div>
   );
