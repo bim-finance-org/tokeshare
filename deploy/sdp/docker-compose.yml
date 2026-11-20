@@ -77,7 +77,10 @@ services:
       # not needed either (users are created from the CLI). No Twilio/SES.
       EMAIL_SENDER_TYPE: DRY_RUN
       SMS_SENDER_TYPE: DRY_RUN
-      DISABLE_MFA: ${SDP_DISABLE_MFA:-true}
+      # The SDP refuses to start on pubnet with MFA disabled ("MFA cannot be
+      # disabled in pubnet"). With DRY_RUN email, login codes land in the
+      # sdp-api logs. Testnet stacks may set SDP_DISABLE_MFA=true.
+      DISABLE_MFA: ${SDP_DISABLE_MFA:-false}
       DISABLE_RECAPTCHA: 'true'
       CORS_ALLOWED_ORIGINS: ${SDP_UI_URL}
       DISTRIBUTION_PUBLIC_KEY: ${DISTRIBUTION_PUBLIC_KEY:?set DISTRIBUTION_PUBLIC_KEY}
@@ -109,7 +112,7 @@ services:
           --default-tenant-owner-first-name Ops \
           --default-tenant-owner-last-name Tokeshare \
           --default-tenant-distribution-account-type DISTRIBUTION_ACCOUNT.STELLAR.ENV \
-          --disable-mfa="${SDP_DISABLE_MFA:-true}" \
+          --disable-mfa="${SDP_DISABLE_MFA:-false}" \
           --disable-recaptcha=true
         exec ./stellar-disbursement-platform serve
     healthcheck:
