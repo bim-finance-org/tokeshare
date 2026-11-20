@@ -18,6 +18,7 @@ import { getNetworkProfile, type StellarNetwork, type StellarNetworkProfile } fr
 import { readTokenBalance } from '@/lib/stellar-assets';
 import { getServer } from '@/lib/stellar';
 import { prisma } from '@/lib/prisma';
+import { syncCycleClaimed } from '@/lib/stellar-cycle-accounting';
 import { decodeEvent, type DecodedEvent, type Json, type RawRpcEvent } from './decode';
 
 const PAGE_LIMIT = 200;
@@ -107,9 +108,7 @@ async function fetchStream(
   let latestLedger = 0;
   for (;;) {
     const page = await server.getEvents(
-      cursor
-        ? { filters: [filter], cursor, limit: PAGE_LIMIT }
-        : { filters: [filter], startLedger, limit: PAGE_LIMIT },
+      cursor ? { filters: [filter], cursor, limit: PAGE_LIMIT } : { filters: [filter], startLedger, limit: PAGE_LIMIT },
     );
     latestLedger = page.latestLedger;
     for (const raw of page.events as unknown as RawRpcEvent[]) {
@@ -142,8 +141,7 @@ const asBigInt = (value: Json | undefined): bigint | null => {
 
 /** Event data is either a bare amount (SEP-41) or a map holding one. */
 const amountOf = (data: Json): bigint | null =>
-  asBigInt(data as string) ??
-  (data && typeof data === 'object' && !Array.isArray(data) ? asBigInt(data.amount) : null);
+  asBigInt(data as string) ?? (data && typeof data === 'object' && !Array.isArray(data) ? asBigInt(data.amount) : null);
 
 type DbEvent = {
   id: string;
@@ -168,7 +166,10 @@ async function applyTokenEvent(
   const network = watched.profile.network;
 
   // Addresses whose balance changed. topics: transfer=[t,from,to] mint=[t,to] burn=[t,from]
-  const parties = topics.slice(1).map(asString).filter((a): a is string => !!a && /^[GC]/.test(a));
+  const parties = topics
+    .slice(1)
+    .map(asString)
+    .filter((a): a is string => !!a && /^[GC]/.test(a));
   const set = touched.get(slug) ?? new Set<string>();
   for (const address of parties) set.add(address);
   touched.set(slug, set);
@@ -255,28 +256,25 @@ async function applyDistributorEvent(watched: WatchedNetwork, event: DbEvent): P
     const amount = asBigInt(data.amount);
     const pushed = data.pushed === true;
     if (!holder || amount === null) return;
-    await prisma.$transaction([
-      prisma.distributionEntry.upsert({
-        where: { network_cycleId_address: { network, cycleId, address: holder } },
-        update: { paidAt: event.ledgerClosedAt, paidTx: event.txHash, pushed },
-        // An entry the console does not know (should not happen) still gets a
-        // row, so accounting from chain data stays complete.
-        create: {
-          network,
-          cycleId,
-          address: holder,
-          amount,
-          proof: [],
-          paidAt: event.ledgerClosedAt,
-          paidTx: event.txHash,
-          pushed,
-        },
-      }),
-      prisma.distributionCycle.update({
-        where: { network_cycleId: { network, cycleId } },
-        data: { claimed: { increment: amount } },
-      }),
-    ]);
+    await prisma.distributionEntry.upsert({
+      where: { network_cycleId_address: { network, cycleId, address: holder } },
+      update: { paidAt: event.ledgerClosedAt, paidTx: event.txHash, pushed },
+      // An entry the console does not know (should not happen) still gets a
+      // row, so accounting from chain data stays complete.
+      create: {
+        network,
+        cycleId,
+        address: holder,
+        amount,
+        proof: [],
+        paidAt: event.ledgerClosedAt,
+        paidTx: event.txHash,
+        pushed,
+      },
+    });
+    // Derived, never incremented: a re-applied event or the console's own
+    // bookkeeping for the same payment must not count it twice.
+    await syncCycleClaimed(network, cycleId);
     return;
   }
 
@@ -318,7 +316,14 @@ export async function pollNetwork(watched: WatchedNetwork): Promise<PollStats> {
   let gapLedgers = 0;
 
   if (start > latest.sequence) {
-    return { network, fetched: 0, processed: 0, lastLedger: cursor?.lastLedger ?? 0, latestLedger: latest.sequence, gapLedgers };
+    return {
+      network,
+      fetched: 0,
+      processed: 0,
+      lastLedger: cursor?.lastLedger ?? 0,
+      latestLedger: latest.sequence,
+      gapLedgers,
+    };
   }
 
   // Phase 1 — fetch every stream, store raw rows. The cursor only advances to

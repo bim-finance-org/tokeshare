@@ -82,3 +82,12 @@ SELECT
   'legacy-' || e."network" || '-' || e."cycleId", e."address", 0, e."amount",
   CASE WHEN e."excluded" THEN 'claim' ELSE 'push' END, 'onchain'
 FROM "DistributionEntry" e;
+
+-- `claimed` becomes derived from the paid entries (lib/stellar-cycle-accounting.ts).
+-- The console and the indexer both incremented it for the same payment, so the
+-- pilot cycle #0 read 2 USDC claimed out of 1; recompute every cycle once.
+UPDATE "DistributionCycle" c
+SET "claimed" = COALESCE((
+  SELECT SUM(e."amount") FROM "DistributionEntry" e
+  WHERE e."network" = c."network" AND e."cycleId" = c."cycleId" AND e."paidAt" IS NOT NULL
+), 0);

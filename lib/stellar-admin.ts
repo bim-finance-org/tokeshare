@@ -24,6 +24,7 @@ import {
 } from '@/lib/stellar-assets';
 import { buildDistribution, type ProvenEntry } from '@/lib/stellar-merkle';
 import { prisma } from '@/lib/prisma';
+import { syncCycleClaimed } from '@/lib/stellar-cycle-accounting';
 
 const INCLUSION_FEE = '100000';
 /** Initial distribute_for batch size; batches split themselves on resource limits. */
@@ -325,16 +326,11 @@ export async function pushCycleEntries(asset: StellarAsset, cycleIds: number[]):
       proof: r.proof as string[],
     }));
     hashes.push(...(await pushInBatches(asset, profile.distributorId, cycleId, entries)));
-    await prisma.$transaction([
-      prisma.distributionEntry.updateMany({
-        where: { network, cycleId, address: { in: entries.map((e) => e.address) } },
-        data: { paidAt: new Date(), pushed: true },
-      }),
-      prisma.distributionCycle.update({
-        where: { network_cycleId: { network, cycleId } },
-        data: { claimed: { increment: entries.reduce((a, e) => a + e.amount, 0n) } },
-      }),
-    ]);
+    await prisma.distributionEntry.updateMany({
+      where: { network, cycleId, address: { in: entries.map((e) => e.address) } },
+      data: { paidAt: new Date(), pushed: true },
+    });
+    await syncCycleClaimed(network, cycleId);
   }
   return hashes;
 }
