@@ -63,6 +63,12 @@ echo '<mot de passe>' | ./stellar-disbursement-platform auth add-user \
   ops@tokeshare.co Ops Tokeshare --password --owner --roles owner --tenant-id <id>
 ```
 
+**Connexion et MFA.** Sur mainnet, le SDP refuse de démarrer si la MFA est
+désactivée (`MFA cannot be disabled in pubnet`) : `SDP_DISABLE_MFA=false`.
+Aucun fournisseur d'email n'est branché (`EMAIL_SENDER_TYPE=DRY_RUN`), donc
+le code envoyé à la connexion n'est pas expédié : il apparaît dans les logs
+du conteneur `sdp-api`. Seuls les admins Coolify peuvent donc se connecter.
+
 ## 3. Clé API et asset (une fois)
 
 Dans le dashboard SDP (`sdp-frontend`), connecté avec le compte ci-dessus :
