@@ -59,6 +59,7 @@ import {
   type LineState,
   type RoundStatus,
 } from '@/lib/stellar-round-state';
+import { errorMessage } from '@/lib/error-message';
 
 export type RoundChannel = 'sdp' | 'contract';
 export type PayoutChannel = 'sdp' | 'push' | 'claim';
@@ -76,8 +77,6 @@ const roundChannelFor = (network: StellarNetwork): RoundChannel => (getSdpConfig
 
 const payoutChannel = (round: RoundChannel, push: boolean): PayoutChannel =>
   push ? (round === 'sdp' ? 'sdp' : 'push') : 'claim';
-
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 /**
  * USDC already committed on the SDP distribution account by other rounds

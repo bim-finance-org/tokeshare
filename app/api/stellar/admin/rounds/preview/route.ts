@@ -8,6 +8,7 @@ import { requireAuth } from '@/lib/api-utils';
 import { getLogger } from '@/lib/logger';
 import { previewRound } from '@/lib/stellar-rounds';
 import { parseRoundRequest } from '../parse';
+import { errorMessage } from '@/lib/error-message';
 
 const log = getLogger('api:stellar-admin-round-preview');
 
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json(await previewRound(parsed.asset, parsed.totalStroops));
   } catch (error) {
     log.error('round preview failed', error);
-    const message = error instanceof Error ? error.message : 'Snapshot failed';
+    const message = errorMessage(error, 'Snapshot failed');
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

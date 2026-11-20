@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-utils';
 import { getLogger } from '@/lib/logger';
 import { advanceRound, getRound } from '@/lib/stellar-rounds';
+import { errorMessage } from '@/lib/error-message';
 
 const log = getLogger('api:stellar-admin-round-advance');
 
@@ -21,7 +22,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     return NextResponse.json(round);
   } catch (error) {
     log.error(`round ${id} advance failed`, error);
-    const message = error instanceof Error ? error.message : 'Round execution failed';
+    const message = errorMessage(error, 'Round execution failed');
     return NextResponse.json({ error: message, roundId: id }, { status: 500 });
   }
 }

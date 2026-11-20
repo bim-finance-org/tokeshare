@@ -25,6 +25,7 @@ import {
 import { buildDistribution, type ProvenEntry } from '@/lib/stellar-merkle';
 import { prisma } from '@/lib/prisma';
 import { syncCycleClaimed } from '@/lib/stellar-cycle-accounting';
+import { errorMessage } from '@/lib/error-message';
 
 const INCLUSION_FEE = '100000';
 /** Initial distribute_for batch size; batches split themselves on resource limits. */
@@ -149,7 +150,7 @@ const entryScVal = (entry: ProvenEntry): xdr.ScVal =>
   ]);
 
 const isResourceError = (error: unknown): boolean =>
-  error instanceof Error && /resource|budget|exceed|limit|too large/i.test(error.message);
+  /resource|budget|exceed|limit|too large/i.test(errorMessage(error, ''));
 
 /**
  * Pushes the payout lines in batches, splitting any batch the network's

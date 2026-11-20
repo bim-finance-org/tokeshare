@@ -20,6 +20,7 @@ import { getServer } from '@/lib/stellar';
 import { prisma } from '@/lib/prisma';
 import { syncCycleClaimed } from '@/lib/stellar-cycle-accounting';
 import { decodeEvent, type DecodedEvent, type Json, type RawRpcEvent } from './decode';
+import { errorMessage } from '@/lib/error-message';
 
 const PAGE_LIMIT = 200;
 /** First boot with no cursor: start this many ledgers back (~30 min at ~5s). */
@@ -139,8 +140,11 @@ async function fetchStream(
   return { events, latestLedger };
 }
 
-const isOutOfRangeError = (error: unknown): boolean =>
-  error instanceof Error && /startLedger|oldest|out of range|LedgerNotFound/i.test(error.message);
+// The RPC rejects a cursor past retention with a raw JSON-RPC error object
+// ({ code: -32600, message: "startLedger must be within the ledger range…" }),
+// not an Error — read it through errorMessage or the gap is never detected.
+export const isOutOfRangeError = (error: unknown): boolean =>
+  /startLedger|oldest|out of range|LedgerNotFound/i.test(errorMessage(error, ''));
 
 // ---- derivation ------------------------------------------------------------
 

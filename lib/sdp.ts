@@ -11,6 +11,7 @@
 // dashboard owner account. Never import from client components.
 
 import { getNetworkProfile, type StellarNetwork } from '@/config/stellar';
+import { errorMessage } from '@/lib/error-message';
 
 export interface SdpConfig {
   network: StellarNetwork;
@@ -86,7 +87,7 @@ async function sdpFetch<T>(config: SdpConfig, path: string, init: RequestInit = 
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
+    const reason = errorMessage(error);
     throw new SdpError(`SDP unreachable (${config.network}): ${reason}`, 0);
   }
 
