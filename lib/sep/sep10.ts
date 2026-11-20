@@ -53,7 +53,7 @@ function assertValidChallenge(tx: Transaction, opts: Sep10Options): void {
   const hash = tx.hash();
   const signedByServer = tx.signatures.some((sig) => {
     try {
-      return serverKeypair.verify(hash, sig.signature());
+      return serverKeypair.verify(hash, sig.signature);
     } catch {
       return false;
     }
