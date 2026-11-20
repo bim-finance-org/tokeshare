@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-utils';
 import { getLogger } from '@/lib/logger';
 import { getRound, rerouteFailed } from '@/lib/stellar-rounds';
+import { errorMessage } from '@/lib/error-message';
 
 const log = getLogger('api:stellar-admin-round-reroute');
 
@@ -19,7 +20,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ cycleId, count, round: await getRound(id) });
   } catch (error) {
     log.error(`round ${id} reroute failed`, error);
-    const message = error instanceof Error ? error.message : 'Re-route failed';
+    const message = errorMessage(error, 'Re-route failed');
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

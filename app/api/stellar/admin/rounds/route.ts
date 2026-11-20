@@ -14,6 +14,7 @@ import { requireAuth } from '@/lib/api-utils';
 import { getLogger } from '@/lib/logger';
 import { advanceRound, getRound, listRounds, planRound, syncActiveRounds } from '@/lib/stellar-rounds';
 import { parseRoundRequest } from './parse';
+import { errorMessage } from '@/lib/error-message';
 
 const log = getLogger('api:stellar-admin-rounds');
 
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
     roundId = await planRound(parsed.asset, parsed.totalStroops, expiresDays);
   } catch (error) {
     log.error('round planning failed', error);
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Planning failed' }, { status: 500 });
+    return NextResponse.json({ error: errorMessage(error, 'Planning failed') }, { status: 500 });
   }
 
   try {
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     return NextResponse.json(round);
   } catch (error) {
     log.error(`round ${roundId} stopped`, error);
-    const message = error instanceof Error ? error.message : 'Round execution failed';
+    const message = errorMessage(error, 'Round execution failed');
     return NextResponse.json({ error: message, roundId }, { status: 500 });
   }
 }

@@ -14,6 +14,7 @@ import { prisma } from '@/lib/prisma';
 import { buildClaimXdr, hasPaymentTrustline } from '@/lib/stellar-assets';
 import { isStrkey } from '@/lib/stellar-distributions';
 import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { errorMessage } from '@/lib/error-message';
 
 const log = getLogger('api:stellar-claim-build');
 
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ needsTrustline: false, xdr: claimXdr, amount: entry.amount.toString() });
   } catch (error) {
     log.error('claim build failed', error);
-    const message = error instanceof Error ? error.message : 'Claim build failed';
+    const message = errorMessage(error, 'Claim build failed');
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

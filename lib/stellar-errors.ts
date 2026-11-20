@@ -2,6 +2,8 @@
 // non-compliant transfers with typed errors that surface in the thrown message as
 // `Error(Contract, #NNN)`; we translate the codes we know about.
 
+import { errorMessage } from '@/lib/error-message';
+
 // Sale contract uses codes 1-7; the token uses 100+. No overlap, so a single map
 // keyed by the numeric code is unambiguous.
 const CONTRACT_ERROR_MESSAGES: Record<number, string> = {
@@ -20,7 +22,7 @@ const CONTRACT_ERROR_MESSAGES: Record<number, string> = {
 
 /** Extracts a known contract error message from a thrown error, if any. */
 export function parseContractError(error: unknown): string | undefined {
-  const message = error instanceof Error ? error.message : typeof error === 'string' ? error : '';
+  const message = errorMessage(error, '');
   const match = message.match(/Error\(Contract,\s*#(\d+)\)/);
   if (!match) return undefined;
   return CONTRACT_ERROR_MESSAGES[Number(match[1])];
@@ -28,5 +30,5 @@ export function parseContractError(error: unknown): string | undefined {
 
 /** Best-effort human-readable message for any Stellar/contract error. */
 export function toReadableStellarError(error: unknown): string {
-  return parseContractError(error) ?? (error instanceof Error ? error.message : 'Unknown error');
+  return parseContractError(error) ?? errorMessage(error);
 }

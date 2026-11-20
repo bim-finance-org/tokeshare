@@ -23,6 +23,7 @@ import { getNetworkProfile, type StellarNetwork } from '@/config/stellar';
 import { getLogger } from '@/lib/logger';
 import { submitSignedXdr } from '@/lib/stellar';
 import { rateLimit, rateLimitHeaders } from '@/lib/ratelimit';
+import { errorMessage } from '@/lib/error-message';
 
 const log = getLogger('api:stellar-claim-submit');
 
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ hash });
   } catch (error) {
     log.error('sponsored submit failed', error);
-    const message = error instanceof Error ? error.message : 'Submit failed';
+    const message = errorMessage(error, 'Submit failed');
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

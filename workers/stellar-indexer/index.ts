@@ -18,6 +18,7 @@ import { createServer } from 'node:http';
 import { prisma } from '@/lib/prisma';
 import { syncActiveRounds } from '@/lib/stellar-rounds';
 import { buildWatched, pollNetwork, type PollStats } from './ingest';
+import { errorMessage } from '@/lib/error-message';
 
 const POLL_MS = (Number(process.env.STELLAR_INDEXER_POLL_MINUTES) || 30) * 60_000;
 const PORT = Number(process.env.PORT) || 8080;
@@ -50,7 +51,7 @@ async function pollAll(): Promise<void> {
           `fetched=${stats.fetched} processed=${stats.processed}${gap}`,
       );
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = errorMessage(error);
       state.networks[name] = {
         ...(state.networks[name] ?? {
           network: name,
@@ -75,7 +76,7 @@ async function syncRounds(): Promise<void> {
     state.sdpSync = { at: new Date().toISOString(), synced, errors };
     for (const error of errors) console.error('[indexer][rounds] sync failed:', error);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = errorMessage(error);
     state.sdpSync = { at: new Date().toISOString(), synced: 0, errors: [message] };
     console.error('[indexer][rounds] sync failed:', message);
   }
