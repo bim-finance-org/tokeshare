@@ -85,10 +85,13 @@ model StellarTrade {
 
 /// One distribution round, mirrored from the distributor contract. Created by
 /// the operator console at cycle creation (with its entries), then kept in
-/// sync by the indexer from CycleCreated/Paid/Swept events.
+/// sync by the indexer from CycleCreated/Paid/Swept events. Belongs to the
+/// DistributionRound that funded it (null only for a cycle the console never
+/// authored — the indexer still mirrors it).
 model DistributionCycle {
   network        String
   cycleId        Int
+  roundId        String?
   assetSlug      String
   tokenId        String
   total          BigInt
@@ -100,9 +103,80 @@ model DistributionCycle {
   createdTx      String?
   createdAt      DateTime            @default(now())
   entries        DistributionEntry[]
+  round          DistributionRound?  @relation(fields: [roundId], references: [id])
 
   @@id([network, cycleId])
   @@index([assetSlug])
+  @@index([roundId])
+}
+
+/// One revenue payout of one asset ("October for TFW_001"), independent of
+/// the chain. The snapshot is split between DISJOINT channels — never both
+/// for one holder, or a holder paid by the SDP would keep a valid Merkle
+/// proof and could claim a second time:
+/// - `sdp` rounds: holders with a USDC trustline are paid by a Stellar
+///   Disbursement Platform disbursement; the others get a distributor cycle
+///   built over them only (claim path);
+/// - `contract` rounds (no SDP on the network): one distributor cycle over
+///   everyone, pushed with distribute_for — the tranche 2 step 1 flow.
+model DistributionRound {
+  id                String               @id @default(cuid())
+  network           String
+  /// sdp | contract
+  channel           String
+  assetSlug         String
+  tokenId           String
+  /// Amount entered by the operator, in stroops. Payout lines sum to
+  /// total - dust (the rounding remainder never leaves the operator).
+  total             BigInt
+  snapshotLedger    Int
+  /// Merkle root over the FULL snapshot (cycle id 0) — audit trail only,
+  /// never published on-chain.
+  snapshotRoot      String
+  /// Claim window for the cycles of this round (initial + re-routes).
+  claimExpiresAt    DateTime
+  /// planned | submitted | settled | attention
+  status            String               @default("planned")
+  /// Set once the SDP distribution account holds enough for this round.
+  fundedAt          DateTime?
+  fundingTx         String?
+  sdpDisbursementId String?
+  /// Last error raised while advancing the round (cleared on success).
+  lastError         String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  cycles            DistributionCycle[]
+  payouts           DistributionPayout[]
+
+  @@index([network, assetSlug])
+  @@index([status])
+}
+
+/// One holder's line in a round's snapshot. `channel` says who pays it:
+/// `sdp` (SDP payment — status mirrored from the SDP), `push` (distribute_for)
+/// or `claim` (distributor claim path). push/claim settlement lives on the
+/// matching DistributionEntry; `status` is only meaningful for sdp lines.
+model DistributionPayout {
+  roundId         String
+  address         String
+  shares          BigInt
+  amount          BigInt
+  /// sdp | push | claim
+  channel         String
+  /// sdp lines: draft | ready | pending | paused | success | failed | canceled | rerouted
+  /// push/claim lines: onchain
+  status          String
+  sdpPaymentId    String?
+  stellarTx       String?
+  paidAt          DateTime?
+  error           String?
+  /// Distributor cycle a failed SDP line was moved to (claim path).
+  reroutedCycleId Int?
+
+  round DistributionRound @relation(fields: [roundId], references: [id])
+
+  @@id([roundId, address])
+  @@index([address])
 }
 
 /// One SEP-24 ramp flow (deposit or withdrawal) started from the app against

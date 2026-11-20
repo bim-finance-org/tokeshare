@@ -17,6 +17,7 @@
     "test:watch": "vitest",
     "indexer": "tsx workers/stellar-indexer/index.ts",
     "indexer:seed": "tsx workers/stellar-indexer/seed.ts",
+    "sdp:secrets": "tsx scripts/sdp-secrets.ts",
     "alfred": "tsx --env-file=.env.local scripts/alfred.ts"
   },
   "dependencies": {

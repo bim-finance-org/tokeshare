@@ -7,6 +7,7 @@
 
 import { getStellarAsset, isAssetConfigured, STELLAR_ASSETS } from '@/config/stellar-assets';
 import { prisma } from '@/lib/prisma';
+import { countRound } from '@/lib/stellar-round-state';
 
 const str = (value: bigint | null | undefined): string | null =>
   value === null || value === undefined ? null : value.toString();
@@ -20,6 +21,9 @@ export const isStrkey = (address: string): boolean => /^[GC][A-Z2-7]{55}$/.test(
  */
 const entryStatus = (entry: { paidAt: Date | null; excluded: boolean }): 'paid' | 'claimable' | 'pending' =>
   entry.paidAt ? 'paid' : entry.excluded ? 'claimable' : 'pending';
+
+/** SDP payout lines a holder sees (a re-routed line shows through its claim entry instead). */
+const visibleSdpPayouts = { channel: 'sdp', status: { not: 'rerouted' } } as const;
 
 const serializeCycle = (cycle: {
   network: string;
@@ -49,19 +53,39 @@ const serializeCycle = (cycle: {
 
 // ---- per-asset views -------------------------------------------------------
 
-/** Distribution history of one asset: every cycle plus its settlement state. */
+/**
+ * Distribution history of one asset: every round (one payout), newest first,
+ * with its delivery state across channels (SDP payments + distributor
+ * entries). Operator-only fields (errors, SDP ids) stay out of this public view.
+ */
 export async function getAssetDistributions(slug: string) {
-  const cycles = await prisma.distributionCycle.findMany({
-    where: { assetSlug: slug },
-    orderBy: { cycleId: 'desc' },
-    include: { entries: { select: { paidAt: true, excluded: true } } },
+  const rounds = await prisma.distributionRound.findMany({
+    where: { assetSlug: slug, status: { not: 'planned' } },
+    orderBy: { createdAt: 'desc' },
+    include: { payouts: true, cycles: { include: { entries: true } } },
   });
-  return cycles.map(({ entries, ...cycle }) => ({
-    ...serializeCycle(cycle),
-    entryCount: entries.length,
-    paidCount: entries.filter((e) => e.paidAt).length,
-    claimableCount: entries.filter((e) => entryStatus(e) === 'claimable').length,
-  }));
+  return rounds.map((round) => {
+    const counts = countRound(
+      round.payouts,
+      round.cycles.flatMap((c) => c.entries),
+    );
+    return {
+      id: round.id,
+      network: round.network,
+      channel: round.channel,
+      status: round.status,
+      total: str(round.payouts.reduce((a, p) => a + p.amount, 0n)),
+      paid: str(counts.paidAmount),
+      holders: counts.holders,
+      paidCount: counts.paid,
+      claimableCount: counts.claimable,
+      snapshotLedger: round.snapshotLedger,
+      snapshotRoot: round.snapshotRoot,
+      claimExpiresAt: round.claimExpiresAt.toISOString(),
+      createdAt: round.createdAt.toISOString(),
+      cycles: round.cycles.map((c) => serializeCycle(c)),
+    };
+  });
 }
 
 /** Cap table of one asset, from the indexer's holder set. */
@@ -103,10 +127,14 @@ export async function getAssetActivity(slug: string, limit: number) {
 
 /** Holdings + trade and distribution totals for one address, per asset. */
 export async function getPortfolio(address: string) {
-  const [holdings, trades, entries] = await Promise.all([
+  const [holdings, trades, entries, sdpPayouts] = await Promise.all([
     prisma.stellarHolder.findMany({ where: { address } }),
     prisma.stellarTrade.findMany({ where: { address } }),
     prisma.distributionEntry.findMany({ where: { address }, include: { cycle: { select: { assetSlug: true } } } }),
+    prisma.distributionPayout.findMany({
+      where: { address, ...visibleSdpPayouts, status: 'success' },
+      include: { round: { select: { assetSlug: true } } },
+    }),
   ]);
 
   const slugs = new Set([...holdings.map((h) => h.assetSlug), ...trades.map((t) => t.assetSlug)]);
@@ -126,41 +154,76 @@ export async function getPortfolio(address: string) {
         sold: str(sum(mine.filter((t) => t.kind === 'sell').map((t) => t.shares))),
         invested: str(sum(mine.filter((t) => t.kind === 'buy' && t.usdc).map((t) => t.usdc!))),
         divested: str(sum(mine.filter((t) => t.kind === 'sell' && t.usdc).map((t) => t.usdc!))),
-        distributionsReceived: str(sum(myEntries.filter((e) => e.paidAt).map((e) => e.amount))),
-        distributionsClaimable: str(
-          sum(myEntries.filter((e) => entryStatus(e) === 'claimable').map((e) => e.amount)),
+        distributionsReceived: str(
+          sum([
+            ...myEntries.filter((e) => e.paidAt).map((e) => e.amount),
+            ...sdpPayouts.filter((p) => p.round.assetSlug === slug).map((p) => p.amount),
+          ]),
         ),
+        distributionsClaimable: str(sum(myEntries.filter((e) => entryStatus(e) === 'claimable').map((e) => e.amount))),
       };
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));
   return { address, assets };
 }
 
-/** Every payout line of one address: claimables (with proof) + history. */
+/**
+ * Every payout line of one address, newest first: distributor entries
+ * (claimables carry their proof) and SDP payments. `cycleId` is set only on
+ * distributor lines — it is what the claim flow needs.
+ */
 export async function getPortfolioDistributions(address: string) {
-  const entries = await prisma.distributionEntry.findMany({
-    where: { address },
-    orderBy: [{ cycleId: 'desc' }],
-    include: { cycle: true },
-  });
-  return entries.map((entry) => {
+  const [entries, payouts] = await Promise.all([
+    prisma.distributionEntry.findMany({ where: { address }, include: { cycle: true } }),
+    prisma.distributionPayout.findMany({ where: { address, ...visibleSdpPayouts }, include: { round: true } }),
+  ]);
+
+  const fromEntries = entries.map((entry) => {
     const status = entryStatus(entry);
     return {
       network: entry.network,
-      cycleId: entry.cycleId,
+      channel: 'distributor' as const,
+      roundId: entry.cycle.roundId,
+      cycleId: entry.cycleId as number | null,
       assetSlug: entry.cycle.assetSlug,
       amount: str(entry.amount),
-      status,
+      status: status as 'paid' | 'claimable' | 'pending' | 'failed',
       pushed: entry.pushed,
       paidAt: entry.paidAt?.toISOString() ?? null,
       paidTx: entry.paidTx,
-      expiresAt: entry.cycle.expiresAt.toISOString(),
+      expiresAt: entry.cycle.expiresAt.toISOString() as string | null,
       expired: entry.cycle.expiresAt.getTime() <= Date.now() || entry.cycle.sweptAt !== null,
+      at: entry.cycle.createdAt,
       // The proof is only actionable on a claimable line; omitting it
       // elsewhere keeps payloads small.
       proof: status === 'claimable' ? (entry.proof as string[]) : undefined,
     };
   });
+
+  const fromSdp = payouts.map((payout) => ({
+    network: payout.round.network,
+    channel: 'sdp' as const,
+    roundId: payout.roundId as string | null,
+    cycleId: null as number | null,
+    assetSlug: payout.round.assetSlug,
+    amount: str(payout.amount),
+    status: (payout.status === 'success'
+      ? 'paid'
+      : payout.status === 'failed' || payout.status === 'canceled'
+        ? 'failed'
+        : 'pending') as 'paid' | 'claimable' | 'pending' | 'failed',
+    pushed: true as boolean | null,
+    paidAt: payout.paidAt?.toISOString() ?? null,
+    paidTx: payout.stellarTx,
+    expiresAt: null as string | null,
+    expired: false,
+    at: payout.round.createdAt,
+    proof: undefined as string[] | undefined,
+  }));
+
+  const lines = [...fromEntries, ...fromSdp].sort((a, b) => b.at.getTime() - a.at.getTime());
+  for (const line of lines) delete (line as { at?: Date }).at;
+  return lines;
 }
 
 /** True when the slug names a configured (deployed) registry asset. */
