@@ -8,6 +8,28 @@
 # Public: sdp-api (port 8000) and sdp-frontend (port 80) — assign their
 # domains in Coolify. Never expose 8003 (tenant admin API): nothing here
 # publishes it, keep it that way.
+#
+# Images are BUILT here rather than pulled: SDF only publishes linux/amd64,
+# and the Coolify host is arm64. The backend is compiled from the tagged
+# source (pure Go, CGO off); the dashboard is static files, copied out of the
+# official image into a native nginx. Builds are inline so the file also works
+# as a pasted Coolify service, with no repository checkout next to it.
+x-sdp-backend-build: &sdp-backend-build
+  context: .
+  dockerfile_inline: |
+    FROM golang:1.26-alpine AS build
+    RUN apk add --no-cache git
+    RUN git clone --depth 1 --branch 7.0.0 https://github.com/stellar/stellar-disbursement-platform-backend.git /src
+    WORKDIR /src
+    ENV CGO_ENABLED=0 GOOS=linux
+    RUN go mod download
+    RUN go build -o /bin/stellar-disbursement-platform -ldflags "-X main.GitCommit=7.0.0" .
+
+    FROM alpine:3.24
+    RUN apk add --no-cache ca-certificates
+    COPY --from=build /bin/stellar-disbursement-platform /app/
+    WORKDIR /app
+    ENTRYPOINT ["./stellar-disbursement-platform"]
 
 services:
   sdp-db:
@@ -26,7 +48,9 @@ services:
       retries: 20
 
   sdp-api:
-    image: stellar/stellar-disbursement-platform-backend:7.0.0
+    image: tokeshare/sdp-backend:7.0.0
+    build: *sdp-backend-build
+    pull_policy: build
     restart: always
     depends_on:
       sdp-db:
@@ -96,7 +120,9 @@ services:
       retries: 10
 
   sdp-tss:
-    image: stellar/stellar-disbursement-platform-backend:7.0.0
+    image: tokeshare/sdp-backend:7.0.0
+    build: *sdp-backend-build
+    pull_policy: build
     restart: always
     depends_on:
       sdp-api:
@@ -118,7 +144,18 @@ services:
         exec ./stellar-disbursement-platform tss
 
   sdp-frontend:
-    image: stellar/stellar-disbursement-platform-frontend:7.0.0
+    image: tokeshare/sdp-frontend:7.0.0
+    pull_policy: build
+    build:
+      context: .
+      # The amd64 stage has no RUN: its files are only copied, never executed,
+      # so an arm64 host needs no emulation.
+      dockerfile_inline: |
+        FROM --platform=linux/amd64 stellar/stellar-disbursement-platform-frontend:7.0.0 AS upstream
+        FROM nginx:1.31
+        COPY --from=upstream /usr/share/nginx/html/ /usr/share/nginx/html/
+        COPY --from=upstream /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+        RUN mkdir -p /usr/share/nginx/html/settings
     restart: always
     depends_on:
       - sdp-api
@@ -129,12 +166,14 @@ services:
       STELLAR_EXPERT_URL: ${STELLAR_EXPERT_URL:?set STELLAR_EXPERT_URL}
       HORIZON_URL: ${HORIZON_URL}
     entrypoint: ''
-    # The dashboard reads its config from a JS file — generated at boot from
-    # the env so no file has to be mounted.
+    # The dashboard fetches /settings/env-config.js (not shipped in the image)
+    # — generated at boot from the env so no file has to be mounted.
     command:
       - sh
       - -c
       - |
+        set -e
+        mkdir -p /usr/share/nginx/html/settings
         printf 'window._env_ = {\n  API_URL: "%s",\n  STELLAR_EXPERT_URL: "%s",\n  HORIZON_URL: "%s",\n  RPC_ENABLED: true,\n  RECAPTCHA_SITE_KEY: "",\n  SINGLE_TENANT_MODE: true\n};\n' \
           "$$SDP_API_URL" "$$STELLAR_EXPERT_URL" "$$HORIZON_URL" > /usr/share/nginx/html/settings/env-config.js
         exec nginx -g 'daemon off;'
