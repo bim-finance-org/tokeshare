@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getNetworkProfile } from '@/config/stellar';
 import {
   createDisbursement,
   getDisbursementPayments,
@@ -93,7 +94,9 @@ describe('resolvePayAssetId', () => {
     fetchMock.mockResolvedValueOnce(
       json(200, [
         { id: 'xlm', code: 'XLM', issuer: '' },
-        { id: 'usdc', code: 'USDC', issuer: 'GCYG5OOZY4O2EZOY7OPT4FYY2XWZQ3WCX6M24CVWWHTV67ATKAVK77QC' },
+        // A same-code asset from another issuer must not match.
+        { id: 'other-usdc', code: 'USDC', issuer: 'GCYG5OOZY4O2EZOY7OPT4FYY2XWZQ3WCX6M24CVWWHTV67ATKAVK77QC' },
+        { id: 'usdc', code: 'USDC', issuer: getNetworkProfile(CONFIG.network).pay.issuer },
       ]),
     );
     expect(await resolvePayAssetId(CONFIG)).toBe('usdc');

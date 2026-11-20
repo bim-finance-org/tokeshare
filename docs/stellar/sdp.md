@@ -85,7 +85,7 @@ SDP_<NET>_ASSET_ID=<id de l'USDC>            (étape 3)
 SDP_<NET>_DASHBOARD_URL=https://sdp-<net>.tokeshare.co
 ```
 
-Déployer le front applique la migration `20261005000000_distribution_rounds`
+Déployer le front applique la migration `20261120000000_distribution_rounds`
 (`prisma migrate deploy`) : les cycles existants deviennent des rounds
 `contract` déjà réglés.
 
