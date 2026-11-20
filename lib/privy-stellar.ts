@@ -30,7 +30,7 @@ export async function signStellarXdrWithPrivy(
   // Our sale/trustline operations are plain transactions (never fee-bump).
   const tx = TransactionBuilder.fromXDR(unsignedXdr, networkPassphrase) as Transaction;
 
-  const hashHex = tx.hash().toString('hex');
+  const hashHex = Buffer.from(tx.hash()).toString('hex');
   const { signature } = await signRawHash({ address, chainType: 'stellar', hash: `0x${hashHex}` });
 
   // signRawHash returns the raw ed25519 signature (hex). Convert to base64 for
