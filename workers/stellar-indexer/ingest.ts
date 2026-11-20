@@ -35,10 +35,28 @@ export interface WatchedNetwork {
 }
 
 /** Groups the registry's configured assets by network. */
+/**
+ * Networks to index, from STELLAR_INDEXER_NETWORKS ("mainnet", "testnet",
+ * comma-separated). Unset = every network with a configured asset. A network
+ * left out is not polled and does not count in /health.
+ */
+export function indexedNetworks(raw = process.env.STELLAR_INDEXER_NETWORKS): Set<StellarNetwork> | null {
+  const names = (raw ?? '')
+    .split(',')
+    .map((n) => n.trim())
+    .filter(Boolean);
+  if (names.length === 0) return null;
+  const unknown = names.filter((n) => n !== 'mainnet' && n !== 'testnet');
+  if (unknown.length > 0) throw new Error(`STELLAR_INDEXER_NETWORKS: unknown network(s) ${unknown.join(', ')}`);
+  return new Set(names as StellarNetwork[]);
+}
+
 export function buildWatched(): WatchedNetwork[] {
+  const only = indexedNetworks();
   const byNetwork = new Map<StellarNetwork, StellarAsset[]>();
   for (const asset of STELLAR_ASSETS) {
     if (!asset.tokenId) continue;
+    if (only && !only.has(asset.network)) continue;
     byNetwork.set(asset.network, [...(byNetwork.get(asset.network) ?? []), asset]);
   }
   return [...byNetwork.entries()].map(([network, assets]) => ({
