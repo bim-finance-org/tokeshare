@@ -71,7 +71,7 @@ export function verifyChallenge(profile: StellarNetworkProfile, signedXdr: strin
   const op = tx.operations[0];
   if (!op || op.type !== 'manageData' || op.name !== CHALLENGE_KEY || !op.value) return null;
 
-  const value = op.value.toString('utf8');
+  const value = new TextDecoder().decode(op.value);
   const [rawExp, digest] = value.split('.');
   const exp = Number(rawExp);
   if (!Number.isFinite(exp) || !digest || exp < now()) return null;
@@ -80,7 +80,7 @@ export function verifyChallenge(profile: StellarNetworkProfile, signedXdr: strin
   try {
     const keypair = Keypair.fromPublicKey(address);
     const hash = tx.hash();
-    if (!tx.signatures.some((sig) => keypair.verify(hash, sig.signature()))) return null;
+    if (!tx.signatures.some((sig) => keypair.verify(hash, sig.signature))) return null;
   } catch {
     return null;
   }

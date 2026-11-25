@@ -17,7 +17,6 @@ import {
   Keypair,
   Transaction,
   TransactionBuilder,
-  xdr,
 } from '@stellar/stellar-sdk';
 import { getNetworkProfile, type StellarNetwork } from '@/config/stellar';
 import { getLogger } from '@/lib/logger';
@@ -33,10 +32,10 @@ function isAllowedInnerTx(inner: Transaction, profile: ReturnType<typeof getNetw
 
   if (op.type === 'invokeHostFunction') {
     const func = op.func;
-    if (func.switch() !== xdr.HostFunctionType.hostFunctionTypeInvokeContract()) return false;
-    const invocation = func.invokeContract();
-    const target = Address.fromScAddress(invocation.contractAddress()).toString();
-    const method = invocation.functionName().toString();
+    if (func.type !== 'hostFunctionTypeInvokeContract') return false;
+    const invocation = func.invokeContract;
+    const target = Address.fromScAddress(invocation.contractAddress).toString();
+    const method = invocation.functionName.toString();
     return target === profile.distributorId && method === 'claim';
   }
 
