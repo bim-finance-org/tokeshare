@@ -19,6 +19,8 @@ const KNOWN_DECIMALS: Record<string, number> = {
   '0xdac17f958d2ee523a2206206994597c13d831ec7': 6, // USDT (Ethereum)
   '0x6b175474e89094c44da98b954eedeac495271d0f': 18, // DAI (Ethereum)
   // Base
+  '0xe904aea5e1b110c9174728fa2effc8aed19e98ef': 18, // PAXG (Base)
+  '0x2ffecb82dbb0d2469ba9643eb390287e01fae4f6': 18, // TGG (Base)
   '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': 6, // USDC
   '0x50c5725949a6f0c72e6c4a641f24049a917db0cb': 18, // DAI
   '0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42': 6, // EURC

@@ -33,11 +33,21 @@ export const ETH_CONTRACTS = {
   PAXG: ETH.PAXG,
 };
 
+// Contrats gold (TGG) sur Base — déployés et vérifiés on-chain le 2026-11-25.
+// Même TGG.sol / Zap.sol que sur Polygon et Ethereum, adossés au PAXG émis
+// nativement sur Base par Paxos.
+export const BASE_GOLD_CONTRACTS = {
+  TGG: BASE.TGG,
+  ZAP: BASE.ZAP_TGG,
+  PAXG: BASE.PAXG,
+};
+
 type TGGContracts = { TGG: string; ZAP: string; PAXG: string };
 
 const TGG_CONTRACTS_BY_CHAIN: Record<string, TGGContracts> = {
   [Blockchain.Polygon]: { TGG: CONTRACTS.TGG, ZAP: CONTRACTS.ZAP, PAXG: CONTRACTS.PAXG },
   [Blockchain.Ethereum]: ETH_CONTRACTS,
+  [Blockchain.Base]: BASE_GOLD_CONTRACTS,
 };
 
 export const getTGGContracts = (blockchain: Blockchain): TGGContracts => {

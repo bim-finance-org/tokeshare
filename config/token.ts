@@ -69,7 +69,7 @@ export const isMarketplaceToken = (symbol: string): symbol is MarketplaceTokenSy
 /**
  * The asset backing a sellable token. Addresses are keyed by chain because the
  * same collateral is deployed at a different address on each network (PAXG on
- * Polygon vs Ethereum), so a single flat address could never be correct for TGG.
+ * Polygon, Ethereum and Base), so a single flat address could never be correct for TGG.
  */
 export type CollateralInfo = {
   symbol: string;
@@ -91,6 +91,7 @@ export const COLLATERALS: Partial<Record<SellableTokenSymbol, CollateralInfo>> =
     addresses: {
       Polygon: POLY.PAXG,
       Ethereum: ETH.PAXG,
+      Base: BASE.PAXG,
     },
   },
   TSG: {
@@ -126,6 +127,7 @@ export const TOKENS: Record<string, TokenInfo> = {
     addresses: {
       Polygon: POLY.TGG,
       Ethereum: ETH.TGG,
+      Base: BASE.TGG,
     },
     decimals: 18,
     type: TokenType.Crypto,

@@ -18,7 +18,9 @@ describe('token helpers', () => {
   });
 
   it('getTokenBlockchains lists the chains a token is on', () => {
-    expect(getTokenBlockchains('TGG').sort()).toEqual([Blockchain.Ethereum, Blockchain.Polygon].sort());
+    expect(getTokenBlockchains('TGG').sort()).toEqual(
+      [Blockchain.Base, Blockchain.Ethereum, Blockchain.Polygon].sort(),
+    );
     expect(getTokenBlockchains('TMC')).toEqual([Blockchain.Base]);
     expect(getTokenBlockchains('NOPE')).toEqual([]);
   });
@@ -27,7 +29,8 @@ describe('token helpers', () => {
     const base = getBlockchainTokens(Blockchain.Base).map((t) => t.symbol);
     expect(base).toContain('TMC');
     expect(base).toContain('TSP500');
-    expect(base).not.toContain('TGG'); // TGG is not on Base
+    expect(base).toContain('TGG');
+    expect(base).not.toContain('TSG'); // TSG is Ethereum-only
   });
 
   it('getTokenDecimals reads the token decimals by symbol', () => {
@@ -39,7 +42,7 @@ describe('token helpers', () => {
 
   it('getTokensByTypeAndByBlockchain filters by type and chain', () => {
     const cryptoOnBase = getTokensByTypeAndByBlockchain(Blockchain.Base, TokenType.Crypto).map((t) => t.symbol);
-    expect(cryptoOnBase).toEqual(expect.arrayContaining(['TMC', 'TSP500', 'TFT_001', 'TLT_001']));
+    expect(cryptoOnBase).toEqual(expect.arrayContaining(['TGG', 'TMC', 'TSP500', 'TFT_001', 'TLT_001']));
     expect(cryptoOnBase).not.toContain('USDC'); // USDC is a stablecoin
   });
 

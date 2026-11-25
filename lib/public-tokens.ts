@@ -37,7 +37,7 @@ export interface PublicTokenContract {
    * The asset backing the token on this chain, or null when the backing is a
    * real-world asset with no on-chain representation (TFT_001, TLT_001, Stellar RWAs).
    * Per-contract rather than per-token: the same collateral lives at a
-   * different address on each chain (PAXG on Polygon vs Ethereum).
+   * different address on each chain (PAXG on Polygon, Ethereum and Base).
    */
   collateralToken: PublicTokenCollateral | null;
 }
