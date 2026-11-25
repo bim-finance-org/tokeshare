@@ -5,6 +5,8 @@ describe('getTokenDecimals (by address)', () => {
   it('resolves known token decimals', () => {
     expect(getTokenDecimals('0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359')).toBe(6); // USDC Polygon
     expect(getTokenDecimals('0x553d3D295e0f695B9228246232eDF400ed3560B5')).toBe(18); // PAXG
+    expect(getTokenDecimals('0xe904AEA5E1b110c9174728fA2efFc8aeD19E98Ef')).toBe(18); // PAXG (Base)
+    expect(getTokenDecimals('0x2FFecb82DBB0D2469bA9643EB390287E01FaE4F6')).toBe(18); // TGG (Base)
     expect(getTokenDecimals('0x123ffe0a3C62878dcbee2742227dc8990058d9E1')).toBe(9); // XAGM
   });
 

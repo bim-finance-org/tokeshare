@@ -5,7 +5,7 @@ import commoditiesData from '@/data/commoditiesData.json';
 import Exchange from '@/components/features/commodities/ExchangeLazy';
 import AssetPageHeader from '@/components/shared/AssetPageHeader';
 import CommoditiesInfos from '@/components/features/commodities/CommoditiesInfos';
-import { CONTRACTS, ETH_CONTRACTS, ETH_SILVER_CONTRACTS } from '@/contracts/contracts';
+import { BASE_GOLD_CONTRACTS, CONTRACTS, ETH_CONTRACTS, ETH_SILVER_CONTRACTS } from '@/contracts/contracts';
 import { Blockchain } from '@/enums/Blockchain';
 
 // Owner wallet is the same address on every chain (only the explorer link
@@ -25,6 +25,7 @@ interface CommodityToken {
   tokenImage: string;
   polygonContract?: string;
   ethereumContract?: string;
+  baseContract?: string;
   ownerWallet?: string;
   /** Proof-of-reserve address per chain (follows the network selector). */
   proofOfReserve?: Partial<Record<Blockchain, string>>;
@@ -39,11 +40,13 @@ const COMMODITY_TOKENS: Record<string, CommodityToken> = {
     tokenImage: '/images/currencies/tgg.png',
     polygonContract: CONTRACTS.TGG,
     ethereumContract: ETH_CONTRACTS.TGG,
+    baseContract: BASE_GOLD_CONTRACTS.TGG,
     ownerWallet: TOKESHARE_OWNER,
     // Proof of reserve is the TGG token contract on each chain.
     proofOfReserve: {
       [Blockchain.Polygon]: CONTRACTS.TGG,
       [Blockchain.Ethereum]: ETH_CONTRACTS.TGG,
+      [Blockchain.Base]: BASE_GOLD_CONTRACTS.TGG,
     },
     onesheetUrl: '/TGG_Onesheet.pdf',
   },
@@ -116,6 +119,7 @@ const CommodityPage = async ({ params }: PageProps) => {
           imagePriority
           polygonContract={tokenInfo.polygonContract}
           ethereumContract={tokenInfo.ethereumContract}
+          baseContract={tokenInfo.baseContract}
         />
 
         {/* Neutralize Exchange's built-in my-8/my-16 so the swap sits right under the header. */}

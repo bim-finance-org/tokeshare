@@ -20,6 +20,11 @@ export const ADDRESSES = {
     USDCE: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
   },
   [Blockchain.Base]: {
+    // TGG + its Zap on Base — deployed and verified on Basescan on 2026-11-25.
+    TGG: '0x2FFecb82DBB0D2469bA9643EB390287E01FaE4F6',
+    ZAP_TGG: '0xa0456E575663F77a70f924C3dCd2b80D8aEC7E76',
+    // PAXG issued natively on Base by Paxos (same implementation as on Ethereum).
+    PAXG: '0xe904AEA5E1b110c9174728fA2efFc8aeD19E98Ef',
     TMC: '0xf47C9E511d215E286d3Ca1B956e7C3DD6F6195D4',
     ZAP_TMC: '0x17b4CA0f1A49dB2c42596B3152c39C8aA7B7a0D9',
     CMC20: '0xa0A8481fc246Cd12f75227aBB96220fF5360fad3',
