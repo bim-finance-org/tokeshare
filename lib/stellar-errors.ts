@@ -18,6 +18,7 @@ const CONTRACT_ERROR_MESSAGES: Record<number, string> = {
   302: 'Your holdings are frozen.',
   303: 'Some of your shares are frozen.',
   1000: 'Trading is currently paused by the issuer.',
+  2000: 'The operator account does not hold the required role on the token.',
 };
 
 /** Extracts a known contract error message from a thrown error, if any. */
