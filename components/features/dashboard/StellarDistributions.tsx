@@ -413,7 +413,7 @@ const StellarDistributions = () => {
               : 'No SDP on this network — channel: distributor cycle (distribute_for push + claim).'}{' '}
             Snapshot ledger {preview.snapshotLedger.toLocaleString('en-US')}.
             {preview.excluded.length > 0 &&
-              ` Excluded (inventory / operator): ${preview.excluded.map(short).join(' · ')}.`}
+              ` Excluded (inventory / operator / venues): ${preview.excluded.map(short).join(' · ')}.`}
           </p>
 
           <div className="mt-4 overflow-x-auto rounded-2xl ring-1 ring-black/5">

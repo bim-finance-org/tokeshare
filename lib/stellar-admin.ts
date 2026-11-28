@@ -11,9 +11,9 @@
 //
 // Never import from client components.
 
-import { Address, Contract, Keypair, TransactionBuilder, nativeToScVal, xdr } from '@stellar/stellar-sdk';
+import { Address, Contract, Keypair, StrKey, TransactionBuilder, nativeToScVal, xdr } from '@stellar/stellar-sdk';
 import { getNetworkProfile, type StellarNetwork } from '@/config/stellar';
-import { type StellarAsset } from '@/config/stellar-assets';
+import { getVenueAddresses, type StellarAsset } from '@/config/stellar-assets';
 import { getServer, stroopsToUnits, submitSignedXdr, unitsToStroops } from '@/lib/stellar';
 import {
   buildClassicPaymentXdr,
@@ -31,7 +31,7 @@ const INCLUSION_FEE = '100000';
 /** Initial distribute_for batch size; batches split themselves on resource limits. */
 const INITIAL_BATCH_SIZE = Number(process.env.STELLAR_DISTRIBUTE_BATCH_SIZE) || 10;
 
-function adminKeypair(): Keypair {
+export function adminKeypair(): Keypair {
   const secret = process.env.STELLAR_DISTRIBUTOR_ADMIN_SECRET;
   if (!secret) throw new Error('STELLAR_DISTRIBUTOR_ADMIN_SECRET is not set');
   return Keypair.fromSecret(secret);
@@ -55,7 +55,7 @@ export interface Snapshot {
   eligibleShares: bigint;
   /** Sub-stroop remainder of the pro-rata split; stays for the sweep. */
   dust: bigint;
-  /** Addresses left out of the tree entirely (inventory, operator, config). */
+  /** Addresses left out of the tree entirely (inventory, operator, venues, config). */
   excluded: string[];
 }
 
@@ -66,6 +66,9 @@ export interface Snapshot {
  * Two different exclusions, deliberately kept apart:
  * - inventory/operator addresses are OUT OF THE TREE — paying the sale
  *   contract or ourselves would be Tokeshare distributing to itself;
+ * - secondary-market venues (liquidity pools and the routers that custody
+ *   the token) are OUT OF THE TREE too — they hold shares without being
+ *   investors, and USDC sent to a pool could be taken by anyone;
  * - holders without a USDC trustline STAY IN THE TREE but out of the push
  *   batch (one failing transfer would abort a whole batch) — their line is
  *   what the claim path serves once they open a trustline.
@@ -83,7 +86,14 @@ export async function computeSnapshot(asset: StellarAsset, totalStroops: bigint)
     .split(',')
     .map((a) => a.trim())
     .filter(Boolean);
-  const excludeSet = new Set([asset.saleId, adminKeypair().publicKey(), ...configured].filter(Boolean));
+  // A mistyped venue address would silently stop excluding its pool, so a
+  // malformed registry entry blocks the snapshot instead of paying a pool.
+  const venues = getVenueAddresses(asset);
+  const malformed = venues.filter((a) => !StrKey.isValidContract(a));
+  if (malformed.length > 0) {
+    throw new Error(`invalid venue address for ${asset.slug}: ${malformed.join(', ')} — fix the venues registry`);
+  }
+  const excludeSet = new Set([asset.saleId, adminKeypair().publicKey(), ...venues, ...configured].filter(Boolean));
 
   const latest = await getServer(profile.rpcUrl).getLatestLedger();
 
@@ -116,7 +126,7 @@ export async function computeSnapshot(asset: StellarAsset, totalStroops: bigint)
 
 // ---- on-chain invocation ---------------------------------------------------
 
-async function invokeAsAdmin(
+export async function invokeAsAdmin(
   asset: StellarAsset,
   contractId: string,
   method: string,

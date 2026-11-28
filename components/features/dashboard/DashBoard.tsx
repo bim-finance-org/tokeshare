@@ -4,6 +4,7 @@ import React from 'react';
 import { ShieldCheck } from 'lucide-react';
 import SnapshotModal from './SnapshotModal';
 import StellarDistributions from './StellarDistributions';
+import StellarAllowlist from './StellarAllowlist';
 import AlfredVerifications from './AlfredVerifications';
 import SignOutButton from '@/app/dashboard/SignOutButton';
 
@@ -32,6 +33,7 @@ const DashBoard = () => {
 
         <SnapshotModal />
         <StellarDistributions />
+        <StellarAllowlist />
         <AlfredVerifications />
       </div>
     </div>
