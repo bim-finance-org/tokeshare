@@ -26,7 +26,7 @@ tranche 2.
 | Élément | Référence |
 |---|---|
 | Token RWA `TFW_001` (SEP-41, allowlist, 7 décimales, 100 parts) | `CC2MTI3REEQUMDJYOLQHK4D6GPGSTGPZOWH3G75SECSOTOH7L7GGLG5O` |
-| Contrat de vente v2 (prix 50 USDC, frais 5 %, `auto_allow`) | `CAFYUWC2U7GX4DNG6JRZLPYDNXDOLJNHP5RWVAMOTOA5QO75N4B56X45` |
+| Contrat de vente v2 (achat à 50 USDC sans frais, rachat à 47,50 USDC net, `auto_allow`) | `CAFYUWC2U7GX4DNG6JRZLPYDNXDOLJNHP5RWVAMOTOA5QO75N4B56X45` |
 | Distributor (claim par preuve de Merkle) | `CD5G6SFEJZOIADCGKFNZ3HPX3RCHHUVBQLJG3XRMGE3ENNTGWKEDSYJE` |
 | Compte opérateur (admin du token, de la vente, du distributor ; sponsor de frais) | `GCBHFIQNNXYC6AVKCFAC3I6EN3E2ZDNBIQ6RUSZDS2IMYVRXAWZH3OYZ` |
 | Compte de versement SDP | `GDKY6DB53WHFGGKBFPT6VDIGD7QTUPAOZFHONVPXTXXUVGFRLUV24WAQ` |
@@ -69,8 +69,8 @@ assets », « first USDC revenue distribution executed », et les parcours fiat 
 ## 1. Faits vérifiés
 
 Vérifiés le 2026-11-28 dans la documentation officielle et le code source des
-protocoles. Ce qui n'a pas pu l'être est marqué **[à vérifier]** et traité dans
-la phase 0 (WS-0).
+protocoles. Les points qui restaient à vérifier ont été levés par le WS-0 : voir
+« Résultats du WS-0 » à la fin de cette section.
 
 ### CCTP (Circle)
 
@@ -145,25 +145,51 @@ la phase 0 (WS-0).
   transfert (erreur `#113 UserNotAllowed`), plus blocklist (`#114`), gel et pause.
 - Le contrat de vente autorise automatiquement l'acheteur au premier achat
   (`auto_allow = true`).
+- Prix de la vente : **50 USDC par part à l'achat, sans frais**. Les 5 % ne
+  s'appliquent qu'au rachat par le contrat : 47,50 USDC net par part, dans la
+  limite des USDC que le contrat détient (1,5 USDC le 2026-11-28, soit 0,03 part).
 - L'admin peut retirer des parts du stock de la vente : `sale.withdraw_tres(to, amount)`.
 - Le snapshot de distribution exclut déjà le contrat de vente, le compte
   opérateur et les adresses de `STELLAR_SNAPSHOT_EXCLUDE` (`lib/stellar-admin.ts`).
 
-### [à vérifier] en phase 0
+### Résultats du WS-0 (2026-11-28)
 
-- Sens exact des transferts de sortie chez Aquarius (pool → utilisateur ou
-  pool → router → utilisateur).
-- Destination de la part « protocole » des frais d'un pool Aquarius quand elle
-  est libellée en TFW_001 (adresse non autorisée → la collecte échouerait-elle
-  sans gêner les échanges ?).
-- `router_pair_for` de Soroswap : renvoie-t-il l'adresse déterministe d'une paire
-  pas encore créée ?
-- Événements émis par la paire Soroswap et le pool Aquarius (noms, topics,
-  présence de l'adresse de l'utilisateur), pour l'indexeur.
-- Le compte opérateur est-il lui-même sur l'allowlist de TFW_001 (`allowed`) ?
-- Le « Standard Transfer fee switch » de Circle est-il actif sur Base (frais
-  minimum imposé même en standard) ? Se lit avec l'API des frais.
-- Compatibilité de la signature Privy avec les invocations des routers.
+Chaque point a été levé par lecture du mainnet (simulations, événements de
+transactions réelles, interfaces des contrats) ou des API publiques. Rien n'a
+été écrit sur la chaîne.
+
+| Point | Résultat | Preuve |
+|---|---|---|
+| Sens des transferts chez Aquarius | À chaque saut : utilisateur → router → pool, puis pool → router → utilisateur. **Le router détient les tokens à l'aller et au retour.** | Événements de la transaction `d28e3d98…145d4` |
+| Part « protocole » des frais Aquarius | 50 % des frais d'échange (`get_protocol_fee_fraction = 5000`). Elle s'accumule dans le pool et n'en sort que par un appel d'administration séparé, `claim_protocol_fees(admin, destination)`. Les échanges n'en dépendent pas. | Interface du pool, lue sur la chaîne |
+| Paiement de création Aquarius | 300 000 AQUA (`3000000000000` unités), token `CAUIKL3IYGMERDRUN6YSCLWVAKIFG5Q4YJHUKM4S4NJZQIA3BAS6OJPK`, versés à `CCAHNRWJ…O54FH` | Lectures du router |
+| Création d'un pool USDC/TFW_001 | **Acceptée en simulation** (pool standard, 0,30 %), frais de ressources ≈ 0,77 XLM. Aucun pool n'existe encore pour cette paire. Tokens à passer triés : USDC puis TFW_001. | Simulation `init_standard_pool`, `get_pools` |
+| Adresse de la paire Soroswap avant création | `router_pair_for` la renvoie : **`CB2EDQIP6FF7YDXEE46DALBCSXPQ2AWOAVW6GRQ4YR3CN7QJQ3WX7YFD`**. La paire n'existe pas encore (`pair_exists = false`). | Simulations |
+| Frais de protocole Soroswap | Activés, mais versés en parts LP à `GC5ZV3VZ…OFLYP`, jamais en TFW_001 : pas d'effet sur l'allowlist. | `fees_enabled`, `fee_to` |
+| Événements Soroswap | La paire émet `SoroswapPair/swap` (montants entrants et sortants, destinataire `to`) et `SoroswapPair/sync` (réserves). Transferts directs utilisateur ↔ paire. | Transaction `5b099c24c1cc…` |
+| Événements Aquarius | Le router émet `swap` avec l'utilisateur, le pool, les tokens et les montants ; le pool émet `trade` (avec le montant des frais) et `update_reserves`. | Transaction `d28e3d98…145d4` |
+| Opérateur sur l'allowlist | Oui (`allowed = true`). Son solde de TFW_001 est 0 ; le token n'est pas en pause. | Simulations |
+| Bornes de prix de la vente | Achat 50 USDC sans frais ; rachat 47,50 USDC net, capacité 0,03 part. | `quote`, `quote_sell`, `buyback_available` |
+| Frais CCTP vers Stellar | Depuis Base : standard **0**, rapide 1,3 point de base. Depuis Polygon : 0. Pas de frais minimum imposé en standard. | `GET iris-api.circle.com/v2/burn/USDC/fees/6/27` et `/7/27` |
+| Clé pour l'API Iris | Aucune : l'API répond sans authentification. | Appel direct (404 attendu sur un hash inconnu) |
+| Signature Privy sur les routers | Compatible par construction : Privy signe le hash de la transaction, comme pour l'achat sur le contrat de vente, qui est déjà une invocation avec transferts imbriqués. **Pas encore testé en réel** : à faire en WS-D. | Lecture de `lib/privy-stellar.ts` |
+
+Conséquences sur le plan :
+
+- **D7 est confirmée** : il faut autoriser la paire Soroswap, le pool Aquarius et
+  le router Aquarius.
+- **L'adresse de la paire Soroswap est connue d'avance** : on peut l'autoriser
+  avant `add_liquidity`, qui crée alors la paire et dépose en une seule
+  transaction (WS-C simplifié).
+- **D9 est élargie** : tant que la vente primaire propose des parts à 50 USDC
+  sans frais, acheter sur un pool coûte toujours plus cher (frais de 0,30 % et
+  impact de prix). Le comparateur doit donc inclure la vente primaire. Les pools
+  servent surtout à **vendre** : le rachat par le contrat est limité à 0,03 part.
+- **D13 est simplifiée** : les événements des deux protocoles portent l'adresse
+  de l'utilisateur, l'indexeur les lit directement.
+- **Aquarius ne pourra pas collecter sa part de frais libellée en TFW_001** tant
+  que sa destination n'est pas autorisée sur le token. Sans effet sur les
+  échanges ; à signaler à leur équipe (§7).
 
 ---
 
@@ -242,9 +268,12 @@ qu'elles y sont ; c'est assumé et documenté.
 
 ### D9 — Routage : devis sur les deux pools, exécution sur le meilleur
 
-Pour un échange TFW_001 ↔ USDC, le serveur demande un devis aux deux (simulation
-`router_get_amounts_out` chez Soroswap ; `find-path` chez Aquarius) et propose le
-meilleur, avec le prix, l'impact et les frais affichés. `find-path` permet aussi
+Pour un échange TFW_001 ↔ USDC, le serveur demande un devis aux deux pools
+(simulation `router_get_amounts_out` chez Soroswap ; `find-path` chez Aquarius)
+**et au contrat de vente** (`quote` à l'achat, `quote_sell` au rachat), puis
+propose le meilleur, avec le prix, l'impact et les frais affichés. Tant que la
+vente primaire est ouverte, c'est elle qui gagne à l'achat ; les pools gagnent à
+la vente. `find-path` permet aussi
 un échange multi-sauts via Aquarius (par exemple XLM → USDC → TFW_001).
 
 ### D10 — Qui peut échanger
@@ -263,7 +292,8 @@ vente par l'admin (`withdraw_tres`), sans achat. Frais : 0,30 % sur Soroswap
 (fixe) et 0,30 % sur Aquarius. Les parts LP restent sur le compte opérateur.
 Avec une liquidité aussi faible, un échange de 0,1 part déplace déjà le prix
 d'environ 20 % : ces pools servent de preuve de fonctionnement, pas de marché
-profond. Le contrat de vente (achat à 50 USDC + 5 %) borne le prix par le haut.
+profond. Le contrat de vente borne le prix : il vend à 50 USDC sans frais
+(plafond, par arbitrage) et rachète à 47,50 USDC net, mais seulement 0,03 part.
 
 ### D12 — Frais des échanges pris en charge pour les utilisateurs Privy
 
@@ -274,10 +304,10 @@ aux deux routers sur nos deux pools. Tout autre appel reste refusé.
 ### D13 — Indexation : les pools sont des « lieux d'échange » comme la vente
 
 `StellarTrade` gagne une colonne `venue` (`sale`, `soroswap`, `aquarius`). Les
-échanges sont dérivés des événements des pools si ceux-ci portent l'adresse de
-l'utilisateur, sinon des transferts TFW_001 dont un pool est une extrémité,
-appariés au transfert USDC de la même transaction (mécanisme déjà utilisé pour
-la vente). Les adresses du registre `venues` sont marquées dans `StellarHolder`
+échanges secondaires sont lus dans les événements des protocoles, qui portent
+l'adresse de l'utilisateur et les montants (WS-0) : `SoroswapPair/swap` côté
+Soroswap, `swap` du router côté Aquarius. Les réserves viennent de
+`SoroswapPair/sync` et de `update_reserves`. Les adresses du registre `venues` sont marquées dans `StellarHolder`
 et ne comptent pas comme investisseurs.
 
 ### D14 — Métriques : définitions publiques et historique journalier
@@ -324,6 +354,9 @@ Branche : aucune (scripts jetables, résultats consignés dans ce fichier).
 
 Critère de sortie : §1 ne contient plus de **[à vérifier]**, ou la décision
 concernée est révisée.
+
+**Fait le 2026-11-28.** Résultats en §1, « Résultats du WS-0 ». Seul reste le
+test réel de la signature Privy sur un router, reporté en WS-D.
 
 ### WS-A · Pont CCTP (Base → Stellar)
 
@@ -380,14 +413,15 @@ Préparation du compte opérateur : 100 USDC supplémentaires ; trustline AQUA e
 2 parts vers l'opérateur (qui doit être autorisé sur le token).
 
 Soroswap, dans cet ordre :
-1. `factory.create_pair(TFW_001, USDC)` → adresse de la paire.
-2. `token.allow_user(paire)`.
-3. `router.add_liquidity` : 1 part + 50 USDC.
+1. `token.allow_user(CB2EDQIP…7YFD)` : l'adresse de la future paire (WS-0).
+2. `router.add_liquidity` : 1 part + 50 USDC. L'appel crée la paire.
+3. Vérifier que `factory.get_pair` renvoie bien l'adresse autorisée.
 4. Devis et un échange de test de faible montant dans chaque sens.
 
 Aquarius, dans cet ordre :
-1. `router.init_standard_pool(opérateur, [tokens triés], 0,30 %)` → adresse du
-   pool (paiement de 300 000 AQUA).
+1. `router.init_standard_pool(opérateur, [USDC, TFW_001], 30)` → adresse du
+   pool (paiement de 300 000 AQUA, ≈ 0,8 XLM de frais ; simulé avec succès en
+   WS-0).
 2. `token.allow_user(pool)` et `token.allow_user(router Aquarius)`.
 3. `router.deposit` : 1 part + 50 USDC.
 4. `find-path` renvoie le pool ; un échange de test dans chaque sens.
@@ -518,7 +552,7 @@ tranche 2, et jamais avant le déploiement de WS-B.
 | Liquidité des pools | 100 USDC | opérateur |
 | Parts mises en pool | 2 TFW_001 (retirées du stock de la vente) | opérateur |
 | Création du pool Aquarius | 300 000 AQUA, ≈ 62 $ au 2026-11-28 | opérateur |
-| Frais et réserves Stellar | ≈ 10 XLM de marge | opérateur |
+| Frais et réserves Stellar | ≈ 10 XLM de marge (dont ≈ 0,8 XLM pour créer le pool Aquarius) | opérateur |
 | Tests CCTP | 1 USDC, puis un montant réel, plus un peu d'ETH sur Base pour le gaz | wallet EVM de test |
 | Versements de revenus | déjà sur le compte (34,10 USDC) | opérateur |
 
@@ -572,6 +606,13 @@ tranche 2, et jamais avant le déploiement de WS-B.
   qu'à des adresses autorisées, mais c'est un contrat tiers évolutif : à
   surveiller, et à retirer de l'allowlist en cas d'incident (les échanges
   Aquarius s'arrêtent alors, sans risque pour les fonds des investisseurs).
+- **Frais de protocole Aquarius en TFW_001.** Leur collecte échouera tant que
+  leur destination n'est pas autorisée sur le token (WS-0). Sans effet sur les
+  échanges, mais à signaler à l'équipe Aquarius, qui pourrait sinon bloquer ou
+  déréférencer le pool.
+- **Intérêt réel des pools à l'achat.** Tant que la vente primaire vend à
+  50 USDC sans frais, personne n'a intérêt à acheter sur un pool. Le marché
+  secondaire sert d'abord de sortie aux détenteurs.
 - **Pause ou gel du token.** Une pause arrête aussi les deux pools.
 - **Coût de création Aquarius.** Indexé sur le cours de l'AQUA ; à relire le jour J.
 - **Clé opérateur.** Un seul signataire, présent sur le serveur, contrôle le
